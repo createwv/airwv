@@ -29,9 +29,10 @@ Reliably pull air data statewide and store it so we never lose history.
 - [x] Normalize readings into a common schema (sensor id, location, timestamp,
       PM1.0/2.5/10, AQI, VOC, temp/humidity/pressure, source) — `Reading`
 - [x] Durable storage with idempotent, deduped writes (SQLite dev / Postgres prod) — `Store`
-- [~] PurpleAir client — current-readings path done; historical backfill pending
-- [ ] Define the list of WV sensors to poll (start from the Kanawha Valley set,
-      expand statewide with WVCAG)
+- [x] WV sensor registry (PII-free) — 54 deployed PurpleAir sensors across 12
+      counties, keyed by device id, with installing org retained — `registry.py`
+- [~] PurpleAir client — current-readings path done; resolve device id (MAC) →
+      PurpleAir `sensor_index`, plus historical backfill, still pending
 - [ ] Scheduled collection (e.g. every N minutes) with retry + backoff
 - [ ] Historical backfill from PurpleAir's archive
 - [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
