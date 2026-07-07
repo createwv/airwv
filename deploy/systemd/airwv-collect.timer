@@ -1,0 +1,14 @@
+# Runs airwv-collect.service every 5 minutes. Enable with:
+#   sudo systemctl enable --now airwv-collect.timer
+# Check status: systemctl list-timers airwv-collect.timer
+
+[Unit]
+Description=Run AirWV collection every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
