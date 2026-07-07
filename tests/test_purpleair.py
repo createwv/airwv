@@ -1,6 +1,9 @@
-"""Tests for the PurpleAir source parser (no network required)."""
+"""Tests for the PurpleAir source parser and HTTP listing."""
 
-from airwv.sources.purpleair import PurpleAirSource
+import httpx
+import respx
+
+from airwv.sources.purpleair import PURPLEAIR_API_BASE, PurpleAirSource
 
 
 def test_parse_sensors_response_maps_fields():
@@ -34,3 +37,23 @@ def test_parse_sensors_response_maps_fields():
 def test_fetch_current_with_no_sensors_returns_empty():
     source = PurpleAirSource(api_key="test-key")
     assert source.fetch_current() == []
+
+
+@respx.mock
+def test_list_sensors_hits_api_and_parses_records():
+    route = respx.get(f"{PURPLEAIR_API_BASE}/sensors").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "fields": ["sensor_index", "name", "latitude", "longitude"],
+                "data": [[101, "EWV Belle 1", 38.23, -81.53]],
+            },
+        )
+    )
+    source = PurpleAirSource(api_key="test-key")
+
+    records = source.list_sensors(40.64, -82.65, 37.20, -77.72)
+
+    assert route.called
+    assert records[0]["name"] == "EWV Belle 1"
+    assert records[0]["sensor_index"] == 101
