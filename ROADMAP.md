@@ -26,15 +26,15 @@ Repo hygiene and a clean open-source starting point.
 
 Reliably pull air data statewide and store it so we never lose history.
 
-- [ ] PurpleAir client (real-time + historical) with API key via secret/env
+- [x] Normalize readings into a common schema (sensor id, location, timestamp,
+      PM1.0/2.5/10, AQI, VOC, temp/humidity/pressure, source) — `Reading`
+- [x] Durable storage with idempotent, deduped writes (SQLite dev / Postgres prod) — `Store`
+- [~] PurpleAir client — current-readings path done; historical backfill pending
 - [ ] Define the list of WV sensors to poll (start from the Kanawha Valley set,
       expand statewide with WVCAG)
-- [ ] Normalize readings into a common schema (sensor id, location, timestamp,
-      PM1.0/2.5/10, AQI, VOC, temp/humidity/pressure, source)
-- [ ] Time-series storage with a durable history model
 - [ ] Scheduled collection (e.g. every N minutes) with retry + backoff
 - [ ] Historical backfill from PurpleAir's archive
-- [ ] Basic data-quality guards on write (range checks, dedupe)
+- [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
 - [ ] Operational logging + run health
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
