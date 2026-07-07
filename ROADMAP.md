@@ -32,12 +32,12 @@ Reliably pull air data statewide and store it so we never lose history.
 - [x] WV sensor registry (PII-free, private) — 54 deployed PurpleAir sensors
       across 12 counties, keyed by device id, installing org retained — `registry.py`
 - [x] PurpleAir current-readings client (`/sensors`) — `PurpleAirSource`
-- [ ] **Resolve device id (MAC) → PurpleAir `sensor_index`** — the missing link
-      to actually poll our sensors. Likely a one-time step: create a private
-      PurpleAir group via the API, add our devices, cache the index per device.
-      *(next; needs API key)*
-- [ ] **End-to-end collector** — `registry → PurpleAirSource → Store`, runnable
-      as `python -m airwv.ingest`. First real data capture. *(next; needs API key)*
+- [x] **Resolve device names → PurpleAir `sensor_index`** — built: match registry
+      names against a WV bounding-box listing, cache `device_id → sensor_index`
+      privately, report unmatched — `resolve.py`. *(run `ingest resolve` w/ key)*
+- [x] **End-to-end collector** — `registry → resolve → PurpleAirSource → Store`,
+      as `python -m airwv.ingest` (`resolve` + `collect`) — `ingest.py`.
+      *(needs API key to capture live data)*
 - [ ] Scheduled collection (every N minutes) with retry + backoff
 - [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
 - [ ] Operational logging + run health
