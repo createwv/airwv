@@ -1,0 +1,40 @@
+[project]
+name = "airwv"
+version = "0.0.1"
+description = "Open-source air quality monitoring, analysis, and alerting for West Virginia"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "AirWV contributors" }]
+keywords = ["air-quality", "purpleair", "west-virginia", "monitoring", "sensors"]
+
+dependencies = [
+    "httpx>=0.27",        # HTTP client for source APIs
+    "pydantic>=2.6",      # schema / config validation
+    "python-dotenv>=1.0", # load .env in development
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+    "respx>=0.21",        # mock httpx in tests
+]
+
+[project.urls]
+Homepage = "https://github.com/createwv/airwv"
+Project = "https://createwv.org/projects/air-monitoring/"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
