@@ -21,6 +21,7 @@ PURPLEAIR_API_BASE = "https://api.purpleair.com/v1"
 # Fields we request from PurpleAir for each sensor. Extend as we map more.
 SENSOR_FIELDS = [
     "sensor_index",
+    "name",
     "latitude",
     "longitude",
     "last_seen",
@@ -32,6 +33,46 @@ SENSOR_FIELDS = [
     "pressure",
     "voc",
 ]
+
+# Minimal fields for resolving our device names to PurpleAir sensor indices.
+RESOLVE_FIELDS = ["name", "latitude", "longitude"]
+
+
+def _records_from_payload(payload: dict) -> list[dict]:
+    """PurpleAir returns column-oriented data (``fields`` + rows). Zip to dicts."""
+    fields: list[str] = payload.get("fields", [])
+    rows: list[list] = payload.get("data", [])
+    return [dict(zip(fields, row)) for row in rows]
+
+
+def parse_sensor_payload(payload: dict, source: str = "purpleair") -> list[Reading]:
+    """Turn a ``/sensors`` (or group members) response into normalized readings."""
+    readings: list[Reading] = []
+    for record in _records_from_payload(payload):
+        last_seen = record.get("last_seen")
+        ts = (
+            datetime.fromtimestamp(last_seen, tz=timezone.utc)
+            if isinstance(last_seen, (int, float))
+            else datetime.now(tz=timezone.utc)
+        )
+        readings.append(
+            Reading(
+                source=source,
+                sensor_id=str(record.get("sensor_index")),
+                ts=ts,
+                lat=record.get("latitude"),
+                lon=record.get("longitude"),
+                pm1_0=record.get("pm1.0"),
+                pm2_5=record.get("pm2.5"),
+                pm10=record.get("pm10.0"),
+                voc=record.get("voc"),
+                temperature=record.get("temperature"),
+                humidity=record.get("humidity"),
+                pressure=record.get("pressure"),
+                raw=record,
+            )
+        )
+    return readings
 
 
 class PurpleAirSource(Source):
@@ -64,50 +105,41 @@ class PurpleAirSource(Source):
             "fields": ",".join(SENSOR_FIELDS),
             "show_only": ",".join(str(s) for s in self._sensor_ids),
         }
+        payload = self._get("/sensors", params)
+        return parse_sensor_payload(payload, self.name)
+
+    def list_sensors(
+        self,
+        nw_lat: float,
+        nw_lng: float,
+        se_lat: float,
+        se_lng: float,
+    ) -> list[dict]:
+        """List sensors within a bounding box (name + index + location).
+
+        Used to resolve our device names to PurpleAir ``sensor_index`` values,
+        since public sensors are read by index. Returns raw record dicts.
+        """
+        params = {
+            "fields": ",".join(RESOLVE_FIELDS),
+            "nwlng": nw_lng,
+            "nwlat": nw_lat,
+            "selng": se_lng,
+            "selat": se_lat,
+        }
+        payload = self._get("/sensors", params)
+        return _records_from_payload(payload)
+
+    def _get(self, path: str, params: dict) -> dict:
         with httpx.Client(timeout=self._timeout) as client:
             resp = client.get(
-                f"{PURPLEAIR_API_BASE}/sensors",
+                f"{PURPLEAIR_API_BASE}{path}",
                 headers=self._headers(),
                 params=params,
             )
             resp.raise_for_status()
-            payload = resp.json()
+            return resp.json()
 
-        return self._parse_sensors_response(payload)
-
+    # Kept for backwards compatibility with existing callers/tests.
     def _parse_sensors_response(self, payload: dict) -> list[Reading]:
-        """Turn a ``/sensors`` response into normalized readings.
-
-        PurpleAir returns column-oriented data: a ``fields`` list plus a ``data``
-        list of rows. We zip each row back into a dict before mapping.
-        """
-        fields: list[str] = payload.get("fields", [])
-        rows: list[list] = payload.get("data", [])
-        readings: list[Reading] = []
-
-        for row in rows:
-            record = dict(zip(fields, row))
-            last_seen = record.get("last_seen")
-            ts = (
-                datetime.fromtimestamp(last_seen, tz=timezone.utc)
-                if isinstance(last_seen, (int, float))
-                else datetime.now(tz=timezone.utc)
-            )
-            readings.append(
-                Reading(
-                    source=self.name,
-                    sensor_id=str(record.get("sensor_index")),
-                    ts=ts,
-                    lat=record.get("latitude"),
-                    lon=record.get("longitude"),
-                    pm1_0=record.get("pm1.0"),
-                    pm2_5=record.get("pm2.5"),
-                    pm10=record.get("pm10.0"),
-                    voc=record.get("voc"),
-                    temperature=record.get("temperature"),
-                    humidity=record.get("humidity"),
-                    pressure=record.get("pressure"),
-                    raw=record,
-                )
-            )
-        return readings
+        return parse_sensor_payload(payload, self.name)
