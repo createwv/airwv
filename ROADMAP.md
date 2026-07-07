@@ -38,9 +38,11 @@ Reliably pull air data statewide and store it so we never lose history.
 - [x] **End-to-end collector** — `registry → resolve → PurpleAirSource → Store`,
       as `python -m airwv.ingest` (`resolve` + `collect`) — `ingest.py`.
       *(needs API key to capture live data)*
-- [ ] Scheduled collection (every N minutes) with retry + backoff
+- [x] Scheduled collection with retry + backoff — `ingest run` loop plus systemd
+      timer / cron deploy configs (`deploy/`)
+- [~] Operational logging + run health — structured logging in place; sensor
+      dropout/last-seen alerting still pending
 - [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
-- [ ] Operational logging + run health
 - [ ] Historical backfill from PurpleAir's archive (2016→present where available)
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
