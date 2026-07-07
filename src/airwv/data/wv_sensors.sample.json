@@ -1,0 +1,9 @@
+{
+  "_comment": "EXAMPLE / SCHEMA ONLY — safe to commit. The real registry lives in wv_sensors.json, which is gitignored because it pairs device ids with locations. To use real data locally, create wv_sensors.json next to this file (same shape) from the private source, or obtain it through a private channel. Operational fields only — NEVER add PII (names, addresses, phone, email, personal notes).",
+  "source": "purpleair",
+  "model": "PurpleAir Flex PM2.5",
+  "sensors": [
+    {"name": "Example Sensor 1", "device_id": "AA:BB:CC:00:11:22", "city": "Charleston", "county": "Kanawha", "sub_region": "Example Area", "zip": "25301", "org": "Create WV", "pollution_source": "Example source", "date_installed": "2024-01-01", "known_status": "online"},
+    {"name": "Example Sensor 2", "device_id": "AA:BB:CC:33:44:55", "city": "Parkersburg", "county": "Wood", "sub_region": "Example Area", "zip": "26101", "org": "WVCAG", "pollution_source": "Example source", "date_installed": "2024-02-01", "known_status": "down"}
+  ]
+}

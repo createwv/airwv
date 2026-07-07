@@ -22,6 +22,11 @@ env/
 .coverage
 htmlcov/
 
+# Private sensor registry — real device MACs + locations stay OUT of the repo.
+# The committed example (wv_sensors.sample.json) documents the schema.
+# To publish later, remove this line (and consider dropping device_id).
+src/airwv/data/wv_sensors.json
+
 # Local data / databases
 *.sqlite
 *.sqlite3
