@@ -19,7 +19,7 @@ Repo hygiene and a clean open-source starting point.
 - [x] README, roadmap, architecture doc
 - [x] License (MIT), Contributing guide, Code of Conduct
 - [x] Python project scaffold, `.gitignore`, `.env.example`
-- [ ] CI: lint + tests on pull requests
+- [x] CI: lint + tests on push/PR (ruff + pytest, Python 3.11/3.12)
 - [ ] Issue/PR templates
 
 ## Phase 1 — Ingestion & Storage (MVP) 🎯
@@ -29,14 +29,19 @@ Reliably pull air data statewide and store it so we never lose history.
 - [x] Normalize readings into a common schema (sensor id, location, timestamp,
       PM1.0/2.5/10, AQI, VOC, temp/humidity/pressure, source) — `Reading`
 - [x] Durable storage with idempotent, deduped writes (SQLite dev / Postgres prod) — `Store`
-- [x] WV sensor registry (PII-free) — 54 deployed PurpleAir sensors across 12
-      counties, keyed by device id, with installing org retained — `registry.py`
-- [~] PurpleAir client — current-readings path done; resolve device id (MAC) →
-      PurpleAir `sensor_index`, plus historical backfill, still pending
-- [ ] Scheduled collection (e.g. every N minutes) with retry + backoff
-- [ ] Historical backfill from PurpleAir's archive
+- [x] WV sensor registry (PII-free, private) — 54 deployed PurpleAir sensors
+      across 12 counties, keyed by device id, installing org retained — `registry.py`
+- [x] PurpleAir current-readings client (`/sensors`) — `PurpleAirSource`
+- [ ] **Resolve device id (MAC) → PurpleAir `sensor_index`** — the missing link
+      to actually poll our sensors. Likely a one-time step: create a private
+      PurpleAir group via the API, add our devices, cache the index per device.
+      *(next; needs API key)*
+- [ ] **End-to-end collector** — `registry → PurpleAirSource → Store`, runnable
+      as `python -m airwv.ingest`. First real data capture. *(next; needs API key)*
+- [ ] Scheduled collection (every N minutes) with retry + backoff
 - [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
 - [ ] Operational logging + run health
+- [ ] Historical backfill from PurpleAir's archive (2016→present where available)
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
 durable storage, with backfilled history and no data loss on transient failures.
