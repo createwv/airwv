@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 try:  # optional in prod where env is already populated
     from dotenv import load_dotenv
@@ -30,6 +31,7 @@ class Config:
     purpleair_api_key: str
     database_url: str
     poll_interval_seconds: int
+    index_cache_path: Path
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -45,8 +47,12 @@ class Config:
 
         poll_interval = int(os.environ.get("AIRWV_POLL_INTERVAL_SECONDS", "300"))
 
+        # Private device -> sensor_index cache (gitignored data/ dir by default).
+        index_cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+
         return cls(
             purpleair_api_key=api_key,
             database_url=database_url,
             poll_interval_seconds=poll_interval,
+            index_cache_path=Path(index_cache),
         )
