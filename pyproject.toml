@@ -12,6 +12,7 @@ dependencies = [
     "httpx>=0.27",        # HTTP client for source APIs
     "pydantic>=2.6",      # schema / config validation
     "python-dotenv>=1.0", # load .env in development
+    "SQLAlchemy>=2.0",    # storage layer (SQLite dev / Postgres prod)
 ]
 
 [project.optional-dependencies]
