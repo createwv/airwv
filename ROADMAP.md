@@ -22,9 +22,11 @@ Repo hygiene and a clean open-source starting point.
 - [x] CI: lint + tests on push/PR (ruff + pytest, Python 3.11/3.12)
 - [ ] Issue/PR templates
 
-## Phase 1 — Ingestion & Storage (MVP) 🎯
+## Phase 1 — Ingestion & Storage (MVP) ✅
 
 Reliably pull air data statewide and store it so we never lose history.
+*Validated against the live API: 30 sensors resolving, realtime + backfill both
+confirmed capturing real data.*
 
 - [x] Normalize readings into a common schema (sensor id, location, timestamp,
       PM1.0/2.5/10, AQI, VOC, temp/humidity/pressure, source) — `Reading`
@@ -50,14 +52,21 @@ Reliably pull air data statewide and store it so we never lose history.
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
 durable storage, with backfilled history and no data loss on transient failures.
 
-## Phase 2 — Data Quality & Anomaly Detection
+## Phase 2 — Data Quality & Anomaly Detection 🎯
 
 Separate real signal from sensor noise before anyone relies on it.
+*Run with `python -m airwv.ingest analyze` (no API cost — reads stored data).*
 
-- [ ] Spike/anomaly detection (implausible jumps vs. sensor + neighbor history)
-- [ ] Sensor health scoring: flag likely malfunctions, stuck values, dropout,
-      and channel disagreement (PurpleAir dual-channel A/B divergence)
-- [ ] Quarantine/flag suspect readings without deleting raw data
+- [x] Spike detection — robust (median/MAD) z-score vs. a sensor's own history —
+      `analysis/anomaly.py`. Already surfaced a real malfunctioning unit.
+- [x] Stuck-value detection (frozen channel) — `analysis/anomaly.py`
+- [x] Sensor health scoring — dropout/offline, missing channels, degraded status
+      — `analysis/health.py`
+- [ ] Neighbor cross-check — corroborate spikes against nearby sensors to
+      distinguish a real event from a single-sensor malfunction
+- [ ] PurpleAir A/B channel divergence as a malfunction signal
+- [ ] Persist findings — flag anomalous rows / store a health record (currently
+      read-only reporting)
 - [ ] Data-quality dashboard/report for maintainers
 
 ## Phase 3 — Trends & Analysis
