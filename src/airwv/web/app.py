@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 import statistics
 from collections import defaultdict
+from datetime import date, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -26,6 +27,10 @@ from airwv.storage import Store
 
 # Fields safe to chart (mirror the Reading schema).
 FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "aqi", "temperature", "humidity", "pressure"]
+
+
+def _parse_date(value: str | None) -> date | None:
+    return datetime.strptime(value, "%Y-%m-%d").date() if value else None
 
 
 def _pm25_color(value: float | None) -> str:
@@ -103,18 +108,35 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=400, detail=f"unknown field {field!r}")
 
     @app.get("/api/series/{sensor_id}")
-    def series(sensor_id: str, field: str = "pm2_5"):
+    def series(sensor_id: str, field: str = "pm2_5", start: str | None = None, end: str | None = None):
         _check_field(field)
+        lo = _parse_date(start)
+        hi = _parse_date(end)
         buckets: dict = defaultdict(list)
         for r in store.readings_for_sensor(sensor_id):
             value = getattr(r, field)
-            if value is not None:
-                buckets[r.ts.replace(minute=0, second=0, microsecond=0)].append(value)
+            if value is None:
+                continue
+            day = r.ts.date()
+            if (lo and day < lo) or (hi and day > hi):
+                continue
+            buckets[r.ts.replace(minute=0, second=0, microsecond=0)].append(value)
         points = [
             {"ts": ts.isoformat(), "value": round(statistics.median(vals), 1)}
             for ts, vals in sorted(buckets.items())
         ]
-        return {"sensor_id": sensor_id, "field": field, "points": points}
+        return {"sensor_id": sensor_id, "name": names.get(sensor_id, sensor_id), "field": field, "points": points}
+
+    @app.get("/api/compare")
+    def compare(sensors: str, field: str = "pm2_5"):
+        _check_field(field)
+        from airwv.analysis import diurnal_amplitude
+
+        out = []
+        for sid in [s for s in sensors.split(",") if s]:
+            amp = diurnal_amplitude(store.readings_for_sensor(sid), field=field)
+            out.append({"sensor_id": sid, "name": names.get(sid, sid), **amp})
+        return {"field": field, "sensors": out}
 
     @app.get("/api/events/{sensor_id}")
     def events(sensor_id: str, field: str = "pm2_5", threshold: float = 6.0):
@@ -130,11 +152,17 @@ def create_app(store: Store) -> FastAPI:
         }
 
     @app.get("/api/diurnal/{sensor_id}")
-    def diurnal(sensor_id: str, field: str = "voc"):
+    def diurnal(sensor_id: str, field: str = "voc", start: str | None = None, end: str | None = None):
         _check_field(field)
-        profile = hour_of_day_profile(store.readings_for_sensor(sensor_id), field=field)
+        lo, hi = _parse_date(start), _parse_date(end)
+        rows = [
+            r for r in store.readings_for_sensor(sensor_id)
+            if not ((lo and r.ts.date() < lo) or (hi and r.ts.date() > hi))
+        ]
+        profile = hour_of_day_profile(rows, field=field)
         return {
             "sensor_id": sensor_id,
+            "name": names.get(sensor_id, sensor_id),
             "field": field,
             "hours": [{"hour": s.hour, "median": s.median, "count": s.count} for s in profile],
         }
@@ -175,6 +203,12 @@ INDEX_HTML = """<!doctype html>
   .chart { height:320px; }
   #map { height:360px; border-radius:0 0 8px 8px; }
   .legend { font-size:12px; color:#666; padding:6px 14px; }
+  .sensorlist { display:flex; flex-direction:column; gap:2px; max-height:120px; overflow:auto;
+    border:1px solid #ddd; border-radius:6px; padding:6px 10px; font-size:13px; min-width:200px; }
+  button { padding:6px 12px; font-size:13px; cursor:pointer; }
+  table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
+  th { color:#666; font-weight:600; }
 </style>
 </head>
 <body>
@@ -183,7 +217,7 @@ INDEX_HTML = """<!doctype html>
   <p>Community sensor data. Map colored by latest PM2.5; times in US Eastern.</p>
 </header>
 <div class="controls">
-  <label>Sensor <select id="sensor"></select></label>
+  <div><b>Sensors</b><div id="sensors" class="sensorlist"></div></div>
   <label>Metric <select id="field">
     <option value="pm2_5">PM2.5</option>
     <option value="voc">VOC</option>
@@ -192,26 +226,33 @@ INDEX_HTML = """<!doctype html>
     <option value="temperature">Temperature</option>
     <option value="humidity">Humidity</option>
   </select></label>
-  <span class="meta" id="meta"></span>
+  <label>From <input type="date" id="start"></label>
+  <label>To <input type="date" id="end"></label>
+  <button id="clear">Clear dates</button>
 </div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
-    <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · click a marker to select</div>
+    <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · click a marker to toggle</div>
 </div>
-<div class="card"><h2>Time series (hourly median) — red × = detected events</h2><div id="ts" class="chart"></div></div>
+<div class="card"><h2>Time series (hourly median) — red × = events (single sensor)</h2><div id="ts" class="chart"></div></div>
 <div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div id="diurnal" class="chart"></div></div>
+<div class="card"><h2>Day vs. overnight compare</h2>
+  <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
+</div>
 <script>
 const $ = id => document.getElementById(id);
 const j = async u => (await fetch(u)).json();
-let map, markers = {};
+const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
+let map, markers = {}, allSensors = [];
 
 async function loadSensors(){
-  const s = await j('/api/sensors');
-  $('sensor').innerHTML = s.map(x => `<option value="${x.sensor_id}" data-count="${x.count}"
-      data-first="${x.first_ts}" data-last="${x.last_ts}">${x.name}</option>`).join('');
-  drawMap(s);
-  if (s.length) render();
+  allSensors = await j('/api/sensors');
+  $('sensors').innerHTML = allSensors.map((x,i) =>
+    `<label><input type="checkbox" value="${x.sensor_id}" ${i===0?'checked':''}> ${x.name}</label>`).join('');
+  $('sensors').querySelectorAll('input').forEach(c => c.addEventListener('change', render));
+  drawMap(allSensors);
+  render();
 }
 function drawMap(sensors){
   if (!map){
@@ -222,39 +263,49 @@ function drawMap(sensors){
   const pts = [];
   sensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
-    const m = L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1,
-      fillColor:x.color, fillOpacity:0.9})
+    L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
       .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${x.count} readings`)
-      .on('click', () => { $('sensor').value = x.sensor_id; render(); });
-    m.addTo(map); markers[x.sensor_id] = m; pts.push([x.lat, x.lon]);
+      .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
+      .addTo(map);
+    pts.push([x.lat, x.lon]);
   });
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
 }
-function meta(){
-  const o = $('sensor').selectedOptions[0]; if(!o) return;
-  $('meta').textContent = `${o.dataset.count} readings · ${(''+o.dataset.first).slice(0,10)} → ${(''+o.dataset.last).slice(0,10)}`;
-}
+const box = id => $('sensors').querySelector(`input[value="${id}"]`);
+const selected = () => [...$('sensors').querySelectorAll('input:checked')].map(c => c.value);
+function range(){ const s=$('start').value, e=$('end').value;
+  return (s?`&start=${s}`:'') + (e?`&end=${e}`:''); }
+
 async function render(){
-  meta();
-  const sid = $('sensor').value, field = $('field').value;
-  const [ser, ev, di] = await Promise.all([
-    j(`/api/series/${sid}?field=${field}`),
-    j(`/api/events/${sid}?field=${field}`),
-    j(`/api/diurnal/${sid}?field=${field}`),
-  ]);
-  const traces = [{x: ser.points.map(p=>p.ts), y: ser.points.map(p=>p.value),
-    mode:'lines', name:field, line:{color:'#3b2a6b', width:1}}];
-  if (ev.events.length) traces.push({x: ev.events.map(e=>e.ts), y: ev.events.map(e=>e.value),
-    mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:8}});
-  Plotly.newPlot('ts', traces, {margin:{t:10,r:10,b:40,l:45}, yaxis:{title:field},
-    showlegend:false}, {responsive:true, displayModeBar:false});
-  Plotly.newPlot('diurnal', [{x: di.hours.map(h=>h.hour), y: di.hours.map(h=>h.median),
-    type:'bar', marker:{color:'#7a5cc0'}}],
-    {margin:{t:10,r:10,b:40,l:45}, xaxis:{title:'hour of day (ET)', dtick:2}, yaxis:{title:field}},
+  const ids = selected(), field = $('field').value, rng = range();
+  const tsTraces = [], diTraces = [];
+  const series = await Promise.all(ids.map(id => j(`/api/series/${id}?field=${field}${rng}`)));
+  series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
+    mode:'lines', name:s.name, line:{color:COLORS[i%COLORS.length], width:1.3}}));
+  if (ids.length === 1){
+    const ev = await j(`/api/events/${ids[0]}?field=${field}`);
+    if (ev.events.length) tsTraces.push({x:ev.events.map(e=>e.ts), y:ev.events.map(e=>e.value),
+      mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:8}});
+  }
+  Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45}, yaxis:{title:field},
+    legend:{orientation:'h'}}, {responsive:true, displayModeBar:false});
+
+  const dis = await Promise.all(ids.map(id => j(`/api/diurnal/${id}?field=${field}${rng}`)));
+  dis.forEach((d,i) => diTraces.push({x:d.hours.map(h=>h.hour), y:d.hours.map(h=>h.median),
+    mode:'lines+markers', name:d.name, line:{color:COLORS[i%COLORS.length]}}));
+  Plotly.newPlot('diurnal', diTraces, {margin:{t:10,r:10,b:40,l:45},
+    xaxis:{title:'hour of day (ET)', dtick:2}, yaxis:{title:field}, legend:{orientation:'h'}},
     {responsive:true, displayModeBar:false});
+
+  const cmp = await j(`/api/compare?sensors=${ids.join(',')}&field=${field}`);
+  $('cmp').querySelector('tbody').innerHTML = cmp.sensors.map(s =>
+    `<tr><td>${s.name}</td><td>${s.day ?? '—'}</td><td>${s.night ?? '—'}</td>
+     <td><b>${s.night_day_ratio ?? '—'}</b></td></tr>`).join('');
 }
-$('sensor').addEventListener('change', render);
 $('field').addEventListener('change', render);
+$('start').addEventListener('change', render);
+$('end').addEventListener('change', render);
+$('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
 loadSensors();
 </script>
 </body>

@@ -129,7 +129,9 @@ Make the data visible and usable.
 - [x] Dashboard (v1) — time series + time-of-day profile with friendly names
 - [x] Dashboard (v2) — Leaflet **sensor map** (PM2.5-colored, clickable) + **event
       markers** overlaid on the time series
-- [ ] Per-area views + trend charts; multi-sensor compare view in the UI
+- [x] Dashboard (v3) — **multi-sensor overlay** (time series + diurnal), **date-range
+      picker**, and a **day/night compare table** — `/api/compare`
+- [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly
 
 ## Phase 6 — Interoperability & Archival

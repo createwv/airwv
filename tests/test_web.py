@@ -47,6 +47,23 @@ def test_events_endpoint(tmp_path):
     assert "events" in r.json()
 
 
+def test_series_date_range_filters(tmp_path):
+    client = _client(tmp_path)
+    full = client.get("/api/series/197127?field=pm2_5").json()["points"]
+    # data is all on 2024-06-01/02; restrict to a date with no data
+    empty = client.get("/api/series/197127?field=pm2_5&start=2025-01-01").json()["points"]
+    assert len(full) > 0
+    assert empty == []
+
+
+def test_compare_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/compare?sensors=197127&field=pm2_5")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["sensors"][0]["sensor_id"] == "197127"
+    assert "night_day_ratio" in data["sensors"][0]
+
+
 def test_sensors_include_color_field(tmp_path):
     data = _client(tmp_path).get("/api/sensors").json()
     assert "color" in data[0]
