@@ -32,8 +32,10 @@ from airwv.analysis import (
     score_health,
     sensor_medians,
 )
+from airwv.alerts import evaluate
 from airwv.config import Config
 from airwv.export_utils import readings_to_csv, readings_to_records
+from airwv.notify import make_notifier
 from airwv.registry import SensorInfo, load_wv_sensors
 from airwv.resolve import (
     WV_NW_LAT,
@@ -324,6 +326,67 @@ def run_compare(
     return results
 
 
+def run_subscribe(
+    config: Config,
+    channel: str,
+    target: str,
+    threshold: float,
+    sensor_name: str | None = None,
+    field: str = "pm2_5",
+    min_interval_seconds: int = 21600,
+    quiet_start: int | None = None,
+    quiet_end: int | None = None,
+    store=None,
+) -> int:
+    """Create an alert subscription. Returns its id."""
+    store = store or Store.from_config(config)
+    store.create_schema()
+    sensor_id = None
+    if sensor_name:
+        scoped = _scoped_index_map(config, names=[sensor_name])
+        if not scoped:
+            log.warning("no resolved sensor matching %r — subscribing to ALL sensors", sensor_name)
+        else:
+            sensor_id = str(sorted(set(scoped.values()))[0])
+
+    sub_id = store.add_subscription(
+        channel=channel, target=target, sensor_id=sensor_id, field=field,
+        threshold=threshold, min_interval_seconds=min_interval_seconds,
+        quiet_start=quiet_start, quiet_end=quiet_end,
+    )
+    log.info("subscription %d: %s -> %s when %s >= %s (%s)", sub_id, channel, target,
+             field, threshold, f"sensor {sensor_id}" if sensor_id else "any sensor")
+    return sub_id
+
+
+def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
+               store=None, notifier_factory=make_notifier) -> list:
+    """Evaluate subscriptions against the latest readings; dispatch if ``send``.
+
+    Defaults to a dry run (prints what would fire) — sending is outward-facing.
+    """
+    store = store or Store.from_config(config)
+    store.create_schema()
+    now = now or datetime.now(tz=timezone.utc).replace(tzinfo=None)
+    subs = store.list_subscriptions(active_only=True)
+    latest = store.latest_reading_per_sensor()
+    alerts = evaluate(subs, latest, now)
+
+    log.info("%d subscription(s), %d alert(s) %s", len(subs), len(alerts),
+             "to send" if send else "(dry run — use --send to deliver)")
+    for a in alerts:
+        log.info("  ALERT sub %d %s->%s: %s=%s >= %s at sensor %s",
+                 a.subscription_id, a.channel, a.target, a.field, a.value, a.threshold, a.sensor_id)
+        if not send:
+            continue
+        try:
+            notifier_factory(a.channel).send(a)
+            store.mark_notified(a.subscription_id, now)
+        except Exception as exc:  # one bad channel shouldn't block the rest
+            log.warning("  failed to send alert %d via %s: %s", a.subscription_id, a.channel, exc)
+    return alerts
+
+
 def run_baseline(config: Config, field: str = "pm2_5", min_pct: float = 25.0, store=None) -> dict:
     """Compare each sensor's median to the network baseline for a field. Read-only."""
     store = store or Store.from_config(config)
@@ -541,6 +604,17 @@ def main(argv: list[str] | None = None) -> None:
     export.add_argument("--format", default="csv", choices=["csv", "json"], help="output format")
     export.add_argument("--sensor", help="only sensors whose name matches")
     export.add_argument("--org", help="only sensors whose org matches")
+    subscribe = sub.add_parser("subscribe", help="create an alert subscription")
+    subscribe.add_argument("--channel", required=True, choices=["email", "webhook", "log"])
+    subscribe.add_argument("--target", required=True, help="email address / webhook URL")
+    subscribe.add_argument("--threshold", type=float, required=True, help="alert when field >= this")
+    subscribe.add_argument("--sensor", help="sensor name (default: any sensor)")
+    subscribe.add_argument("--field", default="pm2_5", help="field to watch (default pm2_5)")
+    subscribe.add_argument("--min-interval", type=int, default=21600, help="min seconds between alerts")
+    subscribe.add_argument("--quiet-start", type=int, help="quiet hours start (local hour 0-23)")
+    subscribe.add_argument("--quiet-end", type=int, help="quiet hours end (local hour 0-23)")
+    alerts = sub.add_parser("alerts", help="evaluate subscriptions (dry run unless --send)")
+    alerts.add_argument("--send", action="store_true", help="actually deliver notifications")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -580,6 +654,12 @@ def main(argv: list[str] | None = None) -> None:
         run_baseline(config, field=args.field)
     elif command == "export":
         run_export(config, args.out, sensor_name=args.sensor, org=args.org, fmt=args.format)
+    elif command == "subscribe":
+        run_subscribe(config, args.channel, args.target, args.threshold, sensor_name=args.sensor,
+                      field=args.field, min_interval_seconds=args.min_interval,
+                      quiet_start=args.quiet_start, quiet_end=args.quiet_end)
+    elif command == "alerts":
+        run_alerts(config, send=args.send)
     elif command == "run":
         try:
             run_scheduler(config)
