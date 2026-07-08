@@ -1,0 +1,51 @@
+"""Tests for the dashboard read API (FastAPI TestClient, no server/network)."""
+
+from datetime import datetime, timedelta, timezone
+
+from fastapi.testclient import TestClient
+
+from airwv.sources.base import Reading
+from airwv.storage import Store
+from airwv.web.app import create_app
+
+
+def _client(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'web.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    store.save_readings([
+        Reading(source="purpleair", sensor_id="197127", ts=t0 + timedelta(hours=i),
+                pm2_5=10.0 + (i % 5), voc=100.0 + i)
+        for i in range(50)
+    ])
+    return TestClient(create_app(store))
+
+
+def test_sensors_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/sensors")
+    assert r.status_code == 200
+    data = r.json()
+    assert data[0]["sensor_id"] == "197127"
+    assert data[0]["count"] == 50
+
+
+def test_series_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/series/197127?field=pm2_5")
+    assert r.status_code == 200
+    assert r.json()["points"]
+
+
+def test_diurnal_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/diurnal/197127?field=voc")
+    assert r.status_code == 200
+    assert len(r.json()["hours"]) == 24
+
+
+def test_bad_field_rejected(tmp_path):
+    assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
+
+
+def test_index_page(tmp_path):
+    r = _client(tmp_path).get("/")
+    assert r.status_code == 200
+    assert "AirWV" in r.text
