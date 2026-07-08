@@ -47,10 +47,24 @@ confirmed capturing real data.*
 - [~] Operational logging + run health — structured logging + suspect-flag
       warnings in place; sensor dropout/last-seen alerting still pending
 - [x] Historical backfill from PurpleAir's archive — windowed, resilient
-      per-sensor history via `ingest backfill --days N --average M` — `ingest.py`
+      per-sensor history via `ingest backfill --days N --average M` (VOC included)
+- [x] Sensor scoping + timeline cherry-pick — `--org` / `--sensor` to focus a
+      subset, `--start` / `--end` for arbitrary date ranges — `ingest.py`
+- [ ] Owner path for offline/private sensors — add owned sensors to a PurpleAir
+      group by MAC + owner_email (needs write key); also the *free* route for
+      Create WV-owned units, and the only way to reach offline ones (e.g. Glasgow)
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
 durable storage, with backfilled history and no data loss on transient failures.
+
+### Rollout scope
+
+- **Now — Create WV / Kanawha Valley sensors** (14; owned, so likely free to pull).
+  Test and prove the system here first.
+- **Next — CAG / EWV sensors** (40): either fold in (buy points — cheap, ~$12–20
+  one-time for full hourly history) or have CAG run their own instance with their
+  own key. Leaning toward one paid instance for simplicity; don't burden orgs.
+- **Later — all WV public sensors** (~563) if a statewide net is wanted.
 
 ## Phase 2 — Data Quality & Anomaly Detection 🎯
 
@@ -74,6 +88,9 @@ Separate real signal from sensor noise before anyone relies on it.
 Turn history into insight — what's getting worse and where.
 
 - [ ] Rolling trend computation per sensor / area / pollutant
+- [ ] Time-of-day / day-of-week pattern analysis — bucket readings by hour to
+      surface recurring diurnal patterns (e.g. evening/overnight VOC or PM
+      elevation at specific sites), corroborated with neighbors + weather
 - [ ] "Areas to watch" — automatic flagging of degrading trends
 - [ ] AQI and VOC trend tracking over selectable windows
 - [ ] Comparative/regional context (neighboring sensors, statewide baseline)
