@@ -8,6 +8,7 @@ PostgreSQL (prod) through the same interface — the connection is chosen by
 
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict
 from typing import Iterable
 
@@ -17,6 +18,9 @@ from sqlalchemy.orm import Session, sessionmaker
 from airwv.config import Config
 from airwv.sources.base import Reading
 from airwv.storage.models import Base, ReadingRow, utcnow
+from airwv.validate import validate_reading
+
+log = logging.getLogger("airwv.storage")
 
 # Columns that come straight from a Reading (everything except bookkeeping).
 _READING_FIELDS = (
@@ -59,10 +63,17 @@ class Store:
         Base.metadata.create_all(self._engine)
 
     def save_readings(self, readings: Iterable[Reading]) -> int:
-        """Persist readings, skipping duplicates. Returns the number inserted."""
+        """Persist readings, skipping duplicates. Returns the number inserted.
+
+        Out-of-range values are flagged ``quality = "suspect"`` (never dropped).
+        """
         rows = [self._to_row(r) for r in readings]
         if not rows:
             return 0
+
+        suspect = sum(1 for row in rows if row["quality"] == "suspect")
+        if suspect:
+            log.warning("%d/%d readings flagged suspect (out-of-range values)", suspect, len(rows))
 
         stmt = self._insert_ignore_stmt(rows)
         if stmt is not None:
@@ -88,7 +99,7 @@ class Store:
     def _to_row(self, reading: Reading) -> dict:
         data = asdict(reading)
         row = {k: data[k] for k in _READING_FIELDS}
-        row["quality"] = "ok"
+        row["quality"] = "suspect" if validate_reading(reading) else "ok"
         row["ingested_at"] = utcnow()
         return row
 
