@@ -192,6 +192,24 @@ Pick a sensor and metric to see an hourly time series and a time-of-day (local
 Eastern) profile. Read API: `/api/sensors`, `/api/series/{id}?field=`,
 `/api/diurnal/{id}?field=`.
 
+## Alerts
+
+Subscribe people/systems to threshold alerts and evaluate them against the latest
+readings:
+
+```bash
+# Alert ops via a webhook when Glasgow PM2.5 hits 35 (unhealthy-for-sensitive)
+python -m airwv.ingest subscribe --channel webhook --target https://hooks.example/... \
+    --sensor "Glasgow" --field pm2_5 --threshold 35 --quiet-start 22 --quiet-end 7
+
+python -m airwv.ingest alerts            # dry run — shows what would fire
+python -m airwv.ingest alerts --send     # actually deliver
+```
+
+Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
+(SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).
+Per-subscription rate limiting and quiet hours prevent spam. SMS is planned.
+
 ## Contributing
 
 This is a community project — contributions welcome. See

@@ -114,17 +114,19 @@ Turn history into insight — what's getting worse and where.
 - [x] Exportable datasets — `ingest export --format csv|json` + dashboard "Download
       CSV" (`/api/export/{id}.csv`) — `export_utils.py`
 
-## Phase 4 — Alerts & Subscriptions
+## Phase 4 — Alerts & Subscriptions 🎯
 
 Get warnings to the people who need them.
 
-- [ ] Subscription model (who wants what, where, at which thresholds)
-- [ ] **Email** notifications (thresholds + digests)
-- [ ] **SMS** notifications (e.g. via Twilio-class provider)
-- [ ] **Webhooks** for partner/org integrations (Slack/Discord/custom)
-- [ ] Threshold + trend-based triggers (not just instantaneous AQI)
-- [ ] Alert deduping / rate limiting / quiet hours
-- [ ] Subscription management (opt-in, confirm, unsubscribe)
+- [x] Subscription model (channel/target/sensor/field/threshold) — `Subscription`
+- [x] **Email** notifications — SMTP via env (`notify/email.py`); *you supply creds*
+- [x] **Webhooks** for partner/org integrations (Slack/Discord/custom) — `notify/webhook.py`
+- [x] Alert deduping / rate limiting / quiet hours — per-subscription in `alerts.evaluate`
+- [x] `subscribe` + `alerts` CLI (dry-run by default; `--send` to deliver)
+- [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
+- [ ] Trend-based triggers (alert on rising trends, not just instantaneous value)
+- [ ] Subscription management UI — opt-in, confirm, unsubscribe (CLI-only for now)
+- [ ] Scheduled evaluation — run `alerts --send` on the collection interval
 
 ## Phase 5 — Public API & Dashboard 🎯
 
