@@ -158,9 +158,13 @@ back-calculated from real usage and are good enough for planning.
 
 | Operation | Rough cost | Implication |
 | --------- | ---------- | ----------- |
-| Statewide `resolve` scan | ~3,900 pts | Expensive — but cached, so run it rarely |
+| Statewide `resolve` scan | ~4–10K pts | Expensive — but cached, so run it rarely |
 | `collect` (realtime) | ~25 pts/sensor/call | ~750 pts/run for 30 sensors |
-| `backfill` (history) | ~3 pts/row | 1 yr hourly ≈ 26K pts/sensor |
+| `backfill` (history) | **~10–12 pts/row** | 1 yr hourly ≈ ~95K pts/sensor (~$1) |
+
+> The history rate is measured from real usage (a Glasgow + neighbor 10-min
+> backfill of ~84K rows spent ~1M points). Earlier docs guessed ~3/row — it's
+> ~3–4× that. A full hourly backfill of all ~54 sensors is ≈ $75, not $20.
 
 **Strategy that keeps you inside the free tier:**
 

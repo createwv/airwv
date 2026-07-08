@@ -95,10 +95,14 @@ Turn history into insight — what's getting worse and where.
       field — `analysis/patterns.py`, `ingest patterns`. (Glasgow VOC: ~2.1×
       evening/overnight vs midday, flat across weekdays → consistent with valley
       nocturnal inversion + a persistent source, not business-hour timing.)
-- [ ] Neighbor comparison — compare a site's diurnal amplitude to nearby sensors
-      to separate regional meteorology from a local source (Glasgow follow-up)
-- [ ] Residual/episodic event detection — remove the typical diurnal cycle, then
-      anomaly-detect the remainder to catch discrete release events
+- [x] Neighbor comparison — `ingest compare` (day/night amplitude across sensors).
+      Glasgow PM2.5 night/day 1.6 vs neighbor Montgomery 1.0 → Glasgow-specific
+      overnight buildup (calibrated PM2.5). Seasonal: year-round, not winter-peaked.
+- [~] Residual/episodic event detection — done as analysis (de-trend by hour →
+      residual z-score; found a 2024-09-24 PM2.5=1086 morning event). Productize
+      into a command + verify real-vs-glitch (neighbor/A-B) still to do.
+- [ ] Second neighbor (Belle) + rural control — blocked on API points (free tier
+      exhausted; needs points top-up or PurpleAir grant)
 - [ ] "Areas to watch" — automatic flagging of degrading trends
 - [ ] AQI and VOC trend tracking over selectable windows
 - [ ] Comparative/regional context (neighboring sensors, statewide baseline)
