@@ -94,6 +94,19 @@ class Store:
             stmt = select(ReadingRow).order_by(ReadingRow.ts.desc()).limit(limit)
             return list(session.scalars(stmt))
 
+    def distinct_sensor_ids(self) -> list[str]:
+        with self._session_factory() as session:
+            return list(session.scalars(select(ReadingRow.sensor_id).distinct()))
+
+    def readings_for_sensor(self, sensor_id: str, since=None) -> list[ReadingRow]:
+        """Return a sensor's readings in chronological order (optionally since a time)."""
+        with self._session_factory() as session:
+            stmt = select(ReadingRow).where(ReadingRow.sensor_id == sensor_id)
+            if since is not None:
+                stmt = stmt.where(ReadingRow.ts >= since)
+            stmt = stmt.order_by(ReadingRow.ts.asc())
+            return list(session.scalars(stmt))
+
     # -- internals ---------------------------------------------------------
 
     def _to_row(self, reading: Reading) -> dict:
