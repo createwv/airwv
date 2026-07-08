@@ -90,7 +90,10 @@ Separate real signal from sensor noise before anyone relies on it.
 
 Turn history into insight — what's getting worse and where.
 
-- [ ] Rolling trend computation per sensor / area / pollutant
+- [x] Trend computation per sensor/pollutant — linear fit on daily medians with
+      correlation gating — `analysis/trends.py`, `ingest trends`, dashboard trend line
+- [x] "Areas to watch" — auto-flag pollutants trending up (`is_worsening`).
+      Glasgow flagged rising: PM2.5 +117%, VOC +79% over its 2024 record.
 - [x] Time-of-day / day-of-week pattern analysis — local-hour bucketing of any
       field — `analysis/patterns.py`, `ingest patterns`. (Glasgow VOC: ~2.1×
       evening/overnight vs midday, flat across weekdays → consistent with valley
@@ -103,10 +106,10 @@ Turn history into insight — what's getting worse and where.
       morning event at Glasgow. (Real-vs-glitch verification needs neighbor/A-B.)
 - [ ] Second neighbor (Belle) + rural control — blocked on API points (free tier
       exhausted; needs points top-up or PurpleAir grant)
-- [ ] "Areas to watch" — automatic flagging of degrading trends
-- [ ] AQI and VOC trend tracking over selectable windows
+- [x] AQI/VOC/PM trend tracking over selectable windows — `ingest trends --field`,
+      dashboard date-range + trend line
 - [ ] Comparative/regional context (neighboring sensors, statewide baseline)
-- [ ] Exportable analysis datasets
+- [ ] Exportable analysis datasets (CSV/JSON)
 
 ## Phase 4 — Alerts & Subscriptions
 
