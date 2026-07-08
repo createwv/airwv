@@ -333,6 +333,7 @@ def run_subscribe(
     threshold: float,
     sensor_name: str | None = None,
     field: str = "pm2_5",
+    kind: str = "threshold",
     min_interval_seconds: int = 21600,
     quiet_start: int | None = None,
     quiet_end: int | None = None,
@@ -350,12 +351,13 @@ def run_subscribe(
             sensor_id = str(sorted(set(scoped.values()))[0])
 
     sub_id = store.add_subscription(
-        channel=channel, target=target, sensor_id=sensor_id, field=field,
+        channel=channel, target=target, sensor_id=sensor_id, field=field, kind=kind,
         threshold=threshold, min_interval_seconds=min_interval_seconds,
         quiet_start=quiet_start, quiet_end=quiet_end,
     )
-    log.info("subscription %d: %s -> %s when %s >= %s (%s)", sub_id, channel, target,
-             field, threshold, f"sensor {sensor_id}" if sensor_id else "any sensor")
+    trigger = f">= {threshold}" if kind == "threshold" else f"rising +{threshold}%"
+    log.info("subscription %d: %s -> %s when %s %s (%s)", sub_id, channel, target,
+             field, trigger, f"sensor {sensor_id}" if sensor_id else "any sensor")
     return sub_id
 
 
@@ -370,13 +372,26 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
     now = now or datetime.now(tz=timezone.utc).replace(tzinfo=None)
     subs = store.list_subscriptions(active_only=True)
     latest = store.latest_reading_per_sensor()
-    alerts = evaluate(subs, latest, now)
+
+    # Trend-kind subscriptions need a fitted trend per (sensor, field).
+    trends = {}
+    trend_pairs = set()
+    for s in subs:
+        if getattr(s, "kind", "threshold") == "trend":
+            for sid in ([s.sensor_id] if s.sensor_id else list(latest)):
+                trend_pairs.add((sid, s.field))
+    for sid, field in trend_pairs:
+        trends[(sid, field)] = linear_trend(store.readings_for_sensor(sid), field=field)
+
+    alerts = evaluate(subs, latest, now, trends=trends)
 
     log.info("%d subscription(s), %d alert(s) %s", len(subs), len(alerts),
              "to send" if send else "(dry run — use --send to deliver)")
     for a in alerts:
-        log.info("  ALERT sub %d %s->%s: %s=%s >= %s at sensor %s",
-                 a.subscription_id, a.channel, a.target, a.field, a.value, a.threshold, a.sensor_id)
+        detail = (f"{a.field} rising +{a.value}% (>= +{a.threshold}%)" if a.kind == "trend"
+                  else f"{a.field}={a.value} >= {a.threshold}")
+        log.info("  ALERT sub %d %s->%s: %s at sensor %s",
+                 a.subscription_id, a.channel, a.target, detail, a.sensor_id)
         if not send:
             continue
         try:
@@ -607,7 +622,10 @@ def main(argv: list[str] | None = None) -> None:
     subscribe = sub.add_parser("subscribe", help="create an alert subscription")
     subscribe.add_argument("--channel", required=True, choices=["email", "webhook", "log"])
     subscribe.add_argument("--target", required=True, help="email address / webhook URL")
-    subscribe.add_argument("--threshold", type=float, required=True, help="alert when field >= this")
+    subscribe.add_argument("--threshold", type=float, required=True,
+                           help="threshold value, or for --kind trend the min %% rise")
+    subscribe.add_argument("--kind", default="threshold", choices=["threshold", "trend"],
+                           help="threshold (value crosses) or trend (rising over time)")
     subscribe.add_argument("--sensor", help="sensor name (default: any sensor)")
     subscribe.add_argument("--field", default="pm2_5", help="field to watch (default pm2_5)")
     subscribe.add_argument("--min-interval", type=int, default=21600, help="min seconds between alerts")
@@ -656,7 +674,7 @@ def main(argv: list[str] | None = None) -> None:
         run_export(config, args.out, sensor_name=args.sensor, org=args.org, fmt=args.format)
     elif command == "subscribe":
         run_subscribe(config, args.channel, args.target, args.threshold, sensor_name=args.sensor,
-                      field=args.field, min_interval_seconds=args.min_interval,
+                      field=args.field, kind=args.kind, min_interval_seconds=args.min_interval,
                       quiet_start=args.quiet_start, quiet_end=args.quiet_end)
     elif command == "alerts":
         run_alerts(config, send=args.send)

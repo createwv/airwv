@@ -73,6 +73,10 @@ class Subscription(Base):
     channel: Mapped[str] = mapped_column(String(16))  # email | sms | webhook | log
     target: Mapped[str] = mapped_column(String(256))  # address / phone / URL
 
+    # kind "threshold": fire when latest field >= threshold.
+    # kind "trend":     fire when field is rising by >= threshold percent.
+    kind: Mapped[str] = mapped_column(String(16), default="threshold")
+
     # None sensor_id = any sensor. field/threshold define the trigger.
     sensor_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     field: Mapped[str] = mapped_column(String(32), default="pm2_5")

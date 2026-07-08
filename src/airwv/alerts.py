@@ -25,6 +25,7 @@ class Alert:
     value: float
     threshold: float
     ts: datetime
+    kind: str = "threshold"  # "threshold" | "trend"
 
 
 def _local_hour(now: datetime, tzname: str) -> int:
@@ -40,9 +41,15 @@ def _in_quiet_hours(hour: int, start, end) -> bool:
     return hour >= start or hour < end  # window wraps midnight
 
 
-def evaluate(subscriptions, latest_by_sensor, now: datetime, tzname: str = EASTERN) -> list[Alert]:
-    """Return the alerts that should fire right now."""
+def evaluate(subscriptions, latest_by_sensor, now: datetime, tzname: str = EASTERN,
+             trends=None) -> list[Alert]:
+    """Return the alerts that should fire right now.
+
+    ``trends`` maps ``(sensor_id, field) -> Trend`` and is only needed for
+    trend-kind subscriptions (fire when a field is rising by >= threshold percent).
+    """
     hour = _local_hour(now, tzname)
+    trends = trends or {}
     alerts: list[Alert] = []
 
     for sub in subscriptions:
@@ -55,18 +62,26 @@ def evaluate(subscriptions, latest_by_sensor, now: datetime, tzname: str = EASTE
             if elapsed < sub.min_interval_seconds:
                 continue
 
+        kind = getattr(sub, "kind", "threshold")
         sensor_ids = [sub.sensor_id] if sub.sensor_id else list(latest_by_sensor)
         for sid in sensor_ids:
-            reading = latest_by_sensor.get(sid)
-            if reading is None:
-                continue
-            value = getattr(reading, sub.field, None)
-            if value is None or value < sub.threshold:
-                continue
+            if kind == "trend":
+                trend = trends.get((sid, sub.field))
+                if trend is None or trend.direction != "rising" or (trend.pct_change or 0) < sub.threshold:
+                    continue
+                value, ts = trend.pct_change, now
+            else:
+                reading = latest_by_sensor.get(sid)
+                if reading is None:
+                    continue
+                value = getattr(reading, sub.field, None)
+                if value is None or value < sub.threshold:
+                    continue
+                ts = reading.ts
             alerts.append(Alert(
                 subscription_id=sub.id, channel=sub.channel, target=sub.target,
                 sensor_id=sid, field=sub.field, value=value,
-                threshold=sub.threshold, ts=reading.ts,
+                threshold=sub.threshold, ts=ts, kind=kind,
             ))
             break  # one alert per subscription per run (rate-limited as a unit)
 

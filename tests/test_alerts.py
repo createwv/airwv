@@ -18,6 +18,7 @@ class _Sub:
         self.active = kw.get("active", True)
         self.channel = kw.get("channel", "log")
         self.target = kw.get("target", "x")
+        self.kind = kw.get("kind", "threshold")
         self.sensor_id = kw.get("sensor_id", "A")
         self.field = kw.get("field", "pm2_5")
         self.threshold = kw.get("threshold", 35.0)
@@ -25,6 +26,12 @@ class _Sub:
         self.quiet_start = kw.get("quiet_start")
         self.quiet_end = kw.get("quiet_end")
         self.last_notified_at = kw.get("last_notified_at")
+
+
+class _Trend:
+    def __init__(self, direction, pct_change):
+        self.direction = direction
+        self.pct_change = pct_change
 
 
 def _reading(pm):
@@ -50,6 +57,21 @@ def test_quiet_hours_suppress():
     # quiet 9-17 local; 10am ET is inside → suppressed
     sub = _Sub(threshold=35, quiet_start=9, quiet_end=17)
     assert evaluate([sub], {"A": _reading(50)}, _NOW) == []
+
+
+def test_trend_trigger_fires_on_rising():
+    sub = _Sub(kind="trend", threshold=20.0)
+    trends = {("A", "pm2_5"): _Trend("rising", 50.0)}
+    alerts = evaluate([sub], {"A": _reading(5)}, _NOW, trends=trends)
+    assert len(alerts) == 1
+    assert alerts[0].kind == "trend"
+    assert alerts[0].value == 50.0
+
+
+def test_trend_trigger_no_fire_when_flat_or_small():
+    sub = _Sub(kind="trend", threshold=20.0)
+    assert evaluate([sub], {"A": _reading(5)}, _NOW, trends={("A", "pm2_5"): _Trend("flat", 0)}) == []
+    assert evaluate([sub], {"A": _reading(5)}, _NOW, trends={("A", "pm2_5"): _Trend("rising", 10.0)}) == []
 
 
 def test_subject_renders():

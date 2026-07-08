@@ -15,15 +15,23 @@ log = logging.getLogger("airwv.notify")
 
 
 def alert_subject(alert) -> str:
+    if getattr(alert, "kind", "threshold") == "trend":
+        return f"AirWV trend alert: {alert.field} rising +{alert.value}% at sensor {alert.sensor_id}"
     return f"AirWV alert: {alert.field} {alert.value} ≥ {alert.threshold} at sensor {alert.sensor_id}"
 
 
 def alert_body(alert) -> str:
-    return (
-        f"Sensor {alert.sensor_id} reported {alert.field} = {alert.value} "
-        f"(threshold {alert.threshold}) at {alert.ts} UTC.\n\n"
-        f"— AirWV, West Virginia community air monitoring"
-    )
+    if getattr(alert, "kind", "threshold") == "trend":
+        detail = (
+            f"Sensor {alert.sensor_id} shows {alert.field} rising +{alert.value}% "
+            f"over its record (trigger: +{alert.threshold}%)."
+        )
+    else:
+        detail = (
+            f"Sensor {alert.sensor_id} reported {alert.field} = {alert.value} "
+            f"(threshold {alert.threshold}) at {alert.ts} UTC."
+        )
+    return f"{detail}\n\n— AirWV, West Virginia community air monitoring"
 
 
 class Notifier(abc.ABC):
