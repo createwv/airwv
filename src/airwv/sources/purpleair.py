@@ -46,6 +46,7 @@ HISTORY_FIELDS = [
     "humidity",
     "temperature",
     "pressure",
+    "voc",
 ]
 
 
@@ -81,6 +82,7 @@ def parse_history_payload(payload: dict, sensor_index: int, source: str = "purpl
                 pm1_0=_first(record, "pm1.0_atm", "pm1.0"),
                 pm2_5=_first(record, "pm2.5_atm", "pm2.5"),
                 pm10=_first(record, "pm10.0_atm", "pm10.0"),
+                voc=record.get("voc"),
                 temperature=record.get("temperature"),
                 humidity=record.get("humidity"),
                 pressure=record.get("pressure"),
