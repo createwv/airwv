@@ -3,7 +3,14 @@
 from datetime import datetime, timezone
 
 from airwv.config import Config
-from airwv.ingest import collect_with_retry, run_collect, run_resolve, run_scheduler
+from airwv.ingest import (
+    _time_windows,
+    collect_with_retry,
+    run_backfill,
+    run_collect,
+    run_resolve,
+    run_scheduler,
+)
 from airwv.registry import SensorInfo
 from airwv.resolve import load_index_map
 from airwv.sources.base import Reading
@@ -23,12 +30,18 @@ class FakeSource:
     def __init__(self, readings=None, records=None):
         self._readings = readings or []
         self._records = records or []
+        self.history_calls = []
 
     def fetch_current(self):
         return self._readings
 
     def list_sensors(self, *args, **kwargs):
         return self._records
+
+    def fetch_sensor_history(self, sensor_index, start, end, average_minutes=60):
+        self.history_calls.append((sensor_index, start, end))
+        # One distinct reading per window (ts = window start) so dedupe keeps all.
+        return [Reading(source="purpleair", sensor_id=str(sensor_index), ts=start, pm2_5=5.0)]
 
 
 def _reading(sensor_id: str) -> Reading:
@@ -129,3 +142,38 @@ def test_run_scheduler_runs_fixed_iterations(tmp_path):
 
     assert calls["n"] == 3
     assert sleeps == [config.poll_interval_seconds, config.poll_interval_seconds]  # no sleep after last
+
+
+def test_time_windows_chunks_range():
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    end = datetime(2026, 1, 31, tzinfo=timezone.utc)
+
+    windows = list(_time_windows(start, end, 14))
+
+    assert len(windows) == 3  # 14 + 14 + 2 days
+    assert windows[0][0] == start
+    assert windows[-1][1] == end
+
+
+def test_run_backfill_windows_and_stores(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    source = FakeSource()
+    now = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    total = run_backfill(
+        config, source=source, store=store, index_map={"AA": 1, "BB": 2},
+        days=30, window_days=14, now=now,
+    )
+
+    # 3 windows/sensor x 2 sensors, each returning 1 distinct reading
+    assert len(source.history_calls) == 6
+    assert total == 6
+    assert store.count() == 6
+
+
+def test_run_backfill_without_indices_is_noop(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+
+    assert run_backfill(config, source=FakeSource(), store=store, index_map={}) == 0

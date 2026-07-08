@@ -56,3 +56,17 @@ def test_values_round_trip(store):
 def test_save_empty_is_noop(store):
     assert store.save_readings([]) == 0
     assert store.count() == 0
+
+
+def test_in_range_reading_stored_as_ok(store):
+    store.save_readings([_reading("ok1", pm2_5=10.0)])
+    (row,) = store.recent(limit=1)
+    assert row.quality == "ok"
+
+
+def test_out_of_range_reading_flagged_suspect_not_dropped(store):
+    store.save_readings([_reading("bad1", pm2_5=-5.0)])
+    (row,) = store.recent(limit=1)
+    assert row.quality == "suspect"  # flagged, not dropped
+    assert store.count() == 1
+    assert row.pm2_5 == -5.0  # raw value preserved

@@ -3,7 +3,11 @@
 import httpx
 import respx
 
-from airwv.sources.purpleair import PURPLEAIR_API_BASE, PurpleAirSource
+from airwv.sources.purpleair import (
+    PURPLEAIR_API_BASE,
+    PurpleAirSource,
+    parse_history_payload,
+)
 
 
 def test_parse_sensors_response_maps_fields():
@@ -57,3 +61,20 @@ def test_list_sensors_hits_api_and_parses_records():
     assert route.called
     assert records[0]["name"] == "EWV Belle 1"
     assert records[0]["sensor_index"] == 101
+
+
+def test_parse_history_payload_maps_rows():
+    payload = {
+        "fields": ["time_stamp", "pm2.5_atm", "temperature", "humidity"],
+        "data": [
+            [1_700_000_000, 6.1, 70.0, 40.0],
+            [1_700_003_600, 7.9, 71.0, 41.0],
+        ],
+    }
+
+    readings = parse_history_payload(payload, sensor_index=101)
+
+    assert len(readings) == 2
+    assert readings[0].sensor_id == "101"
+    assert readings[0].pm2_5 == 6.1
+    assert readings[1].temperature == 71.0
