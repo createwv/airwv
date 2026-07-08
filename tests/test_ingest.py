@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from airwv.config import Config
 from airwv.ingest import (
+    _scoped_index_map,
     _time_windows,
     collect_with_retry,
     run_backfill,
@@ -177,6 +178,45 @@ def test_run_backfill_without_indices_is_noop(tmp_path):
     store = Store(config.database_url)
 
     assert run_backfill(config, source=FakeSource(), store=store, index_map={}) == 0
+
+
+def test_scoped_index_map_filters_by_org(tmp_path):
+    config = _config(tmp_path)
+    sensors = [
+        SensorInfo(name="EWV Belle 1", device_id="AA", source="purpleair", org="Create WV"),
+        SensorInfo(name="EWV Washington 1", device_id="BB", source="purpleair", org="WVCAG"),
+    ]
+    scoped = _scoped_index_map(
+        config, org="Create WV", sensors=sensors, index_map={"AA": 1, "BB": 2}
+    )
+    assert scoped == {"AA": 1}
+
+
+def test_scoped_index_map_filters_by_sensor_name(tmp_path):
+    config = _config(tmp_path)
+    sensors = [
+        SensorInfo(name="EWV Glasgow 1", device_id="AA", source="purpleair", org="Create WV"),
+        SensorInfo(name="EWV Belle 1", device_id="BB", source="purpleair", org="Create WV"),
+    ]
+    scoped = _scoped_index_map(
+        config, names=["glasgow"], sensors=sensors, index_map={"AA": 1, "BB": 2}
+    )
+    assert scoped == {"AA": 1}
+
+
+def test_run_backfill_with_explicit_date_range(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    source = FakeSource()
+    start = datetime(2023, 11, 1, tzinfo=timezone.utc)
+    end = datetime(2023, 11, 15, tzinfo=timezone.utc)
+
+    run_backfill(config, source=source, store=store, index_map={"AA": 1},
+                 start=start, end=end, window_days=14)
+
+    assert len(source.history_calls) == 1  # one 14-day window
+    _, w_start, w_end = source.history_calls[0]
+    assert w_start == start and w_end == end
 
 
 def test_run_backfill_limit_caps_sensors(tmp_path):

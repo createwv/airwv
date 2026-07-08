@@ -38,6 +38,38 @@ from airwv.storage import Store
 log = logging.getLogger("airwv.ingest")
 
 
+def _scoped_index_map(
+    config: Config,
+    org: str | None = None,
+    names: list[str] | None = None,
+    sensors=None,
+    index_map: dict[str, int] | None = None,
+) -> dict[str, int]:
+    """Load the resolved index map, optionally narrowed to an org and/or sensor names.
+
+    Lets us focus collection/backfill on a subset (e.g. only Create WV / Kanawha
+    Valley sensors) — both to control API-point spend and to target investigations.
+    Matching is case-insensitive substring on ``org`` and sensor ``name``.
+    """
+    index_map = index_map if index_map is not None else load_index_map(config.index_cache_path)
+    if not (org or names):
+        return index_map
+
+    sensors = sensors if sensors is not None else load_wv_sensors()
+
+    def matches(s) -> bool:
+        if org and (not s.org or org.lower() not in s.org.lower()):
+            return False
+        if names and not any(n.lower() in s.name.lower() for n in names):
+            return False
+        return True
+
+    selected = {s.device_id for s in sensors if matches(s)}
+    scoped = {dev: idx for dev, idx in index_map.items() if dev in selected}
+    log.info("scoped to %d resolved sensor(s) (org=%s, names=%s)", len(scoped), org, names)
+    return scoped
+
+
 def run_resolve(config: Config, source=None, sensors: list[SensorInfo] | None = None) -> ResolveResult:
     """Resolve device names -> sensor_index across WV and cache the result."""
     sensors = sensors if sensors is not None else load_wv_sensors()
@@ -124,6 +156,8 @@ def run_backfill(
     average_minutes: int = 60,
     window_days: int = 14,
     limit: int | None = None,
+    start: datetime | None = None,
+    end: datetime | None = None,
     now: datetime | None = None,
 ) -> int:
     """Backfill historical readings for all resolved sensors. Returns rows inserted.
@@ -139,7 +173,8 @@ def run_backfill(
         return 0
 
     now = now or datetime.now(tz=timezone.utc)
-    start = now - timedelta(days=days)
+    end = end or now
+    start = start or (end - timedelta(days=days))
     source = source or PurpleAirSource(config.purpleair_api_key)
     store = store or Store.from_config(config)
     store.create_schema()
@@ -148,11 +183,14 @@ def run_backfill(
     if limit is not None:
         indices = indices[:limit]
         log.info("limiting backfill to %d sensor(s) (API-point conservation)", len(indices))
-    log.info("backfilling %d sensors over %d days (avg=%dmin)", len(indices), days, average_minutes)
+    log.info(
+        "backfilling %d sensors %s..%s (avg=%dmin)",
+        len(indices), start.date(), end.date(), average_minutes,
+    )
 
     total = 0
     for idx in indices:
-        for w_start, w_end in _time_windows(start, now, window_days):
+        for w_start, w_end in _time_windows(start, end, window_days):
             try:
                 readings = source.fetch_sensor_history(idx, w_start, w_end, average_minutes)
             except Exception as exc:  # one bad window shouldn't abort the run
@@ -265,9 +303,13 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("resolve", help="match device names to PurpleAir sensor indices")
     collect = sub.add_parser("collect", help="collect current readings once (default)")
     collect.add_argument("--limit", type=int, help="cap sensors polled (saves API points)")
+    collect.add_argument("--org", help="only sensors whose installing org matches (e.g. 'Create WV')")
+    collect.add_argument("--sensor", action="append", help="only sensors whose name matches (repeatable)")
     sub.add_parser("run", help="run the scheduler loop (collect on an interval)")
     backfill = sub.add_parser("backfill", help="backfill historical readings")
     backfill.add_argument("--days", type=int, default=30, help="how far back to fetch (default 30)")
+    backfill.add_argument("--start", help="start date YYYY-MM-DD (overrides --days)")
+    backfill.add_argument("--end", help="end date YYYY-MM-DD (default: now)")
     backfill.add_argument(
         "--average",
         type=int,
@@ -276,6 +318,8 @@ def main(argv: list[str] | None = None) -> None:
         help="PurpleAir averaging bucket in minutes (default 60)",
     )
     backfill.add_argument("--limit", type=int, help="cap sensors backfilled (saves API points)")
+    backfill.add_argument("--org", help="only sensors whose installing org matches (e.g. 'Create WV')")
+    backfill.add_argument("--sensor", action="append", help="only sensors whose name matches (repeatable)")
     analyze = sub.add_parser("analyze", help="detect anomalies + score sensor health (no API cost)")
     analyze.add_argument("--hours", type=int, default=168, help="lookback window (default 168 = 7d)")
     analyze.add_argument("--threshold", type=float, default=3.5, help="spike z-score threshold")
@@ -287,11 +331,23 @@ def main(argv: list[str] | None = None) -> None:
     )
     config = Config.from_env()
 
+    def _date(value: str | None) -> datetime | None:
+        return datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc) if value else None
+
     command = args.command or "collect"
     if command == "resolve":
         run_resolve(config)
     elif command == "backfill":
-        run_backfill(config, days=args.days, average_minutes=args.average, limit=args.limit)
+        index_map = _scoped_index_map(config, org=args.org, names=args.sensor)
+        run_backfill(
+            config,
+            index_map=index_map,
+            days=args.days,
+            average_minutes=args.average,
+            limit=args.limit,
+            start=_date(args.start),
+            end=_date(args.end),
+        )
     elif command == "analyze":
         run_analyze(config, since_hours=args.hours, spike_threshold=args.threshold)
     elif command == "run":
@@ -300,7 +356,8 @@ def main(argv: list[str] | None = None) -> None:
         except KeyboardInterrupt:
             log.info("scheduler stopped")
     else:
-        run_collect(config, limit=getattr(args, "limit", None))
+        index_map = _scoped_index_map(config, org=getattr(args, "org", None), names=getattr(args, "sensor", None))
+        run_collect(config, index_map=index_map, limit=getattr(args, "limit", None))
 
 
 if __name__ == "__main__":
