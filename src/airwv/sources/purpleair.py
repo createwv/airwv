@@ -37,6 +37,58 @@ SENSOR_FIELDS = [
 # Minimal fields for resolving our device names to PurpleAir sensor indices.
 RESOLVE_FIELDS = ["name", "latitude", "longitude"]
 
+# Fields requested from the per-sensor history endpoint. History uses suffixed
+# names (e.g. pm2.5_atm) distinct from the realtime fields.
+HISTORY_FIELDS = [
+    "pm1.0_atm",
+    "pm2.5_atm",
+    "pm10.0_atm",
+    "humidity",
+    "temperature",
+    "pressure",
+]
+
+
+def _first(record: dict, *keys: str):
+    """Return the first present, non-null value among ``keys``."""
+    for key in keys:
+        value = record.get(key)
+        if value is not None:
+            return value
+    return None
+
+
+def parse_history_payload(payload: dict, sensor_index: int, source: str = "purpleair") -> list[Reading]:
+    """Turn a ``/sensors/{index}/history`` response into normalized readings.
+
+    History rows carry ``time_stamp`` (not ``last_seen``) and no per-row sensor
+    index, so the index is supplied by the caller. PM field names are tried in a
+    few forms for resilience across API variants.
+    """
+    readings: list[Reading] = []
+    for record in _records_from_payload(payload):
+        ts_raw = record.get("time_stamp")
+        ts = (
+            datetime.fromtimestamp(ts_raw, tz=timezone.utc)
+            if isinstance(ts_raw, (int, float))
+            else datetime.now(tz=timezone.utc)
+        )
+        readings.append(
+            Reading(
+                source=source,
+                sensor_id=str(sensor_index),
+                ts=ts,
+                pm1_0=_first(record, "pm1.0_atm", "pm1.0"),
+                pm2_5=_first(record, "pm2.5_atm", "pm2.5"),
+                pm10=_first(record, "pm10.0_atm", "pm10.0"),
+                temperature=record.get("temperature"),
+                humidity=record.get("humidity"),
+                pressure=record.get("pressure"),
+                raw=record,
+            )
+        )
+    return readings
+
 
 def _records_from_payload(payload: dict) -> list[dict]:
     """PurpleAir returns column-oriented data (``fields`` + rows). Zip to dicts."""
@@ -129,6 +181,27 @@ class PurpleAirSource(Source):
         }
         payload = self._get("/sensors", params)
         return _records_from_payload(payload)
+
+    def fetch_sensor_history(
+        self,
+        sensor_index: int,
+        start: datetime,
+        end: datetime,
+        average_minutes: int = 60,
+    ) -> list[Reading]:
+        """Fetch historical readings for one sensor in ``[start, end]``.
+
+        ``average_minutes`` is a PurpleAir averaging bucket (10, 30, 60, 360, or
+        1440). Returns normalized readings; the caller handles windowing/storage.
+        """
+        params = {
+            "start_timestamp": int(start.timestamp()),
+            "end_timestamp": int(end.timestamp()),
+            "average": average_minutes,
+            "fields": ",".join(HISTORY_FIELDS),
+        }
+        payload = self._get(f"/sensors/{sensor_index}/history", params)
+        return parse_history_payload(payload, sensor_index, self.name)
 
     def _get(self, path: str, params: dict) -> dict:
         with httpx.Client(timeout=self._timeout) as client:
