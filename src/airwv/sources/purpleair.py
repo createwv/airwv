@@ -168,11 +168,17 @@ class PurpleAirSource(Source):
         nw_lng: float,
         se_lat: float,
         se_lng: float,
+        max_age: int = 0,
     ) -> list[dict]:
         """List sensors within a bounding box (name + index + location).
 
         Used to resolve our device names to PurpleAir ``sensor_index`` values,
         since public sensors are read by index. Returns raw record dicts.
+
+        ``max_age`` filters to sensors seen within that many seconds; PurpleAir
+        defaults to one week, which hides offline sensors. We pass ``0`` (any age)
+        so we can still resolve — and later backfill — sensors that are currently
+        down but were online in the past.
         """
         params = {
             "fields": ",".join(RESOLVE_FIELDS),
@@ -180,6 +186,7 @@ class PurpleAirSource(Source):
             "nwlat": nw_lat,
             "selng": se_lng,
             "selat": se_lat,
+            "max_age": max_age,
         }
         payload = self._get("/sensors", params)
         return _records_from_payload(payload)
