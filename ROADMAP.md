@@ -126,8 +126,9 @@ Get warnings to the people who need them.
 - [x] Trend-based triggers — alert when a field is rising by >= N% (`kind=trend`,
       reuses Phase 3 `linear_trend`). Glasgow VOC (+79%) fires a +20% subscription.
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
+- [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
+      collection (`--no-alerts` to disable)
 - [ ] Subscription management UI — opt-in, confirm, unsubscribe (CLI-only for now)
-- [ ] Scheduled evaluation — run `alerts --send` on the collection interval
 
 ## Phase 5 — Public API & Dashboard 🎯
 

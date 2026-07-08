@@ -27,11 +27,16 @@ journalctl -u airwv-collect.service -f          # watch runs
 ## Option B — built-in loop (simple / cross-platform)
 
 Long-running process that collects every `AIRWV_POLL_INTERVAL_SECONDS` (default
-300) with retry + exponential backoff:
+hourly) with retry + exponential backoff, and **delivers alerts after each
+collection**:
 
 ```bash
-python -m airwv.ingest run
+python -m airwv.ingest run              # collect + evaluate/send alerts
+python -m airwv.ingest run --no-alerts  # collect only
 ```
+
+> Using the timer/cron approach (Option A/C) instead? Those run `collect` only —
+> add a matching `python -m airwv.ingest alerts --send` step to also deliver alerts.
 
 Good for a quick start, a container `CMD`, or running under a process manager
 (supervisor, pm2, tmux). Under systemd you'd use `Type=simple` + `Restart=always`
