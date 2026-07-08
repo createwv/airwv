@@ -151,6 +151,18 @@ def create_app(store: Store) -> FastAPI:
             ],
         }
 
+    @app.get("/api/trend/{sensor_id}")
+    def trend(sensor_id: str, field: str = "pm2_5", min_days: int = 14):
+        _check_field(field)
+        from airwv.analysis import is_worsening, linear_trend
+
+        t = linear_trend(store.readings_for_sensor(sensor_id), field=field, min_days=min_days)
+        return {
+            "sensor_id": sensor_id, "field": field, "direction": t.direction,
+            "pct_change": t.pct_change, "slope_per_30d": t.slope_per_30d,
+            "first": t.first, "last": t.last, "r": t.r, "watch": is_worsening(t),
+        }
+
     @app.get("/api/diurnal/{sensor_id}")
     def diurnal(sensor_id: str, field: str = "voc", start: str | None = None, end: str | None = None):
         _check_field(field)
@@ -235,7 +247,8 @@ INDEX_HTML = """<!doctype html>
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
     <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · click a marker to toggle</div>
 </div>
-<div class="card"><h2>Time series (hourly median) — red × = events (single sensor)</h2><div id="ts" class="chart"></div></div>
+<div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
+  <span class="meta" id="trendinfo"></span></h2><div id="ts" class="chart"></div></div>
 <div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div id="diurnal" class="chart"></div></div>
 <div class="card"><h2>Day vs. overnight compare</h2>
   <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
@@ -283,10 +296,20 @@ async function render(){
   series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
     mode:'lines', name:s.name, line:{color:COLORS[i%COLORS.length], width:1.3}}));
   if (ids.length === 1){
-    const ev = await j(`/api/events/${ids[0]}?field=${field}`);
+    const [ev, tr] = await Promise.all([
+      j(`/api/events/${ids[0]}?field=${field}`),
+      j(`/api/trend/${ids[0]}?field=${field}`),
+    ]);
     if (ev.events.length) tsTraces.push({x:ev.events.map(e=>e.ts), y:ev.events.map(e=>e.value),
       mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:8}});
-  }
+    const pts = series[0].points;
+    if (tr.first != null && pts.length){
+      tsTraces.push({x:[pts[0].ts, pts[pts.length-1].ts], y:[tr.first, tr.last],
+        mode:'lines', name:'trend', line:{dash:'dash', color:'#111', width:2}});
+    }
+    $('trendinfo').textContent = tr.direction === 'insufficient' ? '' :
+      `trend: ${tr.direction}${tr.watch ? ' ⚠ watch' : ''} · Δ${tr.pct_change}% over period (r=${tr.r})`;
+  } else { $('trendinfo').textContent = ''; }
   Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45}, yaxis:{title:field},
     legend:{orientation:'h'}}, {responsive:true, displayModeBar:false});
 

@@ -56,6 +56,13 @@ def test_series_date_range_filters(tmp_path):
     assert empty == []
 
 
+def test_trend_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/trend/197127?field=pm2_5&min_days=1")
+    assert r.status_code == 200
+    body = r.json()
+    assert "direction" in body and "watch" in body
+
+
 def test_compare_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/compare?sensors=197127&field=pm2_5")
     assert r.status_code == 200
