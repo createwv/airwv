@@ -50,9 +50,12 @@ confirmed capturing real data.*
       per-sensor history via `ingest backfill --days N --average M` (VOC included)
 - [x] Sensor scoping + timeline cherry-pick — `--org` / `--sensor` to focus a
       subset, `--start` / `--end` for arbitrary date ranges — `ingest.py`
-- [ ] Owner path for offline/private sensors — add owned sensors to a PurpleAir
-      group by MAC + owner_email (needs write key); also the *free* route for
-      Create WV-owned units, and the only way to reach offline ones (e.g. Glasgow)
+- [x] Reach offline sensors — resolve with `max_age=0` so currently-down units
+      still resolve and their pre-down history is pullable by index (read key
+      only). Took resolution 30→52/54; unlocked Glasgow. — `sources/purpleair.py`
+- [ ] Owner path — only needed now for the ~2 truly-private/renamed sensors, and
+      as the *free* pull route for Create WV-owned units (add by MAC + owner_email
+      to a group; needs a write key). No longer required for offline sensors.
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
 durable storage, with backfilled history and no data loss on transient failures.
