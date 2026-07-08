@@ -1,13 +1,14 @@
-# Runs airwv-collect.service every 5 minutes. Enable with:
+# Runs airwv-collect.service hourly (PurpleAir points add up per sensor per call;
+# hourly is sustainable on the free tier for ~30 sensors). Enable with:
 #   sudo systemctl enable --now airwv-collect.timer
 # Check status: systemctl list-timers airwv-collect.timer
 
 [Unit]
-Description=Run AirWV collection every 5 minutes
+Description=Run AirWV collection hourly
 
 [Timer]
-OnBootSec=2min
-OnUnitActiveSec=5min
+OnBootSec=5min
+OnUnitActiveSec=1h
 Persistent=true
 
 [Install]

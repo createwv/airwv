@@ -45,7 +45,10 @@ class Config:
         # Default to a local SQLite file so development needs zero setup.
         database_url = os.environ.get("AIRWV_DATABASE_URL", "").strip() or "sqlite:///airwv.sqlite"
 
-        poll_interval = int(os.environ.get("AIRWV_POLL_INTERVAL_SECONDS", "300"))
+        # Default hourly: PurpleAir bills API points per sensor per call, so tight
+        # intervals across many sensors are costly. Hourly is sustainable on the
+        # free tier for ~30 sensors; lower it if you have points to spare.
+        poll_interval = int(os.environ.get("AIRWV_POLL_INTERVAL_SECONDS", "3600"))
 
         # Private device -> sensor_index cache (gitignored data/ dir by default).
         index_cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"

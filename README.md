@@ -149,6 +149,31 @@ you don't pool keys across groups. One organization runs one instance with one
 key. If your group wants its own separate system, clone this repo and run it with
 your own PurpleAir key and storage; nothing here is tied to a single operator.
 
+## API points & history strategy
+
+PurpleAir bills **API points** (new accounts include ~1,000,000 free). Cost is
+roughly `base + fields × per-field`, **per sensor, per call**. Exact per-field
+values are in your portal's *Billing → Pricing* tab; the estimates below are
+back-calculated from real usage and are good enough for planning.
+
+| Operation | Rough cost | Implication |
+| --------- | ---------- | ----------- |
+| Statewide `resolve` scan | ~3,900 pts | Expensive — but cached, so run it rarely |
+| `collect` (realtime) | ~25 pts/sensor/call | ~750 pts/run for 30 sensors |
+| `backfill` (history) | ~3 pts/row | 1 yr hourly ≈ 26K pts/sensor |
+
+**Strategy that keeps you inside the free tier:**
+
+- **Backfill once, then own it.** History costs points on every pull; your local
+  DB is free to query forever. Backfill each sensor's history one time, then let
+  scheduled `collect` append new readings cheaply.
+- **Collect hourly, not every few minutes.** Points scale per sensor per call, so
+  tight intervals across many sensors burn the budget fast. The default is hourly
+  (`AIRWV_POLL_INTERVAL_SECONDS=3600`) — sustainable for ~30 sensors.
+- **Backfill at hourly (`--average 60`).** Finer intervals multiply cost (10-min
+  is 6× hourly); reserve those for recent or priority sensors.
+- **Test with `--limit`** before any full run (see above).
+
 ## Contributing
 
 This is a community project — contributions welcome. See
