@@ -49,6 +49,46 @@ with `ExecStart=… -m airwv.ingest run`.
 */5 * * * * cd /opt/airwv && .venv/bin/python -m airwv.ingest collect >> /var/log/airwv.log 2>&1
 ```
 
+## Dashboard
+
+### Local (take a look)
+
+```bash
+pip install -e ".[web]"
+python -m airwv.web            # http://127.0.0.1:8000
+```
+
+### Public (e.g. air.createwv.org)
+
+The dashboard is read-only over public sensor data. Run it bound to localhost and
+put a reverse proxy in front for HTTPS.
+
+1. **DNS:** point `air.createwv.org` (A record) at the server's IP.
+2. **App:** on the server, clone to `/opt/airwv`, create the venv, install:
+   ```bash
+   git clone git@github.com:createwv/airwv.git /opt/airwv
+   cd /opt/airwv && python3.12 -m venv .venv && . .venv/bin/activate
+   pip install -e ".[web]"
+   ```
+   Bring the data: either copy your local `airwv.sqlite` up, or run collection on
+   the server (`resolve` + `backfill`/`run`) once points are available.
+3. **Service:** install `deploy/systemd/airwv-web.service` (binds 127.0.0.1:8000):
+   ```bash
+   sudo cp deploy/systemd/airwv-web.service /etc/systemd/system/
+   sudo systemctl daemon-reload && sudo systemctl enable --now airwv-web
+   ```
+4. **Reverse proxy + TLS** — Caddy gives automatic HTTPS. `/etc/caddy/Caddyfile`:
+   ```
+   air.createwv.org {
+       reverse_proxy 127.0.0.1:8000
+   }
+   ```
+   `sudo systemctl reload caddy`. (nginx + certbot works too.)
+
+Notes: the dashboard has no auth (it shows public data); add HTTP basic-auth at the
+proxy if you want it private during preview. Sensor coordinates shown are the same
+ones PurpleAir already publishes.
+
 ## Notes
 
 - **Resolve occasionally, not every run.** Re-run `resolve` after deploying or

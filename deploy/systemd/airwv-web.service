@@ -1,0 +1,22 @@
+# AirWV dashboard (web) — long-running service behind a reverse proxy.
+# Copy to /etc/systemd/system/, edit User/paths, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now airwv-web
+# Binds to localhost; put Caddy/nginx in front for TLS + a public hostname.
+
+[Unit]
+Description=AirWV dashboard (web)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=airwv
+WorkingDirectory=/opt/airwv
+EnvironmentFile=/opt/airwv/.env
+Environment=AIRWV_WEB_HOST=127.0.0.1
+Environment=AIRWV_WEB_PORT=8000
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.web
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
