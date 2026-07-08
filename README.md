@@ -109,7 +109,45 @@ AirWV reads configuration from environment variables (loaded from a local
 | `PURPLEAIR_API_KEY` | yes      | PurpleAir read API key                       |
 | `AIRWV_DATABASE_URL`| no       | DB connection string (defaults to local SQLite) |
 
-Get a PurpleAir API key at <https://develop.purpleair.com/>.
+## Getting a PurpleAir API key
+
+The collector needs a PurpleAir **Read** key. It's free to start (new accounts
+include ~1,000,000 API points).
+
+1. Sign in at [develop.purpleair.com](https://develop.purpleair.com/) with a
+   Google account. *(For an org deployment, use an org-owned account so billing
+   and ownership stay with the org, not an individual.)*
+2. Create a **Project** (top-right `+ Project`) — e.g. `AirWV`. Projects are just
+   containers that group your keys and track usage; no other setup is required.
+3. Confirm your **Organization** has points (the free tier is plenty to start).
+4. Create an **API Key**: `+ API Key` → select your project → **Type: Read** →
+   **Status: Enabled** → leave host/referer restrictions blank (server-side use).
+5. Copy the key into your local `.env` as `PURPLEAIR_API_KEY` (never commit it).
+
+A **Write** key is only needed later, to add *private* (non-public) sensors via
+PurpleAir groups. Skip it for now.
+
+### Being careful with API points
+
+API calls consume points (roughly: sensors × fields, and history costs more).
+To validate the pipeline before spending much, start small:
+
+```bash
+python -m airwv.ingest resolve                       # one listing call; see the match report
+python -m airwv.ingest collect --limit 3             # poll just 3 sensors
+python -m airwv.ingest backfill --days 7 --average 60 --limit 3   # tiny history sample
+```
+
+`--limit` caps how many sensors are hit, and hourly (`--average 60`) history is
+far cheaper than fine-grained. Once the data looks right, drop `--limit` and
+raise `--days`. Watch your balance on the PurpleAir dashboard.
+
+## Running your own instance
+
+AirWV is designed so **each deployment brings its own API key and database** —
+you don't pool keys across groups. One organization runs one instance with one
+key. If your group wants its own separate system, clone this repo and run it with
+your own PurpleAir key and storage; nothing here is tied to a single operator.
 
 ## Contributing
 
