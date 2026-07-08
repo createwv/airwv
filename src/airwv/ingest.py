@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from airwv.analysis import (
     detect_spikes,
     detect_stuck,
+    diurnal_amplitude,
     hour_of_day_profile,
     part_of_day_summary,
     score_health,
@@ -290,6 +291,32 @@ def run_patterns(
     return results
 
 
+def run_compare(
+    config: Config,
+    sensor_names: list[str],
+    field: str = "pm2_5",
+    store=None,
+) -> list[dict]:
+    """Compare day-vs-overnight amplitude of ``field`` across sensors. Read-only.
+
+    A "control" (clean/rural) site should sit near ratio 1.0; a site with a local
+    overnight source stands out. PM2.5 is calibrated and comparable across sensors.
+    """
+    store = store or Store.from_config(config)
+    results = []
+    log.info("diurnal %s comparison (night 0-5 vs day 9-17, local ET):", field)
+    for name in sensor_names:
+        scoped = _scoped_index_map(config, names=[name])
+        for idx in sorted(set(scoped.values())):
+            amp = diurnal_amplitude(store.readings_for_sensor(str(idx)), field=field)
+            results.append({"name": name, "index": idx, **amp})
+            log.info(
+                "  %-16s idx %-7s day=%-6s night=%-6s  night/day=%-5s  (n=%d)",
+                name, idx, amp["day"], amp["night"], amp["night_day_ratio"], amp["n"],
+            )
+    return results
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -373,6 +400,9 @@ def main(argv: list[str] | None = None) -> None:
     patterns = sub.add_parser("patterns", help="time-of-day profile for a sensor (no API cost)")
     patterns.add_argument("--sensor", required=True, help="sensor name substring (e.g. 'Glasgow')")
     patterns.add_argument("--field", default="voc", help="field to profile (default voc)")
+    compare = sub.add_parser("compare", help="compare day/night amplitude across sensors (no API cost)")
+    compare.add_argument("--sensor", action="append", required=True, help="sensor name (repeatable)")
+    compare.add_argument("--field", default="pm2_5", help="field to compare (default pm2_5)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -402,6 +432,8 @@ def main(argv: list[str] | None = None) -> None:
         run_analyze(config, since_hours=args.hours, spike_threshold=args.threshold)
     elif command == "patterns":
         run_patterns(config, args.sensor, field=args.field)
+    elif command == "compare":
+        run_compare(config, args.sensor, field=args.field)
     elif command == "run":
         try:
             run_scheduler(config)

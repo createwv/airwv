@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from airwv.analysis.patterns import (
     _local_hour,
+    diurnal_amplitude,
     hour_of_day_profile,
     part_of_day_summary,
 )
@@ -44,3 +45,16 @@ def test_part_of_day_summary_flags_evening_elevation():
     summary = part_of_day_summary(profile)
     assert summary["evening_18_23"] > summary["business_9_17"]
     assert summary["evening_vs_business_ratio"] > 1
+
+
+def test_diurnal_amplitude_overnight_buildup():
+    readings = []
+    for day in range(1, 6):
+        readings.append(Reading(source="purpleair", sensor_id="1",
+                                ts=datetime(2024, 6, day, 3, tzinfo=timezone.utc), pm2_5=20.0))
+        readings.append(Reading(source="purpleair", sensor_id="1",
+                                ts=datetime(2024, 6, day, 14, tzinfo=timezone.utc), pm2_5=8.0))
+    amp = diurnal_amplitude(readings, field="pm2_5", tzname="UTC")
+    assert amp["day"] == 8.0
+    assert amp["night"] == 20.0
+    assert amp["night_day_ratio"] == 2.5

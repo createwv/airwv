@@ -57,6 +57,26 @@ def _median_over(profile: list[HourStat], hours) -> float | None:
     return round(statistics.mean(vals), 1) if vals else None
 
 
+def diurnal_amplitude(
+    readings,
+    field: str = "pm2_5",
+    tzname: str = EASTERN,
+    day_hours=range(9, 17),
+    night_hours=range(0, 6),
+) -> dict[str, float | int | None]:
+    """Day vs. overnight typical value and their ratio for one sensor/field.
+
+    ``night_day_ratio`` near 1.0 means no overnight buildup (a "clean" site);
+    well above 1.0 means pollutants accumulate overnight (local source and/or
+    strong local trapping). Use calibrated PM2.5 for cross-sensor comparison.
+    """
+    profile = hour_of_day_profile(readings, field=field, tzname=tzname)
+    day = _median_over(profile, day_hours)
+    night = _median_over(profile, night_hours)
+    ratio = round(night / day, 2) if day and night else None
+    return {"day": day, "night": night, "night_day_ratio": ratio, "n": sum(s.count for s in profile)}
+
+
 def part_of_day_summary(profile: list[HourStat]) -> dict[str, float | None]:
     """Compare typical values across business / evening / overnight hours."""
     business = _median_over(profile, range(9, 17))      # 9a–5p

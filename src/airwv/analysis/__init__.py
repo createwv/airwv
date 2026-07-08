@@ -2,7 +2,12 @@
 
 from airwv.analysis.anomaly import Anomaly, detect_spikes, detect_stuck
 from airwv.analysis.health import SensorHealth, score_health
-from airwv.analysis.patterns import HourStat, hour_of_day_profile, part_of_day_summary
+from airwv.analysis.patterns import (
+    HourStat,
+    diurnal_amplitude,
+    hour_of_day_profile,
+    part_of_day_summary,
+)
 
 __all__ = [
     "Anomaly",
@@ -13,4 +18,5 @@ __all__ = [
     "score_health",
     "hour_of_day_profile",
     "part_of_day_summary",
+    "diurnal_amplitude",
 ]
