@@ -25,6 +25,8 @@ from airwv.analysis import (
     detrend_events,
     diurnal_amplitude,
     hour_of_day_profile,
+    is_worsening,
+    linear_trend,
     part_of_day_summary,
     score_health,
 )
@@ -319,6 +321,44 @@ def run_compare(
     return results
 
 
+def run_trends(
+    config: Config,
+    field: str = "pm2_5",
+    sensor_name: str | None = None,
+    min_days: int = 14,
+    store=None,
+) -> list:
+    """Compute per-sensor long-term trends for a field; flag worsening sites. Read-only."""
+    store = store or Store.from_config(config)
+    scoped = _scoped_index_map(config, names=[sensor_name]) if sensor_name else None
+    if sensor_name and not scoped:
+        log.warning("no resolved sensor matching %r", sensor_name)
+        return []
+
+    wanted = {str(i) for i in scoped.values()} if scoped else None
+    results = []
+    for sid in store.distinct_sensor_ids():
+        if wanted is not None and sid not in wanted:
+            continue
+        trend = linear_trend(store.readings_for_sensor(sid), field=field, min_days=min_days)
+        results.append((sid, trend))
+
+    # Worst-trending first.
+    results.sort(key=lambda t: -(t[1].pct_change or -999))
+    log.info("%s trends over daily medians (%d sensors):", field, len(results))
+    for sid, t in results:
+        watch = "  ⚠ WATCH" if is_worsening(t) else ""
+        log.info(
+            "  sensor %-8s %-12s %sd  first=%s last=%s  %s/30d  Δ=%s%%  r=%s%s",
+            sid, t.direction, t.n_days, t.first, t.last, t.slope_per_30d,
+            t.pct_change, t.r, watch,
+        )
+    watching = [sid for sid, t in results if is_worsening(t)]
+    if watching:
+        log.info("areas to watch (rising %s): %s", field, ", ".join(watching))
+    return results
+
+
 def run_events(
     config: Config,
     sensor_name: str,
@@ -441,6 +481,10 @@ def main(argv: list[str] | None = None) -> None:
     events.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
     events.add_argument("--threshold", type=float, default=6.0, help="residual robust-z threshold")
     events.add_argument("--top", type=int, default=15, help="how many top events to show")
+    trends = sub.add_parser("trends", help="long-term trends + areas to watch (no API cost)")
+    trends.add_argument("--field", default="pm2_5", help="field to trend (default pm2_5)")
+    trends.add_argument("--sensor", help="limit to one sensor name (default: all)")
+    trends.add_argument("--min-days", type=int, default=14, help="minimum days of data (default 14)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -474,6 +518,8 @@ def main(argv: list[str] | None = None) -> None:
         run_compare(config, args.sensor, field=args.field)
     elif command == "events":
         run_events(config, args.sensor, field=args.field, z_threshold=args.threshold, top=args.top)
+    elif command == "trends":
+        run_trends(config, field=args.field, sensor_name=args.sensor, min_days=args.min_days)
     elif command == "run":
         try:
             run_scheduler(config)

@@ -9,6 +9,7 @@ from airwv.analysis.patterns import (
     hour_of_day_profile,
     part_of_day_summary,
 )
+from airwv.analysis.trends import Trend, is_worsening, linear_trend
 
 __all__ = [
     "Anomaly",
@@ -22,4 +23,7 @@ __all__ = [
     "hour_of_day_profile",
     "part_of_day_summary",
     "diurnal_amplitude",
+    "Trend",
+    "linear_trend",
+    "is_worsening",
 ]
