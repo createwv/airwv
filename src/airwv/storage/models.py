@@ -61,3 +61,28 @@ class ReadingRow(Base):
     ingested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False
     )
+
+
+class Subscription(Base):
+    """A person/system asking to be alerted when a field crosses a threshold."""
+
+    __tablename__ = "subscriptions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    channel: Mapped[str] = mapped_column(String(16))  # email | sms | webhook | log
+    target: Mapped[str] = mapped_column(String(256))  # address / phone / URL
+
+    # None sensor_id = any sensor. field/threshold define the trigger.
+    sensor_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    field: Mapped[str] = mapped_column(String(32), default="pm2_5")
+    threshold: Mapped[float] = mapped_column(Float)
+
+    active: Mapped[bool] = mapped_column(default=True)
+    # Rate limiting + quiet hours (local) so people aren't spammed.
+    min_interval_seconds: Mapped[int] = mapped_column(Integer, default=21600)  # 6h
+    quiet_start: Mapped[int | None] = mapped_column(Integer, nullable=True)  # local hour
+    quiet_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

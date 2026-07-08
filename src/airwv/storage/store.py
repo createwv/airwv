@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
 from airwv.sources.base import Reading
-from airwv.storage.models import Base, ReadingRow, utcnow
+from airwv.storage.models import Base, ReadingRow, Subscription, utcnow
 from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
@@ -106,6 +106,38 @@ class Store:
                 stmt = stmt.where(ReadingRow.ts >= since)
             stmt = stmt.order_by(ReadingRow.ts.asc())
             return list(session.scalars(stmt))
+
+    def latest_reading_per_sensor(self) -> dict[str, ReadingRow]:
+        """Most recent stored reading for each sensor."""
+        latest: dict[str, ReadingRow] = {}
+        for sid in self.distinct_sensor_ids():
+            rows = self.readings_for_sensor(sid)
+            if rows:
+                latest[sid] = rows[-1]
+        return latest
+
+    # -- subscriptions -----------------------------------------------------
+
+    def add_subscription(self, **fields) -> int:
+        with self._session_factory() as session:
+            sub = Subscription(**fields)
+            session.add(sub)
+            session.commit()
+            return sub.id
+
+    def list_subscriptions(self, active_only: bool = True) -> list[Subscription]:
+        with self._session_factory() as session:
+            stmt = select(Subscription)
+            if active_only:
+                stmt = stmt.where(Subscription.active.is_(True))
+            return list(session.scalars(stmt))
+
+    def mark_notified(self, subscription_id: int, when) -> None:
+        with self._session_factory() as session:
+            sub = session.get(Subscription, subscription_id)
+            if sub is not None:
+                sub.last_notified_at = when
+                session.commit()
 
     # -- internals ---------------------------------------------------------
 
