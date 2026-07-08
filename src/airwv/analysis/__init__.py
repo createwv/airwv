@@ -9,6 +9,7 @@ from airwv.analysis.patterns import (
     hour_of_day_profile,
     part_of_day_summary,
 )
+from airwv.analysis.regional import compare_to_baseline, sensor_medians
 from airwv.analysis.trends import Trend, is_worsening, linear_trend
 
 __all__ = [
@@ -26,4 +27,6 @@ __all__ = [
     "Trend",
     "linear_trend",
     "is_worsening",
+    "sensor_medians",
+    "compare_to_baseline",
 ]

@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from airwv.analysis import (
+    compare_to_baseline,
     detect_spikes,
     detect_stuck,
     detrend_events,
@@ -29,8 +30,10 @@ from airwv.analysis import (
     linear_trend,
     part_of_day_summary,
     score_health,
+    sensor_medians,
 )
 from airwv.config import Config
+from airwv.export_utils import readings_to_csv, readings_to_records
 from airwv.registry import SensorInfo, load_wv_sensors
 from airwv.resolve import (
     WV_NW_LAT,
@@ -321,6 +324,52 @@ def run_compare(
     return results
 
 
+def run_baseline(config: Config, field: str = "pm2_5", min_pct: float = 25.0, store=None) -> dict:
+    """Compare each sensor's median to the network baseline for a field. Read-only."""
+    store = store or Store.from_config(config)
+    readings_by_sensor = {sid: store.readings_for_sensor(sid) for sid in store.distinct_sensor_ids()}
+    result = compare_to_baseline(sensor_medians(readings_by_sensor, field))
+
+    log.info("%s network baseline (median across sensors): %s", field, result["baseline"])
+    for sid, s in sorted(result["sensors"].items(), key=lambda kv: -(kv[1]["median"])):
+        flag = "  ↑ above network" if (s["pct_vs_baseline"] or 0) >= min_pct else ""
+        log.info("  sensor %-8s median=%-6s  %+.1f%% vs baseline%s", sid, s["median"], s["pct_vs_baseline"] or 0, flag)
+    return result
+
+
+def run_export(
+    config: Config,
+    out_path: str,
+    sensor_name: str | None = None,
+    org: str | None = None,
+    fmt: str = "csv",
+    store=None,
+) -> int:
+    """Export readings to CSV/JSON. Returns row count."""
+    from pathlib import Path
+
+    store = store or Store.from_config(config)
+    if sensor_name or org:
+        scoped = _scoped_index_map(config, org=org, names=[sensor_name] if sensor_name else None)
+        sids = sorted({str(i) for i in scoped.values()})
+    else:
+        sids = sorted(store.distinct_sensor_ids())
+
+    rows = []
+    for sid in sids:
+        rows.extend(store.readings_for_sensor(sid))
+
+    path = Path(out_path)
+    if fmt == "json":
+        import json
+
+        path.write_text(json.dumps(readings_to_records(rows), indent=2), encoding="utf-8")
+    else:
+        path.write_text(readings_to_csv(rows), encoding="utf-8")
+    log.info("exported %d readings from %d sensor(s) -> %s", len(rows), len(sids), out_path)
+    return len(rows)
+
+
 def run_trends(
     config: Config,
     field: str = "pm2_5",
@@ -485,6 +534,13 @@ def main(argv: list[str] | None = None) -> None:
     trends.add_argument("--field", default="pm2_5", help="field to trend (default pm2_5)")
     trends.add_argument("--sensor", help="limit to one sensor name (default: all)")
     trends.add_argument("--min-days", type=int, default=14, help="minimum days of data (default 14)")
+    baseline = sub.add_parser("baseline", help="each sensor vs the network baseline (no API cost)")
+    baseline.add_argument("--field", default="pm2_5", help="field to compare (default pm2_5)")
+    export = sub.add_parser("export", help="export readings to CSV/JSON (no API cost)")
+    export.add_argument("--out", required=True, help="output file path")
+    export.add_argument("--format", default="csv", choices=["csv", "json"], help="output format")
+    export.add_argument("--sensor", help="only sensors whose name matches")
+    export.add_argument("--org", help="only sensors whose org matches")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -520,6 +576,10 @@ def main(argv: list[str] | None = None) -> None:
         run_events(config, args.sensor, field=args.field, z_threshold=args.threshold, top=args.top)
     elif command == "trends":
         run_trends(config, field=args.field, sensor_name=args.sensor, min_days=args.min_days)
+    elif command == "baseline":
+        run_baseline(config, field=args.field)
+    elif command == "export":
+        run_export(config, args.out, sensor_name=args.sensor, org=args.org, fmt=args.format)
     elif command == "run":
         try:
             run_scheduler(config)
