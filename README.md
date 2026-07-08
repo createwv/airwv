@@ -206,6 +206,15 @@ python -m airwv.ingest alerts            # dry run — shows what would fire
 python -m airwv.ingest alerts --send     # actually deliver
 ```
 
+Two trigger kinds: **threshold** (fire when a value crosses a level) and
+**trend** (fire when a field is *rising* by ≥ N% over its record — reuses the
+trend analysis):
+
+```bash
+python -m airwv.ingest subscribe --channel log --kind trend \
+    --sensor "Glasgow" --field voc --threshold 20    # alert if VOC rising ≥ 20%
+```
+
 Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
 (SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).
 Per-subscription rate limiting and quiet hours prevent spam. SMS is planned.

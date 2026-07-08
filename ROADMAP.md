@@ -123,8 +123,9 @@ Get warnings to the people who need them.
 - [x] **Webhooks** for partner/org integrations (Slack/Discord/custom) — `notify/webhook.py`
 - [x] Alert deduping / rate limiting / quiet hours — per-subscription in `alerts.evaluate`
 - [x] `subscribe` + `alerts` CLI (dry-run by default; `--send` to deliver)
+- [x] Trend-based triggers — alert when a field is rising by >= N% (`kind=trend`,
+      reuses Phase 3 `linear_trend`). Glasgow VOC (+79%) fires a +20% subscription.
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
-- [ ] Trend-based triggers (alert on rising trends, not just instantaneous value)
 - [ ] Subscription management UI — opt-in, confirm, unsubscribe (CLI-only for now)
 - [ ] Scheduled evaluation — run `alerts --send` on the collection interval
 
@@ -151,6 +152,8 @@ Grow the network and secure the record.
       environmental data store) for long-term preservation
 - [ ] Open-data exports and a documented public dataset
 - [ ] Public API documentation and rate limiting
+- [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
+      won't alter existing ones (adding a column needs a migration for live DBs)
 
 ---
 
