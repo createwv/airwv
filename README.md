@@ -178,6 +178,20 @@ back-calculated from real usage and are good enough for planning.
   is 6× hourly); reserve those for recent or priority sensors.
 - **Test with `--limit`** before any full run (see above).
 
+## Dashboard
+
+A local web dashboard visualizes stored readings (no API key needed — it only
+reads the database):
+
+```bash
+pip install -e ".[web]"
+python -m airwv.web           # open http://127.0.0.1:8000
+```
+
+Pick a sensor and metric to see an hourly time series and a time-of-day (local
+Eastern) profile. Read API: `/api/sensors`, `/api/series/{id}?field=`,
+`/api/diurnal/{id}?field=`.
+
 ## Contributing
 
 This is a community project — contributions welcome. See

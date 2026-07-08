@@ -120,14 +120,16 @@ Get warnings to the people who need them.
 - [ ] Alert deduping / rate limiting / quiet hours
 - [ ] Subscription management (opt-in, confirm, unsubscribe)
 
-## Phase 5 — Public API & Dashboard
+## Phase 5 — Public API & Dashboard 🎯
 
 Make the data visible and usable.
 
-- [ ] Read API (FastAPI) for current + historical readings
-- [ ] Public map of live AQI across WV
-- [ ] Per-sensor and per-area detail views with trend charts
-- [ ] Embeddable widgets for partner sites
+- [x] Read API (FastAPI) — `/api/sensors`, `/api/series`, `/api/diurnal` — `web/app.py`
+- [x] Dashboard (v1) — `python -m airwv.web`: per-sensor time series + time-of-day
+      profile with friendly names (Plotly)
+- [ ] Public map of live AQI across WV (needs sensor coordinates surfaced)
+- [ ] Per-area views, trend charts, and event overlays on the dashboard
+- [ ] Embeddable widgets for partner sites; deploy publicly
 
 ## Phase 6 — Interoperability & Archival
 
