@@ -18,7 +18,13 @@ import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
-from airwv.analysis import detect_spikes, detect_stuck, score_health
+from airwv.analysis import (
+    detect_spikes,
+    detect_stuck,
+    hour_of_day_profile,
+    part_of_day_summary,
+    score_health,
+)
 from airwv.config import Config
 from airwv.registry import SensorInfo, load_wv_sensors
 from airwv.resolve import (
@@ -243,6 +249,47 @@ def run_analyze(
     return {"anomalies": anomalies, "health": healths}
 
 
+def run_patterns(
+    config: Config,
+    sensor_name: str,
+    field: str = "voc",
+    store=None,
+    index_map: dict[str, int] | None = None,
+    tzname: str = "America/New_York",
+) -> dict:
+    """Print a local-time-of-day profile of ``field`` for matching sensor(s).
+
+    Read-only. Resolves ``sensor_name`` to its stored series and shows median by
+    hour (local), plus a business/evening/overnight summary — the direct test of
+    "does this run higher in the evening?".
+    """
+    store = store or Store.from_config(config)
+    scoped = index_map if index_map is not None else _scoped_index_map(config, names=[sensor_name])
+    if not scoped:
+        log.warning("no resolved sensor matching %r (resolve first?)", sensor_name)
+        return {}
+
+    results = {}
+    for idx in sorted(set(scoped.values())):
+        readings = store.readings_for_sensor(str(idx))
+        profile = hour_of_day_profile(readings, field=field, tzname=tzname)
+        summary = part_of_day_summary(profile)
+        results[idx] = {"profile": profile, "summary": summary}
+
+        total = sum(s.count for s in profile)
+        log.info("%s (index %s): %s by local hour (%s), %d readings", sensor_name, idx, field, tzname, total)
+        peak = max((s.median or 0) for s in profile) or 1
+        for s in profile:
+            bar = "#" * int((s.median or 0) / peak * 40)
+            log.info("  %02d:00  %7s  %s", s.hour, "-" if s.median is None else s.median, bar)
+        log.info(
+            "  business(9-17)=%s  evening(18-23)=%s  overnight(0-5)=%s  evening/business=%s",
+            summary["business_9_17"], summary["evening_18_23"],
+            summary["overnight_0_5"], summary["evening_vs_business_ratio"],
+        )
+    return results
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -323,6 +370,9 @@ def main(argv: list[str] | None = None) -> None:
     analyze = sub.add_parser("analyze", help="detect anomalies + score sensor health (no API cost)")
     analyze.add_argument("--hours", type=int, default=168, help="lookback window (default 168 = 7d)")
     analyze.add_argument("--threshold", type=float, default=3.5, help="spike z-score threshold")
+    patterns = sub.add_parser("patterns", help="time-of-day profile for a sensor (no API cost)")
+    patterns.add_argument("--sensor", required=True, help="sensor name substring (e.g. 'Glasgow')")
+    patterns.add_argument("--field", default="voc", help="field to profile (default voc)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -350,6 +400,8 @@ def main(argv: list[str] | None = None) -> None:
         )
     elif command == "analyze":
         run_analyze(config, since_hours=args.hours, spike_threshold=args.threshold)
+    elif command == "patterns":
+        run_patterns(config, args.sensor, field=args.field)
     elif command == "run":
         try:
             run_scheduler(config)
