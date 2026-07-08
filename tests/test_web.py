@@ -41,6 +41,18 @@ def test_diurnal_endpoint(tmp_path):
     assert len(r.json()["hours"]) == 24
 
 
+def test_events_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/events/197127?field=pm2_5")
+    assert r.status_code == 200
+    assert "events" in r.json()
+
+
+def test_sensors_include_color_field(tmp_path):
+    data = _client(tmp_path).get("/api/sensors").json()
+    assert "color" in data[0]
+    assert data[0]["color"].startswith("#")
+
+
 def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
