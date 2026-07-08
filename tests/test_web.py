@@ -81,6 +81,13 @@ def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
 
+def test_export_csv_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/export/197127.csv")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/csv")
+    assert r.text.splitlines()[0].startswith("ts,source,sensor_id")
+
+
 def test_index_page(tmp_path):
     r = _client(tmp_path).get("/")
     assert r.status_code == 200

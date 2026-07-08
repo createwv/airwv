@@ -20,9 +20,10 @@ from datetime import date, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 from airwv.analysis import detrend_events, hour_of_day_profile
+from airwv.export_utils import readings_to_csv
 from airwv.storage import Store
 
 # Fields safe to chart (mirror the Reading schema).
@@ -179,6 +180,15 @@ def create_app(store: Store) -> FastAPI:
             "hours": [{"hour": s.hour, "median": s.median, "count": s.count} for s in profile],
         }
 
+    @app.get("/api/export/{sensor_id}.csv")
+    def export_csv(sensor_id: str):
+        csv_text = readings_to_csv(store.readings_for_sensor(sensor_id))
+        return Response(
+            content=csv_text,
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="airwv_{sensor_id}.csv"'},
+        )
+
     @app.get("/", response_class=HTMLResponse)
     def index():
         return INDEX_HTML
@@ -241,6 +251,7 @@ INDEX_HTML = """<!doctype html>
   <label>From <input type="date" id="start"></label>
   <label>To <input type="date" id="end"></label>
   <button id="clear">Clear dates</button>
+  <a id="dl" href="#" download>⬇ Download CSV</a>
 </div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
@@ -291,6 +302,7 @@ function range(){ const s=$('start').value, e=$('end').value;
 
 async function render(){
   const ids = selected(), field = $('field').value, rng = range();
+  $('dl').href = ids.length ? `/api/export/${ids[0]}.csv` : '#';
   const tsTraces = [], diTraces = [];
   const series = await Promise.all(ids.map(id => j(`/api/series/${id}?field=${field}${rng}`)));
   series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
