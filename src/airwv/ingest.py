@@ -553,19 +553,29 @@ def run_scheduler(
     sleeper=time.sleep,
     collect=collect_with_retry,
     store=None,
+    send_alerts: bool = True,
+    alerts=run_alerts,
 ) -> None:
     """Collect on a fixed interval forever (or ``iterations`` times, for tests).
 
     The store is created once and reused; each cycle reloads the index cache and
     rebuilds the source, so newly-resolved sensors are picked up without restart.
+    After each collection, subscriptions are evaluated and alerts delivered
+    (unless ``send_alerts`` is False).
     """
     store = store or Store.from_config(config)
     store.create_schema()
-    log.info("scheduler starting — collecting every %ds", config.poll_interval_seconds)
+    log.info("scheduler starting — collecting every %ds%s", config.poll_interval_seconds,
+             "; alerts on" if send_alerts else "; alerts off")
 
     count = 0
     while iterations is None or count < iterations:
         collect(config, store=store)
+        if send_alerts:
+            try:
+                alerts(config, send=True, store=store)
+            except Exception as exc:  # a channel failure shouldn't kill the loop
+                log.warning("alert evaluation failed: %s", exc)
         count += 1
         if iterations is None or count < iterations:
             sleeper(config.poll_interval_seconds)
@@ -579,7 +589,8 @@ def main(argv: list[str] | None = None) -> None:
     collect.add_argument("--limit", type=int, help="cap sensors polled (saves API points)")
     collect.add_argument("--org", help="only sensors whose installing org matches (e.g. 'Create WV')")
     collect.add_argument("--sensor", action="append", help="only sensors whose name matches (repeatable)")
-    sub.add_parser("run", help="run the scheduler loop (collect on an interval)")
+    run_cmd = sub.add_parser("run", help="run the scheduler loop (collect + alerts on an interval)")
+    run_cmd.add_argument("--no-alerts", action="store_true", help="collect only; don't send alerts")
     backfill = sub.add_parser("backfill", help="backfill historical readings")
     backfill.add_argument("--days", type=int, default=30, help="how far back to fetch (default 30)")
     backfill.add_argument("--start", help="start date YYYY-MM-DD (overrides --days)")
@@ -680,7 +691,7 @@ def main(argv: list[str] | None = None) -> None:
         run_alerts(config, send=args.send)
     elif command == "run":
         try:
-            run_scheduler(config)
+            run_scheduler(config, send_alerts=not getattr(args, "no_alerts", False))
         except KeyboardInterrupt:
             log.info("scheduler stopped")
     else:

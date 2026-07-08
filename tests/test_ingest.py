@@ -138,11 +138,33 @@ def test_run_scheduler_runs_fixed_iterations(tmp_path):
         calls["n"] += 1
         return 0
 
+    alert_calls = {"n": 0}
+
+    def fake_alerts(cfg, send=False, store=None):
+        alert_calls["n"] += 1
+        return []
+
     sleeps = []
-    run_scheduler(config, iterations=3, sleeper=sleeps.append, collect=fake_collect, store=store)
+    run_scheduler(config, iterations=3, sleeper=sleeps.append, collect=fake_collect,
+                  store=store, alerts=fake_alerts)
 
     assert calls["n"] == 3
+    assert alert_calls["n"] == 3  # alerts evaluated after each collect
     assert sleeps == [config.poll_interval_seconds, config.poll_interval_seconds]  # no sleep after last
+
+
+def test_run_scheduler_can_disable_alerts(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    alert_calls = {"n": 0}
+
+    def fake_alerts(cfg, send=False, store=None):
+        alert_calls["n"] += 1
+
+    run_scheduler(config, iterations=2, sleeper=lambda _: None,
+                  collect=lambda cfg, store=None: 0, store=store,
+                  send_alerts=False, alerts=fake_alerts)
+    assert alert_calls["n"] == 0
 
 
 def test_time_windows_chunks_range():
