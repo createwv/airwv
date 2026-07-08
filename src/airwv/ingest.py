@@ -17,10 +17,12 @@ import logging
 import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from airwv.analysis import (
     detect_spikes,
     detect_stuck,
+    detrend_events,
     diurnal_amplitude,
     hour_of_day_profile,
     part_of_day_summary,
@@ -317,6 +319,37 @@ def run_compare(
     return results
 
 
+def run_events(
+    config: Config,
+    sensor_name: str,
+    field: str = "pm2_5",
+    z_threshold: float = 6.0,
+    top: int = 15,
+    store=None,
+    tzname: str = "America/New_York",
+) -> list:
+    """Find de-trended episodic events for matching sensor(s). Read-only, no API cost."""
+    store = store or Store.from_config(config)
+    scoped = _scoped_index_map(config, names=[sensor_name])
+    if not scoped:
+        log.warning("no resolved sensor matching %r (resolve first?)", sensor_name)
+        return []
+
+    et = ZoneInfo(tzname)
+    found = []
+    for idx in sorted(set(scoped.values())):
+        events = detrend_events(store.readings_for_sensor(str(idx)), field=field, z_threshold=z_threshold)
+        found.extend(events)
+        log.info("%s (idx %s): %d de-trended %s events (residual z>=%.1f)",
+                 sensor_name, idx, len(events), field, z_threshold)
+        for e in events[:top]:
+            local = e.ts.replace(tzinfo=timezone.utc).astimezone(et)
+            log.info("  %s %s  %s=%.1f  (+%.1f over %.1f baseline, z=%.0f)",
+                     local.strftime("%Y-%m-%d %H:%M"), local.strftime("%a"),
+                     field, e.value, e.residual, e.baseline, e.score)
+    return found
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -403,6 +436,11 @@ def main(argv: list[str] | None = None) -> None:
     compare = sub.add_parser("compare", help="compare day/night amplitude across sensors (no API cost)")
     compare.add_argument("--sensor", action="append", required=True, help="sensor name (repeatable)")
     compare.add_argument("--field", default="pm2_5", help="field to compare (default pm2_5)")
+    events = sub.add_parser("events", help="de-trended episodic events for a sensor (no API cost)")
+    events.add_argument("--sensor", required=True, help="sensor name substring (e.g. 'Glasgow')")
+    events.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
+    events.add_argument("--threshold", type=float, default=6.0, help="residual robust-z threshold")
+    events.add_argument("--top", type=int, default=15, help="how many top events to show")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -434,6 +472,8 @@ def main(argv: list[str] | None = None) -> None:
         run_patterns(config, args.sensor, field=args.field)
     elif command == "compare":
         run_compare(config, args.sensor, field=args.field)
+    elif command == "events":
+        run_events(config, args.sensor, field=args.field, z_threshold=args.threshold, top=args.top)
     elif command == "run":
         try:
             run_scheduler(config)
