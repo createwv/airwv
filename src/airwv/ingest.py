@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import logging
 import time
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 
+from airwv.analysis import detect_spikes, detect_stuck, score_health
 from airwv.config import Config
 from airwv.registry import SensorInfo, load_wv_sensors
 from airwv.resolve import (
@@ -165,6 +167,44 @@ def run_backfill(
     return total
 
 
+def run_analyze(
+    config: Config,
+    store=None,
+    now: datetime | None = None,
+    since_hours: int = 168,
+    spike_threshold: float = 3.5,
+) -> dict:
+    """Analyze stored readings for anomalies and sensor health. Read-only.
+
+    ``now`` is naive UTC (matches how SQLite returns timestamps). Returns
+    ``{"anomalies": [...], "health": [...]}`` and logs a summary.
+    """
+    store = store or Store.from_config(config)
+    now = now or datetime.now(tz=timezone.utc).replace(tzinfo=None)
+    since = now - timedelta(hours=since_hours)
+
+    anomalies = []
+    healths = []
+    for sensor_id in store.distinct_sensor_ids():
+        readings = store.readings_for_sensor(sensor_id, since=since)
+        anomalies.extend(detect_spikes(readings, threshold=spike_threshold))
+        anomalies.extend(detect_stuck(readings))
+        healths.append(score_health(sensor_id, readings, now))
+
+    by_status = Counter(h.status for h in healths)
+    log.info(
+        "analyzed %d sensor(s) over %dh: %d anomalies; health %s",
+        len(healths), since_hours, len(anomalies), dict(by_status),
+    )
+    for a in anomalies[:25]:
+        log.info("  ANOMALY sensor %s %s=%s (%s: %s)", a.sensor_id, a.field, a.value, a.kind, a.detail)
+    for h in healths:
+        if h.status != "ok":
+            log.info("  HEALTH sensor %s -> %s (%s)", h.sensor_id, h.status, "; ".join(h.issues))
+
+    return {"anomalies": anomalies, "health": healths}
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -236,6 +276,9 @@ def main(argv: list[str] | None = None) -> None:
         help="PurpleAir averaging bucket in minutes (default 60)",
     )
     backfill.add_argument("--limit", type=int, help="cap sensors backfilled (saves API points)")
+    analyze = sub.add_parser("analyze", help="detect anomalies + score sensor health (no API cost)")
+    analyze.add_argument("--hours", type=int, default=168, help="lookback window (default 168 = 7d)")
+    analyze.add_argument("--threshold", type=float, default=3.5, help="spike z-score threshold")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -249,6 +292,8 @@ def main(argv: list[str] | None = None) -> None:
         run_resolve(config)
     elif command == "backfill":
         run_backfill(config, days=args.days, average_minutes=args.average, limit=args.limit)
+    elif command == "analyze":
+        run_analyze(config, since_hours=args.hours, spike_threshold=args.threshold)
     elif command == "run":
         try:
             run_scheduler(config)
