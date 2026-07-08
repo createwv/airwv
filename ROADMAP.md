@@ -86,9 +86,10 @@ Separate real signal from sensor noise before anyone relies on it.
       read-only reporting)
 - [ ] Data-quality dashboard/report for maintainers
 
-## Phase 3 — Trends & Analysis
+## Phase 3 — Trends & Analysis ✅
 
 Turn history into insight — what's getting worse and where.
+*(One item — a second neighbor + rural control — is parked on API points, not code.)*
 
 - [x] Trend computation per sensor/pollutant — linear fit on daily medians with
       correlation gating — `analysis/trends.py`, `ingest trends`, dashboard trend line
@@ -108,8 +109,10 @@ Turn history into insight — what's getting worse and where.
       exhausted; needs points top-up or PurpleAir grant)
 - [x] AQI/VOC/PM trend tracking over selectable windows — `ingest trends --field`,
       dashboard date-range + trend line
-- [ ] Comparative/regional context (neighboring sensors, statewide baseline)
-- [ ] Exportable analysis datasets (CSV/JSON)
+- [x] Comparative/regional context — `ingest baseline`: each sensor's median vs the
+      network baseline, flags sites above peers — `analysis/regional.py`
+- [x] Exportable datasets — `ingest export --format csv|json` + dashboard "Download
+      CSV" (`/api/export/{id}.csv`) — `export_utils.py`
 
 ## Phase 4 — Alerts & Subscriptions
 
