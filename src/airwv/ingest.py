@@ -56,8 +56,18 @@ def run_resolve(config: Config, source=None, sensors: list[SensorInfo] | None = 
     return result
 
 
-def run_collect(config: Config, source=None, store=None, index_map: dict[str, int] | None = None) -> int:
-    """Pull current readings for resolved sensors and store them. Returns inserted count."""
+def run_collect(
+    config: Config,
+    source=None,
+    store=None,
+    index_map: dict[str, int] | None = None,
+    limit: int | None = None,
+) -> int:
+    """Pull current readings for resolved sensors and store them. Returns inserted count.
+
+    ``limit`` caps how many sensors are polled — useful to conserve API points
+    while testing before running the full fleet.
+    """
     index_map = index_map if index_map is not None else load_index_map(config.index_cache_path)
     if not index_map:
         log.warning(
@@ -67,6 +77,9 @@ def run_collect(config: Config, source=None, store=None, index_map: dict[str, in
         return 0
 
     indices = sorted(set(index_map.values()))
+    if limit is not None:
+        indices = indices[:limit]
+        log.info("limiting to %d sensor(s) this run (API-point conservation)", len(indices))
     source = source or PurpleAirSource(config.purpleair_api_key, sensor_ids=indices)
     store = store or Store.from_config(config)
     store.create_schema()
@@ -94,6 +107,7 @@ def run_backfill(
     days: int = 30,
     average_minutes: int = 60,
     window_days: int = 14,
+    limit: int | None = None,
     now: datetime | None = None,
 ) -> int:
     """Backfill historical readings for all resolved sensors. Returns rows inserted.
@@ -101,6 +115,7 @@ def run_backfill(
     History is fetched in windows (PurpleAir limits the span per request) and
     saved incrementally; dedupe makes overlaps harmless. A failed window is
     logged and skipped so one bad sensor/range doesn't abort the whole backfill.
+    ``limit`` caps the sensor count — test small before spending API points.
     """
     index_map = index_map if index_map is not None else load_index_map(config.index_cache_path)
     if not index_map:
@@ -114,6 +129,9 @@ def run_backfill(
     store.create_schema()
 
     indices = sorted(set(index_map.values()))
+    if limit is not None:
+        indices = indices[:limit]
+        log.info("limiting backfill to %d sensor(s) (API-point conservation)", len(indices))
     log.info("backfilling %d sensors over %d days (avg=%dmin)", len(indices), days, average_minutes)
 
     total = 0
@@ -191,7 +209,8 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="airwv.ingest", description="AirWV data collector")
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("resolve", help="match device names to PurpleAir sensor indices")
-    sub.add_parser("collect", help="collect current readings once (default)")
+    collect = sub.add_parser("collect", help="collect current readings once (default)")
+    collect.add_argument("--limit", type=int, help="cap sensors polled (saves API points)")
     sub.add_parser("run", help="run the scheduler loop (collect on an interval)")
     backfill = sub.add_parser("backfill", help="backfill historical readings")
     backfill.add_argument("--days", type=int, default=30, help="how far back to fetch (default 30)")
@@ -202,6 +221,7 @@ def main(argv: list[str] | None = None) -> None:
         choices=[10, 30, 60, 360, 1440],
         help="PurpleAir averaging bucket in minutes (default 60)",
     )
+    backfill.add_argument("--limit", type=int, help="cap sensors backfilled (saves API points)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -214,14 +234,14 @@ def main(argv: list[str] | None = None) -> None:
     if command == "resolve":
         run_resolve(config)
     elif command == "backfill":
-        run_backfill(config, days=args.days, average_minutes=args.average)
+        run_backfill(config, days=args.days, average_minutes=args.average, limit=args.limit)
     elif command == "run":
         try:
             run_scheduler(config)
         except KeyboardInterrupt:
             log.info("scheduler stopped")
     else:
-        run_collect(config)
+        run_collect(config, limit=getattr(args, "limit", None))
 
 
 if __name__ == "__main__":

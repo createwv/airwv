@@ -177,3 +177,18 @@ def test_run_backfill_without_indices_is_noop(tmp_path):
     store = Store(config.database_url)
 
     assert run_backfill(config, source=FakeSource(), store=store, index_map={}) == 0
+
+
+def test_run_backfill_limit_caps_sensors(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    source = FakeSource()
+    now = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+    run_backfill(
+        config, source=source, store=store, index_map={"AA": 1, "BB": 2, "CC": 3},
+        days=14, window_days=14, limit=1, now=now,
+    )
+
+    # Only the first sensor (index 1) should be fetched.
+    assert {call[0] for call in source.history_calls} == {1}
