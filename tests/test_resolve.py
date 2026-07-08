@@ -1,7 +1,9 @@
 """Tests for name -> sensor_index resolution and the private index cache."""
 
+import json
+
 from airwv.registry import SensorInfo
-from airwv.resolve import load_index_map, match_indices, save_index_map
+from airwv.resolve import load_index_map, match_indices, save_index_map, save_listing
 
 
 def _sensor(name: str, device_id: str) -> SensorInfo:
@@ -34,3 +36,11 @@ def test_index_map_round_trip(tmp_path):
 
 def test_load_missing_map_returns_empty(tmp_path):
     assert load_index_map(tmp_path / "missing.json") == {}
+
+
+def test_save_listing_keeps_only_slim_fields(tmp_path):
+    path = tmp_path / "listing.json"
+    save_listing(path, [{"name": "A", "sensor_index": 1, "latitude": 38.0, "longitude": -81.0, "x": 9}])
+    assert json.loads(path.read_text()) == [
+        {"name": "A", "sensor_index": 1, "latitude": 38.0, "longitude": -81.0}
+    ]

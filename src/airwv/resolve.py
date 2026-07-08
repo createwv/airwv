@@ -69,3 +69,22 @@ def save_index_map(path: Path, mapping: dict[str, int]) -> None:
     """Persist the device_id -> sensor_index map (creating parents as needed)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(mapping, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def save_listing(path: Path, records: Iterable[dict]) -> None:
+    """Dump the public sensor listing (name/index/location) for diagnosis.
+
+    Written to a gitignored file so unmatched devices can be reconciled offline
+    without spending more API points.
+    """
+    slim = [
+        {
+            "name": r.get("name"),
+            "sensor_index": r.get("sensor_index"),
+            "latitude": r.get("latitude"),
+            "longitude": r.get("longitude"),
+        }
+        for r in records
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(slim, indent=2), encoding="utf-8")

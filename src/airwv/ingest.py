@@ -28,6 +28,7 @@ from airwv.resolve import (
     load_index_map,
     match_indices,
     save_index_map,
+    save_listing,
 )
 from airwv.sources.purpleair import PurpleAirSource
 from airwv.storage import Store
@@ -42,17 +43,30 @@ def run_resolve(config: Config, source=None, sensors: list[SensorInfo] | None = 
 
     records = source.list_sensors(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
     result = match_indices(sensors, records)
-    save_index_map(config.index_cache_path, result.matched)
 
+    # Merge hand-maintained overrides for sensors that can't be matched by name
+    # (renamed or private). Overrides win. Both files sit in the gitignored dir.
+    cache_dir = config.index_cache_path.parent
+    overrides = load_index_map(cache_dir / "sensor_index_overrides.json")
+    mapping = {**result.matched, **overrides}
+    save_index_map(config.index_cache_path, mapping)
+
+    # Dump the full public listing so unmatched devices can be reconciled offline.
+    save_listing(cache_dir / "wv_public_sensors.json", records)
+
+    matched_devices = set(result.matched) | set(overrides)
+    unmatched = [s.device_id for s in sensors if s.device_id not in matched_devices]
     log.info(
-        "resolved %d/%d sensors (%d unmatched) -> %s",
-        len(result.matched),
+        "resolved %d/%d sensors (%d by name, %d override, %d unmatched) -> %s",
+        len(mapping),
         len(sensors),
-        len(result.unmatched),
+        len(result.matched),
+        len(overrides),
+        len(unmatched),
         config.index_cache_path,
     )
-    if result.unmatched:
-        log.info("unmatched device ids: %s", ", ".join(result.unmatched))
+    if unmatched:
+        log.info("unmatched device ids: %s", ", ".join(unmatched))
     return result
 
 
