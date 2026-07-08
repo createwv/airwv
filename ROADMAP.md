@@ -40,10 +40,12 @@ Reliably pull air data statewide and store it so we never lose history.
       *(needs API key to capture live data)*
 - [x] Scheduled collection with retry + backoff — `ingest run` loop plus systemd
       timer / cron deploy configs (`deploy/`)
-- [~] Operational logging + run health — structured logging in place; sensor
-      dropout/last-seen alerting still pending
-- [ ] Range/sanity guards on write (dedupe done; value-range checks pending)
-- [ ] Historical backfill from PurpleAir's archive (2016→present where available)
+- [x] Range/sanity guards on write — out-of-range values flagged `suspect`
+      (never dropped, raw preserved) — `validate.py`
+- [~] Operational logging + run health — structured logging + suspect-flag
+      warnings in place; sensor dropout/last-seen alerting still pending
+- [x] Historical backfill from PurpleAir's archive — windowed, resilient
+      per-sensor history via `ingest backfill --days N --average M` — `ingest.py`
 
 **Exit criteria:** statewide PurpleAir readings flowing on a schedule into
 durable storage, with backfilled history and no data loss on transient failures.
