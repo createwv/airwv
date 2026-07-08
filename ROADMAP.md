@@ -91,9 +91,14 @@ Separate real signal from sensor noise before anyone relies on it.
 Turn history into insight — what's getting worse and where.
 
 - [ ] Rolling trend computation per sensor / area / pollutant
-- [ ] Time-of-day / day-of-week pattern analysis — bucket readings by hour to
-      surface recurring diurnal patterns (e.g. evening/overnight VOC or PM
-      elevation at specific sites), corroborated with neighbors + weather
+- [x] Time-of-day / day-of-week pattern analysis — local-hour bucketing of any
+      field — `analysis/patterns.py`, `ingest patterns`. (Glasgow VOC: ~2.1×
+      evening/overnight vs midday, flat across weekdays → consistent with valley
+      nocturnal inversion + a persistent source, not business-hour timing.)
+- [ ] Neighbor comparison — compare a site's diurnal amplitude to nearby sensors
+      to separate regional meteorology from a local source (Glasgow follow-up)
+- [ ] Residual/episodic event detection — remove the typical diurnal cycle, then
+      anomaly-detect the remainder to catch discrete release events
 - [ ] "Areas to watch" — automatic flagging of degrading trends
 - [ ] AQI and VOC trend tracking over selectable windows
 - [ ] Comparative/regional context (neighboring sensors, statewide baseline)
