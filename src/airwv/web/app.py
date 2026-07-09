@@ -263,17 +263,20 @@ INDEX_HTML = """<!doctype html>
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Empower WV — Community Eco Monitoring</title>
-<link rel="icon" href="/static/favicon.png">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/png" href="/static/favicon.png">
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  /* Empower WV brand palette (from the logo). */
-  :root { --brand:#3f76a8; --brand-accent:#b8863a; --sky:#a1bcd1; --bg:#f4f7f9; }
+  /* Empower WV brand palette — blue / gold / purple. */
+  :root { --brand:#4a7fb0; --brand-accent:#c9992f; --brand-purple:#7a6fb0; --sky:#a9c4dc; --bg:#f4f7f9; }
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
-  header { background:linear-gradient(#a1bcd1, #cbdede); padding:12px 20px; text-align:center; }
-  header img.logo { height:92px; width:auto; max-width:100%; vertical-align:middle; }
-  .subbar { background:var(--brand); color:#fff; padding:8px 20px; font-size:13px; }
+  header { background:url(/static/banner.svg) center bottom / cover no-repeat, linear-gradient(#a9c4dc,#e7dfc4);
+    min-height:150px; display:flex; align-items:center; justify-content:center; padding:12px 20px; }
+  header img.logo { height:118px; width:auto; max-width:96%; filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
+  .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
+    padding:8px 20px; font-size:13px; text-align:center; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   select { padding:6px 10px; font-size:14px; }
   .meta { color:#666; font-size:13px; }
@@ -301,7 +304,7 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body>
 <header>
-  <img class="logo" src="/static/logo.png" alt="empower wv — community eco monitoring">
+  <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
 <div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
 <div class="controls">
