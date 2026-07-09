@@ -84,8 +84,9 @@ Separate real signal from sensor noise before anyone relies on it.
       — `analysis/health.py`
 - [ ] Neighbor cross-check — corroborate spikes against nearby sensors to
       distinguish a real event from a single-sensor malfunction
-- [~] PurpleAir A/B channel divergence as a malfunction signal — channel data now
-      captured (`pm2_5_a`/`pm2_5_b`); implement the divergence check next backfill
+- [x] PurpleAir A/B channel divergence as a malfunction signal — channel data
+      captured + validated across the cluster (Glasgow 99.9% healthy, SC1 1.7%
+      noisier). Productize into a command still to do.
 - [ ] Persist findings — flag anomalous rows / store a health record (currently
       read-only reporting)
 - [ ] Data-quality dashboard/report for maintainers
@@ -148,7 +149,7 @@ Make the data visible and usable.
 - [x] Health guide + EPA/PurpleAir color bands (PM2.5 + VOC), clickable events,
       About/repo section — `/api/guide`
 - [x] Deploy configs — `airwv-web.service` + Caddy runbook (`deploy/README.md`)
-- [ ] Branding — apply org logo + palette (Empower WV / Create WV assets)
+- [x] Branding — Empower WV logo banner + favicon + brand palette
 - [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
 
@@ -156,10 +157,13 @@ Make the data visible and usable.
 
 Show potential pollution sources near sensors for perspective — done carefully to
 stay factual and avoid defamation risk. See the source-labeling policy below.
+*Motivated by a real finding: full 10-min cluster shows industrial-corridor sites
+accumulate PM2.5 overnight (1.4–2.0×) while the upriver control stays flat (0.97) —
+strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
-- [ ] **Documented sources layer** — plot facilities from authoritative public
+- [~] **Documented sources layer** — plot facilities from authoritative public
       records: EPA FRS/ECHO/TRI facilities, EIA/EPA power plants (e.g. John Amos),
-      WV DEP permitted emitters, WV DEP oil & gas wells. Factual, cited.
+      WV DEP permitted emitters, WV DEP oil & gas wells. Factual, cited. *(building)*
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
