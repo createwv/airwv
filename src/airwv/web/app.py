@@ -199,6 +199,18 @@ def create_app(store: Store) -> FastAPI:
             "hours": [{"hour": s.hour, "median": s.median, "count": s.count} for s in profile],
         }
 
+    @app.get("/api/sources")
+    def sources():
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "sources.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return {"tier": data.get("tier"), "disclaimer": data.get("disclaimer"),
+                    "sources": data.get("sources", [])}
+        except Exception:
+            return {"tier": "documented", "disclaimer": "", "sources": []}
+
     @app.get("/api/guide")
     def guide():
         return {
@@ -295,6 +307,7 @@ INDEX_HTML = """<!doctype html>
   <label>To <input type="date" id="end"></label>
   <button id="clear">Clear dates</button>
   <a id="dl" href="#" download>⬇ Download CSV</a>
+  <label><input type="checkbox" id="showsources" checked> 🏭 pollution sources</label>
 </div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
@@ -381,7 +394,25 @@ function drawMap(sensors){
     pts.push([x.lat, x.lon]);
   });
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
+  loadSources();
 }
+let sourceLayer;
+async function loadSources(){
+  const data = await j('/api/sources');
+  if (sourceLayer) sourceLayer.remove();
+  sourceLayer = L.layerGroup();
+  data.sources.forEach(s => {
+    if (s.lat == null || s.lon == null) return;
+    L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:'🏭',
+      iconSize:[22,22], iconAnchor:[11,11]})})
+      .bindPopup(`<b>${s.name}</b><br>${s.type}<br><i>${s.operator||''}</i>`+
+        `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
+        `<br><small style="color:#a00">${data.disclaimer||''}</small>`)
+      .addTo(sourceLayer);
+  });
+  if ($('showsources').checked) sourceLayer.addTo(map);
+}
+
 const box = id => $('sensors').querySelector(`input[value="${id}"]`);
 const selected = () => [...$('sensors').querySelectorAll('input:checked')].map(c => c.value);
 function range(){ const s=$('start').value, e=$('end').value;
@@ -438,6 +469,10 @@ $('field').addEventListener('change', render);
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
+$('showsources').addEventListener('change', e => {
+  if (!sourceLayer) return;
+  e.target.checked ? sourceLayer.addTo(map) : sourceLayer.remove();
+});
 loadGuide().then(loadSensors);
 </script>
 </body>

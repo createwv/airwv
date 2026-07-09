@@ -1,0 +1,35 @@
+{
+  "_comment": "DOCUMENTED pollution sources — public-record facilities plotted for context only. Per docs/SOURCE-POLICY.md: factual (name/type/operator from public records), cited, neutral language; NOT an assertion that a facility caused any sensor reading. Coordinates are approximate (facility-level) and should be verified/expanded from authoritative datasets (EPA FRS/ECHO/TRI, EIA). This is a seed; the full layer pulls from those sources + FracTracker.",
+  "tier": "documented",
+  "disclaimer": "Locations are public-record industrial facilities shown for perspective near community sensors. Presence on this map is not a claim that a facility caused any measured pollution.",
+  "sources": [
+    {
+      "name": "John Amos Power Plant",
+      "type": "Coal-fired power plant",
+      "operator": "Appalachian Power (AEP)",
+      "lat": 38.4728, "lon": -81.8236,
+      "citation": "EPA FRS / EIA-860 (public record)"
+    },
+    {
+      "name": "South Charleston chemical complex (former Union Carbide / Dow)",
+      "type": "Chemical manufacturing",
+      "operator": "Multiple operators",
+      "lat": 38.3655, "lon": -81.7120,
+      "citation": "EPA FRS / TRI (public record)"
+    },
+    {
+      "name": "Institute chemical plant",
+      "type": "Chemical manufacturing",
+      "operator": "Multiple operators (Union Carbide legacy)",
+      "lat": 38.3850, "lon": -81.7750,
+      "citation": "EPA FRS / TRI (public record)"
+    },
+    {
+      "name": "Belle chemical plant (Chemours, former DuPont)",
+      "type": "Chemical manufacturing",
+      "operator": "Chemours",
+      "lat": 38.2350, "lon": -81.5480,
+      "citation": "EPA FRS / TRI (public record)"
+    }
+  ]
+}

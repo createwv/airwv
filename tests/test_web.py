@@ -81,6 +81,15 @@ def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
 
+def test_sources_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/sources")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["tier"] == "documented"
+    assert any(s["name"] == "John Amos Power Plant" for s in body["sources"])
+    assert body["disclaimer"]
+
+
 def test_guide_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/guide")
     assert r.status_code == 200
