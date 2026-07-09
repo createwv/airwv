@@ -410,6 +410,36 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
     return alerts
 
 
+def run_reference(config: Config, days: int = 7, source=None, store=None, now: datetime | None = None) -> int:
+    """Pull WV reference-monitor PM2.5 from OpenAQ into storage (source='openaq').
+
+    Enables validating community sensors against regulatory-grade data. Needs
+    OPENAQ_API_KEY (free at explore.openaq.org).
+    """
+    if source is None and not config.openaq_api_key:
+        log.warning("OPENAQ_API_KEY not set — get a free key at https://explore.openaq.org/register")
+        return 0
+
+    from airwv.sources.openaq import OpenAQSource
+
+    source = source or OpenAQSource(config.openaq_api_key)
+    store = store or Store.from_config(config)
+    store.create_schema()
+    now = now or datetime.now(tz=timezone.utc)
+    start = now - timedelta(days=days)
+
+    locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
+    total = 0
+    for loc in locations:
+        for sensor_id in loc.get("pm25_sensor_ids", []):
+            try:
+                total += store.save_readings(source.fetch_measurements(sensor_id, start, now))
+            except Exception as exc:  # one bad sensor shouldn't abort the pull
+                log.warning("openaq fetch failed for sensor %s: %s", sensor_id, exc)
+    log.info("openaq reference: %d readings from %d WV monitor location(s)", total, len(locations))
+    return total
+
+
 def run_baseline(config: Config, field: str = "pm2_5", min_pct: float = 25.0, store=None) -> dict:
     """Compare each sensor's median to the network baseline for a field. Read-only."""
     store = store or Store.from_config(config)
@@ -654,6 +684,8 @@ def main(argv: list[str] | None = None) -> None:
     subscribe.add_argument("--quiet-end", type=int, help="quiet hours end (local hour 0-23)")
     alerts = sub.add_parser("alerts", help="evaluate subscriptions (dry run unless --send)")
     alerts.add_argument("--send", action="store_true", help="actually deliver notifications")
+    reference = sub.add_parser("reference", help="pull EPA/OpenAQ reference monitors (needs OPENAQ_API_KEY)")
+    reference.add_argument("--days", type=int, default=7, help="how many days back to pull (default 7)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -700,6 +732,8 @@ def main(argv: list[str] | None = None) -> None:
                       quiet_start=args.quiet_start, quiet_end=args.quiet_end)
     elif command == "alerts":
         run_alerts(config, send=args.send)
+    elif command == "reference":
+        run_reference(config, days=args.days)
     elif command == "run":
         try:
             run_scheduler(config, send_alerts=not getattr(args, "no_alerts", False))

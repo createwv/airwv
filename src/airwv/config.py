@@ -32,6 +32,7 @@ class Config:
     database_url: str
     poll_interval_seconds: int
     index_cache_path: Path
+    openaq_api_key: str = ""  # optional — reference-monitor data
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -58,4 +59,5 @@ class Config:
             database_url=database_url,
             poll_interval_seconds=poll_interval,
             index_cache_path=Path(index_cache),
+            openaq_api_key=os.environ.get("OPENAQ_API_KEY", "").strip(),
         )
