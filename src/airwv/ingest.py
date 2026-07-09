@@ -447,13 +447,17 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
     return total
 
 
-def run_validate(config: Config, field: str = "pm2_5", min_days: int = 5, store=None) -> list[dict]:
+def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
+                 store=None, coords: dict | None = None) -> list[dict]:
     """Validate community sensors against the nearest OpenAQ reference monitor.
 
     For each community (PurpleAir) sensor, find the closest regulatory monitor and
     correlate their daily-median PM2.5 over the overlapping days: Pearson r + mean
     bias (sensor − reference). High r + small bias = the community network tracks
     reference-grade data. Read-only. Requires prior `ingest reference` data.
+
+    ``coords`` (sensor_id → (lat, lon)) may be passed directly (the web app already
+    has it); otherwise it is loaded from the resolved public-sensor listing.
     """
     import statistics
 
@@ -466,14 +470,15 @@ def run_validate(config: Config, field: str = "pm2_5", min_days: int = 5, store=
         log.warning("no reference data yet — run `ingest reference` first")
         return []
 
-    # Community sensor coords come from the resolved public-sensor listing.
-    coords: dict[str, tuple] = {}
-    listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
-    if listing_path.exists():
-        for rec in json.loads(listing_path.read_text()):
-            idx = str(rec.get("sensor_index") or rec.get("index") or "")
-            if idx and rec.get("latitude") is not None:
-                coords[idx] = (rec["latitude"], rec["longitude"])
+    # Community sensor coords: passed in, or from the resolved public-sensor listing.
+    if coords is None:
+        coords = {}
+        listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
+        if listing_path.exists():
+            for rec in json.loads(listing_path.read_text()):
+                idx = str(rec.get("sensor_index") or rec.get("index") or "")
+                if idx and rec.get("latitude") is not None:
+                    coords[idx] = (rec["latitude"], rec["longitude"])
 
     # Reference monitors: coords + daily medians (coords stored on the readings).
     monitors = []

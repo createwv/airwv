@@ -222,6 +222,22 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"note": "", "monitors": []}
 
+    @app.get("/api/validate")
+    def validate():
+        """Community sensors vs their nearest regulatory reference monitor."""
+        from airwv.ingest import run_validate
+
+        results = run_validate(store=store, coords=coords)
+        for r in results:
+            r["sensor_name"] = names.get(r["sensor"], r["sensor"])
+        return {
+            "results": results,
+            "note": "Each community sensor is paired with its nearest regulatory "
+                    "reference monitor (OpenAQ/AirNow). r = daily-median correlation "
+                    "(1.0 = perfect tracking); bias = sensor − reference (µg/m³). "
+                    "High r validates the sensor; a wild bias flags a malfunction.",
+        }
+
     @app.get("/api/guide")
     def guide():
         return {
@@ -359,6 +375,11 @@ INDEX_HTML = """<!doctype html>
 <div class="card"><h2>Day vs. overnight compare</h2>
   <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
 </div>
+<div class="card"><h2>Validation — community sensors vs. regulatory reference monitors</h2>
+  <table id="validate"><thead><tr><th>Community sensor</th><th>Nearest reference monitor</th>
+    <th>Distance</th><th>Days</th><th>Correlation (r)</th><th>Bias vs. reference</th></tr></thead><tbody></tbody></table>
+  <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
+</div>
 <div class="card"><h2>Health guide — what the levels mean</h2><div id="guide" class="guide"></div></div>
 <div class="card"><h2>About AirWV</h2>
   <div class="about">
@@ -458,12 +479,38 @@ async function loadSources(){
     if (s.lat == null || s.lon == null) return;
     L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:'🏭',
       iconSize:[22,22], iconAnchor:[11,11]})})
-      .bindPopup(`<b>${s.name}</b><br>${s.type}<br><i>${s.operator||''}</i>`+
+      .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}<br>${s.type}<br><i>${s.operator||''}</i>`+
         `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
         `<br><small style="color:#a00">${data.disclaimer||''}</small>`)
       .addTo(sourceLayer);
   });
   if ($('showsources').checked) sourceLayer.addTo(map);
+}
+
+async function loadValidation(){
+  const d = await j('/api/validate');
+  const tb = document.querySelector('#validate tbody');
+  if (!d.results.length){
+    tb.innerHTML = '<tr><td colspan="6" style="color:#888">No reference data yet — '+
+      'run <code>ingest reference</code> then it appears here.</td></tr>';
+    $('validatenote').textContent = ''; return;
+  }
+  tb.innerHTML = d.results.map(v => {
+    const r = v.r;
+    const rcol = r==null ? '#888' : r>=0.7 ? '#1b9e77' : r>=0.4 ? '#e07b00' : '#d62728';
+    const rtxt = r==null ? 'n/a' : r.toFixed(2);
+    const bad = Math.abs(v.bias) > 50;   // an absurd bias flags a malfunctioning sensor
+    const btxt = (v.bias>0?'+':'') + v.bias.toFixed(1) + ' µg/m³';
+    return `<tr>
+      <td>${v.sensor_name}</td>
+      <td>monitor #${v.monitor}</td>
+      <td>${v.distance_km} km</td>
+      <td>${v.days}</td>
+      <td style="color:${rcol};font-weight:600">${rtxt}</td>
+      <td style="color:${bad?'#d62728':'#444'};font-weight:${bad?'600':'400'}">${btxt}${bad?' ⚠ malfunction?':''}</td>
+    </tr>`;
+  }).join('');
+  $('validatenote').textContent = d.note;
 }
 
 const box = id => $('sensors').querySelector(`input[value="${id}"]`);
@@ -531,6 +578,7 @@ $('showref').addEventListener('change', e => {
   e.target.checked ? refLayer.addTo(map) : refLayer.remove();
 });
 loadGuide().then(loadSensors);
+loadValidation();
 </script>
 </body>
 </html>"""
