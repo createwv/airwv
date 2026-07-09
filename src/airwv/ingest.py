@@ -448,7 +448,7 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
 
 
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
-                 store=None, coords: dict | None = None) -> list[dict]:
+                 store=None, coords: dict | None = None, correct: bool = False) -> list[dict]:
     """Validate community sensors against the nearest OpenAQ reference monitor.
 
     For each community (PurpleAir) sensor, find the closest regulatory monitor and
@@ -505,7 +505,12 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         if cid not in coords:
             continue
         clat, clon = coords[cid]
-        cdaily = dict(daily_medians(store.readings_for_sensor(cid), field))
+        crows = store.readings_for_sensor(cid)
+        if correct and field == "pm2_5":
+            from airwv.correction import corrected_daily_medians
+            cdaily = corrected_daily_medians(crows)
+        else:
+            cdaily = dict(daily_medians(crows, field))
         if not cdaily:
             continue
         rid, rlat, rlon, rdaily = min(monitors, key=lambda m: haversine(clat, clon, m[1], m[2]))
@@ -525,7 +530,8 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         })
 
     results.sort(key=lambda x: (x["r"] is None, -(x["r"] or 0)))
-    log.info("sensor-vs-reference validation (%s, ≥%d overlapping days):", field, min_days)
+    corr = " [EPA-corrected]" if correct and field == "pm2_5" else ""
+    log.info("sensor-vs-reference validation (%s%s, ≥%d overlapping days):", field, corr, min_days)
     for v in results:
         rtxt = "n/a " if v["r"] is None else f"{v['r']:+.2f}"
         log.info("  sensor %-8s ↔ monitor %-8s  %4.0f km  %2dd  r=%s  bias=%+.2f",
@@ -786,6 +792,8 @@ def main(argv: list[str] | None = None) -> None:
     validate = sub.add_parser("validate", help="community sensors vs nearest reference monitor (no API cost)")
     validate.add_argument("--field", default="pm2_5", help="field to validate (default pm2_5)")
     validate.add_argument("--min-days", type=int, default=5, help="min overlapping days to report a pair")
+    validate.add_argument("--correct", action="store_true",
+                          help="apply the EPA PurpleAir correction to PM2.5 before comparing")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -840,7 +848,7 @@ def main(argv: list[str] | None = None) -> None:
             return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end))
     elif command == "validate":
-        run_validate(config, field=args.field, min_days=args.min_days)
+        run_validate(config, field=args.field, min_days=args.min_days, correct=args.correct)
     elif command == "run":
         try:
             run_scheduler(config, send_alerts=not getattr(args, "no_alerts", False))

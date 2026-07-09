@@ -223,20 +223,21 @@ def create_app(store: Store) -> FastAPI:
             return {"note": "", "monitors": []}
 
     @app.get("/api/validate")
-    def validate():
+    def validate(correct: bool = False):
         """Community sensors vs their nearest regulatory reference monitor."""
         from airwv.ingest import run_validate
 
-        results = run_validate(store=store, coords=coords)
+        results = run_validate(store=store, coords=coords, correct=correct)
         for r in results:
             r["sensor_name"] = names.get(r["sensor"], r["sensor"])
-        return {
-            "results": results,
-            "note": "Each community sensor is paired with its nearest regulatory "
-                    "reference monitor (OpenAQ/AirNow). r = daily-median correlation "
-                    "(1.0 = perfect tracking); bias = sensor − reference (µg/m³). "
-                    "High r validates the sensor; a wild bias flags a malfunction.",
-        }
+        note = ("Each community sensor is paired with its nearest regulatory "
+                "reference monitor (OpenAQ/AirNow). r = daily-median correlation "
+                "(1.0 = perfect tracking); bias = sensor − reference (µg/m³). "
+                "High r validates the sensor; a wild bias flags a malfunction.")
+        if correct:
+            note += (" PM2.5 is EPA-corrected (Barkjohn 2021), which pulls raw "
+                     "PurpleAir's high bias down toward reference grade.")
+        return {"results": results, "corrected": correct, "note": note}
 
     @app.get("/api/guide")
     def guide():
@@ -314,6 +315,9 @@ INDEX_HTML = """<!doctype html>
     filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
   .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     padding:8px 20px; font-size:13px; text-align:center; }
+  .betabar { background:#fff4d6; color:#7a5b12; border-bottom:1px solid #f0e0b0;
+    padding:6px 20px; font-size:12.5px; text-align:center; }
+  .betabar b { color:#8a4b00; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   select { padding:6px 10px; font-size:14px; }
   .meta { color:#666; font-size:13px; }
@@ -347,6 +351,7 @@ INDEX_HTML = """<!doctype html>
   <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
 <div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
+<div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
 <div class="controls">
   <div><b>Sensors</b><div id="sensors" class="sensorlist"></div></div>
   <label>Metric <select id="field">
@@ -361,6 +366,7 @@ INDEX_HTML = """<!doctype html>
   <label>To <input type="date" id="end"></label>
   <button id="clear">Clear dates</button>
   <a id="dl" href="#" download>⬇ Download CSV</a>
+  <label><input type="checkbox" id="showsensors" checked> ● community sensors</label>
   <label><input type="checkbox" id="showsources" checked> 🏭 pollution sources</label>
   <label><input type="checkbox" id="showref" checked> 📍 EPA monitors</label>
 </div>
@@ -377,7 +383,8 @@ INDEX_HTML = """<!doctype html>
 <div class="card"><h2>Day vs. overnight compare</h2>
   <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
 </div>
-<div class="card"><h2>Validation — community sensors vs. regulatory reference monitors</h2>
+<div class="card"><h2>Validation — community sensors vs. regulatory reference monitors
+  <label style="float:right;font-weight:400;font-size:12px"><input type="checkbox" id="epacorrect"> EPA-corrected PM2.5</label></h2>
   <table id="validate"><thead><tr><th>Community sensor</th><th>Nearest reference monitor</th>
     <th>Distance</th><th>Days</th><th>Correlation (r)</th><th>Bias vs. reference</th></tr></thead><tbody></tbody></table>
   <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
@@ -444,19 +451,23 @@ function drawMap(sensors){
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
   }
+  if (sensorLayer) sensorLayer.remove();
+  sensorLayer = L.layerGroup();
   const pts = [];
   sensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
     L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
       .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${x.count} readings`)
       .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
-      .addTo(map);
+      .addTo(sensorLayer);
     pts.push([x.lat, x.lon]);
   });
+  if ($('showsensors').checked) sensorLayer.addTo(map);
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
   loadReference();
 }
+let sensorLayer;
 let refLayer;
 async function loadReference(){
   const data = await j('/api/reference-monitors');
@@ -490,7 +501,7 @@ async function loadSources(){
 }
 
 async function loadValidation(){
-  const d = await j('/api/validate');
+  const d = await j('/api/validate?correct=' + ($('epacorrect').checked ? 'true' : 'false'));
   const tb = document.querySelector('#validate tbody');
   if (!d.results.length){
     tb.innerHTML = '<tr><td colspan="6" style="color:#888">No reference data yet — '+
@@ -571,6 +582,10 @@ $('field').addEventListener('change', render);
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
+$('showsensors').addEventListener('change', e => {
+  if (!sensorLayer) return;
+  e.target.checked ? sensorLayer.addTo(map) : sensorLayer.remove();
+});
 $('showsources').addEventListener('change', e => {
   if (!sourceLayer) return;
   e.target.checked ? sourceLayer.addTo(map) : sourceLayer.remove();
@@ -581,6 +596,7 @@ $('showref').addEventListener('change', e => {
 });
 loadGuide().then(loadSensors);
 loadValidation();
+$('epacorrect').addEventListener('change', loadValidation);
 </script>
 </body>
 </html>"""
