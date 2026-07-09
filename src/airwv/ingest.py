@@ -13,7 +13,9 @@ arguments so they can be tested without network or a real database.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
+import math
 import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -410,11 +412,13 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
     return alerts
 
 
-def run_reference(config: Config, days: int = 7, source=None, store=None, now: datetime | None = None) -> int:
+def run_reference(config: Config, days: int = 7, source=None, store=None, now: datetime | None = None,
+                  start: datetime | None = None, end: datetime | None = None) -> int:
     """Pull WV reference-monitor PM2.5 from OpenAQ into storage (source='openaq').
 
     Enables validating community sensors against regulatory-grade data. Needs
-    OPENAQ_API_KEY (free at explore.openaq.org).
+    OPENAQ_API_KEY (free at explore.openaq.org). Pass --start/--end (ISO dates) to
+    pull a historical window matching your sensor data; otherwise the last N days.
     """
     if source is None and not config.openaq_api_key:
         log.warning("OPENAQ_API_KEY not set — get a free key at https://explore.openaq.org/register")
@@ -426,18 +430,104 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
     store = store or Store.from_config(config)
     store.create_schema()
     now = now or datetime.now(tz=timezone.utc)
-    start = now - timedelta(days=days)
+    end = end or now
+    start = start or (end - timedelta(days=days))
 
     locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
     total = 0
     for loc in locations:
         for sensor_id in loc.get("pm25_sensor_ids", []):
             try:
-                total += store.save_readings(source.fetch_measurements(sensor_id, start, now))
+                total += store.save_readings(source.fetch_measurements(
+                    sensor_id, start, end, lat=loc.get("lat"), lon=loc.get("lon")))
             except Exception as exc:  # one bad sensor shouldn't abort the pull
                 log.warning("openaq fetch failed for sensor %s: %s", sensor_id, exc)
-    log.info("openaq reference: %d readings from %d WV monitor location(s)", total, len(locations))
+    log.info("openaq reference: %d readings from %d monitor location(s), %s..%s",
+             total, len(locations), start.date(), end.date())
     return total
+
+
+def run_validate(config: Config, field: str = "pm2_5", min_days: int = 5, store=None) -> list[dict]:
+    """Validate community sensors against the nearest OpenAQ reference monitor.
+
+    For each community (PurpleAir) sensor, find the closest regulatory monitor and
+    correlate their daily-median PM2.5 over the overlapping days: Pearson r + mean
+    bias (sensor − reference). High r + small bias = the community network tracks
+    reference-grade data. Read-only. Requires prior `ingest reference` data.
+    """
+    import statistics
+
+    from airwv.analysis.trends import daily_medians
+
+    store = store or Store.from_config(config)
+    community = store.sensor_ids_by_source("purpleair")
+    reference = store.sensor_ids_by_source("openaq")
+    if not reference:
+        log.warning("no reference data yet — run `ingest reference` first")
+        return []
+
+    # Community sensor coords come from the resolved public-sensor listing.
+    coords: dict[str, tuple] = {}
+    listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
+    if listing_path.exists():
+        for rec in json.loads(listing_path.read_text()):
+            idx = str(rec.get("sensor_index") or rec.get("index") or "")
+            if idx and rec.get("latitude") is not None:
+                coords[idx] = (rec["latitude"], rec["longitude"])
+
+    # Reference monitors: coords + daily medians (coords stored on the readings).
+    monitors = []
+    for rid in reference:
+        rows = store.readings_for_sensor(rid)
+        lat = next((r.lat for r in rows if r.lat is not None), None)
+        lon = next((r.lon for r in rows if r.lon is not None), None)
+        if lat is None:
+            continue
+        monitors.append((rid, lat, lon, dict(daily_medians(rows, field))))
+    if not monitors:
+        log.warning("reference readings have no coordinates — re-pull with `ingest reference`")
+        return []
+
+    def haversine(a_lat, a_lon, b_lat, b_lon) -> float:
+        r = 6371.0
+        p1, p2 = math.radians(a_lat), math.radians(b_lat)
+        dphi, dl = math.radians(b_lat - a_lat), math.radians(b_lon - a_lon)
+        h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+        return 2 * r * math.asin(math.sqrt(h))
+
+    results = []
+    for cid in community:
+        if cid not in coords:
+            continue
+        clat, clon = coords[cid]
+        cdaily = dict(daily_medians(store.readings_for_sensor(cid), field))
+        if not cdaily:
+            continue
+        rid, rlat, rlon, rdaily = min(monitors, key=lambda m: haversine(clat, clon, m[1], m[2]))
+        common = sorted(set(cdaily) & set(rdaily))
+        if len(common) < min_days:
+            continue
+        cs = [cdaily[d] for d in common]
+        rs = [rdaily[d] for d in common]
+        try:
+            r = statistics.correlation(cs, rs) if len(common) >= 2 else None
+        except statistics.StatisticsError:
+            r = None  # a channel was flat over the window
+        results.append({
+            "sensor": cid, "monitor": rid, "distance_km": round(haversine(clat, clon, rlat, rlon), 1),
+            "days": len(common), "r": None if r is None else round(r, 2),
+            "bias": round(statistics.mean(c - s for c, s in zip(cs, rs)), 2),
+        })
+
+    results.sort(key=lambda x: (x["r"] is None, -(x["r"] or 0)))
+    log.info("sensor-vs-reference validation (%s, ≥%d overlapping days):", field, min_days)
+    for v in results:
+        rtxt = "n/a " if v["r"] is None else f"{v['r']:+.2f}"
+        log.info("  sensor %-8s ↔ monitor %-8s  %4.0f km  %2dd  r=%s  bias=%+.2f",
+                 v["sensor"], v["monitor"], v["distance_km"], v["days"], rtxt, v["bias"])
+    if not results:
+        log.info("  (no sensor/monitor pairs with enough overlapping days — pull a matching window with `ingest reference --start/--end`)")
+    return results
 
 
 def run_baseline(config: Config, field: str = "pm2_5", min_pct: float = 25.0, store=None) -> dict:
@@ -686,6 +776,11 @@ def main(argv: list[str] | None = None) -> None:
     alerts.add_argument("--send", action="store_true", help="actually deliver notifications")
     reference = sub.add_parser("reference", help="pull EPA/OpenAQ reference monitors (needs OPENAQ_API_KEY)")
     reference.add_argument("--days", type=int, default=7, help="how many days back to pull (default 7)")
+    reference.add_argument("--start", help="ISO start date for a historical window (e.g. 2024-01-01)")
+    reference.add_argument("--end", help="ISO end date (default now)")
+    validate = sub.add_parser("validate", help="community sensors vs nearest reference monitor (no API cost)")
+    validate.add_argument("--field", default="pm2_5", help="field to validate (default pm2_5)")
+    validate.add_argument("--min-days", type=int, default=5, help="min overlapping days to report a pair")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -733,7 +828,14 @@ def main(argv: list[str] | None = None) -> None:
     elif command == "alerts":
         run_alerts(config, send=args.send)
     elif command == "reference":
-        run_reference(config, days=args.days)
+        def _parse_dt(s):
+            if not s:
+                return None
+            dt = datetime.fromisoformat(s)
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end))
+    elif command == "validate":
+        run_validate(config, field=args.field, min_days=args.min_days)
     elif command == "run":
         try:
             run_scheduler(config, send_alerts=not getattr(args, "no_alerts", False))

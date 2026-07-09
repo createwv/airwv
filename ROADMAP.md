@@ -163,8 +163,9 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
 - [~] **Documented sources layer** — facilities from **EPA TRI** (keyless
       Envirofacts API) + landmarks, cited, on the map — `scripts/fetch_sources.py`.
-      Now **statewide (all WV)**, not just Kanawha. Still to add: EIA power plants,
-      WV DEP permits + O&G wells.
+      Now **statewide (all WV) + cross-border** (OH/PA/MD/VA/KY facilities within
+      ~20km of the WV line, so Ohio-River emitters count) — 437 facilities. Still to
+      add: EIA power plants, WV DEP permits + O&G wells.
 - [ ] **Facility status / permit layer** — toggle facilities by status:
       **active / inactive / approved / requesting (planning/pending)** — the permit
       lifecycle regulated emitters go through. Permit info as a separate field
@@ -208,9 +209,15 @@ Grow the network and secure the record.
       government monitors (independent of our PurpleAir sensors), hourly history
       back to ~2016, 429 rate-limit handling. First pull: 3,874 readings / 24
       monitors. Community sensors' daytime PM2.5 (~7-8) match Kanawha regs (~7).
-- [ ] Reference on the dashboard — plot OpenAQ monitors on the map + a
-      **sensor-vs-reference validation view** (overlay/correlate the two).
-- [ ] Historical reference pull (`reference --start/--end`) to match sensor windows.
+- [x] **Sensor-vs-reference validation** (`ingest validate`) — pairs each
+      community sensor with its nearest reference monitor, correlates daily-median
+      PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
+      and it auto-flagged the known-bad sensor (196533: r<0, bias +1589 µg/m³).
+- [x] Historical reference pull (`reference --start/--end`) to match sensor windows.
+- [ ] Reference on the dashboard — plot OpenAQ monitors on the map + a live
+      **validation panel** (the `validate` table) so it's visible, not just CLI.
+- [ ] **PurpleAir bias correction** — community sensors read ~+3–5 µg/m³ high vs
+      reference; apply the EPA PurpleAir correction and store a corrected AQI.
 - [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
       (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
 - [ ] Additional community-sensor sources beyond PurpleAir

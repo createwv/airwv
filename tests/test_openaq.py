@@ -50,9 +50,9 @@ class _FakeOpenAQ:
     def fetch_locations(self, *a, **k):
         return [{"id": 1, "name": "Ref", "lat": 38.3, "lon": -81.6, "pm25_sensor_ids": [9]}]
 
-    def fetch_measurements(self, sensor_id, start, end):
+    def fetch_measurements(self, sensor_id, start, end, lat=None, lon=None):
         return [Reading(source="openaq", sensor_id="9",
-                        ts=datetime(2026, 7, 1, 12, 0), pm2_5=7.0)]
+                        ts=datetime(2026, 7, 1, 12, 0), pm2_5=7.0, lat=lat, lon=lon)]
 
 
 def test_run_reference_stores_openaq_readings(tmp_path):
@@ -67,3 +67,33 @@ def test_run_reference_no_key_is_noop(tmp_path):
     config = Config(purpleair_api_key="k", database_url=f"sqlite:///{tmp_path / 'r.sqlite'}",
                     poll_interval_seconds=3600, index_cache_path=tmp_path / "m.json", openaq_api_key="")
     assert run_reference(config) == 0
+
+
+def test_run_validate_correlates_sensor_to_nearest_monitor(tmp_path):
+    import json
+
+    from airwv.ingest import run_validate
+
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    store.create_schema()
+    # community sensor coords come from the resolved public-sensor listing
+    (tmp_path / "wv_public_sensors.json").write_text(json.dumps(
+        [{"sensor_index": 111, "latitude": 38.35, "longitude": -81.63}]))
+
+    # 8 days of daily readings: community tracks reference + a fixed +4 high bias
+    base = [5, 8, 12, 6, 20, 9, 7, 15]
+    for i, v in enumerate(base):
+        ts = datetime(2026, 6, 1 + i, 12, 0)
+        store.save_readings([Reading(source="purpleair", sensor_id="111", ts=ts, pm2_5=v + 4)])
+        store.save_readings([Reading(source="openaq", sensor_id="9", ts=ts, pm2_5=v,
+                                     lat=38.36, lon=-81.62)])  # ~1km away
+        store.save_readings([Reading(source="openaq", sensor_id="99", ts=ts, pm2_5=v,
+                                     lat=39.9, lon=-79.9)])  # far monitor, should not be chosen
+
+    results = run_validate(config, min_days=5, store=store)
+    assert len(results) == 1
+    v = results[0]
+    assert v["sensor"] == "111" and v["monitor"] == "9"  # nearest monitor picked
+    assert v["r"] > 0.99  # tracks reference
+    assert v["bias"] == 4.0  # recovers the +4 offset

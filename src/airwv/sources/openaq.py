@@ -37,14 +37,15 @@ def _measurement_ts(m: dict) -> datetime | None:
     return None
 
 
-def parse_measurements(payload: dict, sensor_id, source: str = "openaq") -> list[Reading]:
+def parse_measurements(payload: dict, sensor_id, source: str = "openaq", lat=None, lon=None) -> list[Reading]:
     readings: list[Reading] = []
     for m in payload.get("results", []):
         ts = _measurement_ts(m)
         value = m.get("value")
         if ts is None or value is None:
             continue
-        readings.append(Reading(source=source, sensor_id=str(sensor_id), ts=ts, pm2_5=float(value)))
+        readings.append(Reading(source=source, sensor_id=str(sensor_id), ts=ts,
+                                pm2_5=float(value), lat=lat, lon=lon))
     return readings
 
 
@@ -94,10 +95,11 @@ class OpenAQSource:
             })
         return out
 
-    def fetch_measurements(self, sensor_id, start: datetime, end: datetime) -> list[Reading]:
+    def fetch_measurements(self, sensor_id, start: datetime, end: datetime,
+                           lat=None, lon=None) -> list[Reading]:
         """Hourly PM2.5 measurements for one sensor in [start, end]."""
         payload = self._get(
             f"/sensors/{sensor_id}/measurements",
             {"datetime_from": start.isoformat(), "datetime_to": end.isoformat(), "limit": 1000},
         )
-        return parse_measurements(payload, sensor_id, self.name)
+        return parse_measurements(payload, sensor_id, self.name, lat=lat, lon=lon)

@@ -23,6 +23,7 @@
       "name": "Gemark Services Of West Virginia Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Gemark Corp",
+      "state": "WV",
       "lat": 37.285,
       "lon": -81.105,
       "citation": "EPA TRI (facility 24701GMRKSRTE29)"
@@ -31,6 +32,7 @@
       "name": "Eimco Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Sandvik Inc",
+      "state": "WV",
       "lat": 37.2828,
       "lon": -81.2492,
       "citation": "EPA TRI (facility 24701MCCLMRTE52)"
@@ -39,6 +41,7 @@
       "name": "Airgas Mid America",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.2706,
       "lon": -81.2478,
       "citation": "EPA TRI (facility 24701RGSMD1620C)"
@@ -47,6 +50,7 @@
       "name": "Tabor Machine Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Elgin National Industries Inc",
+      "state": "WV",
       "lat": 37.2958,
       "lon": -81.2078,
       "citation": "EPA TRI (facility 24701TBRMCRT52N)"
@@ -55,6 +59,7 @@
       "name": "Herndon Processing Co Llc Keystone No 2 Prep Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Alpha Natural Resources Llc",
+      "state": "WV",
       "lat": 37.5161,
       "lon": -81.3619,
       "citation": "EPA TRI (facility 24726HRNDNWVRTE)"
@@ -63,6 +68,7 @@
       "name": "Talon Manufacturing Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.5028,
       "lon": -81.3353,
       "citation": "EPA TRI (facility 24726TLNMFRTE10)"
@@ -71,6 +77,7 @@
       "name": "Fosroc Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Fosroc Inc",
+      "state": "WV",
       "lat": 37.3639,
       "lon": -81.0833,
       "citation": "EPA TRI (facility 24740CLTTNPOBOX)"
@@ -79,6 +86,7 @@
       "name": "Acme Wood Preserving Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.3617,
       "lon": -81.0844,
       "citation": "EPA TRI (facility 24740CMWDPROGER)"
@@ -87,6 +95,7 @@
       "name": "Conn-Weld Industries Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.3567,
       "lon": -81.0675,
       "citation": "EPA TRI (facility 24740CNNWLUSROU)"
@@ -95,6 +104,7 @@
       "name": "Bottling Group Llc Pepsi Bottling Group",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Pepsi Bottling Group Inc",
+      "state": "WV",
       "lat": 37.3333,
       "lon": -81.1083,
       "citation": "EPA TRI (facility 24740PPSCLROGER)"
@@ -103,6 +113,7 @@
       "name": "Industrial Plating & Machine I Nc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.3672,
       "lon": -81.0044,
       "citation": "EPA TRI (facility 24740SWNSN401LA)"
@@ -111,6 +122,7 @@
       "name": "Amonate Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Consol Energy Inc",
+      "state": "WV",
       "lat": 37.2117,
       "lon": -81.6503,
       "citation": "EPA TRI (facility 24815MNTPRSTATE)"
@@ -119,6 +131,7 @@
       "name": "Pc West Virginia Synthetic Fuel #3 Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Pace Carbon Investors Lp",
+      "state": "WV",
       "lat": 37.3914,
       "lon": -81.4642,
       "citation": "EPA TRI (facility 24829PCWSTEUREK)"
@@ -127,6 +140,7 @@
       "name": "Kepler Processing Co Pocahontas No 51 Coal Prep Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Alpha Natural Resources Llc",
+      "state": "WV",
       "lat": 37.5769,
       "lon": -81.5694,
       "citation": "EPA TRI (facility 24874KPLRPRTE97)"
@@ -135,6 +149,7 @@
       "name": "Pinnacle Mining Co Llc  - Pinnacle Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Seneca Coal Resources Llc",
+      "state": "WV",
       "lat": 37.5342,
       "lon": -81.5011,
       "citation": "EPA TRI (facility 24874SSTLMPINNA)"
@@ -143,6 +158,7 @@
       "name": "Appalachian Electronic Instrum Ents Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.7689,
       "lon": -80.4672,
       "citation": "EPA TRI (facility 24902PPLCH100AE)"
@@ -151,6 +167,7 @@
       "name": "Us Bureau Of Prisons Alderson Federal Prison Camp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Us Department Of Justice",
+      "state": "WV",
       "lat": 37.7242,
       "lon": -80.6703,
       "citation": "EPA TRI (facility 24910SDPTFGLENR)"
@@ -159,6 +176,7 @@
       "name": "Howes Leather Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Howes Leather Corp",
+      "state": "WV",
       "lat": 38.5439,
       "lon": -79.8083,
       "citation": "EPA TRI (facility 24920HWSLTRT250)"
@@ -167,6 +185,7 @@
       "name": "Judy Fencecraft Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.5406,
       "lon": -79.7764,
       "citation": "EPA TRI (facility 24920JDYFNBOX97)"
@@ -175,6 +194,7 @@
       "name": "Hanover Shoe Co Marlinton Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "C & J Clark Inc",
+      "state": "WV",
       "lat": 38.2283,
       "lon": -80.0911,
       "citation": "EPA TRI (facility 24954HNVRS3002N)"
@@ -183,6 +203,7 @@
       "name": "American Foam Technologies Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.8653,
       "lon": -81.3983,
       "citation": "EPA TRI (facility 24957MRCNFMCLAU)"
@@ -191,6 +212,7 @@
       "name": "American Foam Technologies",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.6667,
       "lon": -80.5,
       "citation": "EPA TRI (facility 24970JFFYFRIVER)"
@@ -199,6 +221,7 @@
       "name": "Goodrich Corp Deicing & Specialty Systems Div",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rtx Corp",
+      "state": "WV",
       "lat": 37.6181,
       "lon": -80.5306,
       "citation": "EPA TRI (facility 24983BFGDRRT5BO)"
@@ -207,6 +230,7 @@
       "name": "Wva Manufacturing Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ferroglobe Usa Inc",
+      "state": "WV",
       "lat": 38.1378,
       "lon": -81.2786,
       "citation": "EPA TRI (facility 25002LKMMTBOX61)"
@@ -215,6 +239,7 @@
       "name": "Occidental Chemical Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Occidental Petroleum Corp",
+      "state": "WV",
       "lat": 38.2347,
       "lon": -81.5458,
       "citation": "EPA TRI (facility 25015CCDNTDUPON)"
@@ -223,6 +248,7 @@
       "name": "Chemours Belle Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "The Chemours Co",
+      "state": "WV",
       "lat": 38.2428,
       "lon": -81.5594,
       "citation": "EPA TRI (facility 25015DPNTB901WE)"
@@ -231,6 +257,7 @@
       "name": "Little Creek Dock Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Cline Resource & Development Co",
+      "state": "WV",
       "lat": 38.2033,
       "lon": -81.4761,
       "citation": "EPA TRI (facility 25015LTTLC2978E)"
@@ -239,6 +266,7 @@
       "name": "Vandalia Resources Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Pittston Coal Co",
+      "state": "WV",
       "lat": 38.3867,
       "lon": -81.0283,
       "citation": "EPA TRI (facility 25019VNDLRCOUNT)"
@@ -247,6 +275,7 @@
       "name": "Pond Fork Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Brook Trout Coal Co Llc",
+      "state": "WV",
       "lat": 37.94,
       "lon": -81.7014,
       "citation": "EPA TRI (facility 25028JPTRHWVRTE)"
@@ -255,6 +284,7 @@
       "name": "Appalachian Fuels Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Appalachian Fuels Llc",
+      "state": "WV",
       "lat": 38.1528,
       "lon": -81.2403,
       "citation": "EPA TRI (facility 25031PPLCHUSRTE)"
@@ -263,6 +293,7 @@
       "name": "Toyota Motor Manufacturing West Virginia Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Toyota Industries North America",
+      "state": "WV",
       "lat": 38.5919,
       "lon": -82.0025,
       "citation": "EPA TRI (facility 25033TYTMT1SUGA)"
@@ -271,6 +302,7 @@
       "name": "Panther Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.165,
       "lon": -81.4783,
       "citation": "EPA TRI (facility 25061PNTHRWETBR)"
@@ -279,6 +311,7 @@
       "name": "Remington Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.0908,
       "lon": -81.5292,
       "citation": "EPA TRI (facility 25067RMNGTSLAUG)"
@@ -287,6 +320,7 @@
       "name": "Diamond Electric Manufacturing Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Diamond Electric Manufacturing Co",
+      "state": "WV",
       "lat": 38.5417,
       "lon": -81.9481,
       "citation": "EPA TRI (facility 25070DMNDLSTRT6)"
@@ -295,6 +329,7 @@
       "name": "Bayer Materialscience Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Bayer Corp",
+      "state": "WV",
       "lat": 38.3822,
       "lon": -81.7783,
       "citation": "EPA TRI (facility 25112CWSTVROUTE)"
@@ -303,6 +338,7 @@
       "name": "Fmc Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Fmc Corp",
+      "state": "WV",
       "lat": 38.3808,
       "lon": -81.7864,
       "citation": "EPA TRI (facility 25112FMCCRRT25X)"
@@ -311,6 +347,7 @@
       "name": "Union Carbide Corp Institute Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Dow Inc",
+      "state": "WV",
       "lat": 38.3822,
       "lon": -81.7783,
       "citation": "EPA TRI (facility 25112NNCRBRTE25)"
@@ -319,6 +356,7 @@
       "name": "Erp Environmental - Beth Station Prep",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Erp Environmental",
+      "state": "WV",
       "lat": 38.1111,
       "lon": -81.8542,
       "citation": "EPA TRI (facility 25130HBTMNUSRT1)"
@@ -327,6 +365,7 @@
       "name": "Omar Mining Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Massey Energy Co",
+      "state": "WV",
       "lat": 38.015,
       "lon": -81.7294,
       "citation": "EPA TRI (facility 25130MRMNNRTE85)"
@@ -335,6 +374,7 @@
       "name": "Independence Coal Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Alpha Natural Resources Llc",
+      "state": "WV",
       "lat": 38.0156,
       "lon": -81.7542,
       "citation": "EPA TRI (facility 25130NDPNDHC98B)"
@@ -343,6 +383,7 @@
       "name": "Endurance Mining",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Independence Coal Co",
+      "state": "WV",
       "lat": 37.9181,
       "lon": -81.7464,
       "citation": "EPA TRI (facility 25130NDRNCHC78P)"
@@ -351,6 +392,7 @@
       "name": "Ac&S Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4333,
       "lon": -81.8583,
       "citation": "EPA TRI (facility 25143CSNCXWEST1)"
@@ -359,6 +401,7 @@
       "name": "Catalyst Refiners Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ames Goldsmith Corp",
+      "state": "WV",
       "lat": 38.3547,
       "lon": -81.7928,
       "citation": "EPA TRI (facility 25143CTLYS1580F)"
@@ -367,6 +410,7 @@
       "name": "Great Lakes Chemical Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Great Lakes Chemical Corp",
+      "state": "WV",
       "lat": 38.435,
       "lon": -81.8456,
       "citation": "EPA TRI (facility 25143FMCCRPLANT)"
@@ -375,6 +419,7 @@
       "name": "Kincaid Enterprises Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4278,
       "lon": -81.8417,
       "citation": "EPA TRI (facility 25143KNCDNPLANT)"
@@ -383,6 +428,7 @@
       "name": "Brenntag Mid-South Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Brenntag North America Inc",
+      "state": "WV",
       "lat": 38.42,
       "lon": -81.84,
       "citation": "EPA TRI (facility 25143PBSCHPLANT)"
@@ -391,6 +437,7 @@
       "name": "Republic Container Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.7083,
       "lon": -82.4053,
       "citation": "EPA TRI (facility 25143RPBLCVISCO)"
@@ -399,6 +446,7 @@
       "name": "Solutia-Ops At Flexsys Nitro",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Solutia Inc",
+      "state": "WV",
       "lat": 38.4369,
       "lon": -81.8456,
       "citation": "EPA TRI (facility 25143SLTPR1MONS)"
@@ -407,6 +455,7 @@
       "name": "Itw Insulation Systems  Nitro Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4358,
       "lon": -81.8419,
       "citation": "EPA TRI (facility 25143TWNSL19IND)"
@@ -415,6 +464,7 @@
       "name": "Airgas Usa, Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Airgas Inc",
+      "state": "WV",
       "lat": 38.4972,
       "lon": -81.8347,
       "citation": "EPA TRI (facility 25159VRGNWSTATE)"
@@ -423,6 +473,7 @@
       "name": "Azz Galvanizing-Pilot",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Azz Inc",
+      "state": "WV",
       "lat": 38.4611,
       "lon": -81.7844,
       "citation": "EPA TRI (facility 25159VSPLTMANIL)"
@@ -431,6 +482,7 @@
       "name": "West Virginia Steel Corp.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Raleigh Mine & Industrial Supply",
+      "state": "WV",
       "lat": 38.5119,
       "lon": -81.7914,
       "citation": "EPA TRI (facility 25159WSTVRWRIGH)"
@@ -439,6 +491,7 @@
       "name": "American Stone-Mix Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Oldcastle Architectural Inc",
+      "state": "WV",
       "lat": 38.4019,
       "lon": -81.8489,
       "citation": "EPA TRI (facility 25177MRCNS400OL)"
@@ -447,6 +500,7 @@
       "name": "Elk Run Coal Co Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Contura Energy",
+      "state": "WV",
       "lat": 38.0081,
       "lon": -81.5717,
       "citation": "EPA TRI (facility 25193LKRNCPOBOX)"
@@ -455,6 +509,7 @@
       "name": "Progress Coal Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Independence Coal Co Inc",
+      "state": "WV",
       "lat": 37.92,
       "lon": -81.5717,
       "citation": "EPA TRI (facility 25204PRGRSCUNTY)"
@@ -463,6 +518,7 @@
       "name": "American Electric Power Amos Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Electric Power",
+      "state": "WV",
       "lat": 38.4731,
       "lon": -81.8236,
       "citation": "EPA TRI (facility 25213JHNMS1530W)"
@@ -471,6 +527,7 @@
       "name": "Plasma Processing Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Phillips Metals Recovery",
+      "state": "WV",
       "lat": 38.1542,
       "lon": -81.9208,
       "citation": "EPA TRI (facility 25262PLSMPJACKS)"
@@ -479,6 +536,7 @@
       "name": "American Alloys  Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.9575,
       "lon": -81.9264,
       "citation": "EPA TRI (facility 25265MRCNLRT62X)"
@@ -487,6 +545,7 @@
       "name": "Goodrich Aircraft Interior Products",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Goodrich Corp",
+      "state": "WV",
       "lat": 38.7931,
       "lon": -81.3383,
       "citation": "EPA TRI (facility 25276BFXXXROANE)"
@@ -495,6 +554,7 @@
       "name": "Stella-Jones Corporation",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Stella-Jones Inc",
+      "state": "WV",
       "lat": 38.8683,
       "lon": -81.4053,
       "citation": "EPA TRI (facility 25276BRKPRROUTE)"
@@ -503,6 +563,7 @@
       "name": "Armacell Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Armacell Us Holdings Inc",
+      "state": "WV",
       "lat": 38.8042,
       "lon": -81.3542,
       "citation": "EPA TRI (facility 25276MNRCH388MA)"
@@ -511,6 +572,7 @@
       "name": "West Virginia Steel Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Raleigh Mine & Industrial Supply",
+      "state": "WV",
       "lat": 38.3519,
       "lon": -81.6242,
       "citation": "EPA TRI (facility 25301WSTVR900BR)"
@@ -519,6 +581,7 @@
       "name": "United Dairy Inc.  (Valley Bell)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.3631,
       "lon": -81.6467,
       "citation": "EPA TRI (facility 25302BRDNN508RO)"
@@ -527,6 +590,7 @@
       "name": "Covestro Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Covestro Llc",
+      "state": "WV",
       "lat": 38.3678,
       "lon": -81.6872,
       "citation": "EPA TRI (facility 25303CWSTV437MA)"
@@ -535,6 +599,7 @@
       "name": "Fmc Corp Spring Hill Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Fmc Corp",
+      "state": "WV",
       "lat": 38.3708,
       "lon": -81.6958,
       "citation": "EPA TRI (facility 25303FMCCR3200M)"
@@ -543,6 +608,7 @@
       "name": "Innovative Water Care Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Olympus Water Us Holding Corp",
+      "state": "WV",
       "lat": 38.3667,
       "lon": -81.7061,
       "citation": "EPA TRI (facility 25303LNCRP95MAC)"
@@ -551,6 +617,7 @@
       "name": "Union Carbide Corp Technology Park Operations",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Dow Inc",
+      "state": "WV",
       "lat": 38.3583,
       "lon": -81.7097,
       "citation": "EPA TRI (facility 25303NNCRB32003)"
@@ -559,6 +626,7 @@
       "name": "Union Carbide Corp South Charleston Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Dow Inc",
+      "state": "WV",
       "lat": 38.3686,
       "lon": -81.6967,
       "citation": "EPA TRI (facility 25303NNCRB437MA)"
@@ -567,6 +635,7 @@
       "name": "South Charleston Stamping & Manufacturing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Mayflower Corp",
+      "state": "WV",
       "lat": 38.3653,
       "lon": -81.7014,
       "citation": "EPA TRI (facility 25303STHCH3100M)"
@@ -575,6 +644,7 @@
       "name": "Eastman Chemical Co Eastman Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Eastman Chemical Co",
+      "state": "WV",
       "lat": 38.3678,
       "lon": -81.6872,
       "citation": "EPA TRI (facility 25303TXSST437XX)"
@@ -583,6 +653,7 @@
       "name": "Pennzoil-Quaker State Co Etowah Terminal",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Pennzoil-Quaker State Co",
+      "state": "WV",
       "lat": 38.3692,
       "lon": -81.6056,
       "citation": "EPA TRI (facility 25311PNNZL1015B)"
@@ -591,6 +662,7 @@
       "name": "Mplx Terminals Llc - Charleston Wv Terminal",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Marathon Petroleum Corp",
+      "state": "WV",
       "lat": 38.3517,
       "lon": -81.6492,
       "citation": "EPA TRI (facility 25314XXNCHSTAND)"
@@ -599,6 +671,7 @@
       "name": "Praxair Com",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Praxair Inc",
+      "state": "WV",
       "lat": 38.2392,
       "lon": -81.56,
       "citation": "EPA TRI (facility 25315LQDCR10637)"
@@ -607,6 +680,7 @@
       "name": "Brentwood Industries Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Brentwood Industries Inc",
+      "state": "WV",
       "lat": 39.3889,
       "lon": -78.0236,
       "citation": "EPA TRI (facility 25401BRNTW2011I)"
@@ -615,6 +689,7 @@
       "name": "Chem-Pak Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.3892,
       "lon": -78.0217,
       "citation": "EPA TRI (facility 25401CHMPK242CO)"
@@ -623,6 +698,7 @@
       "name": "Ecolab Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ecolab Inc",
+      "state": "WV",
       "lat": 39.4119,
       "lon": -77.9006,
       "citation": "EPA TRI (facility 25401CLBNC942BA)"
@@ -631,6 +707,7 @@
       "name": "Continental Brick Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.4328,
       "lon": -77.9583,
       "citation": "EPA TRI (facility 25401CNTNN154CH)"
@@ -639,6 +716,7 @@
       "name": "Argos Usa - Martinsburg",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Summit Materials Llc",
+      "state": "WV",
       "lat": 39.4344,
       "lon": -77.9794,
       "citation": "EPA TRI (facility 25401CPTLCSOUTH)"
@@ -647,6 +725,7 @@
       "name": "World Kitchen Inc Martinsburg Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "World Kitchen Inc",
+      "state": "WV",
       "lat": 39.3839,
       "lon": -78.005,
       "citation": "EPA TRI (facility 25401CRNNGROUTE)"
@@ -655,6 +734,7 @@
       "name": "Griffith Energy Services Inc Boyd Ave Wv",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Star Group Lp",
+      "state": "WV",
       "lat": 39.4633,
       "lon": -77.9653,
       "citation": "EPA TRI (facility 25401GRFFTBOYDA)"
@@ -663,6 +743,7 @@
       "name": "Maax Us Corp.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Bath Group Llc",
+      "state": "WV",
       "lat": 39.5,
       "lon": -77.95,
       "citation": "EPA TRI (facility 25401KRPLS2011M)"
@@ -671,6 +752,7 @@
       "name": "Quad/Graphics Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Quad/Graphics Inc",
+      "state": "WV",
       "lat": 39.5106,
       "lon": -77.9561,
       "citation": "EPA TRI (facility 25401QDGRP855CA)"
@@ -679,6 +761,7 @@
       "name": "Sexton Can Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Sexton Can Co Inc",
+      "state": "WV",
       "lat": 39.4375,
       "lon": -78.9583,
       "citation": "EPA TRI (facility 25401SXTNCFAIRF)"
@@ -687,6 +770,7 @@
       "name": "Lippert Components Inc Plant 21",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Lippert Components Manufacturing Inc",
+      "state": "WV",
       "lat": 39.4903,
       "lon": -78.2947,
       "citation": "EPA TRI (facility 25411LPPRT63JRH)"
@@ -695,6 +779,7 @@
       "name": "Tom Seely Furniture",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.5575,
       "lon": -78.2664,
       "citation": "EPA TRI (facility 25411SLYPN522SO)"
@@ -703,6 +788,7 @@
       "name": "Griffith Energy Services Inc-Charlestown",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Star Group Lp",
+      "state": "WV",
       "lat": 39.2867,
       "lon": -77.8711,
       "citation": "EPA TRI (facility 25414GRFFTMARTI)"
@@ -711,6 +797,7 @@
       "name": "Fasloc Inc Potomac River Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Dsi Underground Systems Inc",
+      "state": "WV",
       "lat": 39.5417,
       "lon": -77.9083,
       "citation": "EPA TRI (facility 25419DPNTPROUTE)"
@@ -719,6 +806,7 @@
       "name": "National Fruit Product Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.3658,
       "lon": -78.0792,
       "citation": "EPA TRI (facility 25420NTNLFRTE1B)"
@@ -727,6 +815,7 @@
       "name": "Knauf Insulation Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Knauf Insulation",
+      "state": "WV",
       "lat": 39.405,
       "lon": -78.0231,
       "citation": "EPA TRI (facility 25428GRDNFI81TA)"
@@ -735,6 +824,7 @@
       "name": "Knouse Foods Co-Op Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.6167,
       "lon": -78.05,
       "citation": "EPA TRI (facility 25428KNSFDOLDRT)"
@@ -743,6 +833,7 @@
       "name": "Dalb Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.3542,
       "lon": -77.875,
       "citation": "EPA TRI (facility 25430DLBNC105IN)"
@@ -751,6 +842,7 @@
       "name": "Automated Merchandising Systems Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Seaga Manufacturing Inc",
+      "state": "WV",
       "lat": 39.3581,
       "lon": -77.8622,
       "citation": "EPA TRI (facility 25430TMTDM109WB)"
@@ -759,6 +851,7 @@
       "name": "Utc Fire & Security",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Kidde Fire Protection Inc (A Utc Fire & Sec",
+      "state": "WV",
       "lat": 39.2983,
       "lon": -77.8631,
       "citation": "EPA TRI (facility 25438BDGRPNMILD)"
@@ -767,6 +860,7 @@
       "name": "Ufp Ranson Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ufp Industries Inc",
+      "state": "WV",
       "lat": 39.3086,
       "lon": -77.8603,
       "citation": "EPA TRI (facility 25438NVRSLPOBOX)"
@@ -775,6 +869,7 @@
       "name": "Sturm Rapid Response Center",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Sulzer Pumps (Us) Inc",
+      "state": "WV",
       "lat": 38.4006,
       "lon": -82.2836,
       "citation": "EPA TRI (facility 25504STRMD1305M)"
@@ -783,6 +878,7 @@
       "name": "Panther Creek - Samples",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Blackhawk Mining Llc",
+      "state": "WV",
       "lat": 38.0506,
       "lon": -81.475,
       "citation": "EPA TRI (facility 25507CTNRY5914C)"
@@ -791,6 +887,7 @@
       "name": "Kanawha River Terminals Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Electric Fuels Corp",
+      "state": "WV",
       "lat": 38.3972,
       "lon": -82.5583,
       "citation": "EPA TRI (facility 25507KNWHRMAINS)"
@@ -799,6 +896,7 @@
       "name": "American National Rubber",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anr Partners Inc",
+      "state": "WV",
       "lat": 38.3917,
       "lon": -82.5586,
       "citation": "EPA TRI (facility 25507MRCNNMAINH)"
@@ -807,6 +905,7 @@
       "name": "Service Wire Culloden",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Arthur'S Enterprises Inc",
+      "state": "WV",
       "lat": 38.4172,
       "lon": -82.0536,
       "citation": "EPA TRI (facility 25510SRVCW300DA)"
@@ -815,6 +914,7 @@
       "name": "Icl-Ip America Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Icl Specialty Products North America Inc",
+      "state": "WV",
       "lat": 38.7767,
       "lon": -82.2083,
       "citation": "EPA TRI (facility 25515KZCHMSTATE)"
@@ -823,6 +923,7 @@
       "name": "Willert Home Products",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Willert Home Products",
+      "state": "WV",
       "lat": 38.4069,
       "lon": -82.585,
       "citation": "EPA TRI (facility 25530KNVCH21STB)"
@@ -831,6 +932,7 @@
       "name": "Braskem America Inc Neal Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Braskem America Inc",
+      "state": "WV",
       "lat": 38.3722,
       "lon": -82.5953,
       "citation": "EPA TRI (facility 25530RSTCHOLDBI)"
@@ -839,6 +941,7 @@
       "name": "Aoc Materials Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Aoc Materials Llc",
+      "state": "WV",
       "lat": 38.3678,
       "lon": -82.5958,
       "citation": "EPA TRI (facility 25530SHLNDBIGSA)"
@@ -847,6 +950,7 @@
       "name": "Rustoleum Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rpm International Inc",
+      "state": "WV",
       "lat": 38.5511,
       "lon": -82.2844,
       "citation": "EPA TRI (facility 25537PRKSC7850O)"
@@ -855,6 +959,7 @@
       "name": "Us Defense National Stockpile Center Point Pleasant Depot",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Us Department Of Defense",
+      "state": "WV",
       "lat": 38.8706,
       "lon": -82.135,
       "citation": "EPA TRI (facility 25550SDFNS2601M)"
@@ -863,6 +968,7 @@
       "name": "Wheeling-Pittsburgh Coal Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Wheeling-Pittsburgh Corp",
+      "state": "WV",
       "lat": 37.7244,
       "lon": -81.9989,
       "citation": "EPA TRI (facility 25638WPCLCRTE44)"
@@ -871,6 +977,7 @@
       "name": "Rawl Sales & Processing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.6506,
       "lon": -82.1878,
       "citation": "EPA TRI (facility 25678RWLSLRTE49)"
@@ -879,6 +986,7 @@
       "name": "Production Efficiency Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.695,
       "lon": -82.1419,
       "citation": "EPA TRI (facility 25690PRDCTRT655)"
@@ -887,6 +995,7 @@
       "name": "Bek Engineering Co (Dba Level 1 Fasteners)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4167,
       "lon": -82.5,
       "citation": "EPA TRI (facility 25701BKNGN3THIR)"
@@ -895,6 +1004,7 @@
       "name": "Owens-Brockway Glass Container Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Owens-Illinois Inc",
+      "state": "WV",
       "lat": 38.3764,
       "lon": -82.4631,
       "citation": "EPA TRI (facility 25701WNSLL8THAV)"
@@ -903,6 +1013,7 @@
       "name": "Xcel-Premet Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.3894,
       "lon": -82.4519,
       "citation": "EPA TRI (facility 25701XCLPR2140P)"
@@ -911,6 +1022,7 @@
       "name": "D & E Industries Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.46,
       "lon": -82.3094,
       "citation": "EPA TRI (facility 25702DNSTRKYLEL)"
@@ -919,6 +1031,7 @@
       "name": "J H Fletcher & Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4117,
       "lon": -82.4653,
       "citation": "EPA TRI (facility 25702JHFLT707WE)"
@@ -927,6 +1040,7 @@
       "name": "Alcon Research Ltd.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Novartis Us",
+      "state": "WV",
       "lat": 38.4597,
       "lon": -82.3083,
       "citation": "EPA TRI (facility 25702LCNLB6065K)"
@@ -935,6 +1049,7 @@
       "name": "American Medical Indl Supply Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4281,
       "lon": -82.4206,
       "citation": "EPA TRI (facility 25703MRCNM22122)"
@@ -943,6 +1058,7 @@
       "name": "Rubberlite Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4306,
       "lon": -82.4139,
       "citation": "EPA TRI (facility 25703RBRLT2501G)"
@@ -951,6 +1067,7 @@
       "name": "Swva Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Steel Dynamics Inc",
+      "state": "WV",
       "lat": 38.4269,
       "lon": -82.4272,
       "citation": "EPA TRI (facility 25703STLFW17THS)"
@@ -959,6 +1076,7 @@
       "name": "Transfab Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4594,
       "lon": -82.3083,
       "citation": "EPA TRI (facility 25703TRNSFKYLEL)"
@@ -967,6 +1085,7 @@
       "name": "Columbia Paint Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Columbia Paint Corp",
+      "state": "WV",
       "lat": 38.4106,
       "lon": -82.465,
       "citation": "EPA TRI (facility 25704CLMBP641JA)"
@@ -975,6 +1094,7 @@
       "name": "Huntington Plating Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4114,
       "lon": -82.4653,
       "citation": "EPA TRI (facility 25704HNTNG625MO)"
@@ -983,6 +1103,7 @@
       "name": "J.H. Fletcher & Co.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.4167,
       "lon": -82.375,
       "citation": "EPA TRI (facility 25705JHFLT402HI)"
@@ -991,6 +1112,7 @@
       "name": "Acf Huntington Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Acf Industries Llc",
+      "state": "WV",
       "lat": 38.3983,
       "lon": -82.4208,
       "citation": "EPA TRI (facility 25710CFNDS2300T)"
@@ -999,6 +1121,7 @@
       "name": "Huntington Publishing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Gannett Co Inc",
+      "state": "WV",
       "lat": 38.4194,
       "lon": -82.4439,
       "citation": "EPA TRI (facility 25710HNTNG9465T)"
@@ -1007,6 +1130,7 @@
       "name": "Thistle Processing Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Berkshire Hathaway Inc",
+      "state": "WV",
       "lat": 38.4125,
       "lon": -82.3842,
       "citation": "EPA TRI (facility 25720NCLLYRIVER)"
@@ -1015,6 +1139,7 @@
       "name": "Gravefork Coal Handling Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 37.6736,
       "lon": -81.3717,
       "citation": "EPA TRI (facility 25865GRVFRRTE54)"
@@ -1023,6 +1148,7 @@
       "name": "Georgia-Pacific Wood Products Llc - Mt. Hope Osb",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Koch Industries Inc",
+      "state": "WV",
       "lat": 37.9028,
       "lon": -81.1875,
       "citation": "EPA TRI (facility 25880GRGPC79NOR)"
@@ -1031,6 +1157,7 @@
       "name": "Cue Of West Virginia Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Cue Inc",
+      "state": "WV",
       "lat": 37.8797,
       "lon": -81.1856,
       "citation": "EPA TRI (facility 25880LNTXNPRICE)"
@@ -1039,6 +1166,7 @@
       "name": "East Gulf Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "United Coal Co",
+      "state": "WV",
       "lat": 37.64,
       "lon": -81.285,
       "citation": "EPA TRI (facility 25915LFTFRRTE33)"
@@ -1047,6 +1175,7 @@
       "name": "Georgia-Pacific Corp Rainelle Wv",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Georgia-Pacific Corp",
+      "state": "WV",
       "lat": 37.9764,
       "lon": -80.7656,
       "citation": "EPA TRI (facility 25962GRGPCSNAKE)"
@@ -1055,6 +1184,7 @@
       "name": "Meadwestvaco Corp Rupert Area",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Meadwestvaco Corp",
+      "state": "WV",
       "lat": 38.05,
       "lon": -80.6042,
       "citation": "EPA TRI (facility 25984WSTVC2007T)"
@@ -1063,6 +1193,7 @@
       "name": "Blue Ribbon Paint Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.0589,
       "lon": -80.7267,
       "citation": "EPA TRI (facility 26003BLRBB2321M)"
@@ -1071,6 +1202,7 @@
       "name": "Centre Foundry & Machine Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Centre Foundry & Machine Co",
+      "state": "WV",
       "lat": 40.1039,
       "lon": -80.7019,
       "citation": "EPA TRI (facility 26003CNTRF74WAR)"
@@ -1079,6 +1211,7 @@
       "name": "Coronet Foods Inc East",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.0811,
       "lon": -80.7178,
       "citation": "EPA TRI (facility 26003CRNTF225MC)"
@@ -1087,6 +1220,7 @@
       "name": "Custom Marble Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Custom Marble Corp",
+      "state": "WV",
       "lat": 40.0367,
       "lon": -80.6672,
       "citation": "EPA TRI (facility 26003CSTMM90ECO)"
@@ -1095,6 +1229,7 @@
       "name": "Hubco Bronze Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Advance Bronze Inc",
+      "state": "WV",
       "lat": 40.0789,
       "lon": -80.6844,
       "citation": "EPA TRI (facility 26003HBCBR3INDU)"
@@ -1103,6 +1238,7 @@
       "name": "Hubco Bronze Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.0583,
       "lon": -80.7125,
       "citation": "EPA TRI (facility 26003HBCNC21418)"
@@ -1111,6 +1247,7 @@
       "name": "Hess Co Industries Of Wv Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Hess Co Industries Inc",
+      "state": "WV",
       "lat": 40.1833,
       "lon": -80.65,
       "citation": "EPA TRI (facility 26003HSSCN7020T)"
@@ -1119,6 +1256,7 @@
       "name": "Ohio Valley Steel Co Fabrication Div",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.0619,
       "lon": -80.7114,
       "citation": "EPA TRI (facility 26003HVLLY20THS)"
@@ -1127,6 +1265,7 @@
       "name": "Ohio Valley Steel Co Bumgardner Fndy Div",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ohio Valley Steel Co",
+      "state": "WV",
       "lat": 40.0478,
       "lon": -80.6656,
       "citation": "EPA TRI (facility 26003HVLLYCOMMU)"
@@ -1135,6 +1274,7 @@
       "name": "Posi Clean Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.0533,
       "lon": -80.7261,
       "citation": "EPA TRI (facility 26003PSCLN33RDC)"
@@ -1143,6 +1283,7 @@
       "name": "Positech International Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.1144,
       "lon": -80.7039,
       "citation": "EPA TRI (facility 26003PSTCH170NO)"
@@ -1151,6 +1292,7 @@
       "name": "Safety-Kleen Systems Wheeling (Whe)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Clean Harbors Inc",
+      "state": "WV",
       "lat": 40.075,
       "lon": -80.7078,
       "citation": "EPA TRI (facility 26003SFTYK10IND)"
@@ -1159,6 +1301,7 @@
       "name": "Swisher International Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Swisher International Inc",
+      "state": "WV",
       "lat": 40.1108,
       "lon": -80.7264,
       "citation": "EPA TRI (facility 26003SWSHR4000W)"
@@ -1167,6 +1310,7 @@
       "name": "Wheeling-Pittsburgh Steel Corp Labelle Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Wheeling-Pittsburgh Corp",
+      "state": "WV",
       "lat": 40.0556,
       "lon": -80.7222,
       "citation": "EPA TRI (facility 26003WHLNG31STS)"
@@ -1175,6 +1319,7 @@
       "name": "Shoemaker Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Consol Energy Inc",
+      "state": "WV",
       "lat": 40.02,
       "lon": -80.7306,
       "citation": "EPA TRI (facility 26031CNSLDRTE2X)"
@@ -1183,6 +1328,7 @@
       "name": "Laclede Steel Benwood",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Laclede Steel Co",
+      "state": "WV",
       "lat": 40.0083,
       "lon": -80.7333,
       "citation": "EPA TRI (facility 26031LCLDS8THMC)"
@@ -1191,6 +1337,7 @@
       "name": "Boc Industrial Gases",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Boc Group Inc",
+      "state": "WV",
       "lat": 40.5633,
       "lon": -80.6592,
       "citation": "EPA TRI (facility 26034RCNDSRTE2S)"
@@ -1199,6 +1346,7 @@
       "name": "Congo Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Alcan Aluminum Corp",
+      "state": "WV",
       "lat": 40.6131,
       "lon": -80.5631,
       "citation": "EPA TRI (facility 26034RRNHF1100M)"
@@ -1207,6 +1355,7 @@
       "name": "Follansbee Steel Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Louis Berkman Co",
+      "state": "WV",
       "lat": 40.3208,
       "lon": -80.5875,
       "citation": "EPA TRI (facility 26037FLLNS1STAT)"
@@ -1215,6 +1364,7 @@
       "name": "Koppers Follansbee Tar Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Koppers Inc",
+      "state": "WV",
       "lat": 40.3369,
       "lon": -80.6061,
       "citation": "EPA TRI (facility 26037KPPRSKOPPE)"
@@ -1223,6 +1373,7 @@
       "name": "Wheeling-Nippon Steel",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.3275,
       "lon": -80.5958,
       "citation": "EPA TRI (facility 26037WHLNGPENNM)"
@@ -1231,6 +1382,7 @@
       "name": "Mountain State Carbon Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Cleveland-Cliffs Inc",
+      "state": "WV",
       "lat": 40.3333,
       "lon": -80.6,
       "citation": "EPA TRI (facility 26037WHLNGROUTE)"
@@ -1239,6 +1391,7 @@
       "name": "Triangle Wire & Cable Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.9361,
       "lon": -80.7556,
       "citation": "EPA TRI (facility 26038TRNGL1701W)"
@@ -1247,6 +1400,7 @@
       "name": "Columbian Chemicals Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Columbian Chemicals Acquisition Llc",
+      "state": "WV",
       "lat": 39.7978,
       "lon": -80.8239,
       "citation": "EPA TRI (facility 26041CLMBNROUTE)"
@@ -1255,6 +1409,7 @@
       "name": "American Electric Power Kammer/Mitchell Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Electric Power",
+      "state": "WV",
       "lat": 39.8461,
       "lon": -80.8186,
       "citation": "EPA TRI (facility 26041KMMRPRTE2X)"
@@ -1263,6 +1418,7 @@
       "name": "Hanlin Chemicals West Virginia Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Hanlin Group Inc",
+      "state": "WV",
       "lat": 39.9028,
       "lon": -80.8067,
       "citation": "EPA TRI (facility 26041LCPCHROUTE)"
@@ -1271,6 +1427,7 @@
       "name": "Rain Cii Carbon  Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rain Cii Carbon Llc",
+      "state": "WV",
       "lat": 39.8336,
       "lon": -80.8206,
       "citation": "EPA TRI (facility 26041VNTRCRTE2S)"
@@ -1279,6 +1436,7 @@
       "name": "Homer Laughlin China Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.6222,
       "lon": -80.6106,
       "citation": "EPA TRI (facility 26050HMRLGSIXTH)"
@@ -1287,6 +1445,7 @@
       "name": "Newchem, Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.5083,
       "lon": -80.5931,
       "citation": "EPA TRI (facility 26050NWLLSPOBOX)"
@@ -1295,6 +1454,7 @@
       "name": "Pennzoil-Quaker State (Dba Sopus Products)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Shell Petroleum Inc",
+      "state": "WV",
       "lat": 40.6,
       "lon": -80.6333,
       "citation": "EPA TRI (facility 26050QKRSTRT2XX)"
@@ -1303,6 +1463,7 @@
       "name": "Ergon West Virginia Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ergon Inc",
+      "state": "WV",
       "lat": 40.6167,
       "lon": -80.625,
       "citation": "EPA TRI (facility 26050RGNWSSTATE)"
@@ -1311,6 +1472,7 @@
       "name": "P B & S Chemical Co Inc Proctor Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Brenntag Usa",
+      "state": "WV",
       "lat": 39.75,
       "lon": -80.86,
       "citation": "EPA TRI (facility 26055PBSCHRTE2B)"
@@ -1319,6 +1481,7 @@
       "name": "Chrome Deposit Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Chrome Deposit Corp",
+      "state": "WV",
       "lat": 40.3881,
       "lon": -80.615,
       "citation": "EPA TRI (facility 26062CHRMD2894B)"
@@ -1327,6 +1490,7 @@
       "name": "Holcim (Us) Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Holcim (Us) Inc",
+      "state": "WV",
       "lat": 40.385,
       "lon": -80.6058,
       "citation": "EPA TRI (facility 26062HLCMS4996F)"
@@ -1335,6 +1499,7 @@
       "name": "Levolor Co Weirton Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Levolor Co",
+      "state": "WV",
       "lat": 40.3833,
       "lon": -80.6167,
       "citation": "EPA TRI (facility 26062LVLRL2898B)"
@@ -1343,6 +1508,7 @@
       "name": "Crown Cork & Seal Co (Usa) Inc Crown Closure Div",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Crown Holdings Inc",
+      "state": "WV",
       "lat": 40.3872,
       "lon": -80.6211,
       "citation": "EPA TRI (facility 26062NCHRH3011B)"
@@ -1351,6 +1517,7 @@
       "name": "Neo Industries (Weirton) Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Neo Industries (Usa) Inc",
+      "state": "WV",
       "lat": 40.3747,
       "lon": -80.6256,
       "citation": "EPA TRI (facility 26062NNDST3025B)"
@@ -1359,6 +1526,7 @@
       "name": "Applied Dynamics",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.3897,
       "lon": -80.6175,
       "citation": "EPA TRI (facility 26062PPLDD200FO)"
@@ -1367,6 +1535,7 @@
       "name": "Pori International Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.4167,
       "lon": -80.5917,
       "citation": "EPA TRI (facility 26062PRNTRLEEAV)"
@@ -1375,6 +1544,7 @@
       "name": "Precoat Metals",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Azz Inc",
+      "state": "WV",
       "lat": 40.3867,
       "lon": -80.6061,
       "citation": "EPA TRI (facility 26062RLLCT4502F)"
@@ -1383,6 +1553,7 @@
       "name": "Air Products & Chemicals Inc Weirton Wv Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Air Products & Chemicals Inc",
+      "state": "WV",
       "lat": 40.4319,
       "lon": -80.6014,
       "citation": "EPA TRI (facility 26062RPRDC4THAN)"
@@ -1391,6 +1562,7 @@
       "name": "Ball Aerosol & Specialty Container Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ball Corp",
+      "state": "WV",
       "lat": 40.3892,
       "lon": -80.6217,
       "citation": "EPA TRI (facility 26062SCNCM3028B)"
@@ -1399,6 +1571,7 @@
       "name": "Sal Chemical Co Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.3903,
       "lon": -80.625,
       "citation": "EPA TRI (facility 26062SLCHM3036B)"
@@ -1407,6 +1580,7 @@
       "name": "Banner Fibreboard Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.2833,
       "lon": -80.6083,
       "citation": "EPA TRI (facility 26070BNNRFWVAST)"
@@ -1415,6 +1589,7 @@
       "name": "Eagle Manufacturing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 40.2869,
       "lon": -80.6103,
       "citation": "EPA TRI (facility 26070GLMNF24THC)"
@@ -1423,6 +1598,7 @@
       "name": "Schott Scientific Glass",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Schott Corp",
+      "state": "WV",
       "lat": 39.2594,
       "lon": -81.5361,
       "citation": "EPA TRI (facility 26101CRNNG1624S)"
@@ -1431,6 +1607,7 @@
       "name": "Ames Co Plant #2",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Usi American Holdings Inc",
+      "state": "WV",
       "lat": 39.2514,
       "lon": -81.5367,
       "citation": "EPA TRI (facility 26101MSCPL3301C)"
@@ -1439,6 +1616,7 @@
       "name": "Ames True Temper Plant 1",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Us Industries Inc",
+      "state": "WV",
       "lat": 39.2456,
       "lon": -81.5261,
       "citation": "EPA TRI (facility 26101MSCPL3801C)"
@@ -1447,6 +1625,7 @@
       "name": "B-T Energy Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "B-T Energy Corp",
+      "state": "WV",
       "lat": 39.2475,
       "lon": -81.5575,
       "citation": "EPA TRI (facility 26102BTNRG516CA)"
@@ -1455,6 +1634,7 @@
       "name": "Mountain State Steel Castings, Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.2475,
       "lon": -81.5575,
       "citation": "EPA TRI (facility 26102MNTNS300BR)"
@@ -1463,6 +1643,7 @@
       "name": "Johns Manville Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Johns Manville Corp",
+      "state": "WV",
       "lat": 39.3167,
       "lon": -81.5556,
       "citation": "EPA TRI (facility 26105MNVLL29053)"
@@ -1471,6 +1652,7 @@
       "name": "Axens N.A. Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Axens North America Inc",
+      "state": "WV",
       "lat": 39.3561,
       "lon": -81.3058,
       "citation": "EPA TRI (facility 26134CRTRN74CAT)"
@@ -1479,6 +1661,7 @@
       "name": "Phibro Animal Health Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Phibro Animal Health Corp",
+      "state": "WV",
       "lat": 39.3536,
       "lon": -81.3125,
       "citation": "EPA TRI (facility 26134MRCNC1DUGG)"
@@ -1487,6 +1670,7 @@
       "name": "Pleasants Power Station",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Energy Harbor Llc",
+      "state": "WV",
       "lat": 39.3678,
       "lon": -81.1292,
       "citation": "EPA TRI (facility 26134PLSNTNO1PO)"
@@ -1495,6 +1679,7 @@
       "name": "Bfgoodrich Aerospace",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Bfgoodrich Co",
+      "state": "WV",
       "lat": 38.9108,
       "lon": -81.9139,
       "citation": "EPA TRI (facility 26147BFGDRRT1BO)"
@@ -1503,6 +1688,7 @@
       "name": "Rubber Crafters Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rubber Crafters Inc",
+      "state": "WV",
       "lat": 38.9347,
       "lon": -81.0931,
       "citation": "EPA TRI (facility 26147RBBRCROUTE)"
@@ -1511,6 +1697,7 @@
       "name": "Covestro",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Covestro Llc",
+      "state": "WV",
       "lat": 39.7264,
       "lon": -80.8306,
       "citation": "EPA TRI (facility 26155MBYCRSTATE)"
@@ -1519,6 +1706,7 @@
       "name": "Westlake Natrium Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Westlake Corp",
+      "state": "WV",
       "lat": 39.7369,
       "lon": -80.8408,
       "citation": "EPA TRI (facility 26155PPGNDSTATE)"
@@ -1527,6 +1715,7 @@
       "name": "Corning Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Corning Inc",
+      "state": "WV",
       "lat": 39.6083,
       "lon": -80.95,
       "citation": "EPA TRI (facility 26159CRNNGFIRST)"
@@ -1535,6 +1724,7 @@
       "name": "Hartley Manufacturing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Hartley Oil Co",
+      "state": "WV",
       "lat": 38.9369,
       "lon": -81.7583,
       "citation": "EPA TRI (facility 26164HRTLYRTE68)"
@@ -1543,6 +1733,7 @@
       "name": "Century Aluminum Of West Virginia Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Century Aluminum Co",
+      "state": "WV",
       "lat": 38.9358,
       "lon": -81.8233,
       "citation": "EPA TRI (facility 26164KSRLMPOBOX)"
@@ -1551,6 +1742,7 @@
       "name": "Constellium Rolled Products Ravenswood Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Constellium Us Holding 1 Llc",
+      "state": "WV",
       "lat": 38.9358,
       "lon": -81.8364,
       "citation": "EPA TRI (facility 26164PCHNYROUTE)"
@@ -1559,6 +1751,7 @@
       "name": "Mpm Silicones Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Mom Holding Co",
+      "state": "WV",
       "lat": 39.4894,
       "lon": -81.09,
       "citation": "EPA TRI (facility 26175NNCRBSTATE)"
@@ -1567,6 +1760,7 @@
       "name": "Precision International Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.5603,
       "lon": -80.9989,
       "citation": "EPA TRI (facility 26175PRCSN435BU)"
@@ -1575,6 +1769,7 @@
       "name": "Rpr Ind Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rpr Ind Inc",
+      "state": "WV",
       "lat": 39.0944,
       "lon": -81.0772,
       "citation": "EPA TRI (facility 26178RBBRCROUTE)"
@@ -1583,6 +1778,7 @@
       "name": "Delrin Usa Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Delrin Usa Llc",
+      "state": "WV",
       "lat": 39.27,
       "lon": -81.6692,
       "citation": "EPA TRI (facility 26180DPNTWDUPON)"
@@ -1591,6 +1787,7 @@
       "name": "Aga Gas Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Aga Gas Inc",
+      "state": "WV",
       "lat": 39.2461,
       "lon": -81.7683,
       "citation": "EPA TRI (facility 26181GGSNCDUPON)"
@@ -1599,6 +1796,7 @@
       "name": "Northwest Pipe Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Northwest Pipe Co",
+      "state": "WV",
       "lat": 39.2544,
       "lon": -81.6928,
       "citation": "EPA TRI (facility 26181LBFSTRTE89)"
@@ -1607,6 +1805,7 @@
       "name": "Cabot Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Cabot Corp",
+      "state": "WV",
       "lat": 39.3406,
       "lon": -81.3503,
       "citation": "EPA TRI (facility 26184CBTCRSTATE)"
@@ -1615,6 +1814,7 @@
       "name": "Farr Manufacturing & Engineering Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.3897,
       "lon": -81.4406,
       "citation": "EPA TRI (facility 26187FRRMN200AR)"
@@ -1623,6 +1823,7 @@
       "name": "Fenton Art Glass Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "The Fenton Art Glass Co",
+      "state": "WV",
       "lat": 39.4028,
       "lon": -81.4617,
       "citation": "EPA TRI (facility 26187THFNT700EL)"
@@ -1631,6 +1832,7 @@
       "name": "Walker Systems Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "The Wiremold Co",
+      "state": "WV",
       "lat": 39.3925,
       "lon": -81.4669,
       "citation": "EPA TRI (facility 26187WLKRS1000I)"
@@ -1639,6 +1841,7 @@
       "name": "Cytec Industries Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Syensqo Holding Inc",
+      "state": "WV",
       "lat": 39.3561,
       "lon": -81.3058,
       "citation": "EPA TRI (facility 26190MRCNCSTRT2)"
@@ -1647,6 +1850,7 @@
       "name": "Corhart Refractories",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Saint-Gobain Corp",
+      "state": "WV",
       "lat": 38.9911,
       "lon": -80.2442,
       "citation": "EPA TRI (facility 26201CRHRTROUTE)"
@@ -1655,6 +1859,7 @@
       "name": "Coastal Lumber Co - Buckh Annon",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.9833,
       "lon": -80.2167,
       "citation": "EPA TRI (facility 26201CSTLLFIFTH)"
@@ -1663,6 +1868,7 @@
       "name": "Savin Lumber",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.0431,
       "lon": -80.2272,
       "citation": "EPA TRI (facility 26201SVNLM35TUR)"
@@ -1671,6 +1877,7 @@
       "name": "Smr Technologies Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Loar Group Inc",
+      "state": "WV",
       "lat": 38.2283,
       "lon": -80.5842,
       "citation": "EPA TRI (facility 26202SMRTCSTARR)"
@@ -1679,6 +1886,7 @@
       "name": "Brooks Run Coal Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Amfire Llc",
+      "state": "WV",
       "lat": 38.5178,
       "lon": -80.6128,
       "citation": "EPA TRI (facility 26203BRKSR61MIS)"
@@ -1687,6 +1895,7 @@
       "name": "Columbia Forest Products Columbia West Virginia Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Columbia Forest Products",
+      "state": "WV",
       "lat": 38.3417,
       "lon": -80.6583,
       "citation": "EPA TRI (facility 26205CLMBW111CA)"
@@ -1695,6 +1904,7 @@
       "name": "Jeld-Wen",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Jeld-Wen Inc",
+      "state": "WV",
       "lat": 38.3469,
       "lon": -80.6569,
       "citation": "EPA TRI (facility 26205JLDWN600JE)"
@@ -1703,6 +1913,7 @@
       "name": "Icg Eastern Llc Birch River Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Arch Coal Inc",
+      "state": "WV",
       "lat": 38.4222,
       "lon": -80.4294,
       "citation": "EPA TRI (facility 26206VRGRNRTE82)"
@@ -1711,6 +1922,7 @@
       "name": "Coastal Lumber Co - Hacke R Valley",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.6333,
       "lon": -80.4,
       "citation": "EPA TRI (facility 26222CSTLLWVRTE)"
@@ -1719,6 +1931,7 @@
       "name": "Coastal Lumber Co - Poe Run Sawmill",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.9167,
       "lon": -79.8167,
       "citation": "EPA TRI (facility 26241CSTLL1105U)"
@@ -1727,6 +1940,7 @@
       "name": "Coastal Lumber Co Elkins Yard",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.9167,
       "lon": -79.85,
       "citation": "EPA TRI (facility 26241CSTLLFIFTE)"
@@ -1735,6 +1949,7 @@
       "name": "Guttman Oil Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Guttman Oil Co",
+      "state": "WV",
       "lat": 38.8603,
       "lon": -79.8633,
       "citation": "EPA TRI (facility 26241GTTMNRTE21)"
@@ -1743,6 +1958,7 @@
       "name": "Meadwestvaco Corp Elkins Area",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Meadwestvaco Corp",
+      "state": "WV",
       "lat": 38.7694,
       "lon": -80.0139,
       "citation": "EPA TRI (facility 26241WSTVC525CE)"
@@ -1751,6 +1967,7 @@
       "name": "Ahf Products",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ahf Products Llc",
+      "state": "WV",
       "lat": 38.8172,
       "lon": -79.8781,
       "citation": "EPA TRI (facility 26253BRCHRRTE25)"
@@ -1759,6 +1976,7 @@
       "name": "Concast Metal Prods Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Roessing Bronze Co",
+      "state": "WV",
       "lat": 38.7833,
       "lon": -79.8917,
       "citation": "EPA TRI (facility 26259CNCSTRTES2)"
@@ -1767,6 +1985,7 @@
       "name": "Eastern Hardwoods - Dailey Sawmill",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Eastern Hardwoods Inc",
+      "state": "WV",
       "lat": 38.7933,
       "lon": -79.9,
       "citation": "EPA TRI (facility 26259CSTLLHWY25)"
@@ -1775,6 +1994,7 @@
       "name": "Northwest Hardwoods Inc-Dailey Yard",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Northwest Hardwoods Inc",
+      "state": "WV",
       "lat": 38.8,
       "lon": -79.8833,
       "citation": "EPA TRI (facility 26259CSTLLHWY2A)"
@@ -1783,6 +2003,7 @@
       "name": "Parsons Footwear Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Carter Footwear Inc",
+      "state": "WV",
       "lat": 39.0917,
       "lon": -80.2069,
       "citation": "EPA TRI (facility 26287PRSNS222DA)"
@@ -1791,6 +2012,7 @@
       "name": "Agama Glass Technologies Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.2725,
       "lon": -80.3061,
       "citation": "EPA TRI (facility 26301GLCNV423TU)"
@@ -1799,6 +2021,7 @@
       "name": "Lockheed Martin Aeronautical Systems Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Lockheed Martin Corp",
+      "state": "WV",
       "lat": 39.2833,
       "lon": -80.3167,
       "citation": "EPA TRI (facility 26301LCKHDBRIDG)"
@@ -1807,6 +2030,7 @@
       "name": "Wellslee Coca-Cola",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.25,
       "lon": -80.3181,
       "citation": "EPA TRI (facility 26301WLLSLRT20S)"
@@ -1815,6 +2039,7 @@
       "name": "West Virginia Welding (Dba West Virginia Welding)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Airgas Inc",
+      "state": "WV",
       "lat": 39.2833,
       "lon": -80.35,
       "citation": "EPA TRI (facility 26301WVRGSSTADI)"
@@ -1823,6 +2048,7 @@
       "name": "Amsted Graphite Materials",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Amsted Industries Inc",
+      "state": "WV",
       "lat": 39.2561,
       "lon": -80.2931,
       "citation": "EPA TRI (facility 26323CRCRBPHILI)"
@@ -1831,6 +2057,7 @@
       "name": "Prebena Na Fastener Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Prebena America Inc",
+      "state": "WV",
       "lat": 39.2203,
       "lon": -80.2542,
       "citation": "EPA TRI (facility 26330PRBNNRTE1B)"
@@ -1839,6 +2066,7 @@
       "name": "Pratt & Whitney Engine Services Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rtx Corp",
+      "state": "WV",
       "lat": 39.2997,
       "lon": -80.2228,
       "citation": "EPA TRI (facility 26330PRTTWBENED)"
@@ -1847,6 +2075,7 @@
       "name": "Rex-Hide Industries Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Rex-Hide Industries Inc",
+      "state": "WV",
       "lat": 39.3653,
       "lon": -80.0525,
       "citation": "EPA TRI (facility 26354RXHDNCOUNT)"
@@ -1855,6 +2084,7 @@
       "name": "Harrison Power Station",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Firstenergy Corp",
+      "state": "WV",
       "lat": 39.3836,
       "lon": -80.3161,
       "citation": "EPA TRI (facility 26366HRRSNRTE20)"
@@ -1863,6 +2093,7 @@
       "name": "Composite Pool Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.1033,
       "lon": -80.3994,
       "citation": "EPA TRI (facility 26378CMPST473IN)"
@@ -1871,6 +2102,7 @@
       "name": "Ptc Alliance Jane Lew Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ptc Alliance",
+      "state": "WV",
       "lat": 39.1089,
       "lon": -80.4064,
       "citation": "EPA TRI (facility 26378PTTSBPOBOX)"
@@ -1879,6 +2111,7 @@
       "name": "Latham Pool Products Inc D/B/A Viking Pools-Wv",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Latham Pool Products Inc",
+      "state": "WV",
       "lat": 39.1014,
       "lon": -80.4014,
       "citation": "EPA TRI (facility 26378VKNGP439IN)"
@@ -1887,6 +2120,7 @@
       "name": "Coastal Lumber Co - Smithburg",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 39.2833,
       "lon": -80.7167,
       "citation": "EPA TRI (facility 26436CSTLLHWY50)"
@@ -1895,6 +2129,7 @@
       "name": "Glass Works Wv Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.0369,
       "lon": -80.4536,
       "citation": "EPA TRI (facility 26452LGLSS631EA)"
@@ -1903,6 +2138,7 @@
       "name": "Patriot Mining Co Inc Osage Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anker Group Inc",
+      "state": "WV",
       "lat": 39.6333,
       "lon": -80.0322,
       "citation": "EPA TRI (facility 26504PTRTM1090C)"
@@ -1911,6 +2147,7 @@
       "name": "Patriot Mining Co Inc  Dents Run Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anker Group Inc",
+      "state": "WV",
       "lat": 39.6386,
       "lon": -80.0706,
       "citation": "EPA TRI (facility 26504PTRTM12MIA)"
@@ -1919,6 +2156,7 @@
       "name": "Patriot Mining Co Inc  Metz Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anker Group Inc",
+      "state": "WV",
       "lat": 39.6447,
       "lon": -80.0222,
       "citation": "EPA TRI (facility 26504PTRTM12MIL)"
@@ -1927,6 +2165,7 @@
       "name": "Patriot Mining Co Inc Crown Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anker Group Inc",
+      "state": "WV",
       "lat": 39.5875,
       "lon": -80.0969,
       "citation": "EPA TRI (facility 26504PTRTM22MIL)"
@@ -1935,6 +2174,7 @@
       "name": "Morgantown Energy Associates",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Vicinity Energy",
+      "state": "WV",
       "lat": 39.6397,
       "lon": -79.9606,
       "citation": "EPA TRI (facility 26505MRGNT555BE)"
@@ -1943,6 +2183,7 @@
       "name": "Mylan Pharmaceuticals Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Mylan Laboratories Inc",
+      "state": "WV",
       "lat": 39.6167,
       "lon": -79.95,
       "citation": "EPA TRI (facility 26505MYLNP781CH)"
@@ -1951,6 +2192,7 @@
       "name": "Swanson Plating Corp Inc.",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Swanson Industries Inc",
+      "state": "WV",
       "lat": 39.5333,
       "lon": -80.0033,
       "citation": "EPA TRI (facility 26505SWNSNSTATE)"
@@ -1959,6 +2201,7 @@
       "name": "Si Group Inc - South Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Si Group Inc",
+      "state": "WV",
       "lat": 39.5994,
       "lon": -79.9708,
       "citation": "EPA TRI (facility 26505WSTMR1000D)"
@@ -1967,6 +2210,7 @@
       "name": "Si Group Inc -North Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Si Group Inc",
+      "state": "WV",
       "lat": 39.61,
       "lon": -79.9761,
       "citation": "EPA TRI (facility 26505WSTMRMORGA)"
@@ -1975,6 +2219,7 @@
       "name": "Craft Run Mine Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.7039,
       "lon": -79.9814,
       "citation": "EPA TRI (facility 26507CRFTR1MILE)"
@@ -1983,6 +2228,7 @@
       "name": "Mepco Inc Crooked Run Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.7167,
       "lon": -79.9694,
       "citation": "EPA TRI (facility 26507CRKDRWVCUN)"
@@ -1991,6 +2237,7 @@
       "name": "Crawdad Portal A Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.7097,
       "lon": -79.9836,
       "citation": "EPA TRI (facility 26507CRWDD1MILE)"
@@ -1999,6 +2246,7 @@
       "name": "Coastal Lumber Co - Hazelton Yard",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 39.6667,
       "lon": -79.5167,
       "citation": "EPA TRI (facility 26525CSTLL249HA)"
@@ -2007,6 +2255,7 @@
       "name": "Patriot Mining Company Inc Guston Run South",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Arch Coal Inc",
+      "state": "WV",
       "lat": 39.6711,
       "lon": -80.055,
       "citation": "EPA TRI (facility 26527PTRTMSTATE)"
@@ -2015,6 +2264,7 @@
       "name": "Coastal Coal Co Llc Albright Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Coal Co  Llc",
+      "state": "WV",
       "lat": 39.4847,
       "lon": -79.6394,
       "citation": "EPA TRI (facility 26537CSTLC84ALB)"
@@ -2023,6 +2273,7 @@
       "name": "Matthews International Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Matthews International Corp",
+      "state": "WV",
       "lat": 39.4744,
       "lon": -79.6967,
       "citation": "EPA TRI (facility 26537SHDWBSISLE)"
@@ -2031,6 +2282,7 @@
       "name": "Coresco Inc Booths Creek Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.5172,
       "lon": -79.9686,
       "citation": "EPA TRI (facility 26541CRSCBGOSHE)"
@@ -2039,6 +2291,7 @@
       "name": "Coresco Llc Maidsville Complex",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Mepco Holdings Llc",
+      "state": "WV",
       "lat": 39.7069,
       "lon": -79.9686,
       "citation": "EPA TRI (facility 26541CRSCNRTE10)"
@@ -2047,6 +2300,7 @@
       "name": "Crawdad Portal B",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.7078,
       "lon": -79.9992,
       "citation": "EPA TRI (facility 26541CRWDD2141L)"
@@ -2055,6 +2309,7 @@
       "name": "Fort Martin Power Station",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Firstenergy Corp",
+      "state": "WV",
       "lat": 39.7,
       "lon": -79.9167,
       "citation": "EPA TRI (facility 26541FRTMRRTE53)"
@@ -2063,6 +2318,7 @@
       "name": "Patriot Mining Co Inc  Guston Run Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Anker Group Inc",
+      "state": "WV",
       "lat": 39.6731,
       "lon": -80.0642,
       "citation": "EPA TRI (facility 26546PTRTMUSRTE)"
@@ -2071,6 +2327,7 @@
       "name": "Superior Fibers",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Superior Fibers Llc",
+      "state": "WV",
       "lat": 39.5064,
       "lon": -79.805,
       "citation": "EPA TRI (facility 26547HLLNCROUTE)"
@@ -2079,6 +2336,7 @@
       "name": "Helmick Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.475,
       "lon": -80.1458,
       "citation": "EPA TRI (facility 26554HLMCK8THBE)"
@@ -2087,6 +2345,7 @@
       "name": "Ruskin Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Ruskin Co",
+      "state": "WV",
       "lat": 39.4447,
       "lon": -80.1586,
       "citation": "EPA TRI (facility 26554MCCLM2030P)"
@@ -2095,6 +2354,7 @@
       "name": "Nd Fairmont Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Nd Paper Llc",
+      "state": "WV",
       "lat": 39.4944,
       "lon": -80.1283,
       "citation": "EPA TRI (facility 26554MRCNF702AF)"
@@ -2103,6 +2363,7 @@
       "name": "Industrial Resources Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Victory Of West Virginia",
+      "state": "WV",
       "lat": 39.4683,
       "lon": -80.1742,
       "citation": "EPA TRI (facility 26554NDSTR1INDU)"
@@ -2111,6 +2372,7 @@
       "name": "Philips Lighting Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Philips Electronics North American Co",
+      "state": "WV",
       "lat": 39.5167,
       "lon": -80.1333,
       "citation": "EPA TRI (facility 26554PHLPSHOULT)"
@@ -2119,6 +2381,7 @@
       "name": "Creative Label Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.5,
       "lon": -80.125,
       "citation": "EPA TRI (facility 26554THCRT1100H)"
@@ -2127,6 +2390,7 @@
       "name": "Novelis Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Novelis Inc",
+      "state": "WV",
       "lat": 39.4911,
       "lon": -80.1083,
       "citation": "EPA TRI (facility 26555LCNRLSPEED)"
@@ -2135,6 +2399,7 @@
       "name": "Loveridge Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Consol Energy Inc",
+      "state": "WV",
       "lat": 39.6044,
       "lon": -80.2836,
       "citation": "EPA TRI (facility 26570LVRDGCOUNT)"
@@ -2143,6 +2408,7 @@
       "name": "Federal #2 Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Patriot Coal Corp",
+      "state": "WV",
       "lat": 39.675,
       "lon": -80.2667,
       "citation": "EPA TRI (facility 26570STRNS1044M)"
@@ -2151,6 +2417,7 @@
       "name": "American Bituminous Power Partners Lp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Bituminous Power Partners Lp",
+      "state": "WV",
       "lat": 39.5561,
       "lon": -80.2514,
       "citation": "EPA TRI (facility 26574MRCNBRTE17)"
@@ -2159,6 +2426,7 @@
       "name": "Blacksville #2 Mine",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Consol Energy Inc",
+      "state": "WV",
       "lat": 39.7078,
       "lon": -80.2944,
       "citation": "EPA TRI (facility 26590BLCKSRTE7W)"
@@ -2167,6 +2435,7 @@
       "name": "Appalachian Timber Services Llc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.6539,
       "lon": -80.6928,
       "citation": "EPA TRI (facility 26601PPLCHOLDFA)"
@@ -2175,6 +2444,7 @@
       "name": "Coastal Lumber Co - Frametown",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.6472,
       "lon": -80.85,
       "citation": "EPA TRI (facility 26623CSTLLHC61B)"
@@ -2183,6 +2453,7 @@
       "name": "Coastal Lumber Co Gassaway Sawmill",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 38.655,
       "lon": -80.84,
       "citation": "EPA TRI (facility 26624CSTLLRTE4X)"
@@ -2191,6 +2462,7 @@
       "name": "Weyerhaeuser Nr Co - Sutton Osb",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Weyerhaeuser Co",
+      "state": "WV",
       "lat": 38.7619,
       "lon": -80.6553,
       "citation": "EPA TRI (facility 26627WYRHSUSHWY)"
@@ -2199,6 +2471,7 @@
       "name": "Peerless Eagle Plant No 1",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "A T Massey Coal Co Inc",
+      "state": "WV",
       "lat": 38.2769,
       "lon": -80.9139,
       "citation": "EPA TRI (facility 26651PRLSSCAMPF)"
@@ -2207,6 +2480,7 @@
       "name": "Power Mountain Coal Co Preparation Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Alpha Natural Resources Llc",
+      "state": "WV",
       "lat": 38.3025,
       "lon": -80.9986,
       "citation": "EPA TRI (facility 26667PWRMNNO2JE)"
@@ -2215,6 +2489,7 @@
       "name": "Green Valley Coal Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 38.1511,
       "lon": -80.6881,
       "citation": "EPA TRI (facility 26676GRNVLPOBOX)"
@@ -2223,6 +2498,7 @@
       "name": "Buffalo Coal Co Inc C-1",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.1408,
       "lon": -79.2917,
       "citation": "EPA TRI (facility 26707BFFLCRTE90)"
@@ -2231,6 +2507,7 @@
       "name": "Vindex Energy Corp A-34 Prep Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "International Coal Group Inc",
+      "state": "WV",
       "lat": 39.2131,
       "lon": -79.3178,
       "citation": "EPA TRI (facility 26707BFFLCRTE9A)"
@@ -2239,6 +2516,7 @@
       "name": "Coastal Lumber Co - Horse Shoe Run",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Coastal Lumber Co",
+      "state": "WV",
       "lat": 39.2667,
       "lon": -79.5,
       "citation": "EPA TRI (facility 26716CSTLLRTE1B)"
@@ -2247,6 +2525,7 @@
       "name": "Dominion North Branch Power Station",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Dominion Resources Inc",
+      "state": "WV",
       "lat": 39.2642,
       "lon": -79.33,
       "citation": "EPA TRI (facility 26720NRTHB2000E)"
@@ -2255,6 +2534,7 @@
       "name": "Koppers Inc (Green Spring Wv)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Koppers Inc",
+      "state": "WV",
       "lat": 39.5333,
       "lon": -78.625,
       "citation": "EPA TRI (facility 26722KPPRSRAILR)"
@@ -2263,6 +2543,7 @@
       "name": "Carroll Mfg International",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Carroll International Corp",
+      "state": "WV",
       "lat": 39.4403,
       "lon": -78.9525,
       "citation": "EPA TRI (facility 26726CRRLLWAXLE)"
@@ -2271,6 +2552,7 @@
       "name": "Kingsford Manufacturing Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "The Clorox Co",
+      "state": "WV",
       "lat": 39.4786,
       "lon": -79.0669,
       "citation": "EPA TRI (facility 26726KNGSFRTE46)"
@@ -2279,6 +2561,7 @@
       "name": "Kessel Lumber Supply Inc",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": null,
+      "state": "WV",
       "lat": 39.3917,
       "lon": -79.0083,
       "citation": "EPA TRI (facility 26726KSSLLSTARR)"
@@ -2287,6 +2570,7 @@
       "name": "Allegany Ballistics Lab (Nirop)",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Northrop Grumman Corp",
+      "state": "WV",
       "lat": 39.5583,
       "lon": -78.8417,
       "citation": "EPA TRI (facility 26726LLGNYWESTV)"
@@ -2295,6 +2579,7 @@
       "name": "Anchor Glass Container Corp",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Vitro Sa",
+      "state": "WV",
       "lat": 39.4583,
       "lon": -78.9583,
       "citation": "EPA TRI (facility 26726NCHRGWAXLE)"
@@ -2303,6 +2588,7 @@
       "name": "Romney Shoe Co",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "F W Woolworth Co Inc",
+      "state": "WV",
       "lat": 39.3628,
       "lon": -78.7561,
       "citation": "EPA TRI (facility 26757RMNYSDRAWE)"
@@ -2311,6 +2597,7 @@
       "name": "Hanover Shoe Co Franklin Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "C & J Clark Inc",
+      "state": "WV",
       "lat": 38.6083,
       "lon": -79.3569,
       "citation": "EPA TRI (facility 26807HNVRSRTE22)"
@@ -2319,6 +2606,7 @@
       "name": "Capon Valley Marble",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Fertig Cabinet Co Inc",
+      "state": "WV",
       "lat": 39.0508,
       "lon": -78.9828,
       "citation": "EPA TRI (facility 26836CPNVLBEANS)"
@@ -2327,6 +2615,7 @@
       "name": "Pilgrim'S Pride Corp Moorefield Prepared Foods Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Pilgrims Pride Corp",
+      "state": "WV",
       "lat": 39.0572,
       "lon": -78.9719,
       "citation": "EPA TRI (facility 26836HSTRN104SM)"
@@ -2335,6 +2624,7 @@
       "name": "American Woodmark Moorefield Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Woodmark Corp",
+      "state": "WV",
       "lat": 39.0608,
       "lon": -78.9653,
       "citation": "EPA TRI (facility 26836MRCNW117SF)"
@@ -2343,6 +2633,7 @@
       "name": "American Woodmark Hardy County Plant",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "American Woodmark Corp",
+      "state": "WV",
       "lat": 39.0408,
       "lon": -79.2039,
       "citation": "EPA TRI (facility 26836MRCNWROUTE)"
@@ -2351,6 +2642,7 @@
       "name": "Pilgrim'S Pride Corp Moorefield Fresh Facility",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Jbs Usa Food Co",
+      "state": "WV",
       "lat": 39.0594,
       "lon": -78.9822,
       "citation": "EPA TRI (facility 26836RCKNGPOTOM)"
@@ -2359,9 +2651,1288 @@
       "name": "Pilgrim'S Pride Corp Moorefield Feedmill",
       "type": "TRI-listed facility (reports toxic releases)",
       "operator": "Jbs Usa Food Co",
+      "state": "WV",
       "lat": 39.045,
       "lon": -78.9825,
       "citation": "EPA TRI (facility 26836WMPLRHWY22)"
+    },
+    {
+      "name": "Riviera Cabinets Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Apl Corp",
+      "state": "OH",
+      "lat": 39.7167,
+      "lon": -80.5,
+      "citation": "EPA TRI (facility 43130RVRCB3200O)"
+    },
+    {
+      "name": "Ohio Valley Coal Resources Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 39.9069,
+      "lon": -80.9903,
+      "citation": "EPA TRI (facility 43902HVLLY56854)"
+    },
+    {
+      "name": "Cardinal Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Buckeye Power Inc",
+      "state": "OH",
+      "lat": 40.2522,
+      "lon": -80.6483,
+      "citation": "EPA TRI (facility 43913CRDNL306CO)"
+    },
+    {
+      "name": "Ferro Corp Porcelain Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ferro Corp",
+      "state": "OH",
+      "lat": 40.6319,
+      "lon": -80.5494,
+      "citation": "EPA TRI (facility 43920FRRCR1230R)"
+    },
+    {
+      "name": "Mason Color Works Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 40.6158,
+      "lon": -80.5786,
+      "citation": "EPA TRI (facility 43920MSNCL250EA)"
+    },
+    {
+      "name": "Heritage Thermal Services",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Heritage Environmental Services Inc",
+      "state": "OH",
+      "lat": 40.6317,
+      "lon": -80.5436,
+      "citation": "EPA TRI (facility 43920VNRLL1250S)"
+    },
+    {
+      "name": "Wallover Oil Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Wallover Enterprises Inc",
+      "state": "OH",
+      "lat": 40.6306,
+      "lon": -80.5528,
+      "citation": "EPA TRI (facility 43920WLLVR401VI)"
+    },
+    {
+      "name": "Ormet Aluminum Mill Products Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 39.7047,
+      "lon": -80.8497,
+      "citation": "EPA TRI (facility 43931CNSLDSTATE)"
+    },
+    {
+      "name": "Ormet Primary Aluminum Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ormet Corp",
+      "state": "OH",
+      "lat": 39.7039,
+      "lon": -80.8489,
+      "citation": "EPA TRI (facility 43931RMTCRPOBOX)"
+    },
+    {
+      "name": "Capitol Manufacturing Lansing Facility",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Harsco Corp",
+      "state": "OH",
+      "lat": 40.0686,
+      "lon": -80.8125,
+      "citation": "EPA TRI (facility 43934CPTLM1700C)"
+    },
+    {
+      "name": "Turf Care Supply Llc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Turf Care Supply Llc",
+      "state": "OH",
+      "lat": 40.1014,
+      "lon": -80.7222,
+      "citation": "EPA TRI (facility 43935LSCMR100PI)"
+    },
+    {
+      "name": "Rg Steel Wheeling, Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "The Renco Group Inc",
+      "state": "OH",
+      "lat": 40.1,
+      "lon": -80.7167,
+      "citation": "EPA TRI (facility 43935WHLNG1134M)"
+    },
+    {
+      "name": "R. E. Burger Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Firstenergy Generation Corp",
+      "state": "OH",
+      "lat": 39.9092,
+      "lon": -80.7606,
+      "citation": "EPA TRI (facility 43947FRSTN57246)"
+    },
+    {
+      "name": "Barium & Chemicals Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 40.4011,
+      "lon": -80.6231,
+      "citation": "EPA TRI (facility 43952BRMCHCOUNT)"
+    },
+    {
+      "name": "Jsw Steel Usa Ohio Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Acero Junction Holdings Inc",
+      "state": "OH",
+      "lat": 40.3167,
+      "lon": -80.6,
+      "citation": "EPA TRI (facility 43952WHLNGMCLIS)"
+    },
+    {
+      "name": "Severstal Wheeling, Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Severstal Wheeling Inc",
+      "state": "OH",
+      "lat": 40.3519,
+      "lon": -80.6169,
+      "citation": "EPA TRI (facility 43952WHLNGSOUTH)"
+    },
+    {
+      "name": "Hancock Manufacturing Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 40.4753,
+      "lon": -80.6078,
+      "citation": "EPA TRI (facility 43964HNCCKCLEVE)"
+    },
+    {
+      "name": "Titanium Metals Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Berkshire Hathaway Inc",
+      "state": "OH",
+      "lat": 40.4469,
+      "lon": -80.6081,
+      "citation": "EPA TRI (facility 43964TMTDV100TI)"
+    },
+    {
+      "name": "Barretts Minerals Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Minerals Technologies Inc",
+      "state": "OH",
+      "lat": 40.5903,
+      "lon": -80.6667,
+      "citation": "EPA TRI (facility 43968BRRTT2400C)"
+    },
+    {
+      "name": "Sterling China Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 40.6033,
+      "lon": -80.6417,
+      "citation": "EPA TRI (facility 43968STRLN12COM)"
+    },
+    {
+      "name": "Ohio Coatings Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Wheeling Pittsburgh Steel Corp",
+      "state": "OH",
+      "lat": 40.1475,
+      "lon": -80.7108,
+      "citation": "EPA TRI (facility 43971HCTNG2100T)"
+    },
+    {
+      "name": "Safety-Kleen Systems (419601)",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Safety-Kleen Corp",
+      "state": "OH",
+      "lat": 40.1256,
+      "lon": -80.7119,
+      "citation": "EPA TRI (facility 44509SFTYK11711)"
+    },
+    {
+      "name": "Elco Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Detrex Corp",
+      "state": "OH",
+      "lat": 39.1783,
+      "lon": -81.7539,
+      "citation": "EPA TRI (facility 45033THLCCSTATE)"
+    },
+    {
+      "name": "Astro Containers Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 38.0,
+      "lon": -80.0,
+      "citation": "EPA TRI (facility 45241STRCN2795S)"
+    },
+    {
+      "name": "Gavin Power Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Lightstone Generation Llc",
+      "state": "OH",
+      "lat": 38.9356,
+      "lon": -82.1164,
+      "citation": "EPA TRI (facility 45620MRCNL7397N)"
+    },
+    {
+      "name": "Gkn Sinter Metals - Gallipolis",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Gkn Powder Metallurgy Holdings Inc",
+      "state": "OH",
+      "lat": 38.8267,
+      "lon": -82.1689,
+      "citation": "EPA TRI (facility 45631FDRLM2160E)"
+    },
+    {
+      "name": "Kyger Creek Station",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ohio Valley Electric Corp",
+      "state": "OH",
+      "lat": 38.9144,
+      "lon": -82.1289,
+      "citation": "EPA TRI (facility 45631HVLLY5758O)"
+    },
+    {
+      "name": "L & L Scrap Metals & Recycling",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 38.8167,
+      "lon": -82.2208,
+      "citation": "EPA TRI (facility 45631LLSCR128TE)"
+    },
+    {
+      "name": "Rockwell Automation Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 38.8389,
+      "lon": -82.2306,
+      "citation": "EPA TRI (facility 45631RCKWL250MC)"
+    },
+    {
+      "name": "South Point Ethanol",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ashland Ethanol Inc",
+      "state": "OH",
+      "lat": 38.4358,
+      "lon": -82.6,
+      "citation": "EPA TRI (facility 45680STHPNCOUNT)"
+    },
+    {
+      "name": "Ineos Nova Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ineos Nova Llc",
+      "state": "OH",
+      "lat": 39.2808,
+      "lon": -81.6369,
+      "citation": "EPA TRI (facility 45714HNTSMTOWNS)"
+    },
+    {
+      "name": "Raiser Aluminum & Chemical Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kaiser Aluminum Technical Services Inc",
+      "state": "OH",
+      "lat": 39.2814,
+      "lon": -81.6597,
+      "citation": "EPA TRI (facility 45714KSRLMFARSO)"
+    },
+    {
+      "name": "International Converter Inc Belpre",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Packaging Dynamics Operating Co",
+      "state": "OH",
+      "lat": 39.2814,
+      "lon": -81.6128,
+      "citation": "EPA TRI (facility 45714NTRNT721FA)"
+    },
+    {
+      "name": "Kraton Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kraton Chemical Co Llc",
+      "state": "OH",
+      "lat": 39.2794,
+      "lon": -81.6439,
+      "citation": "EPA TRI (facility 45714SHLLC2982W)"
+    },
+    {
+      "name": "Orion Engineered Carbons Belpre",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Orion Engineered Carbons Llc",
+      "state": "OH",
+      "lat": 39.3033,
+      "lon": -81.5658,
+      "citation": "EPA TRI (facility 45714SHLNDHWY7N)"
+    },
+    {
+      "name": "Dupont Little Hocking Service Center",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "E I Du Pont De Nemours & Co",
+      "state": "OH",
+      "lat": 39.2792,
+      "lon": -81.6958,
+      "citation": "EPA TRI (facility 45742DPNTPTOWNS)"
+    },
+    {
+      "name": "Profusion Industries Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Profusion Industries Llc",
+      "state": "OH",
+      "lat": 39.4472,
+      "lon": -81.4603,
+      "citation": "EPA TRI (facility 45750BFGDRBFGOO)"
+    },
+    {
+      "name": "Americas Styrenics Llc - Marietta",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Americas Styrenics Llc",
+      "state": "OH",
+      "lat": 39.3728,
+      "lon": -81.5153,
+      "citation": "EPA TRI (facility 45750CHVRNROUTE)"
+    },
+    {
+      "name": "Thermo Fisher Scientific (Asheville) Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Thermo Fisher Scientific Inc",
+      "state": "OH",
+      "lat": 39.445,
+      "lon": -81.4417,
+      "citation": "EPA TRI (facility 45750FRMSCMILLC)"
+    },
+    {
+      "name": "American Municipal Power  Richard H Gorsuch Station",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "American Municipal Power",
+      "state": "OH",
+      "lat": 39.3672,
+      "lon": -81.5208,
+      "citation": "EPA TRI (facility 45750GRSCHRTE7S)"
+    },
+    {
+      "name": "Eramet Marietta Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 39.3667,
+      "lon": -81.5219,
+      "citation": "EPA TRI (facility 45750LKMMTROUTE)"
+    },
+    {
+      "name": "Solvay Specialty Polymers Usa Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Syensqo Holding Inc",
+      "state": "OH",
+      "lat": 39.3722,
+      "lon": -81.5139,
+      "citation": "EPA TRI (facility 45750MCPRFPOBOX)"
+    },
+    {
+      "name": "Magnum Magnetics",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 39.4711,
+      "lon": -81.485,
+      "citation": "EPA TRI (facility 45750MGNMMRTE3M)"
+    },
+    {
+      "name": "Mplx Terminals Llc - Marietta Oh Terminal",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Marathon Petroleum Corp",
+      "state": "OH",
+      "lat": 39.3836,
+      "lon": -81.4911,
+      "citation": "EPA TRI (facility 45750MRTTHOLDRT)"
+    },
+    {
+      "name": "Marietta Industrial Enterprise S Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Marietta Industrial Enterprises Inc",
+      "state": "OH",
+      "lat": 39.3458,
+      "lon": -81.5472,
+      "citation": "EPA TRI (facility 45750MRTTNOHIOS)"
+    },
+    {
+      "name": "Airolite Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "OH",
+      "lat": 39.4303,
+      "lon": -81.4794,
+      "citation": "EPA TRI (facility 45750THRLT114WE)"
+    },
+    {
+      "name": "Vanguard Paints & Finishes Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Hollister Investment Corp",
+      "state": "OH",
+      "lat": 39.425,
+      "lon": -81.4242,
+      "citation": "EPA TRI (facility 45750VNGRD1409G)"
+    },
+    {
+      "name": "Energizer Holdings Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Energizer Holdings Inc",
+      "state": "OH",
+      "lat": 39.3764,
+      "lon": -81.5244,
+      "citation": "EPA TRI (facility 45750VRDYBCOUNT)"
+    },
+    {
+      "name": "Union Electric Steel Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ampco-Pittsburgh Corp",
+      "state": "PA",
+      "lat": 40.4069,
+      "lon": -80.4056,
+      "citation": "EPA TRI (facility 15021NNLCTPOBOX)"
+    },
+    {
+      "name": "Arrow Terminals",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Alcan Aluminum Corp",
+      "state": "PA",
+      "lat": 40.6414,
+      "lon": -80.4192,
+      "citation": "EPA TRI (facility 15052RRWTRRD2XX)"
+    },
+    {
+      "name": "Langeloth Metallurgical Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 40.3631,
+      "lon": -80.4,
+      "citation": "EPA TRI (facility 15054CLMXMMAINS)"
+    },
+    {
+      "name": "Mplx Terminals Llc - Midland Pa Terminal",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Marathon Petroleum Corp",
+      "state": "PA",
+      "lat": 40.63,
+      "lon": -80.4419,
+      "citation": "EPA TRI (facility 15059MDLNDRTE68)"
+    },
+    {
+      "name": "Keywell Corp Vac Air Alloys Div",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Keywell Corp",
+      "state": "PA",
+      "lat": 40.6353,
+      "lon": -80.4581,
+      "citation": "EPA TRI (facility 15059SGKYW10THS)"
+    },
+    {
+      "name": "Whemco-Steel Castings Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Whemco Inc",
+      "state": "PA",
+      "lat": 40.6311,
+      "lon": -80.4497,
+      "citation": "EPA TRI (facility 15059WSTHMONE12)"
+    },
+    {
+      "name": "Bvpv Styrenics Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Styropek Usa Inc",
+      "state": "PA",
+      "lat": 40.6233,
+      "lon": -80.3606,
+      "citation": "EPA TRI (facility 15061RCCHMFRANK)"
+    },
+    {
+      "name": "Gold Bond Building Products - Shippingport",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Spangler Cos Inc",
+      "state": "PA",
+      "lat": 40.625,
+      "lon": -80.4167,
+      "citation": "EPA TRI (facility 15077NWNGC168SH)"
+    },
+    {
+      "name": "Pittsburgh Indl Plating",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "John Maneely Co",
+      "state": "PA",
+      "lat": 40.5,
+      "lon": -80.5,
+      "citation": "EPA TRI (facility 15202PTTSB1HERR)"
+    },
+    {
+      "name": "V-Bat Div",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Washington Penn Plastic Co Inc",
+      "state": "PA",
+      "lat": 40.1556,
+      "lon": -80.2917,
+      "citation": "EPA TRI (facility 15301VBTPLPOBOX)"
+    },
+    {
+      "name": "West Penn Wire/Cdt - Wa",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Belden Inc",
+      "state": "PA",
+      "lat": 40.1569,
+      "lon": -80.2958,
+      "citation": "EPA TRI (facility 15301WSTPN2833W)"
+    },
+    {
+      "name": "Anderson Fittings",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Berkshire Hathaway Inc",
+      "state": "PA",
+      "lat": 39.7228,
+      "lon": -80.2617,
+      "citation": "EPA TRI (facility 15316CCRTFCOUNT)"
+    },
+    {
+      "name": "Morgantown Technical Services Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Swanson Industries Inc",
+      "state": "PA",
+      "lat": 39.7392,
+      "lon": -80.0578,
+      "citation": "EPA TRI (facility 15349MRGNT303ME)"
+    },
+    {
+      "name": "Kyowa Of America Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kyowa Of America Corp",
+      "state": "PA",
+      "lat": 39.8997,
+      "lon": -80.1403,
+      "citation": "EPA TRI (facility 15370KYWFM317ER)"
+    },
+    {
+      "name": "Cumberland Coal Resources Lp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Foundation Coal Holdings Inc",
+      "state": "PA",
+      "lat": 39.7947,
+      "lon": -80.1636,
+      "citation": "EPA TRI (facility 15370RGCMB855KI)"
+    },
+    {
+      "name": "Rag Emerald Resources Lp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Rag American Coal Holdings Inc",
+      "state": "PA",
+      "lat": 39.8956,
+      "lon": -80.1969,
+      "citation": "EPA TRI (facility 15370RGMRL158PO)"
+    },
+    {
+      "name": "West Penn Wire/Cdt - Wb",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Belden Cdt Inc",
+      "state": "PA",
+      "lat": 39.8975,
+      "lon": -80.1308,
+      "citation": "EPA TRI (facility 15370WSTPNSTATE)"
+    },
+    {
+      "name": "Hansen Engineering Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 40.0422,
+      "lon": -80.5119,
+      "citation": "EPA TRI (facility 15376HNSNNRTE1B)"
+    },
+    {
+      "name": "Bailey/Enlow Fork Mining Compl Ex",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 39.9708,
+      "lon": -80.4181,
+      "citation": "EPA TRI (facility 15377BLYNL332EN)"
+    },
+    {
+      "name": "Gerome Manufacturing Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 39.8642,
+      "lon": -79.7456,
+      "citation": "EPA TRI (facility 15401GRMMFOLIVE)"
+    },
+    {
+      "name": "Community Playthings",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Community Playthings",
+      "state": "PA",
+      "lat": 39.8333,
+      "lon": -79.5833,
+      "citation": "EPA TRI (facility 15437CMMNTROUTE)"
+    },
+    {
+      "name": "Northwest Hardwoods Inc. - Hopwood Sawmill",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Northwest Hardwoods Inc",
+      "state": "PA",
+      "lat": 39.875,
+      "lon": -79.7083,
+      "citation": "EPA TRI (facility 15445CSTLLSUMMI)"
+    },
+    {
+      "name": "Pbs Coals Strip Complex (Job 220)",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Pbs Coals Inc",
+      "state": "PA",
+      "lat": 39.8692,
+      "lon": -78.9775,
+      "citation": "EPA TRI (facility 15530PBSCL585WA)"
+    },
+    {
+      "name": "4 Guys Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 39.8011,
+      "lon": -79.0431,
+      "citation": "EPA TRI (facility 155524GYSN23IND)"
+    },
+    {
+      "name": "Keystone Aluminum Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "PA",
+      "lat": 40.5,
+      "lon": -80.5,
+      "citation": "EPA TRI (facility 16046KYSTN126MY)"
+    },
+    {
+      "name": "Fairfield Shoe Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Woolworth Corp",
+      "state": "PA",
+      "lat": 39.7856,
+      "lon": -79.3583,
+      "citation": "EPA TRI (facility 17320FRFLDPOBOX)"
+    },
+    {
+      "name": "Stewart Connector Systems Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Insilco Corp",
+      "state": "PA",
+      "lat": 39.8319,
+      "lon": -79.6875,
+      "citation": "EPA TRI (facility 17327STWRT11118)"
+    },
+    {
+      "name": "Packaging Corp Of America",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Packaging Corp Of America",
+      "state": "PA",
+      "lat": 39.8197,
+      "lon": -79.8036,
+      "citation": "EPA TRI (facility 17331PCKNG435GI)"
+    },
+    {
+      "name": "Griffith Energy Services Inc Bare",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Star Group Lp",
+      "state": "MD",
+      "lat": 39.5639,
+      "lon": -78.0256,
+      "citation": "EPA TRI (facility 21157GRFFT8SULL)"
+    },
+    {
+      "name": "Us Marine/ Brunswick Family Boats Co Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Brunswick Corp",
+      "state": "MD",
+      "lat": 39.6019,
+      "lon": -78.7511,
+      "citation": "EPA TRI (facility 21502BYLNRDAYRD)"
+    },
+    {
+      "name": "U.S. Marine/Brunswick Family Boat Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Brunswick Corp",
+      "state": "MD",
+      "lat": 39.6019,
+      "lon": -78.7519,
+      "citation": "EPA TRI (facility 21502BYLNRDAYRO)"
+    },
+    {
+      "name": "Fibred-Maryland Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "MD",
+      "lat": 39.5667,
+      "lon": -78.7333,
+      "citation": "EPA TRI (facility 21502FBRDNRT4BO)"
+    },
+    {
+      "name": "Potomac Farms Dairy",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Galliker Dairy Co",
+      "state": "MD",
+      "lat": 39.65,
+      "lon": -78.7469,
+      "citation": "EPA TRI (facility 21502PTMCFRACES)"
+    },
+    {
+      "name": "Schroeder Industries",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Alco Industries Inc",
+      "state": "MD",
+      "lat": 39.615,
+      "lon": -78.7622,
+      "citation": "EPA TRI (facility 21502SCHRD45QUE)"
+    },
+    {
+      "name": "Aes Warrior Run Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Aes Corp",
+      "state": "MD",
+      "lat": 39.5944,
+      "lon": -78.7456,
+      "citation": "EPA TRI (facility 21502SWRRR11600)"
+    },
+    {
+      "name": "Lonaconing Mine 5",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "MD",
+      "lat": 39.5833,
+      "lon": -78.9667,
+      "citation": "EPA TRI (facility 21539LNCNNRTE36)"
+    },
+    {
+      "name": "Mount Savage Specialty Refractories Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "MD",
+      "lat": 39.6936,
+      "lon": -78.8822,
+      "citation": "EPA TRI (facility 21545MTSVGFOUND)"
+    },
+    {
+      "name": "Maryland Ribbon Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "C M Offray & Son Inc",
+      "state": "MD",
+      "lat": 39.5333,
+      "lon": -77.7333,
+      "citation": "EPA TRI (facility 21740MRYLN857WI)"
+    },
+    {
+      "name": "Metal Finishing Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Alexandria Metal Finishers Inc",
+      "state": "MD",
+      "lat": 39.4608,
+      "lon": -77.7078,
+      "citation": "EPA TRI (facility 21740MTLFN743BO)"
+    },
+    {
+      "name": "C &O Canal National Historical Park",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "MD",
+      "lat": 39.4394,
+      "lon": -77.7931,
+      "citation": "EPA TRI (facility 21740SNTLP185DU)"
+    },
+    {
+      "name": "Fleetwood Travel Trailers Of Maryland Inc #28",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Fleetwood Enterprises Inc",
+      "state": "MD",
+      "lat": 39.6956,
+      "lon": -78.1925,
+      "citation": "EPA TRI (facility 21750FLTWD35SOU)"
+    },
+    {
+      "name": "Rayloc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Genuine Parts Co",
+      "state": "MD",
+      "lat": 39.6931,
+      "lon": -78.1583,
+      "citation": "EPA TRI (facility 21750GNNPR100RA)"
+    },
+    {
+      "name": "Lanco Pennland",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "MD",
+      "lat": 39.7158,
+      "lon": -78.1856,
+      "citation": "EPA TRI (facility 21750JFFRS14738)"
+    },
+    {
+      "name": "Valley Energy Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 39.1586,
+      "lon": -77.7175,
+      "citation": "EPA TRI (facility 20132VLLYD103HI)"
+    },
+    {
+      "name": "Crown Cork & Seal Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Crown Cork & Seal Co Inc",
+      "state": "VA",
+      "lat": 39.1203,
+      "lon": -78.1406,
+      "citation": "EPA TRI (facility 22601CRWNCPOBOX)"
+    },
+    {
+      "name": "Cives Steel Co Mid Atlantic Div",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Cives Corp",
+      "state": "VA",
+      "lat": 39.2086,
+      "lon": -78.1508,
+      "citation": "EPA TRI (facility 22601CVSSTPOBOX)"
+    },
+    {
+      "name": "Audiopak Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 39.0911,
+      "lon": -78.1756,
+      "citation": "EPA TRI (facility 22601DPKNC1680T)"
+    },
+    {
+      "name": "Fleetwood Travel Trailers Of Virginia Inc #14",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Fleetwood Ents Inc",
+      "state": "VA",
+      "lat": 39.1406,
+      "lon": -78.1794,
+      "citation": "EPA TRI (facility 22601FLTWD380BA)"
+    },
+    {
+      "name": "Henkel-Harris Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 39.1447,
+      "lon": -78.1733,
+      "citation": "EPA TRI (facility 22601HNKLHPLEAS)"
+    },
+    {
+      "name": "Kingspan Insulation Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kingspan Group Public Ltd Co",
+      "state": "VA",
+      "lat": 39.2131,
+      "lon": -78.14,
+      "citation": "EPA TRI (facility 22601MCFMPROUTE)"
+    },
+    {
+      "name": "Quarles Petroleum Inc. Winchester Bulk Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Quarles Petroleum Inc",
+      "state": "VA",
+      "lat": 39.1956,
+      "lon": -78.155,
+      "citation": "EPA TRI (facility 22601QRLSP779SM)"
+    },
+    {
+      "name": "Rubbermaid Inc Commercial Prods",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Rubbermaid Inc",
+      "state": "VA",
+      "lat": 39.1181,
+      "lon": -78.1181,
+      "citation": "EPA TRI (facility 22601RBBRM3124V)"
+    },
+    {
+      "name": "Ashworth Brothers Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 39.1444,
+      "lon": -78.1861,
+      "citation": "EPA TRI (facility 22601SHWRT450AR)"
+    },
+    {
+      "name": "Lear Corp Winchester",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Lear Operations Corp",
+      "state": "VA",
+      "lat": 39.1647,
+      "lon": -78.1789,
+      "citation": "EPA TRI (facility 22601SLLVN181BA)"
+    },
+    {
+      "name": "Hp Hood Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Hp Hood Llc",
+      "state": "VA",
+      "lat": 39.1292,
+      "lon": -78.1917,
+      "citation": "EPA TRI (facility 22602HPHDX160HO)"
+    },
+    {
+      "name": "Green Bay Packaging Inc. Winchester Coated Products Div.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Green Bay Packaging Inc",
+      "state": "VA",
+      "lat": 39.2086,
+      "lon": -78.1442,
+      "citation": "EPA TRI (facility 22603GRNBY285PA)"
+    },
+    {
+      "name": "Qg Printing Ii Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Quad/Graphics Inc",
+      "state": "VA",
+      "lat": 39.2183,
+      "lon": -78.1442,
+      "citation": "EPA TRI (facility 22603QBCRW16CEN)"
+    },
+    {
+      "name": "Shockey Precast Group",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 39.2053,
+      "lon": -78.1558,
+      "citation": "EPA TRI (facility 22603SHCKY1057M)"
+    },
+    {
+      "name": "Stanley Door Systems Winchester",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Stanley Works",
+      "state": "VA",
+      "lat": 39.2583,
+      "lon": -78.1983,
+      "citation": "EPA TRI (facility 22603STNLY985EB)"
+    },
+    {
+      "name": "New Bedford Technology Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Bedford Technology",
+      "state": "VA",
+      "lat": 39.2194,
+      "lon": -78.1481,
+      "citation": "EPA TRI (facility 22603SWRDN1481L)"
+    },
+    {
+      "name": "Betco Supreme Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Oldcastleapg Northeast Inc",
+      "state": "VA",
+      "lat": 39.2169,
+      "lon": -78.1553,
+      "citation": "EPA TRI (facility 22604SPRMB1515T)"
+    },
+    {
+      "name": "Siemens Vdo Automotive",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Siemens Vdo Automotive",
+      "state": "VA",
+      "lat": 39.2,
+      "lon": -78.15,
+      "citation": "EPA TRI (facility 22604VDNRT188BR)"
+    },
+    {
+      "name": "Griffith Energy Services Inc-Berryville",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Star Group Lp",
+      "state": "VA",
+      "lat": 39.1514,
+      "lon": -77.9792,
+      "citation": "EPA TRI (facility 22611CLRKC618EM)"
+    },
+    {
+      "name": "American Woodmark Co. Berryville Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "American Woodmark Corp",
+      "state": "VA",
+      "lat": 39.1444,
+      "lon": -77.9808,
+      "citation": "EPA TRI (facility 22611MRCNW109BY)"
+    },
+    {
+      "name": "O-N Minerals (Chemstone) Winchester Lime Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Carmeuse North America",
+      "state": "VA",
+      "lat": 39.2542,
+      "lon": -78.0875,
+      "citation": "EPA TRI (facility 22624GLBLSONEQU)"
+    },
+    {
+      "name": "Trelleborg Marine Systems Usa, Inc.",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Trelleborg Industries",
+      "state": "VA",
+      "lat": 39.2567,
+      "lon": -78.0953,
+      "citation": "EPA TRI (facility 22624SWRDNROUTE)"
+    },
+    {
+      "name": "Baugh Northeast Co-Op Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Sysco Corp",
+      "state": "VA",
+      "lat": 38.9942,
+      "lon": -78.17,
+      "citation": "EPA TRI (facility 22630BGHNR1BAUG)"
+    },
+    {
+      "name": "Axalta Coating Systems Usa Llc-Front Royal Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Axalta Coating Systems Llc",
+      "state": "VA",
+      "lat": 38.9808,
+      "lon": -78.1742,
+      "citation": "EPA TRI (facility 22630DPNTFPOBOX)"
+    },
+    {
+      "name": "Fisher Diagnostics A Div Of Fisher Scientific Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Thermo Fisher Scientific Inc",
+      "state": "VA",
+      "lat": 39.0178,
+      "lon": -78.2917,
+      "citation": "EPA TRI (facility 22645FSHRD8365V)"
+    },
+    {
+      "name": "Stowe Woodward",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Stowe Woodward Llc",
+      "state": "VA",
+      "lat": 39.0169,
+      "lon": -78.2911,
+      "citation": "EPA TRI (facility 22645STWWDRTE11)"
+    },
+    {
+      "name": "Technicon Instruments Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Miles Inc",
+      "state": "VA",
+      "lat": 39.0178,
+      "lon": -78.2917,
+      "citation": "EPA TRI (facility 22645TCHNCRTE11)"
+    },
+    {
+      "name": "Valley Milk Products",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 38.9764,
+      "lon": -78.3583,
+      "citation": "EPA TRI (facility 22657BRDNN329EA)"
+    },
+    {
+      "name": "O-N Minerals (Chemstone) Strasburg Lime Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Carmeuse Lime Inc",
+      "state": "VA",
+      "lat": 39.0222,
+      "lon": -78.3333,
+      "citation": "EPA TRI (facility 22657GLBLS1696O)"
+    },
+    {
+      "name": "Lsc Communications / Strasburg",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Lsc Communications Inc",
+      "state": "VA",
+      "lat": 38.9894,
+      "lon": -78.3539,
+      "citation": "EPA TRI (facility 22657SHNNDROUTE)"
+    },
+    {
+      "name": "Iac-Strasburg,Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "International Automotive Components Group North America Inc",
+      "state": "VA",
+      "lat": 38.9892,
+      "lon": -78.3542,
+      "citation": "EPA TRI (facility 22657TMTVNEASTQ)"
+    },
+    {
+      "name": "Fibermaster Ltd",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 38.6694,
+      "lon": -78.9389,
+      "citation": "EPA TRI (facility 22701FBRMS982JA)"
+    },
+    {
+      "name": "Mountain View Rendering Comp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "VA",
+      "lat": 38.8753,
+      "lon": -78.6103,
+      "citation": "EPA TRI (facility 22824MNTNVSTATE)"
+    },
+    {
+      "name": "George'S Chicken Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "George'S Inc",
+      "state": "VA",
+      "lat": 38.8778,
+      "lon": -78.6131,
+      "citation": "EPA TRI (facility 22824RCCFRRTE42)"
+    },
+    {
+      "name": "Bluefield Beverage Co",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kroger Co",
+      "state": "VA",
+      "lat": 37.2361,
+      "lon": -81.3056,
+      "citation": "EPA TRI (facility 24605BLFLDRT2BO)"
+    },
+    {
+      "name": "Consolidation Coal Co Buchanan Mine",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Consol Energy Inc",
+      "state": "VA",
+      "lat": 37.1608,
+      "lon": -81.9864,
+      "citation": "EPA TRI (facility 24627BCHNNRTE63)"
+    },
+    {
+      "name": "Consol Energy Inc Vp 8 Mine Garden Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Consol Energy Inc",
+      "state": "VA",
+      "lat": 37.1667,
+      "lon": -82.0144,
+      "citation": "EPA TRI (facility 24631CNSLNRTE62)"
+    },
+    {
+      "name": "Virginian Metal Prods Co, Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Southwest Virginia Tire Co Inc",
+      "state": "VA",
+      "lat": 37.2,
+      "lon": -81.1333,
+      "citation": "EPA TRI (facility 24641VRGNN2706C)"
+    },
+    {
+      "name": "Pyott Boone Electronics",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Prarie Capital",
+      "state": "VA",
+      "lat": 37.1731,
+      "lon": -81.4758,
+      "citation": "EPA TRI (facility 24651PYTTBRT650)"
+    },
+    {
+      "name": "Jewell Coke Co Lp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Suncoke Energy Inc",
+      "state": "VA",
+      "lat": 37.2336,
+      "lon": -82.0431,
+      "citation": "EPA TRI (facility 24656JWLLCHWY46)"
+    },
+    {
+      "name": "A C Marble Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": null,
+      "state": "KY",
+      "lat": 38.4667,
+      "lon": -82.625,
+      "citation": "EPA TRI (facility 41101CMRBL2767M)"
+    },
+    {
+      "name": "City Of Ashland Wwtp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "City Of Ashland",
+      "state": "KY",
+      "lat": 38.4747,
+      "lon": -82.6239,
+      "citation": "EPA TRI (facility 41101CTYFS26THS)"
+    },
+    {
+      "name": "Harsco Co Heckett Multiserv Plant 20",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Harsco Corp",
+      "state": "KY",
+      "lat": 38.4914,
+      "lon": -82.4939,
+      "citation": "EPA TRI (facility 41101HCKTTARMCO)"
+    },
+    {
+      "name": "Ashland Hide Co Inc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Howes Leather Corp",
+      "state": "KY",
+      "lat": 38.475,
+      "lon": -82.6278,
+      "citation": "EPA TRI (facility 41105CLWRN50025)"
+    },
+    {
+      "name": "Ak Steel Corp Ashland Works - Coke Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Ak Steel Corp",
+      "state": "KY",
+      "lat": 38.4583,
+      "lon": -82.6106,
+      "citation": "EPA TRI (facility 41105RMCST4000E)"
+    },
+    {
+      "name": "Armco Steel Co Lp Grey Iron Fndy",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Armco Inc & Kawasaki",
+      "state": "KY",
+      "lat": 38.4844,
+      "lon": -82.6289,
+      "citation": "EPA TRI (facility 41105RMCSTGREEN)"
+    },
+    {
+      "name": "Catlettsburg Refining Llc",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Marathon Petroleum Corp",
+      "state": "KY",
+      "lat": 38.3775,
+      "lon": -82.5925,
+      "citation": "EPA TRI (facility 41114CTLTTPOBOX)"
+    },
+    {
+      "name": "Big Sandy Ky Asphalt",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Marathon Oil Corp",
+      "state": "KY",
+      "lat": 38.3294,
+      "lon": -82.5828,
+      "citation": "EPA TRI (facility 41129BGSND15085)"
+    },
+    {
+      "name": "Calgon Carbon Corp",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "Kuraray Holdings Usa Inc",
+      "state": "KY",
+      "lat": 38.3375,
+      "lon": -82.59,
+      "citation": "EPA TRI (facility 41129CLGNCUSROU)"
+    },
+    {
+      "name": "Burke Plant",
+      "type": "TRI-listed facility (reports toxic releases)",
+      "operator": "James River Coal Co",
+      "state": "KY",
+      "lat": 37.4719,
+      "lon": -82.2822,
+      "citation": "EPA TRI (facility 41539BRKPL991LO)"
     }
   ]
 }

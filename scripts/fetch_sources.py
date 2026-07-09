@@ -1,9 +1,10 @@
 """Regenerate the documented pollution-source layer from EPA public records.
 
-Pulls EPA TRI (Toxics Release Inventory) facilities for WV via the keyless
-Envirofacts REST API, filters to the Kanawha Valley area near our sensors,
-converts the DMS-encoded coordinates, and merges them with the curated seed.
-Everything is public-record + cited, per docs/SOURCE-POLICY.md.
+Pulls EPA TRI (Toxics Release Inventory) facilities via the keyless Envirofacts
+REST API for WV *and* neighboring states (pollution crosses state lines), keeps
+those inside WV's bounding box (i.e. WV + just across every border), converts the
+DMS-encoded coordinates, and merges them with the curated seed. Everything is
+public-record + cited, per docs/SOURCE-POLICY.md.
 
     python scripts/fetch_sources.py
 """
@@ -11,13 +12,51 @@ Everything is public-record + cited, per docs/SOURCE-POLICY.md.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import httpx
 
-# Statewide West Virginia bounding box (all WV facilities).
+# Statewide West Virginia bounding box (fast pre-filter before the polygon test).
 LAT_MIN, LAT_MAX = 37.10, 40.70
 LON_MIN, LON_MAX = -82.70, -77.70
+
+# WV plus every state it borders (OH/PA/MD/VA/KY). WV facilities are all kept;
+# neighbor facilities only if within BORDER_BUFFER_KM of the WV line — i.e. "just
+# across the border" — so we catch cross-border emitters without pulling whole
+# neighboring metros (Pittsburgh, Roanoke) into the map.
+STATES = ["WV", "OH", "PA", "MD", "VA", "KY"]
+BORDER_BUFFER_KM = 20.0
+
+# Coarse clockwise WV outline (lat, lon). Approximate — used only with the buffer
+# above, so ~10km imprecision is absorbed. Traces the northern panhandle, the Ohio
+# River (OH), the Big Sandy (KY), the VA ridge, and the eastern panhandle/Potomac.
+WV_OUTLINE = [
+    (40.64, -80.60), (40.16, -80.52), (39.72, -80.88), (39.34, -81.45),
+    (38.99, -81.75), (38.70, -82.13), (38.42, -82.44), (37.78, -82.30),
+    (37.30, -81.97), (37.21, -81.55), (37.30, -81.20), (37.53, -80.86),
+    (38.00, -80.30), (38.46, -79.68), (38.76, -79.22), (39.00, -78.60),
+    (39.32, -77.83), (39.32, -77.72), (39.62, -78.35), (39.72, -79.00),
+    (39.72, -80.52), (40.16, -80.52), (40.64, -80.60),
+]
+
+
+def _seg_km(lat, lon, a, b) -> float:
+    """Distance (km) from a point to segment a-b via equirectangular projection."""
+    latr = math.radians(lat)
+    def xy(p):
+        return (math.radians(p[1]) * math.cos(latr) * 6371.0, math.radians(p[0]) * 6371.0)
+    px, py = math.radians(lon) * math.cos(latr) * 6371.0, math.radians(lat) * 6371.0
+    (ax, ay), (bx, by) = xy(a), xy(b)
+    dx, dy = bx - ax, by - ay
+    seg = dx * dx + dy * dy
+    t = 0.0 if seg == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / seg))
+    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+
+def near_wv_border(lat, lon) -> bool:
+    return min(_seg_km(lat, lon, WV_OUTLINE[i], WV_OUTLINE[i + 1])
+               for i in range(len(WV_OUTLINE) - 1)) <= BORDER_BUFFER_KM
 
 # Hand-verified landmark seed (kept first; EPA facilities are appended).
 CURATED = {
@@ -47,10 +86,10 @@ def _dms_to_decimal(v) -> float | None:
     return dd + mm / 60 + ss / 3600
 
 
-def fetch_wv_tri() -> list[dict]:
+def fetch_state_tri(state: str) -> list[dict]:
     rows = []
-    url = "https://data.epa.gov/efservice/tri_facility/state_abbr/WV/rows/{}:{}/JSON"
-    for start in range(0, 3000, 200):
+    url = f"https://data.epa.gov/efservice/tri_facility/state_abbr/{state}/rows/{{}}:{{}}/JSON"
+    for start in range(0, 6000, 200):
         r = httpx.get(url.format(start, start + 199), timeout=60)
         r.raise_for_status()
         batch = r.json()
@@ -70,12 +109,17 @@ def to_source(rec: dict) -> dict | None:
     lon = -abs(lon)  # WV is western hemisphere
     if not (LAT_MIN <= lat <= LAT_MAX and LON_MIN <= lon <= LON_MAX):
         return None
+    state = (rec.get("state_abbr") or "").upper()
+    # WV facilities are all kept; neighbors only if right across the WV line.
+    if state != "WV" and not near_wv_border(lat, lon):
+        return None
     op = (rec.get("standardized_parent_company") or rec.get("parent_co_name") or "").strip()
     operator = op.title() if op and op.upper() not in ("NA", "N/A", "NONE") else None
     return {
         "name": (rec.get("facility_name") or "").title().strip(),
         "type": "TRI-listed facility (reports toxic releases)",
         "operator": operator,
+        "state": state or None,
         "lat": round(lat, 4),
         "lon": round(lon, 4),
         "citation": f"EPA TRI (facility {rec.get('tri_facility_id')})",
@@ -83,7 +127,11 @@ def to_source(rec: dict) -> dict | None:
 
 
 def main():
-    epa = [s for s in (to_source(r) for r in fetch_wv_tri()) if s]
+    epa = []
+    for st in STATES:
+        found = [s for s in (to_source(r) for r in fetch_state_tri(st)) if s]
+        print(f"  {st}: {len(found)} in bbox")
+        epa.extend(found)
     # dedupe by name; keep curated first (hand-verified landmarks)
     seen = {s["name"].lower() for s in CURATED["sources"]}
     merged = list(CURATED["sources"])
