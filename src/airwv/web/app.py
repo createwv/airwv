@@ -239,18 +239,18 @@ INDEX_HTML = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AirWV Dashboard</title>
+<title>Empower WV — Community Eco Monitoring</title>
+<link rel="icon" href="/static/favicon.png">
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  /* Brand palette — swap these to rebrand (e.g. Empower WV colors). */
-  :root { --brand:#3b2a6b; --brand-accent:#7a5cc0; --bg:#f7f7f8; }
+  /* Empower WV brand palette (from the logo). */
+  :root { --brand:#3f76a8; --brand-accent:#b8863a; --sky:#a1bcd1; --bg:#f4f7f9; }
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
-  header { background:var(--brand); color:#fff; padding:14px 20px; display:flex; align-items:center; gap:14px; }
-  header img#logo { height:38px; width:auto; }
-  header h1 { margin:0; font-size:20px; }
-  header p { margin:4px 0 0; opacity:.8; font-size:13px; }
+  header { padding:0; background:var(--sky); }
+  header img.banner { display:block; width:100%; height:160px; object-fit:cover; object-position:center; }
+  .subbar { background:var(--brand); color:#fff; padding:8px 20px; font-size:13px; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   select { padding:6px 10px; font-size:14px; }
   .meta { color:#666; font-size:13px; }
@@ -278,12 +278,9 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body>
 <header>
-  <img id="logo" src="/static/logo.svg" alt="" onerror="this.style.display='none'">
-  <div>
-    <h1>AirWV — West Virginia Air Quality</h1>
-    <p>Community sensor data. Map colored by latest PM2.5; times in US Eastern.</p>
-  </div>
+  <img class="banner" src="/static/banner.png" alt="empower wv — community eco monitoring">
 </header>
+<div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
 <div class="controls">
   <div><b>Sensors</b><div id="sensors" class="sensorlist"></div></div>
   <label>Metric <select id="field">
@@ -315,8 +312,9 @@ INDEX_HTML = """<!doctype html>
 <div class="card"><h2>Health guide — what the levels mean</h2><div id="guide" class="guide"></div></div>
 <div class="card"><h2>About AirWV</h2>
   <div class="about">
-    <p>AirWV is an open-source, community air-quality monitoring project for West
-    Virginia. It collects readings from community <a href="https://www2.purpleair.com/"
+    <p><b>Empower WV — community eco monitoring</b> is a community air-quality
+    initiative for West Virginia, powered by the open-source AirWV project. It
+    collects readings from community <a href="https://www2.purpleair.com/"
     target="_blank" rel="noopener">PurpleAir</a> sensors, stores long-term history,
     and surfaces trends, anomalies, and alerts. It grew out of the
     <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
