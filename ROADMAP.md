@@ -165,7 +165,10 @@ Make the data visible and usable.
       tree (▸ closed by default, parent + leaf checkboxes, tri-state parent).
       Sensor parents **Community Sensors** and **EPA / Reference Monitors** (toggle
       at parent or individual level), plus **Pollution Sources** and **Community
-      Reports** groups.
+      Reports** groups. Community sensors **sub-group by region** (Kanawha Valley,
+      Ohio Valley, Eastern Panhandle, North Central…) via a county→WV-region map.
+- [ ] **⭐ My Sensors (follow list)** — let users star sensors they care about;
+      persists (localStorage now, account-based later) as a pinned top group.
 - [ ] **Pollution-source categories** — `category` field on sources (power /
       chemical / oil-gas / TRI-other; later rail/highway) so you can turn off, e.g.,
       *all power plants*. Category sub-toggles under the Sources layer.
@@ -217,6 +220,18 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
       toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
       field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
+- [ ] **Source-proximity panel ("around a polluter")** — pick a pollution source
+      (search e.g. *DOW / Union Carbide*, *John Amos*) and see the sensors around it
+      with **distance + compass bearing**: nearest overall + nearest in each of the
+      8 sectors (N/NE/E/SE/S/SW/W/NW). Then **pivot the dashboard to those sensors**
+      (series / diurnal / overnight) to inspect a source's signature.
+      *Distance bands (scientific): near-field **< 1 mi (~1.6 km)** = clearest for
+      ground-level/fugitive emissions; local vicinity **1–3 mi**; tall stacks
+      (power plants) can peak **1–10 mi downwind** (plume touchdown), so raw distance
+      undersells them.* Needs a bearing calc (haversine already in `validate`) +
+      source search. **Follow-up (the rigorous version): wind-direction weighting**
+      — rank/weight *downwind* sensors, tying into the overnight-accumulation finding
+      (Nitro/John Amos 1.98×). Pairs with a wind-rose data source.
 - [~] **Community reporting & feedback** — DESIGNED (v2 of the design):
       [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Now a **staged
       pipeline**: light auto pre-screen → published *unverified* → maintainer

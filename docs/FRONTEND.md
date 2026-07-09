@@ -47,10 +47,14 @@ parent + child checkboxes, tri-state parent = checked / unchecked / indeterminat
 Toggle a whole group at the parent, or individuals underneath.
 
 ```
-▸ ☑ Community Sensors           (parent toggles all)
+▸ ☑ ⭐ My Sensors                (user's followed sensors — persists locally)
     ☑ EWV Glasgow 1
-    ☑ EWV Nitro 1
-    … (optionally sub-grouped by org or county)
+▸ ☑ Community Sensors           (parent toggles all)
+  ▸ ☑ Kanawha Valley            (sub-grouped BY REGION, not org)
+      ☑ EWV Nitro 1
+      ☑ EWV Glasgow 1
+  ▸ ☑ Ohio Valley
+  ▸ ☑ Eastern Panhandle …
 ▸ ☑ EPA / Reference Monitors
     ☑ EPA #24589  (or real AirNow site name)
     ☑ EPA #1833
@@ -64,7 +68,12 @@ Toggle a whole group at the parent, or individuals underneath.
 ```
 
 - **Community Sensors / EPA Monitors** are the two sensor parents the user asked
-  for — checkable at parent or leaf level, collapsed by default.
+  for — checkable at parent or leaf level, collapsed by default. Community sensors
+  **sub-group by region** (Kanawha Valley, Ohio Valley, Eastern Panhandle, North
+  Central, …), derived from county → WV region (not by org).
+- **⭐ My Sensors** — users can follow sensors they care about; the set persists
+  (localStorage for anonymous now; account-based later) and surfaces as a pinned
+  group at the top of the tree.
 - **Pollution Sources get categories** so you can, e.g., turn *all power plants*
   off. Needs a `category` field on sources (derive from EPA/EIA type: power,
   chemical, oil-gas, TRI-other; later rail/highway as their own groups).
@@ -106,7 +115,23 @@ templates, serve the three modes as pages, keep interactivity in small vanilla/
 **Alpine** modules (no build). It gives real structure for the admin panels while
 preserving the zero-toolchain property. Reserve **C (Svelte/Vite)** for when the
 admin console's interactivity clearly outgrows that — a deliberate later call, not
-now. **This is a decision to lock before the restructure build begins.**
+now. **This is a decision to lock before the restructure build begins.** *(Locked:
+Jinja2 + Alpine.)*
+
+### When to graduate to Svelte/Vite (and only for `/admin`)
+The public Overview/Analysis pages stay no-build indefinitely — Plotly/Leaflet +
+Alpine handle them. It's the **Admin console** that eventually justifies a SPA.
+Introduce Svelte/Vite (scoped to `/admin`) once ~2–3 of these are true:
+- **Shared live state across panels** — queues (reports/feedback/flagging) updating
+  in place, optimistic approve/remove, cross-panel filters kept in sync.
+- **Real-time** — websockets/polling driving reactive UI (live counts, new-report pings).
+- **Reusable components across modes** where Jinja duplication starts causing bugs.
+- **Multi-step stateful forms** — e.g. the reporting wizard outgrowing a simple form.
+- **Client routing with preserved state** across many admin views.
+
+Rule of thumb: **stay on Jinja2 + Alpine until `/admin` becomes a stateful
+single-page tool**, then adopt Svelte/Vite *for `/admin` only*, leaving the public
+pages toolchain-free.
 
 ## Suggested build order (after the reporting backend lands)
 1. **Labeling + time window** (low-risk, high-value): EPA monitor names, source
@@ -120,7 +145,6 @@ now. **This is a decision to lock before the restructure build begins.**
    + moderation console.
 
 ## Open decisions
-- Framework: **B recommended** — confirm before step 3.
-- Sensor sub-grouping under "Community Sensors": by **org** (Create WV / EWV) or by
-  **county**? (Leaf checkboxes either way.)
+- Framework: **Jinja2 + Alpine (locked)**; Svelte/Vite for `/admin` only, later.
+- Community-sensor sub-grouping: **by region** (locked) — need a county→WV-region map.
 - Overview "notable flags" source: reuse `events` / `baseline` / trend outputs.
