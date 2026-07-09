@@ -211,6 +211,17 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"tier": "documented", "disclaimer": "", "sources": []}
 
+    @app.get("/api/reference-monitors")
+    def reference_monitors():
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "reference_monitors.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return {"note": data.get("note"), "monitors": data.get("monitors", [])}
+        except Exception:
+            return {"note": "", "monitors": []}
+
     @app.get("/api/guide")
     def guide():
         return {
@@ -308,6 +319,7 @@ INDEX_HTML = """<!doctype html>
   <button id="clear">Clear dates</button>
   <a id="dl" href="#" download>⬇ Download CSV</a>
   <label><input type="checkbox" id="showsources" checked> 🏭 pollution sources</label>
+  <label><input type="checkbox" id="showref" checked> 📍 EPA monitors</label>
 </div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
@@ -395,6 +407,22 @@ function drawMap(sensors){
   });
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
+  loadReference();
+}
+let refLayer;
+async function loadReference(){
+  const data = await j('/api/reference-monitors');
+  if (refLayer) refLayer.remove();
+  refLayer = L.layerGroup();
+  data.monitors.forEach(m => {
+    if (m.lat == null || m.lon == null) return;
+    L.marker([m.lat, m.lon], {icon: L.divIcon({className:'', html:'📍', iconSize:[20,20], iconAnchor:[10,20]})})
+      .bindPopup(`<b>${m.name}</b> (${m.county} Co.)<br>EPA regulatory monitor`+
+        `<br>2024 mean PM2.5: <b>${m.mean_pm25}</b> µg/m³ (${m.days} days)`+
+        `<br><small>${m.citation||''}</small>`)
+      .addTo(refLayer);
+  });
+  if ($('showref').checked) refLayer.addTo(map);
 }
 let sourceLayer;
 async function loadSources(){
@@ -472,6 +500,10 @@ $('clear').addEventListener('click', () => { $('start').value=''; $('end').value
 $('showsources').addEventListener('change', e => {
   if (!sourceLayer) return;
   e.target.checked ? sourceLayer.addTo(map) : sourceLayer.remove();
+});
+$('showref').addEventListener('change', e => {
+  if (!refLayer) return;
+  e.target.checked ? refLayer.addTo(map) : refLayer.remove();
 });
 loadGuide().then(loadSensors);
 </script>

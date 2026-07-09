@@ -81,6 +81,14 @@ def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
 
+def test_reference_monitors_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/reference-monitors")
+    assert r.status_code == 200
+    body = r.json()
+    assert "monitors" in body
+    assert any(m["county"] == "Kanawha" for m in body["monitors"])
+
+
 def test_sources_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/sources")
     assert r.status_code == 200
