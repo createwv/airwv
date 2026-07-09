@@ -12,6 +12,7 @@ against the live API on first use (as we did with PurpleAir).
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 
 import httpx
@@ -58,11 +59,20 @@ class OpenAQSource:
         self._api_key = api_key
         self._timeout = timeout
 
-    def _get(self, path: str, params: dict) -> dict:
-        with httpx.Client(timeout=self._timeout) as client:
-            resp = client.get(f"{OPENAQ_BASE}{path}", headers={"X-API-Key": self._api_key}, params=params)
+    def _get(self, path: str, params: dict, retries: int = 4, sleeper=time.sleep) -> dict:
+        """GET with retry on 429 (free tier is ~60 req/min), honoring Retry-After."""
+        for attempt in range(retries):
+            with httpx.Client(timeout=self._timeout) as client:
+                resp = client.get(f"{OPENAQ_BASE}{path}",
+                                  headers={"X-API-Key": self._api_key}, params=params)
+            if resp.status_code == 429 and attempt < retries - 1:
+                wait = float(resp.headers.get("Retry-After") or (2 ** attempt))
+                sleeper(min(wait, 30))
+                continue
             resp.raise_for_status()
             return resp.json()
+        resp.raise_for_status()
+        return resp.json()
 
     def fetch_locations(self, nw_lat, nw_lng, se_lat, se_lng, parameter_id: int = PM25_PARAMETER_ID) -> list[dict]:
         """Reference-monitor locations in a bbox, with their PM2.5 sensor ids."""
