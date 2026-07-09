@@ -241,6 +241,42 @@ def test_run_backfill_with_explicit_date_range(tmp_path):
     assert w_start == start and w_end == end
 
 
+def test_run_backfill_skips_windows_already_stored(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    store.create_schema()
+    # Pre-store a reading for sensor index 1 inside the first window.
+    store.save_readings([Reading(source="purpleair", sensor_id="1",
+                                 ts=datetime(2024, 11, 5, tzinfo=timezone.utc), pm2_5=5.0)])
+    source = FakeSource()
+    now = datetime(2024, 12, 1, tzinfo=timezone.utc)
+
+    run_backfill(config, source=source, store=store, index_map={"AA": 1},
+                 days=30, window_days=14, now=now)
+
+    fetched = {c[1].date() for c in source.history_calls}
+    from datetime import date
+    assert date(2024, 11, 1) not in fetched  # window with existing data was skipped
+    assert date(2024, 11, 15) in fetched      # empty window still fetched
+
+
+def test_run_backfill_refresh_repulls_stored_windows(tmp_path):
+    config = _config(tmp_path)
+    store = Store(config.database_url)
+    store.create_schema()
+    store.save_readings([Reading(source="purpleair", sensor_id="1",
+                                 ts=datetime(2024, 11, 5, tzinfo=timezone.utc), pm2_5=5.0)])
+    source = FakeSource()
+    now = datetime(2024, 12, 1, tzinfo=timezone.utc)
+
+    run_backfill(config, source=source, store=store, index_map={"AA": 1},
+                 days=30, window_days=14, now=now, refresh=True)
+
+    from datetime import date
+    fetched = {c[1].date() for c in source.history_calls}
+    assert date(2024, 11, 1) in fetched  # --refresh re-pulls even stored windows
+
+
 def test_run_backfill_limit_caps_sensors(tmp_path):
     config = _config(tmp_path)
     store = Store(config.database_url)

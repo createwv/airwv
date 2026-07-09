@@ -72,9 +72,12 @@ class Store:
         Base.metadata.create_all(self._engine)
 
     def save_readings(self, readings: Iterable[Reading]) -> int:
-        """Persist readings, skipping duplicates. Returns the number inserted.
+        """Persist readings. Returns the number written (inserted or updated).
 
-        Out-of-range values are flagged ``quality = "suspect"`` (never dropped).
+        Idempotent by ``(source, sensor_id, ts)``: re-ingesting the same reading
+        **upserts** — it updates the row's fields in place (so a re-pull with a
+        richer field set enriches existing rows), never duplicating. Out-of-range
+        values are flagged ``quality = "suspect"`` (never dropped).
         """
         rows = [self._to_row(r) for r in readings]
         if not rows:
@@ -84,14 +87,14 @@ class Store:
         if suspect:
             log.warning("%d/%d readings flagged suspect (out-of-range values)", suspect, len(rows))
 
-        stmt = self._insert_ignore_stmt(rows)
+        stmt = self._upsert_stmt(rows)
         if stmt is not None:
             with self._session_factory() as session:
                 result = session.execute(stmt)
                 session.commit()
                 return result.rowcount
 
-        # Portable fallback for dialects without native upsert: check-then-insert.
+        # Portable fallback for dialects without native upsert: check-then-write.
         return self._save_readings_fallback(rows)
 
     def count(self) -> int:
@@ -157,35 +160,57 @@ class Store:
         row["ingested_at"] = utcnow()
         return row
 
-    def _insert_ignore_stmt(self, rows: list[dict]):
-        """Return a dialect-specific INSERT ... ON CONFLICT DO NOTHING, or None."""
+    def _upsert_stmt(self, rows: list[dict]):
+        """Dialect-specific INSERT ... ON CONFLICT DO UPDATE (enrich in place), or None."""
         dialect = self._engine.dialect.name
         if dialect == "postgresql":
             from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-            return pg_insert(ReadingRow).values(rows).on_conflict_do_nothing()
-        if dialect == "sqlite":
+            stmt = pg_insert(ReadingRow).values(rows)
+        elif dialect == "sqlite":
             from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
-            return sqlite_insert(ReadingRow).values(rows).on_conflict_do_nothing()
-        return None
+            stmt = sqlite_insert(ReadingRow).values(rows)
+        else:
+            return None
+
+        # Update every non-key column on conflict, so re-pulls enrich existing rows.
+        keys = {"source", "sensor_id", "ts"}
+        updates = {c: stmt.excluded[c] for c in rows[0] if c not in keys}
+        return stmt.on_conflict_do_update(
+            index_elements=["source", "sensor_id", "ts"],
+            set_=updates,
+        )
 
     def _save_readings_fallback(self, rows: list[dict]) -> int:
-        inserted = 0
+        written = 0
         with self._session_factory() as session:
             for row in rows:
-                exists = session.scalar(
-                    select(func.count())
-                    .select_from(ReadingRow)
-                    .where(
+                existing = session.scalar(
+                    select(ReadingRow).where(
                         ReadingRow.source == row["source"],
                         ReadingRow.sensor_id == row["sensor_id"],
                         ReadingRow.ts == row["ts"],
                     )
                 )
-                if exists:
-                    continue
-                session.add(ReadingRow(**row))
-                inserted += 1
+                if existing is not None:  # enrich in place
+                    for key, value in row.items():
+                        if key not in ("source", "sensor_id", "ts"):
+                            setattr(existing, key, value)
+                else:
+                    session.add(ReadingRow(**row))
+                written += 1
             session.commit()
-        return inserted
+        return written
+
+    def count_readings(self, sensor_id: str, start=None, end=None) -> int:
+        """How many readings we already have for a sensor in [start, end)."""
+        with self._session_factory() as session:
+            stmt = select(func.count()).select_from(ReadingRow).where(
+                ReadingRow.sensor_id == sensor_id
+            )
+            if start is not None:
+                stmt = stmt.where(ReadingRow.ts >= start)
+            if end is not None:
+                stmt = stmt.where(ReadingRow.ts < end)
+            return session.scalar(stmt) or 0

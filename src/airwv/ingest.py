@@ -174,14 +174,16 @@ def run_backfill(
     limit: int | None = None,
     start: datetime | None = None,
     end: datetime | None = None,
+    refresh: bool = False,
     now: datetime | None = None,
 ) -> int:
-    """Backfill historical readings for all resolved sensors. Returns rows inserted.
+    """Backfill historical readings for all resolved sensors. Returns rows written.
 
     History is fetched in windows (PurpleAir limits the span per request) and
-    saved incrementally; dedupe makes overlaps harmless. A failed window is
-    logged and skipped so one bad sensor/range doesn't abort the whole backfill.
-    ``limit`` caps the sensor count — test small before spending API points.
+    upserted (re-pulls enrich existing rows). **Windows we already have data for
+    are skipped** to avoid re-spending API points — pass ``refresh=True`` to
+    re-pull and overwrite them (e.g. to enrich old rows with new fields). A failed
+    window is logged and skipped. ``limit`` caps the sensor count for cheap tests.
     """
     index_map = index_map if index_map is not None else load_index_map(config.index_cache_path)
     if not index_map:
@@ -205,8 +207,12 @@ def run_backfill(
     )
 
     total = 0
+    skipped = 0
     for idx in indices:
         for w_start, w_end in _time_windows(start, end, window_days):
+            if not refresh and store.count_readings(str(idx), w_start, w_end) > 0:
+                skipped += 1
+                continue  # already have data here — don't re-spend points
             try:
                 readings = source.fetch_sensor_history(idx, w_start, w_end, average_minutes)
             except Exception as exc:  # one bad window shouldn't abort the run
@@ -216,6 +222,8 @@ def run_backfill(
                 )
                 continue
             total += store.save_readings(readings)
+    if skipped and not refresh:
+        log.info("skipped %d window(s) already stored (use --refresh to re-pull/enrich)", skipped)
 
     log.info("backfill complete: %d new rows across %d sensors", total, len(indices))
     return total
@@ -605,6 +613,8 @@ def main(argv: list[str] | None = None) -> None:
     backfill.add_argument("--limit", type=int, help="cap sensors backfilled (saves API points)")
     backfill.add_argument("--org", help="only sensors whose installing org matches (e.g. 'Create WV')")
     backfill.add_argument("--sensor", action="append", help="only sensors whose name matches (repeatable)")
+    backfill.add_argument("--refresh", action="store_true",
+                          help="re-pull windows already stored (enrich/overwrite; spends points)")
     analyze = sub.add_parser("analyze", help="detect anomalies + score sensor health (no API cost)")
     analyze.add_argument("--hours", type=int, default=168, help="lookback window (default 168 = 7d)")
     analyze.add_argument("--threshold", type=float, default=3.5, help="spike z-score threshold")
@@ -668,6 +678,7 @@ def main(argv: list[str] | None = None) -> None:
             limit=args.limit,
             start=_date(args.start),
             end=_date(args.end),
+            refresh=args.refresh,
         )
     elif command == "analyze":
         run_analyze(config, since_hours=args.hours, spike_threshold=args.threshold)

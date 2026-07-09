@@ -33,13 +33,13 @@ def test_save_and_count(store):
     assert store.count() == 2
 
 
-def test_duplicate_readings_are_ignored(store):
-    r = _reading("1")
-    assert store.save_readings([r]) == 1
-    # Same source/sensor/ts -> no new row, even with a different value.
-    dup = _reading("1", pm2_5=99.9)
-    assert store.save_readings([dup]) == 0
+def test_reingest_upserts_and_enriches(store):
+    assert store.save_readings([_reading("1", pm2_5=8.0)]) == 1
+    # Same source/sensor/ts -> no duplicate; the row is updated in place.
+    store.save_readings([_reading("1", pm2_5=99.9)])
     assert store.count() == 1
+    (row,) = store.recent(limit=1)
+    assert row.pm2_5 == 99.9  # enriched/overwritten, not discarded
 
 
 def test_values_round_trip(store):
