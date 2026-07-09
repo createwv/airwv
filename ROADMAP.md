@@ -47,7 +47,10 @@ confirmed capturing real data.*
 - [~] Operational logging + run health — structured logging + suspect-flag
       warnings in place; sensor dropout/last-seen alerting still pending
 - [x] Historical backfill from PurpleAir's archive — windowed, resilient
-      per-sensor history via `ingest backfill --days N --average M` (VOC included)
+      per-sensor history via `ingest backfill --days N --average M`
+- [x] Rich field set — PM1/2.5/10, **A/B channels**, **confidence**, VOC,
+      temp/humidity/pressure, **0.3–10µm particle counts** — captured before backfill
+- [x] 25M-point PurpleAir grant + request protocol — `docs/PURPLEAIR-POINTS.md`
 - [x] Sensor scoping + timeline cherry-pick — `--org` / `--sensor` to focus a
       subset, `--start` / `--end` for arbitrary date ranges — `ingest.py`
 - [x] Reach offline sensors — resolve with `max_age=0` so currently-down units
@@ -81,7 +84,8 @@ Separate real signal from sensor noise before anyone relies on it.
       — `analysis/health.py`
 - [ ] Neighbor cross-check — corroborate spikes against nearby sensors to
       distinguish a real event from a single-sensor malfunction
-- [ ] PurpleAir A/B channel divergence as a malfunction signal
+- [~] PurpleAir A/B channel divergence as a malfunction signal — channel data now
+      captured (`pm2_5_a`/`pm2_5_b`); implement the divergence check next backfill
 - [ ] Persist findings — flag anomalous rows / store a health record (currently
       read-only reporting)
 - [ ] Data-quality dashboard/report for maintainers
