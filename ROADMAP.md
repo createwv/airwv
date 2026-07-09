@@ -193,15 +193,26 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
       toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
       field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
-- [~] **Community reporting layer** — DESIGNED: see
-      [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Locked decisions:
-      **post-moderation** (live on submit, removed if bad), **no facility naming**
-      (location + category only → can't defame), v1 = **pin-drop + address geocode +
-      optional private contact + photo**. Safety leans on an **automated pre-screen**
-      (spam/profanity/known-facility-name → hold), **photos held until approved**,
-      EXIF/GPS strip, rate-limit + honeypot, and **~150 m location jitter** for
-      privacy. Next: build v1 (`reports` table, `POST/GET /api/reports`, flag,
-      admin/CLI moderation, 📣 map layer). Needs the Alembic migration story.
+- [~] **Community reporting & feedback** — DESIGNED (v2 of the design):
+      [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Now a **staged
+      pipeline**: light auto pre-screen → published *unverified* → maintainer
+      **verify/enrich** → *confirmed*. **Broadened scope** (air / water / soil /
+      wildlife / suspected-violation / other). **Progressive disclosure** — dead
+      simple by default, optional advanced tools (name an org, enter a reading,
+      photo, contact). **Naming is input-allowed but publish-gated** (private until
+      a reviewer confirms). Keeps EXIF strip, ~150 m jitter, rate-limit + honeypot.
+- [ ] **Community readings** — optional structured measurements (air/water/soil),
+      community-submitted + clearly unverified; own map layer once verified.
+- [ ] **Site feedback form** — bug / idea / question about the website itself,
+      footer-reachable, routed to maintainers (not mapped) — `feedback` table.
+- [ ] **Maintainer pipeline: notifications** — new reports/feedback ping a
+      **Slack/Discord webhook** (`AIRWV_REPORT_WEBHOOK`, reuse alerts webhook util).
+- [ ] **Admin / moderation & verification console** (priority) — token-gated queues
+      (held / unverified / flagged / feedback) with verify · enrich · approve-field
+      (org/photo/reading) · merge · remove · respond, + CLI mirror. This is the
+      "admin end" that makes the staged trust model real.
+- [ ] **Migrations (Alembic)** — needed for the `reports` / `readings_community` /
+      `feedback` tables (create_all won't ALTER the shared DB); long-standing gap.
 - [ ] **"Report to WV DEP"** — surface the official channel to report an
       environmental concern/complaint to WV DEP (their complaint form + spill/
       emergency line) from the dashboard, alongside a community report. *Verify the

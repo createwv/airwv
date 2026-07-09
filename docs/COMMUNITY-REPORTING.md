@@ -1,165 +1,231 @@
-# Community Reporting Layer — Design
+# Community Reporting & Feedback — Design
 
-Let West Virginia residents report an air-quality concern and place it on the
-map, so lived experience (odors, smoke, dust, symptoms) sits alongside sensor
-data and documented sources. This is a **community-reported tier** — clearly
-separated from measured data and documented public-record sources, and governed
-by the source-labeling policy in [`SOURCE-POLICY.md`](SOURCE-POLICY.md).
+Two ways for people to talk back to the project:
 
-## Decisions (locked)
+- **A. Environmental concern reports** — residents flag something they notice
+  (air/water/soil/wildlife/possible violation) and place it on the map.
+- **B. Site feedback** — "this is broken" / "I'd like to do or know X" about the
+  website itself. Not on the map; routed to maintainers.
 
-| Decision | Choice | Why it's safe |
-|---|---|---|
-| **Publishing** | **Post-moderation** — reports go live on submit, removed if flagged/reviewed | Acceptable *because* of the no-naming rule below; the residual risk is abusive free-text/photos, handled by an automated pre-screen |
-| **Facility naming** | **No naming** — location + category only, no facility field | Nobody is named, so an individual report can't defame a facility. Nearby documented sources remain their own separate, cited layer |
-| **v1 scope** | Pin-drop **+** address geocoding **+** optional private contact **+** photo upload | Full-featured, but each feature carries a guard (below) |
+Both feed a **maintainer pipeline** (notifications + an admin console) so a small
+team can triage, verify, enrich, and publish. Governed by the source-labeling
+policy in [`SOURCE-POLICY.md`](SOURCE-POLICY.md).
 
-The tension in "post-moderation + immediately public + free text + photos" is real.
-We reconcile it with a **hybrid**: normal text-only reports post instantly, but an
-**automated pre-screen** quarantines clear-bad content to `pending`, and **photos
-are held until approved** (the one element we pre-moderate — an abusive image
-being briefly public is the worst-case we refuse to accept).
+## Guiding idea
 
-## Principles
+**Dead-simple for the average person; power tools for those who know what they're
+talking about.** The default report is ~20 seconds (what + where). Everything else
+— naming a business, entering a measurement, attaching a photo — is optional
+"advanced" that stays out of the way until asked for.
 
-1. **Separate tier, always labeled.** Distinct marker + color; every popup reads
-   *"Community-reported concern — unverified, not a finding of fact."*
-2. **No naming, no blame.** No facility field. Free-text that names a documented
-   facility is auto-held for review (enforces the policy without censoring people).
-3. **Privacy first.** Contact info is private and never served publicly. Public
-   pin location is **jittered ~150 m** so a report can't pinpoint someone's home.
-4. **Provisional, correctable.** Standing disclaimer + a removal/right-of-reply path.
+And a **staged trust model**: a light report passes a quick automated screen and
+goes up as *unverified*, a maintainer gets pinged, and it can then be **verified /
+enriched** on the back end before it becomes a *confirmed* report. Sensitive inputs
+(a named business, a suspected violation, a measurement) are **captured but withheld
+from the public view until a maintainer verifies them**.
 
-## Data model — `reports`
+## Decisions (revised)
+
+| Topic | Decision |
+|---|---|
+| **Trust model** | **Staged**: light auto pre-screen → published *unverified* (or *held*) → maintainer **verify/enrich** → *confirmed*. Not pure post-moderation, not full pre-moderation. |
+| **Scope** | Broadened beyond air: **air / water / soil-land / wildlife / suspected violation / other**. |
+| **Naming orgs** | **Allowed as input, gated by verification.** A reporter *may* name a business/org; it's stored privately and only appears publicly if a maintainer verifies + approves it. Unverified reports never name anyone. |
+| **Complexity** | **Progressive disclosure** — simple by default, optional advanced fields (org, readings, photo, contact). |
+| **Pipeline** | New reports/feedback **ping a Slack/Discord webhook**; a token-gated **admin console** handles triage/verify/publish. |
+| **Feedback** | Separate lightweight **site-feedback** form (bug / idea / question), maintainer-routed, not mapped. |
+
+---
+
+## Part A — Environmental concern reports
+
+### Domains & categories
+
+| Domain | Example categories (auto-suggested; free "other" always allowed) |
+|---|---|
+| **Air** | odor / chemical smell · smoke or soot · dust · haze · flaring / open burning · diesel-truck traffic · symptoms (eye/throat/breathing) |
+| **Water** | discoloration · odor · foam/sheen · fish kill · discharge/outfall · flooding of a site |
+| **Soil / land** | dumping · staining/residue · erosion into water · odor from ground |
+| **Wildlife / animals** | dead or sick wildlife · livestock/pet illness · fish/bird die-off |
+| **Suspected violation** | possible permit or regulatory violation (e.g. burning, discharge, hours) — routed for review, **never published as fact** |
+| **Other** | anything that doesn't fit |
+
+Categorizing the obvious ones keeps it a couple of taps for most users.
+
+### Progressive disclosure — what the form asks
+
+**Simple (everyone, required):**
+1. **Domain** (big buttons: 💨 Air · 💧 Water · 🟤 Soil · 🐾 Wildlife · ⚠️ Violation · Other)
+2. **Category** (chips suggested from the domain) + one-line **description**
+3. **Location** — drop/drag a pin, or type an address → geocoded pin
+
+**Advanced (optional, collapsed under "Add more detail"):**
+- **When** it happened (`observed_at`)
+- **Name a business/org** you think is involved — *"Private. It may not appear in
+  the public report; a reviewer decides."*
+- **Enter a reading** — a measurement you took (see Part B)
+- **Photo** (held until approved)
+- **Contact** (email/phone — private, for follow-up only)
+
+### Verification lifecycle
 
 ```
-id             int   pk
-created_at     utc   server time
-observed_at    utc   optional — when the reporter experienced it
-lat, lon       float required — concern location (exact, stored)
-area_label     text  optional — coarse reverse-geocoded area ("Institute, Kanawha Co."), NOT street address
-category       text  enum below
-description    text  sanitized, length-capped (e.g. 1000 chars)
-photo_path     text  optional — stored file (EXIF/GPS stripped, re-encoded)
-photo_ok       bool  photo approved for display (false until moderated)
-contact_email  text  optional, PRIVATE — never serialized publicly
-contact_phone  text  optional, PRIVATE — never serialized publicly
-status         text  visible | pending | removed
-screen_reason  text  why auto-held (spam/profanity/possible-name/photo), nullable
-flags_count    int   public flags received
-ip_hash        text  PRIVATE — salted hash for rate-limit/abuse, short retention
-mod_note       text  PRIVATE — maintainer notes
+submit → [auto pre-screen] ─┬─ clean → PUBLISHED (badge: "Unverified community report")
+                            └─ flagged → HELD (not public; in the queue)
+                                   │
+        maintainer (pinged) ───────┴──► VERIFY / ENRICH ─┬─ CONFIRMED (badge: "Verified"),
+                                                          │   org/readings may now show
+                                                          ├─ keep unverified (leave as-is)
+                                                          ├─ MERGE into a related report
+                                                          └─ REMOVE (spam/abuse/off-topic)
 ```
 
-**Public API projection** (what leaves the server for the map): `id, created_at,
-observed_at, category, description, jittered lat/lon, area_label, photo (only if
-photo_ok), tier="community-reported"`. Contact, `ip_hash`, `mod_note`, and exact
-coordinates **never** appear in the public response.
+Public badges: **"Unverified community report"** (default) vs **"Verified"** (a
+maintainer confirmed it). Suspected-violation and named-org details are **only**
+visible on `CONFIRMED` reports where the reviewer approved that specific field.
 
-### Categories (v1)
+### Data model — `reports`
 
-`odor / chemical smell` · `smoke or soot` · `dust` · `haze / poor visibility` ·
-`flaring or open burning` · `heavy diesel / truck traffic` · `physical symptoms
-(eye, throat, breathing, headache)` · `other`
+```
+id            int   pk
+created_at    utc
+observed_at   utc   optional
+domain        text  air | water | soil | wildlife | violation | other
+category      text  from the domain list, or free text
+description   text  sanitized, length-capped
+lat, lon      float exact (stored); public view is jittered ~150 m
+area_label    text  coarse reverse-geocode ("Institute, Kanawha Co."), never a street address
+stage         text  published_unverified | held | confirmed | removed | merged
+suspected_org text  PRIVATE until confirmed+approved
+org_public    bool  reviewer approved showing the org (default false)
+photo_path    text  optional
+photo_ok      bool  approved for display (false until reviewed)
+contact_*     text  PRIVATE — email/phone, never served publicly
+screen_reason text  why held (spam/profanity/name/violation/photo)
+flags_count   int
+ip_hash       text  PRIVATE — salted, short retention
+mod_note      text  PRIVATE
+verified_by   text  maintainer/org that confirmed it
+```
 
-## Submission flow (UX)
+**Public projection:** `id, created_at, observed_at, domain, category, description,
+jittered lat/lon, area_label, stage badge, photo (if photo_ok), org (only if
+org_public), verified_by`. Contact, exact coords, ip_hash, mod_note never leave.
 
-1. **"Report a concern"** button on the map card opens a form.
-2. **Locate:** click the map to drop/drag a pin **or** type an address → geocode
-   (drops a pin the user can nudge). Pin is required.
-3. **Details:** category (required), description (optional), when it happened.
-4. **Optional:** private contact (email/phone) for follow-up; photo upload.
-5. **Consent line:** "This will be shown publicly (except your contact info).
-   Report only what you experienced; don't name or accuse specific businesses."
-6. Submit → validated + pre-screened → returns `visible` (live now) or `pending`
-   (held for review, with a friendly "thanks, a maintainer will review this" note).
+### Submission UX notes
+- Consent line: *"Shown publicly (except your contact). Report what you experienced.
+  If you name a business it's kept private unless a reviewer confirms it."*
+- Returns `published_unverified` (live now, unverified badge) or `held` (thanks,
+  under review) — reporter always gets a friendly confirmation.
 
-## Guards (the heart of post-moderation safety)
+### Guards (carried over, still essential)
+- **Auto pre-screen** → `held`: links/contact in description (spam), profanity,
+  pathological text, **any suspected-violation or named-org report** (needs eyes),
+  and **any photo** (held until approved).
+- **Anti-spam:** per-IP-hash rate limit, hidden honeypot + min time-on-form,
+  public flag → auto-hide at threshold, captcha in v2.
+- **Photos:** JPEG/PNG/WebP ≤5 MB, re-encoded, dimension-capped, **EXIF/GPS
+  stripped** (Pillow), stored outside the repo, never served until `photo_ok`.
+- **Privacy:** public location jittered ~150 m; coarse `area_label`; private
+  contact + `ip_hash` with a documented retention/purge policy.
 
-**Automated pre-screen** (runs on every submit; a hit sets `status=pending`):
-- Contains a URL / phone / email in the *description* → spam hold.
-- Matches a profanity/abuse wordlist → hold.
-- **Matches a known facility name** (from `sources.json`) → hold (enforces no-naming).
-- Pathological text (very long, all-caps, repeated chars, gibberish ratio) → hold.
-- **Any photo present** → photo held (`photo_ok=false`) until a maintainer approves,
-  even if the text goes live.
+### Display
+- Toggleable **📣 community reports** map layer (on/off like the others), clustered
+  when dense, distinct color, filterable by domain. Popups show the badge +
+  disclaimer + link to policy; org/photo only when approved.
+- v2: **aggregate/heatmap** ("6 water-odor reports near X, last 30 days").
 
-**Anti-spam / abuse:**
-- Rate limit per hashed IP (e.g. ≤5/hour, ≤20/day); return 429 over limit.
-- Hidden **honeypot** field + minimum time-on-form (bots fail both).
-- (v2) hCaptcha/Turnstile if bot pressure appears.
-- Public **flag** button; auto-hide at a flag threshold pending review.
+---
 
-**Photo handling:**
-- Accept JPEG/PNG/WebP, ≤5 MB; re-encode to JPEG/WebP; cap dimensions (~1600px);
-  generate a thumbnail.
-- **Strip all EXIF including GPS** on upload (Pillow — already a dependency).
-- Store outside the repo (gitignored dir in dev; object storage in prod). Never
-  serve until `photo_ok`.
+## Part B — Community readings (optional, for the knowledgeable)
 
-**Privacy:**
-- Public coordinates **jittered ~150 m**; exact coords kept server-side only.
-- `area_label` is coarse (town/county), never a street address.
-- Contact + `ip_hash` retention-limited; documented purge policy.
+Let people who take their own measurements attach them. Clearly community-submitted
+and **not mixed into the sensor-network data** unless verified.
 
-## API
+`readings_community` table: `id, report_id? (nullable — can stand alone), domain,
+parameter, value, unit, method_or_device, taken_at, lat/lon, verified (bool),
+notes`. Per-domain parameter presets to keep units sane:
+
+- **Air:** PM2.5 (µg/m³), PM10, VOC (index), CO (ppm), O₃ (ppb)
+- **Water:** pH, turbidity (NTU), conductivity (µS/cm), temperature (°C),
+  dissolved O₂ (mg/L), nitrate (mg/L)
+- **Soil:** pH, moisture (%)
+
+Free "other parameter + unit" always available. Verified community readings could
+later render as their own map layer distinct from the sensor network.
+
+---
+
+## Part C — Site feedback (about the website)
+
+A tiny form, reachable from the footer ("Feedback / report a problem"):
+
+`feedback` table: `id, created_at, kind (bug | idea | question), message, page/url
+context, contact? (private), status (new | triaged | done), ip_hash`.
+
+Not mapped. Pings the maintainer channel, shows in the admin console alongside
+reports. This is how "it's broken" and "I'd like to do/know X" reach the team.
+
+---
+
+## The maintainer pipeline
+
+### Notifications (Slack / Discord / etc.)
+On a new report (especially `held`, `violation`, named-org) or feedback, POST a
+compact summary to an **incoming webhook** (`AIRWV_REPORT_WEBHOOK`) — reuse the
+existing webhook-notifier pattern from alerts. Message: domain/category, area,
+unverified badge, and a link to the admin item. Keep PII out of the ping.
+
+### Admin / moderation & verification console (priority)
+Token-gated (`X-Admin-Token` == `AIRWV_ADMIN_TOKEN`; real auth later), a simple
+page + endpoints to run the queue:
+- **Queues:** held · unverified · flagged · feedback.
+- **Per report:** view full record (incl. private fields), **Verify/Confirm**,
+  edit/enrich (fix category, add area, write a public note), **approve field**
+  (org / photo / reading), **Merge**, **Remove**, and respond to the reporter
+  (if contact given).
+- **Audit:** who did what, when (`mod_note`, `verified_by`).
+- Optional CLI mirror: `ingest reports --queue held|flagged`, `--confirm ID`,
+  `--remove ID`, `--approve-org ID`.
+
+This is the "admin end" to build toward — moderation + verification is what makes
+the staged trust model real.
+
+---
+
+## APIs
 
 Public:
-- `POST /api/reports` — create (validated + pre-screened). Body: lat, lon,
-  category, description?, observed_at?, contact?, photo?, honeypot?, elapsed_ms.
-- `GET /api/reports?bbox=&category=&since=` — visible reports (public projection).
-- `POST /api/reports/{id}/flag` — increment flags; auto-hide at threshold.
+- `POST /api/reports` — create (simple or with advanced fields); validated + screened.
+- `GET /api/reports?domain=&bbox=&since=` — published reports (public projection).
+- `POST /api/reports/{id}/flag`
+- `POST /api/readings` — attach/submit a community reading.
+- `POST /api/feedback` — site feedback.
 
-Admin (gated by `X-Admin-Token` == `AIRWV_ADMIN_TOKEN` env; proper auth later):
-- `GET /api/admin/reports?status=pending|all` — full records incl. private fields.
-- `POST /api/admin/reports/{id}/moderate` — `{action: approve|remove|approve_photo, note}`.
+Admin (token):
+- `GET /api/admin/queue?type=held|unverified|flagged|feedback`
+- `POST /api/admin/reports/{id}` — `{action: confirm|enrich|approve_org|approve_photo|merge|remove, ...}`
+- `POST /api/admin/feedback/{id}` — `{status, note}`
 
-Optional CLI mirror for maintainers without the web UI:
-`ingest reports --list-pending`, `--approve ID`, `--remove ID`.
+---
 
-## Display
+## Policy / legal alignment
+- Ties into [`SOURCE-POLICY.md`](SOURCE-POLICY.md). Naming is **input-allowed,
+  publish-gated**: unverified reports never name anyone; a business appears only
+  after a maintainer verifies and approves that field, framed factually.
+- "Suspected violation" is a **routing category, never a public accusation** — it
+  goes to review (and potentially a DEP referral), not straight to the map as fact.
+- Standing disclaimer on every community item; visible removal / right-of-reply.
 
-- Toggleable **📣 community reports** map layer (on/off like sensors/sources/monitors),
-  clustered when dense. Distinct color from the measured/documented layers.
-- Popup: category, date, description, "unverified community report" disclaimer,
-  link to the policy; photo thumbnail only if approved.
-- (v2) **Aggregate view** — heatmap / "N odor reports near X in the last 30 days" —
-  useful for spotting patterns without over-weighting any single pin.
+---
 
-## Moderation
-
-- Post-moderation queue = anything the pre-screen held (`pending`) + anything
-  flagged. A minimal token-gated `/admin` page (or the CLI) lists these with
-  approve / remove / approve-photo actions.
-- (v2) email/Slack ping to maintainers on new `pending` items.
-
-## Legal / policy hooks
-
-- Ties into [`SOURCE-POLICY.md`](SOURCE-POLICY.md): community-reported is the
-  explicitly-hedged tier; no assertions of fact or causation.
-- Form terms: report only firsthand experience; be respectful; content is public;
-  don't name/accuse businesses. Visible removal/right-of-reply contact.
-- Even with no naming, a cluster of pins near one facility can imply blame — the
-  standing disclaimer + the separate, cited sources layer keep the framing neutral.
-
-## Phasing
-
-**v1 (this design):** form (pin-drop + address geocode + optional contact +
-photo), `POST/GET /api/reports`, flag, pre-screen (spam/profanity/name/photo-hold),
-EXIF strip, rate limit + honeypot, jittered public location, admin moderate
-(token) + CLI, 📣 map layer with disclaimer.
-
-**v2+:** aggregate/heatmap view, maintainer notifications, captcha, richer
-moderation UI, report status (acknowledged/resolved), and a **"Report to WV DEP"**
-hand-off next to community reports (see the Report-to-DEP roadmap item — verify the
-exact DEP URL/number before shipping).
-
-## Dependencies / notes
-
-- **Pillow** (have it) for EXIF strip + re-encode.
-- **Geocoding:** OpenStreetMap **Nominatim** (free) needs a valid User-Agent,
-  ≤1 req/sec, result caching, and attribution; swap to a self-hosted/paid geocoder
-  if volume grows. Address is a convenience that drops an adjustable pin; pin-drop
-  is the source of truth.
-- New `reports` table via the storage layer; needs the migration story we already
-  flagged (Alembic) rather than `create_all` on the shared DB.
+## Build sequence (toward the admin end)
+1. **Migrations (Alembic)** + tables: `reports`, `readings_community`, `feedback`.
+2. **Notification util** — Slack/Discord webhook (reuse alerts webhook pattern).
+3. **Public intake** — `POST /api/reports` + `/feedback` + pre-screen + rate-limit
+   + honeypot; `GET /api/reports` (published projection).
+4. **Admin console** — token-gated queues + verify/enrich/approve/remove/respond
+   (the priority) + CLI mirror.
+5. **Map UX** — progressive-disclosure form + 📣 layer with badges + domain filter.
+6. **Photo pipeline** (EXIF strip, held-until-approved) + **readings** entry.
+7. v2 — aggregate/heatmap, captcha, maintainer notifications polish, DEP hand-off.
