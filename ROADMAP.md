@@ -195,10 +195,11 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
 Grow the network and secure the record.
 
-- [ ] Reference monitors (regulatory-grade validation) — historical via **EPA AQS**
-      (authoritative, ~6mo lag) or **OpenAQ** (free, real-time + historical); ongoing
-      via **EPA AirNow snapshots** (poll + store like PurpleAir). Overlay on map to
-      validate/calibrate our community sensors.
+- [~] Reference monitors (regulatory-grade validation) — **EPA AirData** layer on
+      the map (13 WV monitors, done) + **OpenAQ live client** (`ingest reference`,
+      needs a free key — built, verify vs live on first pull). Community sensors'
+      daytime PM2.5 (~7-8) already match the Kanawha regulatory monitors (~7).
+      Still to add: OpenAQ live data on the map + a sensor-vs-reference view.
 - [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
       (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
 - [ ] Additional community-sensor sources beyond PurpleAir
