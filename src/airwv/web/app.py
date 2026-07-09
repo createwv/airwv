@@ -248,8 +248,8 @@ INDEX_HTML = """<!doctype html>
   /* Empower WV brand palette (from the logo). */
   :root { --brand:#3f76a8; --brand-accent:#b8863a; --sky:#a1bcd1; --bg:#f4f7f9; }
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
-  header { padding:0; background:var(--sky); }
-  header img.banner { display:block; width:100%; height:160px; object-fit:cover; object-position:center; }
+  header { background:linear-gradient(#a1bcd1, #cbdede); padding:12px 20px; text-align:center; }
+  header img.logo { height:92px; width:auto; max-width:100%; vertical-align:middle; }
   .subbar { background:var(--brand); color:#fff; padding:8px 20px; font-size:13px; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   select { padding:6px 10px; font-size:14px; }
@@ -278,7 +278,7 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body>
 <header>
-  <img class="banner" src="/static/banner.png" alt="empower wv — community eco monitoring">
+  <img class="logo" src="/static/logo.png" alt="empower wv — community eco monitoring">
 </header>
 <div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
 <div class="controls">

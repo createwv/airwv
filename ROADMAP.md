@@ -162,6 +162,12 @@ stay factual and avoid defamation risk. See the source-labeling policy below.
 - [ ] **Suspected/community-reported layer** — clearly separate tier for
       unverified concerns, hedged language + basis cited (never asserted as fact).
 - [ ] Toggle layers on/off; each marker links to its public-record source.
+- [ ] **FracTracker Alliance collaboration** — they already map WV pollution
+      sources with strong storytelling ([WV map](https://ft.maps.arcgis.com/apps/instant/sidebar/index.html?appid=da308b503a0140af9e399d092674494f)).
+      Explore: (a) overlay/link their layers (ArcGIS feature services) for source
+      context, (b) share our sensor data/readings with them, (c) co-tell the
+      story (their sources + our measurements). Reduces our own liability by
+      leaning on their vetted, sourced datasets.
 
 **Source-labeling policy ("constitution")** — draft into `docs/SOURCE-POLICY.md`:
 
