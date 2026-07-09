@@ -148,6 +148,35 @@ Make the data visible and usable.
 - [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
 
+### Pollution-source context (map layers)
+
+Show potential pollution sources near sensors for perspective — done carefully to
+stay factual and avoid defamation risk. See the source-labeling policy below.
+
+- [ ] **Documented sources layer** — plot facilities from authoritative public
+      records: EPA FRS/ECHO/TRI facilities, EIA/EPA power plants (e.g. John Amos),
+      WV DEP permitted emitters, WV DEP oil & gas wells. Factual, cited.
+- [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
+      Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
+      counts; OpenStreetMap geometry).
+- [ ] **Suspected/community-reported layer** — clearly separate tier for
+      unverified concerns, hedged language + basis cited (never asserted as fact).
+- [ ] Toggle layers on/off; each marker links to its public-record source.
+
+**Source-labeling policy ("constitution")** — draft into `docs/SOURCE-POLICY.md`:
+
+1. **Facts over accusations.** Only plot from authoritative public records; state
+   facts (name, type, permit/emissions per the cited record) — do not assert a
+   facility caused any sensor's readings.
+2. **Two tiers, clearly separated.** *Documented* (public record, factual) vs.
+   *community-reported/suspected* (unverified, labeled as such, hedged: "reported
+   concern," "potential," never "responsible for").
+3. **Cite everything.** Every marker links to its EPA/DEP/DOT source record.
+4. **Neutral language.** "Permitted emitter of X (EPA TRI)" not "polluter."
+5. **Right of reply / correction** process; visible map disclaimer.
+6. Legal footing: truthful statements of public record + clearly-labeled
+   hypotheses. Avoid stating false facts or implying wrongdoing as fact.
+
 ## Phase 6 — Interoperability & Archival
 
 Grow the network and secure the record.
