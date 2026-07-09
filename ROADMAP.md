@@ -156,15 +156,39 @@ Make the data visible and usable.
       570px; current `clamp(165px,20vw,230px)` approximates it continuously.
 - [x] **Master map-layer toggles** — community sensors / 🏭 sources / 📍 monitors
       each toggle on/off (sensors now toggle as one layer like the others).
-- [ ] **Sensor hierarchy + category filters** — label sensors by network/type
-      (community *PurpleAir*, regulatory *EPA/AirNow*, future *Clarity*, *Sensirion*,
-      Create WV-owned vs partner, indoor/outdoor…) and let users filter categories
-      on/off, not just all-or-nothing. Needs a `network`/`category` field on sensors
-      + a grouped legend/filter UI. Foundation: readings already carry `source`.
-- [ ] **Beta → launch** — the "under construction" bar is live; drop it (or flip to
-      a version/changelog note) when we go public at air.createwv.org.
 - [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
+
+#### Dashboard restructure (modes, layers, labeling) — see [`docs/FRONTEND.md`](docs/FRONTEND.md)
+
+- [ ] **Hierarchical layers tree** — replace flat checkboxes with a collapsible
+      tree (▸ closed by default, parent + leaf checkboxes, tri-state parent).
+      Sensor parents **Community Sensors** and **EPA / Reference Monitors** (toggle
+      at parent or individual level), plus **Pollution Sources** and **Community
+      Reports** groups.
+- [ ] **Pollution-source categories** — `category` field on sources (power /
+      chemical / oil-gas / TRI-other; later rail/highway) so you can turn off, e.g.,
+      *all power plants*. Category sub-toggles under the Sources layer.
+- [ ] **Name the EPA monitors** — persist each reference monitor's real AirNow site
+      name (we already fetch it from OpenAQ `locations`, just don't store it) and
+      display it; fall back to **`EPA #<id>`**. Community sensors keep EWV names.
+- [ ] **Explicit default time window** — on load, show the actual data span
+      ("Showing all data · first point → last point") from real min/max timestamps;
+      updates with selection/date-range. Cheap `GET /api/coverage` (or fold into
+      `/api/sensors`).
+- [ ] **Three modes** — move off the single scroll to **Overview** (public landing:
+      at-a-glance + active flags + *sign up for alerts* + *report a concern* + updates
+      feed; feedback in footer), **Analysis** (today's power dashboard), and **Admin**
+      (token-gated panels: reports · feedback · air-quality flagging · trends).
+- [ ] **Frontend architecture decision** — pick before the mode restructure.
+      Recommended: **Jinja2 templates + three mode pages + small vanilla/Alpine
+      modules (no build step)**; reserve a Svelte/Vite SPA for if the admin console
+      outgrows that. (We're FastAPI + vanilla JS today — *not* Django.)
+- [ ] **Sensor category metadata** — `network`/`ownership` fields (PurpleAir vs
+      EPA/AirNow vs future sensors; Create WV-owned vs partner; indoor/outdoor) to
+      power the tree sub-grouping. Foundation: readings already carry `source`.
+- [ ] **Beta → launch** — the "under construction" bar is live; drop it (or flip to
+      a version/changelog note) when we go public at air.createwv.org.
 
 ### Pollution-source context (map layers)
 
