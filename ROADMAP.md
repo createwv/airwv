@@ -193,12 +193,15 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
       toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
       field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
-- [ ] **Community reporting layer** — let residents report a concern and place it
-      on the map: **drop a pin or enter an address** (geocode), pick a category
-      (odor, smoke/dust, flaring, truck traffic, health symptom…), add notes/photo,
-      timestamp. Stored as a clearly-separate *community-reported* tier (hedged,
-      never asserted as fact — see policy). Needs a submission form + moderation +
-      a `reports` store; consider spam/abuse guards and opt-in contact.
+- [~] **Community reporting layer** — DESIGNED: see
+      [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Locked decisions:
+      **post-moderation** (live on submit, removed if bad), **no facility naming**
+      (location + category only → can't defame), v1 = **pin-drop + address geocode +
+      optional private contact + photo**. Safety leans on an **automated pre-screen**
+      (spam/profanity/known-facility-name → hold), **photos held until approved**,
+      EXIF/GPS strip, rate-limit + honeypot, and **~150 m location jitter** for
+      privacy. Next: build v1 (`reports` table, `POST/GET /api/reports`, flag,
+      admin/CLI moderation, 📣 map layer). Needs the Alembic migration story.
 - [ ] **"Report to WV DEP"** — surface the official channel to report an
       environmental concern/complaint to WV DEP (their complaint form + spill/
       emergency line) from the dashboard, alongside a community report. *Verify the
