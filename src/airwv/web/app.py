@@ -290,7 +290,7 @@ INDEX_HTML = """<!doctype html>
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
   /* Parallax hero: still sky gradient + panning cloud layers + still logo.
      Height scales with viewport width -> more sky on desktop, compact on mobile. */
-  header { position:relative; overflow:hidden; height:clamp(150px, 22vw, 300px);
+  header { position:relative; overflow:hidden; height:clamp(185px, 24vw, 320px);
     background:linear-gradient(to top, #f7ca89 4%, #e4d1ab 18%, #cddcd7 38%, #c5e0e8 49%, #a1bcd1 82%);
     display:flex; align-items:center; justify-content:center; }
   header .cloud { position:absolute; bottom:0; left:50%; width:120%; height:auto;
@@ -308,7 +308,9 @@ INDEX_HTML = """<!doctype html>
   }
   @keyframes sway { 0%,9%{transform:translateX(calc(-50% - var(--amp)))} 91%,100%{transform:translateX(calc(-50% + var(--amp)))} }
   @media (prefers-reduced-motion:reduce){ header .cloud{animation:none} }
-  header img.logo { position:relative; z-index:2; height:clamp(92px, 12vw, 150px); width:auto; max-width:92%;
+  /* Logo: floors ~165px on narrow screens (≈30vw near 570px), scales at 20vw
+     through desktop, capped so it stays in the banner on big monitors. */
+  header img.logo { position:relative; z-index:2; height:clamp(165px, 20vw, 230px); width:auto; max-width:92%;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
   .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     padding:8px 20px; font-size:13px; text-align:center; }

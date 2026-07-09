@@ -149,7 +149,11 @@ Make the data visible and usable.
 - [x] Health guide + EPA/PurpleAir color bands (PM2.5 + VOC), clickable events,
       About/repo section — `/api/guide`
 - [x] Deploy configs — `airwv-web.service` + Caddy runbook (`deploy/README.md`)
-- [x] Branding — Empower WV logo banner + favicon + brand palette
+- [x] Branding — Empower WV logo banner + favicon + brand palette + parallax
+      cloud hero. Logo enlarged (~165px floor near 570px wide, scaling to ~20vw
+      on desktop, capped in-banner). **Revisit:** fine-tune the exact logo/banner
+      sizing curve — the effect wanted is ~20vw on desktop stepping to ~30vw around
+      570px; current `clamp(165px,20vw,230px)` approximates it continuously.
 - [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
 
@@ -216,8 +220,11 @@ Grow the network and secure the record.
 - [x] Historical reference pull (`reference --start/--end`) to match sensor windows.
 - [ ] Reference on the dashboard — plot OpenAQ monitors on the map + a live
       **validation panel** (the `validate` table) so it's visible, not just CLI.
-- [ ] **PurpleAir bias correction** — community sensors read ~+3–5 µg/m³ high vs
-      reference; apply the EPA PurpleAir correction and store a corrected AQI.
+- [ ] **EPA PurpleAir bias correction** — our `validate` pass measured community
+      sensors reading ~+3–5 µg/m³ high vs reference. Apply the EPA nationwide
+      PurpleAir correction (`PM2.5_corrected = 0.524·PA_cf1 − 0.0862·RH + 5.75`;
+      we already store RH), expose both raw and corrected PM2.5/AQI, and re-run
+      `validate` to confirm the bias shrinks toward zero. Reference-grade output.
 - [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
       (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
 - [ ] Additional community-sensor sources beyond PurpleAir
