@@ -15,9 +15,9 @@ from pathlib import Path
 
 import httpx
 
-# Kanawha Valley bounding box (near our Create WV sensors).
-LAT_MIN, LAT_MAX = 38.05, 38.65
-LON_MIN, LON_MAX = -82.10, -81.30
+# Statewide West Virginia bounding box (all WV facilities).
+LAT_MIN, LAT_MAX = 37.10, 40.70
+LON_MIN, LON_MAX = -82.70, -77.70
 
 # Hand-verified landmark seed (kept first; EPA facilities are appended).
 CURATED = {
@@ -50,7 +50,7 @@ def _dms_to_decimal(v) -> float | None:
 def fetch_wv_tri() -> list[dict]:
     rows = []
     url = "https://data.epa.gov/efservice/tri_facility/state_abbr/WV/rows/{}:{}/JSON"
-    for start in range(0, 800, 200):
+    for start in range(0, 3000, 200):
         r = httpx.get(url.format(start, start + 199), timeout=60)
         r.raise_for_status()
         batch = r.json()

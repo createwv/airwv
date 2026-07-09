@@ -161,9 +161,17 @@ stay factual and avoid defamation risk. See the source-labeling policy below.
 accumulate PM2.5 overnight (1.4–2.0×) while the upriver control stays flat (0.97) —
 strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
-- [~] **Documented sources layer** — 41 Kanawha Valley facilities from **EPA TRI**
-      (keyless Envirofacts API) + landmarks, cited, on the map — `scripts/fetch_sources.py`.
-      Still to add: statewide coverage, EIA power plants, WV DEP permits + O&G wells.
+- [~] **Documented sources layer** — facilities from **EPA TRI** (keyless
+      Envirofacts API) + landmarks, cited, on the map — `scripts/fetch_sources.py`.
+      Now **statewide (all WV)**, not just Kanawha. Still to add: EIA power plants,
+      WV DEP permits + O&G wells.
+- [ ] **Facility status / permit layer** — toggle facilities by status:
+      **active / inactive / approved / requesting (planning/pending)** — the permit
+      lifecycle regulated emitters go through. Permit info as a separate field
+      (permit id/type/status) from operating status. Sources: WV DEP permit
+      database, EPA ECHO (compliance/active), FracTracker (proposed/planned sites).
+- [ ] **Map scale** — statewide = many markers; add clustering / zoom-based
+      thinning so the map stays usable across all of WV.
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
