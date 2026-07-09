@@ -21,6 +21,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import readings_to_csv
@@ -219,6 +220,10 @@ def create_app(store: Store) -> FastAPI:
     def index():
         return INDEX_HTML
 
+    static_dir = Path(__file__).parent / "static"
+    if static_dir.is_dir():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
     return app
 
 
@@ -239,8 +244,11 @@ INDEX_HTML = """<!doctype html>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; background:#f7f7f8; color:#1a1a1a; }
-  header { background:#3b2a6b; color:#fff; padding:14px 20px; }
+  /* Brand palette — swap these to rebrand (e.g. Empower WV colors). */
+  :root { --brand:#3b2a6b; --brand-accent:#7a5cc0; --bg:#f7f7f8; }
+  body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
+  header { background:var(--brand); color:#fff; padding:14px 20px; display:flex; align-items:center; gap:14px; }
+  header img#logo { height:38px; width:auto; }
   header h1 { margin:0; font-size:20px; }
   header p { margin:4px 0 0; opacity:.8; font-size:13px; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
@@ -263,15 +271,18 @@ INDEX_HTML = """<!doctype html>
   .guide .sw { width:14px; height:14px; border-radius:3px; border:1px solid #0002; }
   .guide .note { flex-basis:100%; color:#666; font-size:12px; margin-top:4px; }
   .about { padding:10px 14px; font-size:13px; color:#444; max-width:70ch; }
-  .about a { color:#3b2a6b; }
+  .about a { color:var(--brand); }
   footer { text-align:center; color:#888; font-size:12px; padding:20px; }
-  footer a { color:#7a5cc0; }
+  footer a { color:var(--brand-accent); }
 </style>
 </head>
 <body>
 <header>
-  <h1>AirWV — West Virginia Air Quality</h1>
-  <p>Community sensor data. Map colored by latest PM2.5; times in US Eastern.</p>
+  <img id="logo" src="/static/logo.svg" alt="" onerror="this.style.display='none'">
+  <div>
+    <h1>AirWV — West Virginia Air Quality</h1>
+    <p>Community sensor data. Map colored by latest PM2.5; times in US Eastern.</p>
+  </div>
 </header>
 <div class="controls">
   <div><b>Sensors</b><div id="sensors" class="sensorlist"></div></div>

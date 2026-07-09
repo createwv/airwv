@@ -41,6 +41,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "airwv.data" = ["*.json"]
+"airwv.web" = ["static/*"]
 
 [tool.ruff]
 line-length = 100
