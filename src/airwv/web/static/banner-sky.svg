@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2800 768" preserveAspectRatio="xMidYMax meet"><defs><linearGradient id="linear-gradient" x1="1401.5" y1="749.2" x2="1401.5" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset=".04" stop-color="#f7ca89"/>
+      <stop offset=".18" stop-color="#e4d1ab"/>
+      <stop offset=".38" stop-color="#cddcd7"/>
+      <stop offset=".49" stop-color="#c5e0e8"/>
+      <stop offset=".8" stop-color="#a1bcd1"/>
+    </linearGradient></defs><rect width="2803" height="749.2" fill="url(#linear-gradient)"/></svg>

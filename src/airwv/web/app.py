@@ -272,9 +272,22 @@ INDEX_HTML = """<!doctype html>
   /* Empower WV brand palette — blue / gold / purple. */
   :root { --brand:#4a7fb0; --brand-accent:#c9992f; --brand-purple:#7a6fb0; --sky:#a9c4dc; --bg:#f4f7f9; }
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
-  header { background:url(/static/banner.svg) center bottom / cover no-repeat, linear-gradient(#a9c4dc,#e7dfc4);
-    min-height:150px; display:flex; align-items:center; justify-content:center; padding:12px 20px; }
-  header img.logo { height:118px; width:auto; max-width:96%; filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
+  /* Parallax hero: still sky gradient + panning cloud layers + still logo.
+     Height scales with viewport width -> more sky on desktop, compact on mobile. */
+  header { position:relative; overflow:hidden; height:clamp(150px, 22vw, 300px);
+    background:linear-gradient(to top, #f7ca89 4%, #e4d1ab 18%, #cddcd7 38%, #c5e0e8 49%, #a1bcd1 82%);
+    display:flex; align-items:center; justify-content:center; }
+  header .cloud { position:absolute; bottom:0; left:50%; width:120%; height:auto;
+    transform:translateX(-50%); pointer-events:none; }
+  header .c-gold  { animation: sway-g 36s ease-in-out infinite alternate; }
+  header .c-blue  { animation: sway-b 27s ease-in-out infinite alternate; }
+  header .c-white { animation: sway-w 20s ease-in-out infinite alternate; }
+  @keyframes sway-g { 0%,9%{transform:translateX(calc(-50% - 12px))} 91%,100%{transform:translateX(calc(-50% + 12px))} }
+  @keyframes sway-b { 0%,9%{transform:translateX(calc(-50% - 20px))} 91%,100%{transform:translateX(calc(-50% + 20px))} }
+  @keyframes sway-w { 0%,9%{transform:translateX(calc(-50% - 32px))} 91%,100%{transform:translateX(calc(-50% + 32px))} }
+  @media (prefers-reduced-motion:reduce){ header .cloud{animation:none} }
+  header img.logo { position:relative; z-index:2; height:clamp(92px, 12vw, 150px); width:auto; max-width:92%;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
   .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     padding:8px 20px; font-size:13px; text-align:center; }
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
@@ -304,6 +317,9 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body>
 <header>
+  <img class="cloud c-gold"  src="/static/banner-clouds-gold.svg"  alt="">
+  <img class="cloud c-blue"  src="/static/banner-clouds-blue.svg"  alt="">
+  <img class="cloud c-white" src="/static/banner-clouds-white.svg" alt="">
   <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
 <div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
