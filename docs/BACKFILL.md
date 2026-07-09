@@ -13,19 +13,32 @@ source .venv/bin/activate
 python -m airwv.ingest resolve
 ```
 
-## 1. Create WV sensors — full 10-min history (recommended)
+## Points-safety built in
 
-14 sensors, install→today, ~1.6M rows ≈ **~20M points (~$197)**:
+- **Backfill skips windows already stored** — re-running never re-spends points on
+  data you own. Add `--refresh` only when you *want* to re-pull (e.g. to enrich old
+  rows with newly-added fields).
+- **Writes upsert** — a `--refresh` re-pull updates existing rows in place (fills in
+  new fields), never duplicating.
+
+## 1. Create WV sensors — full history (recommended)
+
+14 sensors, install→today. With the rich field set (~16 fields incl. A/B channels,
+confidence, particle counts), measured cost drives the choice — the 25M grant
+covers **hourly** (~7M pts) or **30-min** (~14M pts) for all 14, but **not 10-min
+everywhere** (~41M > 25M). Recommended:
 
 ```bash
-python -m airwv.ingest backfill --org "Create WV" --average 10 --start 2023-01-01
-```
-
-Cheaper hourly version (~3.3M points / ~$33):
-
-```bash
+# Hourly full history for all 14 (deep, rich, ~7M points — fits with room to spare)
 python -m airwv.ingest backfill --org "Create WV" --average 60 --start 2023-01-01
+
+# Then spend the remaining headroom on targeted 10-min for priority sensors/windows:
+python -m airwv.ingest backfill --sensor "Glasgow" --average 10 \
+    --start 2024-02-01 --end 2024-12-31 --refresh   # --refresh enriches the rows we already have
 ```
+
+> Verify first (a few cents): `--limit 1` a short window and check your points
+> dashboard before/after to confirm the new fields return and the real per-row cost.
 
 ## 2. Priority event verification (tiny, do right after points arrive)
 
