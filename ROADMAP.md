@@ -154,6 +154,15 @@ Make the data visible and usable.
       on desktop, capped in-banner). **Revisit:** fine-tune the exact logo/banner
       sizing curve — the effect wanted is ~20vw on desktop stepping to ~30vw around
       570px; current `clamp(165px,20vw,230px)` approximates it continuously.
+- [x] **Master map-layer toggles** — community sensors / 🏭 sources / 📍 monitors
+      each toggle on/off (sensors now toggle as one layer like the others).
+- [ ] **Sensor hierarchy + category filters** — label sensors by network/type
+      (community *PurpleAir*, regulatory *EPA/AirNow*, future *Clarity*, *Sensirion*,
+      Create WV-owned vs partner, indoor/outdoor…) and let users filter categories
+      on/off, not just all-or-nothing. Needs a `network`/`category` field on sensors
+      + a grouped legend/filter UI. Foundation: readings already carry `source`.
+- [ ] **Beta → launch** — the "under construction" bar is live; drop it (or flip to
+      a version/changelog note) when we go public at air.createwv.org.
 - [ ] Per-area rollups + trend charts on the dashboard
 - [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
 
@@ -180,8 +189,20 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
-- [ ] **Suspected/community-reported layer** — clearly separate tier for
-      unverified concerns, hedged language + basis cited (never asserted as fact).
+- [ ] **Source categories + filters** — categorize documented sources (coal/power,
+      chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
+      toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
+      field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
+- [ ] **Community reporting layer** — let residents report a concern and place it
+      on the map: **drop a pin or enter an address** (geocode), pick a category
+      (odor, smoke/dust, flaring, truck traffic, health symptom…), add notes/photo,
+      timestamp. Stored as a clearly-separate *community-reported* tier (hedged,
+      never asserted as fact — see policy). Needs a submission form + moderation +
+      a `reports` store; consider spam/abuse guards and opt-in contact.
+- [ ] **"Report to WV DEP"** — surface the official channel to report an
+      environmental concern/complaint to WV DEP (their complaint form + spill/
+      emergency line) from the dashboard, alongside a community report. *Verify the
+      exact current URL/number before publishing — do not hardcode an unverified line.*
 - [ ] Toggle layers on/off; each marker links to its public-record source.
 - [ ] **FracTracker Alliance collaboration** — they already map WV pollution
       sources with strong storytelling ([WV map](https://ft.maps.arcgis.com/apps/instant/sidebar/index.html?appid=da308b503a0140af9e399d092674494f)).
@@ -218,13 +239,16 @@ Grow the network and secure the record.
       PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
       and it auto-flagged the known-bad sensor (196533: r<0, bias +1589 µg/m³).
 - [x] Historical reference pull (`reference --start/--end`) to match sensor windows.
-- [ ] Reference on the dashboard — plot OpenAQ monitors on the map + a live
-      **validation panel** (the `validate` table) so it's visible, not just CLI.
-- [ ] **EPA PurpleAir bias correction** — our `validate` pass measured community
-      sensors reading ~+3–5 µg/m³ high vs reference. Apply the EPA nationwide
-      PurpleAir correction (`PM2.5_corrected = 0.524·PA_cf1 − 0.0862·RH + 5.75`;
-      we already store RH), expose both raw and corrected PM2.5/AQI, and re-run
-      `validate` to confirm the bias shrinks toward zero. Reference-grade output.
+- [x] **Validation panel on the dashboard** — the `validate` table live at
+      `/api/validate`, color-coded r + bias, with a malfunction flag on absurd bias.
+- [ ] Plot the OpenAQ reference monitors on the map as a live layer (distinct from
+      the static EPA AirData 📍 layer).
+- [~] **EPA PurpleAir bias correction** — DONE: `correction.py` (Barkjohn 2021,
+      `0.524·PA_cf1 − 0.0862·RH + 5.75`), `validate --correct` + dashboard toggle;
+      raw +3–5 µg/m³ bias collapses to ~−1.5 and r improves. STILL TO DO: expose
+      corrected PM2.5/AQI everywhere (series, map colors, events, **alerts**) with a
+      raw/corrected switch; consider storing a corrected column. Note the malfunction
+      sensor (196533) has no RH so it drops from corrected view — keep it visible.
 - [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
       (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
 - [ ] Additional community-sensor sources beyond PurpleAir
