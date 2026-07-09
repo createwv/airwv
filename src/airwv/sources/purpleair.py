@@ -48,6 +48,8 @@ RESOLVE_FIELDS = ["name", "latitude", "longitude"]
 
 # Fields requested from the per-sensor history endpoint. History uses suffixed
 # names (e.g. pm2.5_atm) distinct from the realtime fields.
+# NOTE: 'confidence' is a realtime-only field — NOT valid for /history (verified
+# against the API). It stays in SENSOR_FIELDS but must not be requested here.
 HISTORY_FIELDS = [
     "pm1.0_atm",
     "pm2.5_atm",
@@ -58,7 +60,6 @@ HISTORY_FIELDS = [
     "temperature",
     "pressure",
     "voc",
-    "confidence",
     "0.3_um_count",
     "0.5_um_count",
     "1.0_um_count",
