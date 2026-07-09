@@ -279,12 +279,18 @@ INDEX_HTML = """<!doctype html>
     display:flex; align-items:center; justify-content:center; }
   header .cloud { position:absolute; bottom:0; left:50%; width:120%; height:auto;
     transform:translateX(-50%); pointer-events:none; }
-  header .c-gold  { animation: sway-g 36s ease-in-out infinite alternate; }
-  header .c-blue  { animation: sway-b 27s ease-in-out infinite alternate; }
-  header .c-white { animation: sway-w 20s ease-in-out infinite alternate; }
-  @keyframes sway-g { 0%,9%{transform:translateX(calc(-50% - 12px))} 91%,100%{transform:translateX(calc(-50% + 12px))} }
-  @keyframes sway-b { 0%,9%{transform:translateX(calc(-50% - 20px))} 91%,100%{transform:translateX(calc(-50% + 20px))} }
-  @keyframes sway-w { 0%,9%{transform:translateX(calc(-50% - 32px))} 91%,100%{transform:translateX(calc(-50% + 32px))} }
+  /* Same duration so all layers turn the corners together. Gold(back) + white
+     (front) sway one way; blue(mid) counter-sways (alternate-reverse). Amplitude
+     gives the depth (subtle back, bold front) and bumps up on desktop. */
+  header .c-gold  { --amp:16px; animation: sway 30s ease-in-out infinite alternate; }
+  header .c-blue  { --amp:24px; animation: sway 30s ease-in-out infinite alternate-reverse; }
+  header .c-white { --amp:36px; animation: sway 30s ease-in-out infinite alternate; }
+  @media (min-width:820px){
+    header .c-gold  { --amp:30px; }
+    header .c-blue  { --amp:46px; }
+    header .c-white { --amp:66px; }
+  }
+  @keyframes sway { 0%,9%{transform:translateX(calc(-50% - var(--amp)))} 91%,100%{transform:translateX(calc(-50% + var(--amp)))} }
   @media (prefers-reduced-motion:reduce){ header .cloud{animation:none} }
   header img.logo { position:relative; z-index:2; height:clamp(92px, 12vw, 150px); width:auto; max-width:92%;
     filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
