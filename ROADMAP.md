@@ -161,9 +161,9 @@ stay factual and avoid defamation risk. See the source-labeling policy below.
 accumulate PM2.5 overnight (1.4–2.0×) while the upriver control stays flat (0.97) —
 strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
-- [~] **Documented sources layer** — plot facilities from authoritative public
-      records: EPA FRS/ECHO/TRI facilities, EIA/EPA power plants (e.g. John Amos),
-      WV DEP permitted emitters, WV DEP oil & gas wells. Factual, cited. *(building)*
+- [~] **Documented sources layer** — 41 Kanawha Valley facilities from **EPA TRI**
+      (keyless Envirofacts API) + landmarks, cited, on the map — `scripts/fetch_sources.py`.
+      Still to add: statewide coverage, EIA power plants, WV DEP permits + O&G wells.
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
@@ -195,7 +195,13 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
 Grow the network and secure the record.
 
-- [ ] Additional sources (EPA AirNow, other community sensors, reference monitors)
+- [ ] Reference monitors (regulatory-grade validation) — historical via **EPA AQS**
+      (authoritative, ~6mo lag) or **OpenAQ** (free, real-time + historical); ongoing
+      via **EPA AirNow snapshots** (poll + store like PurpleAir). Overlay on map to
+      validate/calibrate our community sensors.
+- [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
+      (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
+- [ ] Additional community-sensor sources beyond PurpleAir
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
 - [ ] Open-data exports and a documented public dataset
