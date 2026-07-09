@@ -34,14 +34,32 @@ def _parse_date(value: str | None) -> date | None:
     return datetime.strptime(value, "%Y-%m-%d").date() if value else None
 
 
+# EPA / PurpleAir PM2.5 AQI categories (µg/m³ upper bounds; last is open-ended).
+PM25_BANDS = [
+    {"max": 12.0, "label": "Good", "color": "#00e400"},
+    {"max": 35.4, "label": "Moderate", "color": "#ffff00"},
+    {"max": 55.4, "label": "Unhealthy for sensitive groups", "color": "#ff7e00"},
+    {"max": 150.4, "label": "Unhealthy", "color": "#ff0000"},
+    {"max": 250.4, "label": "Very unhealthy", "color": "#8f3f97"},
+    {"max": None, "label": "Hazardous", "color": "#7e0023"},
+]
+
+# VOC (Bosch gas index) is relative/uncalibrated — rough guidance only.
+VOC_BANDS = [
+    {"max": 100.0, "label": "Typical", "color": "#00e400"},
+    {"max": 200.0, "label": "Slightly elevated", "color": "#ffff00"},
+    {"max": 400.0, "label": "Elevated", "color": "#ff7e00"},
+    {"max": None, "label": "High", "color": "#ff0000"},
+]
+
+
 def _pm25_color(value: float | None) -> str:
-    """Rough EPA-style color for a PM2.5 concentration (µg/m³)."""
+    """EPA-style color for a PM2.5 concentration (µg/m³)."""
     if value is None:
         return "#9e9e9e"
-    for limit, color in ((12, "#00e400"), (35, "#ffff00"), (55, "#ff7e00"),
-                         (150, "#ff0000"), (250, "#8f3f97")):
-        if value < limit:
-            return color
+    for band in PM25_BANDS:
+        if band["max"] is None or value <= band["max"]:
+            return band["color"]
     return "#7e0023"
 
 
@@ -180,6 +198,14 @@ def create_app(store: Store) -> FastAPI:
             "hours": [{"hour": s.hour, "median": s.median, "count": s.count} for s in profile],
         }
 
+    @app.get("/api/guide")
+    def guide():
+        return {
+            "pm2_5": PM25_BANDS,
+            "voc": VOC_BANDS,
+            "voc_note": "VOC is a relative gas index (uncalibrated, drifts per sensor) — trends and comparisons at one sensor are meaningful; absolute cross-sensor values are not.",
+        }
+
     @app.get("/api/export/{sensor_id}.csv")
     def export_csv(sensor_id: str):
         csv_text = readings_to_csv(store.readings_for_sensor(sensor_id))
@@ -231,6 +257,15 @@ INDEX_HTML = """<!doctype html>
   table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
   th { color:#666; font-weight:600; }
+  .guide { padding:10px 14px; display:flex; flex-wrap:wrap; gap:8px; }
+  .guide .chip { display:flex; align-items:center; gap:6px; font-size:12px; border:1px solid #eee;
+    border-radius:6px; padding:4px 8px; }
+  .guide .sw { width:14px; height:14px; border-radius:3px; border:1px solid #0002; }
+  .guide .note { flex-basis:100%; color:#666; font-size:12px; margin-top:4px; }
+  .about { padding:10px 14px; font-size:13px; color:#444; max-width:70ch; }
+  .about a { color:#3b2a6b; }
+  footer { text-align:center; color:#888; font-size:12px; padding:20px; }
+  footer a { color:#7a5cc0; }
 </style>
 </head>
 <body>
@@ -259,16 +294,59 @@ INDEX_HTML = """<!doctype html>
     <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · click a marker to toggle</div>
 </div>
 <div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
-  <span class="meta" id="trendinfo"></span></h2><div id="ts" class="chart"></div></div>
+  <span class="meta" id="trendinfo"></span></h2><div id="ts" class="chart"></div>
+  <div class="meta" id="detail" style="padding:6px 14px">Click a point (or event ×) for detail.</div>
+</div>
 <div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div id="diurnal" class="chart"></div></div>
 <div class="card"><h2>Day vs. overnight compare</h2>
   <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
 </div>
+<div class="card"><h2>Health guide — what the levels mean</h2><div id="guide" class="guide"></div></div>
+<div class="card"><h2>About AirWV</h2>
+  <div class="about">
+    <p>AirWV is an open-source, community air-quality monitoring project for West
+    Virginia. It collects readings from community <a href="https://www2.purpleair.com/"
+    target="_blank" rel="noopener">PurpleAir</a> sensors, stores long-term history,
+    and surfaces trends, anomalies, and alerts. It grew out of the
+    <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
+    Valley Air Quality Monitoring project</a> (Create WV, WVCAG, and partners).</p>
+    <p>Data shown is from community sensors and is provided as-is for awareness, not
+    regulatory use. Source &amp; docs:
+    <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">github.com/createwv/airwv</a>.</p>
+  </div>
+</div>
+<footer>AirWV · open-source · <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a></footer>
 <script>
 const $ = id => document.getElementById(id);
 const j = async u => (await fetch(u)).json();
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
-let map, markers = {}, allSensors = [];
+let map, markers = {}, allSensors = [], GUIDE = null;
+
+async function loadGuide(){
+  GUIDE = await j('/api/guide');
+  const bands = (arr, unit) => arr.map((b,i) => {
+    const lo = i === 0 ? 0 : arr[i-1].max;
+    const range = b.max == null ? `${lo}+` : `${lo}–${b.max}`;
+    return `<span class="chip"><span class="sw" style="background:${b.color}"></span>${b.label} (${range}${unit})</span>`;
+  }).join('');
+  $('guide').innerHTML =
+    '<b style="flex-basis:100%">PM2.5 (µg/m³)</b>' + bands(GUIDE.pm2_5, '') +
+    '<b style="flex-basis:100%;margin-top:6px">VOC (relative index)</b>' + bands(GUIDE.voc, '') +
+    `<div class="note">${GUIDE.voc_note}</div>`;
+}
+function bandShapes(field, yMax){
+  const arr = field === 'pm2_5' ? GUIDE?.pm2_5 : field === 'voc' ? GUIDE?.voc : null;
+  if (!arr) return [];
+  const shapes = [];
+  arr.forEach((b,i) => {
+    const lo = i === 0 ? 0 : arr[i-1].max;
+    const hi = b.max == null ? yMax : Math.min(b.max, yMax);
+    if (hi <= lo) return;
+    shapes.push({type:'rect', xref:'paper', x0:0, x1:1, yref:'y', y0:lo, y1:hi,
+      fillcolor:b.color, opacity:0.10, line:{width:0}, layer:'below'});
+  });
+  return shapes;
+}
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
@@ -313,7 +391,8 @@ async function render(){
       j(`/api/trend/${ids[0]}?field=${field}`),
     ]);
     if (ev.events.length) tsTraces.push({x:ev.events.map(e=>e.ts), y:ev.events.map(e=>e.value),
-      mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:8}});
+      mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:9},
+      customdata: ev.events.map(e=>[e.residual, e.score])});
     const pts = series[0].points;
     if (tr.first != null && pts.length){
       tsTraces.push({x:[pts[0].ts, pts[pts.length-1].ts], y:[tr.first, tr.last],
@@ -322,8 +401,17 @@ async function render(){
     $('trendinfo').textContent = tr.direction === 'insufficient' ? '' :
       `trend: ${tr.direction}${tr.watch ? ' ⚠ watch' : ''} · Δ${tr.pct_change}% over period (r=${tr.r})`;
   } else { $('trendinfo').textContent = ''; }
-  Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45}, yaxis:{title:field},
-    legend:{orientation:'h'}}, {responsive:true, displayModeBar:false});
+  const yMax = Math.max(1, ...tsTraces.flatMap(t => t.y.filter(v => v != null)));
+  const gd = await Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45},
+    yaxis:{title:field}, legend:{orientation:'h'}, shapes:bandShapes(field, yMax)},
+    {responsive:true, displayModeBar:false});
+  gd.on('plotly_click', e => {
+    const p = e.points[0];
+    let msg = `${p.x} — ${field} = ${p.y}`;
+    if (p.data.name === 'event' && p.customdata)
+      msg += `  ·  event: +${p.customdata[0]} over baseline (z=${p.customdata[1]})`;
+    $('detail').textContent = msg;
+  });
 
   const dis = await Promise.all(ids.map(id => j(`/api/diurnal/${id}?field=${field}${rng}`)));
   dis.forEach((d,i) => diTraces.push({x:d.hours.map(h=>h.hour), y:d.hours.map(h=>h.median),
@@ -341,7 +429,7 @@ $('field').addEventListener('change', render);
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
-loadSensors();
+loadGuide().then(loadSensors);
 </script>
 </body>
 </html>"""

@@ -81,6 +81,14 @@ def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
 
+def test_guide_endpoint(tmp_path):
+    r = _client(tmp_path).get("/api/guide")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["pm2_5"][0]["label"] == "Good"
+    assert "voc" in body and body["voc_note"]
+
+
 def test_export_csv_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/export/197127.csv")
     assert r.status_code == 200

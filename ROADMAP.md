@@ -141,8 +141,12 @@ Make the data visible and usable.
       markers** overlaid on the time series
 - [x] Dashboard (v3) — **multi-sensor overlay** (time series + diurnal), **date-range
       picker**, and a **day/night compare table** — `/api/compare`
+- [x] Health guide + EPA/PurpleAir color bands (PM2.5 + VOC), clickable events,
+      About/repo section — `/api/guide`
+- [x] Deploy configs — `airwv-web.service` + Caddy runbook (`deploy/README.md`)
+- [ ] Branding — apply org logo + palette (Empower WV / Create WV assets)
 - [ ] Per-area rollups + trend charts on the dashboard
-- [ ] Embeddable widgets for partner sites; deploy publicly
+- [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
 
 ## Phase 6 — Interoperability & Archival
 
