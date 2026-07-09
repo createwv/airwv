@@ -18,6 +18,9 @@ from airwv.sources.base import Reading
 _RANGES: dict[str, tuple[float, float]] = {
     "pm1_0": (0.0, 5000.0),
     "pm2_5": (0.0, 5000.0),
+    "pm2_5_a": (0.0, 5000.0),
+    "pm2_5_b": (0.0, 5000.0),
+    "confidence": (0.0, 100.0),
     "pm10": (0.0, 5000.0),
     "aqi": (0.0, 1000.0),
     "voc": (0.0, 60000.0),

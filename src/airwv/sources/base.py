@@ -36,6 +36,18 @@ class Reading:
     temperature: float | None = None
     humidity: float | None = None
     pressure: float | None = None
+    # Dual-channel PM2.5 (A/B laser counters) — divergence signals a malfunction.
+    pm2_5_a: float | None = None
+    pm2_5_b: float | None = None
+    # PurpleAir channel-agreement confidence (0-100).
+    confidence: float | None = None
+    # Particle counts by size (per deciliter) — for source characterization.
+    count_0_3: float | None = None
+    count_0_5: float | None = None
+    count_1_0: float | None = None
+    count_2_5: float | None = None
+    count_5_0: float | None = None
+    count_10_0: float | None = None
     raw: dict[str, Any] = field(default_factory=dict)
 
 

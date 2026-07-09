@@ -27,11 +27,20 @@ SENSOR_FIELDS = [
     "last_seen",
     "pm1.0",
     "pm2.5",
+    "pm2.5_a",
+    "pm2.5_b",
     "pm10.0",
     "humidity",
     "temperature",
     "pressure",
     "voc",
+    "confidence",
+    "0.3_um_count",
+    "0.5_um_count",
+    "1.0_um_count",
+    "2.5_um_count",
+    "5.0_um_count",
+    "10.0_um_count",
 ]
 
 # Minimal fields for resolving our device names to PurpleAir sensor indices.
@@ -42,11 +51,20 @@ RESOLVE_FIELDS = ["name", "latitude", "longitude"]
 HISTORY_FIELDS = [
     "pm1.0_atm",
     "pm2.5_atm",
+    "pm2.5_atm_a",
+    "pm2.5_atm_b",
     "pm10.0_atm",
     "humidity",
     "temperature",
     "pressure",
     "voc",
+    "confidence",
+    "0.3_um_count",
+    "0.5_um_count",
+    "1.0_um_count",
+    "2.5_um_count",
+    "5.0_um_count",
+    "10.0_um_count",
 ]
 
 
@@ -57,6 +75,21 @@ def _first(record: dict, *keys: str):
         if value is not None:
             return value
     return None
+
+
+def _extended_fields(record: dict, a_keys: tuple[str, ...], b_keys: tuple[str, ...]) -> dict:
+    """A/B channel PM2.5, confidence, and particle counts common to both endpoints."""
+    return {
+        "pm2_5_a": _first(record, *a_keys),
+        "pm2_5_b": _first(record, *b_keys),
+        "confidence": record.get("confidence"),
+        "count_0_3": record.get("0.3_um_count"),
+        "count_0_5": record.get("0.5_um_count"),
+        "count_1_0": record.get("1.0_um_count"),
+        "count_2_5": record.get("2.5_um_count"),
+        "count_5_0": record.get("5.0_um_count"),
+        "count_10_0": record.get("10.0_um_count"),
+    }
 
 
 def parse_history_payload(payload: dict, sensor_index: int, source: str = "purpleair") -> list[Reading]:
@@ -87,6 +120,7 @@ def parse_history_payload(payload: dict, sensor_index: int, source: str = "purpl
                 humidity=record.get("humidity"),
                 pressure=record.get("pressure"),
                 raw=record,
+                **_extended_fields(record, ("pm2.5_atm_a", "pm2.5_a"), ("pm2.5_atm_b", "pm2.5_b")),
             )
         )
     return readings
@@ -124,6 +158,7 @@ def parse_sensor_payload(payload: dict, source: str = "purpleair") -> list[Readi
                 humidity=record.get("humidity"),
                 pressure=record.get("pressure"),
                 raw=record,
+                **_extended_fields(record, ("pm2.5_a",), ("pm2.5_b",)),
             )
         )
     return readings

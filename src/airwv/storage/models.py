@@ -56,6 +56,16 @@ class ReadingRow(Base):
     humidity: Mapped[float | None] = mapped_column(Float, nullable=True)
     pressure: Mapped[float | None] = mapped_column(Float, nullable=True)
 
+    pm2_5_a: Mapped[float | None] = mapped_column(Float, nullable=True)
+    pm2_5_b: Mapped[float | None] = mapped_column(Float, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_0_3: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_0_5: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_1_0: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_2_5: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_5_0: Mapped[float | None] = mapped_column(Float, nullable=True)
+    count_10_0: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     quality: Mapped[str] = mapped_column(String(16), default="ok", nullable=False)
     raw: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     ingested_at: Mapped[datetime] = mapped_column(

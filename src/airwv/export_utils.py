@@ -9,7 +9,10 @@ import io
 COLUMNS = [
     "ts", "source", "sensor_id", "lat", "lon",
     "pm1_0", "pm2_5", "pm10", "aqi", "voc",
-    "temperature", "humidity", "pressure", "quality",
+    "temperature", "humidity", "pressure",
+    "pm2_5_a", "pm2_5_b", "confidence",
+    "count_0_3", "count_0_5", "count_1_0", "count_2_5", "count_5_0", "count_10_0",
+    "quality",
 ]
 
 

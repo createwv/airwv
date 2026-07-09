@@ -37,6 +37,15 @@ _READING_FIELDS = (
     "temperature",
     "humidity",
     "pressure",
+    "pm2_5_a",
+    "pm2_5_b",
+    "confidence",
+    "count_0_3",
+    "count_0_5",
+    "count_1_0",
+    "count_2_5",
+    "count_5_0",
+    "count_10_0",
     "raw",
 )
 
