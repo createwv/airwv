@@ -64,8 +64,12 @@ class OpenAQSource:
 
     name = "openaq"
 
-    def __init__(self, api_key: str, timeout: float = 30.0, min_interval: float = 1.1,
+    def __init__(self, api_key: str, timeout: float = 30.0, min_interval: float = 2.0,
                  daily_cap: int = 1000, usage_path=None):
+        # OpenAQ free tier = 60 req/min AND 2000 req/hour. min_interval 2.0s = 30/min
+        # and ≤1800/hour — comfortably under BOTH. (The old 1.1s = ~3270/hour, which
+        # blew the hourly limit and got us banned.) daily_cap is our own belt-and-
+        # suspenders so we never "leave requests running in perpetuity" (their ToS).
         if not api_key:
             raise ValueError("OpenAQ API key is required (set OPENAQ_API_KEY)")
         self._api_key = api_key
