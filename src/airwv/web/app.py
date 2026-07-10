@@ -78,6 +78,32 @@ def _index_to_name() -> dict[str, str]:
         return {}
 
 
+# WV county → region, for grouping community sensors in the layers tree.
+COUNTY_REGION = {
+    "Kanawha": "Kanawha Valley", "Putnam": "Kanawha Valley",
+    "Wood": "Mid-Ohio Valley", "Mason": "Mid-Ohio Valley", "Pleasants": "Mid-Ohio Valley",
+    "Tyler": "Mid-Ohio Valley",
+    "Marion": "North Central", "Braxton": "Central WV",
+    "Tucker": "Potomac Highlands",
+    "Mingo": "Southern Coalfields", "Logan": "Southern Coalfields",
+    "Greenbrier": "Greenbrier Valley", "Jefferson": "Eastern Panhandle",
+}
+
+
+def _index_to_region() -> dict[str, str]:
+    """Map sensor id (PurpleAir index) to a WV region via the registry county."""
+    try:
+        from airwv.registry import load_wv_sensors
+        from airwv.resolve import load_index_map
+
+        cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+        index_map = load_index_map(Path(cache))
+        region_by_device = {s.device_id: COUNTY_REGION.get(s.county, "Other") for s in load_wv_sensors()}
+        return {str(idx): region_by_device.get(dev, "Other") for dev, idx in index_map.items()}
+    except Exception:
+        return {}
+
+
 def _index_to_coords() -> dict[str, tuple[float, float]]:
     """Map sensor id -> (lat, lon) from the resolved public listing, best-effort."""
     try:
@@ -99,6 +125,7 @@ def create_app(store: Store) -> FastAPI:
     app = FastAPI(title="AirWV Dashboard")
     names = _index_to_name()
     coords = _index_to_coords()
+    regions = _index_to_region()
 
     @app.get("/api/sensors")
     def sensors():
@@ -121,6 +148,7 @@ def create_app(store: Store) -> FastAPI:
                 "sensor_id": sid,
                 "name": name,
                 "kind": "reference" if is_ref else "community",
+                "region": None if is_ref else regions.get(sid, "Other"),
                 "count": cov["count"],
                 "first_ts": cov["first_ts"].isoformat() if cov["first_ts"] else None,
                 "last_ts": cov["last_ts"].isoformat() if cov["last_ts"] else None,
@@ -344,6 +372,14 @@ INDEX_HTML = """<!doctype html>
   .legend { font-size:12px; color:#666; padding:6px 14px; }
   .sensorlist { display:flex; flex-direction:column; gap:2px; max-height:120px; overflow:auto;
     border:1px solid #ddd; border-radius:6px; padding:6px 10px; font-size:13px; min-width:200px; }
+  .layerbar { padding:2px 20px 4px; }
+  .layers { font-size:13px; display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; }
+  .layers > b { align-self:center; }
+  .layers details { min-width:150px; }
+  .layers summary { cursor:pointer; user-select:none; padding:1px 0; }
+  .layers .children { padding:2px 0 0 20px; display:flex; flex-direction:column; gap:1px; }
+  .layers label { display:block; }
+  .layers .cnt { color:#aaa; font-size:11px; }
   button { padding:6px 12px; font-size:13px; cursor:pointer; }
   table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
@@ -382,10 +418,8 @@ INDEX_HTML = """<!doctype html>
   <label>To <input type="date" id="end"></label>
   <button id="clear">Clear dates</button>
   <a id="dl" href="#" download>⬇ Download CSV</a>
-  <label><input type="checkbox" id="showsensors" checked> ● community sensors</label>
-  <label><input type="checkbox" id="showref" checked> ◎ reference monitors</label>
-  <label><input type="checkbox" id="showsources" checked> 🏭 pollution sources</label>
 </div>
+<div class="layerbar"><div id="layers" class="layers"></div></div>
 <div class="meta" id="coverage" style="padding:0 20px 8px"></div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
@@ -469,61 +503,108 @@ async function loadCoverage(){
   if (c.first_ts) $('coverage').textContent =
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
+const layerState = {community:true, reference:true, sources:true, regions:{}, cats:{}};
 function drawMap(sensors){
   if (!map){
     map = L.map('map').setView([38.35, -81.6], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
   }
+  redrawSensors();
+  const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
+  if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
+  loadSources();
+}
+function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
   if (refLayer) refLayer.remove();
   sensorLayer = L.layerGroup();
   refLayer = L.layerGroup();
-  const pts = [];
-  sensors.forEach(x => {
+  allSensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
     if (x.kind === 'reference') {
-      // reference monitor: same PM2.5 color, but a bold ring = regulatory-grade
+      if (!layerState.reference) return;
       L.circleMarker([x.lat, x.lon], {radius:8, color:'#111', weight:3, fillColor:x.color, fillOpacity:0.85})
         .bindPopup(`<b>${x.name}</b><br><i>reference monitor (EPA/AirNow)</i>`+
           `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
         .addTo(refLayer);
     } else {
+      if (!layerState.community || layerState.regions[x.region] === false) return;
       L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
         .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
         .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
         .addTo(sensorLayer);
-      pts.push([x.lat, x.lon]);
     }
   });
-  if ($('showsensors').checked) sensorLayer.addTo(map);
-  if ($('showref').checked) refLayer.addTo(map);
-  if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
-  loadSources();
+  sensorLayer.addTo(map);
+  refLayer.addTo(map);
 }
 let sensorLayer, refLayer;
 // reference monitors are now drawn live in drawMap() (ringed circles, current PM2.5)
 const SRC_ICON = {power:'⚡', chemical:'⚗️', oil_gas:'🛢️', materials:'⛏️', waste:'🗑️', other:'🏭'};
 const SRC_LABEL = {power:'Power plant', chemical:'Chemical', oil_gas:'Oil & gas',
   materials:'Metals / mining / materials', waste:'Waste', other:'Other TRI facility'};
-let sourceLayer, allSources_ = [];
+let sourceLayer, allSources_ = [], srcDisclaimer = '';
 async function loadSources(){
   const data = await j('/api/sources');
-  allSources_ = data.sources;
+  allSources_ = data.sources; srcDisclaimer = data.disclaimer || '';
+  redrawSources();
+  buildLayers();
+}
+function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
   sourceLayer = L.layerGroup();
-  data.sources.forEach(s => {
+  if (layerState.sources) allSources_.forEach(s => {
     if (s.lat == null || s.lon == null) return;
     const cat = s.category || 'other';
+    if (layerState.cats[cat] === false) return;
     L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
       iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}`+
         `<br><b style="color:#7a5b12">${SRC_LABEL[cat]||'Facility'}</b> · ${s.type}<br><i>${s.operator||''}</i>`+
         `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
-        `<br><small style="color:#a00">${data.disclaimer||''}</small>`)
+        `<br><small style="color:#a00">${srcDisclaimer}</small>`)
       .addTo(sourceLayer);
   });
-  if ($('showsources').checked) sourceLayer.addTo(map);
+  sourceLayer.addTo(map);
+}
+// ---- Collapsible map-layers tree (community by region · reference · sources by category) ----
+function groupCount(arr, key){ const m={}; arr.forEach(x=>{ const k=x[key]; if(k) m[k]=(m[k]||0)+1; }); return m; }
+function buildLayers(){
+  const comm = allSensors.filter(s => s.kind==='community' && s.lat!=null);
+  const ref = allSensors.filter(s => s.kind==='reference' && s.lat!=null);
+  const rCounts = groupCount(comm,'region'), cCounts = groupCount(allSources_,'category');
+  const regions = Object.keys(rCounts).sort();
+  const cats = ['power','chemical','oil_gas','materials','waste','other'].filter(c=>cCounts[c]);
+  regions.forEach(r=>{ if(!(r in layerState.regions)) layerState.regions[r]=true; });
+  cats.forEach(c=>{ if(!(c in layerState.cats)) layerState.cats[c]=true; });
+  const row = (attr,val,checked,label,cnt)=>
+    `<label><input type="checkbox" data-${attr}="${val}" ${checked?'checked':''}> ${label} <span class="cnt">${cnt}</span></label>`;
+  const regionRows = regions.map(r=>row('region',r,layerState.regions[r],r,rCounts[r])).join('');
+  const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
+  $('layers').innerHTML =
+    `<b style="font-size:12px;color:#555">Map layers</b>`+
+    `<details><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionRows}</div></details>`+
+    `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
+    `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`;
+  // parent checkboxes shouldn't toggle the <details> open/close
+  ['L-community','L-sources'].forEach(id=> $(id).addEventListener('click', e=>e.stopPropagation()));
+  $('L-community').onchange = e=>{ layerState.community=e.target.checked; regions.forEach(r=>layerState.regions[r]=e.target.checked); redrawSensors(); buildLayers(); };
+  $('L-reference').onchange = e=>{ layerState.reference=e.target.checked; redrawSensors(); };
+  $('L-sources').onchange = e=>{ layerState.sources=e.target.checked; cats.forEach(c=>layerState.cats[c]=e.target.checked); redrawSources(); buildLayers(); };
+  $('layers').querySelectorAll('[data-region]').forEach(cb=> cb.onchange=e=>{
+    layerState.regions[e.target.dataset.region]=e.target.checked;
+    layerState.community=regions.some(r=>layerState.regions[r]); redrawSensors(); syncParents(regions,cats); });
+  $('layers').querySelectorAll('[data-cat]').forEach(cb=> cb.onchange=e=>{
+    layerState.cats[e.target.dataset.cat]=e.target.checked;
+    layerState.sources=cats.some(c=>layerState.cats[c]); redrawSources(); syncParents(regions,cats); });
+  syncParents(regions,cats);
+}
+function syncParents(regions,cats){
+  const cOn=regions.filter(r=>layerState.regions[r]).length, sOn=cats.filter(c=>layerState.cats[c]).length;
+  const cbC=$('L-community'), cbS=$('L-sources');
+  if(cbC){ cbC.checked=cOn>0; cbC.indeterminate=cOn>0 && cOn<regions.length; }
+  if(cbS){ cbS.checked=sOn>0; cbS.indeterminate=sOn>0 && sOn<cats.length; }
 }
 
 async function loadValidation(){
@@ -608,18 +689,7 @@ $('field').addEventListener('change', render);
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
-$('showsensors').addEventListener('change', e => {
-  if (!sensorLayer) return;
-  e.target.checked ? sensorLayer.addTo(map) : sensorLayer.remove();
-});
-$('showsources').addEventListener('change', e => {
-  if (!sourceLayer) return;
-  e.target.checked ? sourceLayer.addTo(map) : sourceLayer.remove();
-});
-$('showref').addEventListener('change', e => {
-  if (!refLayer) return;
-  e.target.checked ? refLayer.addTo(map) : refLayer.remove();
-});
+// map layer visibility is driven by the layers tree (buildLayers)
 loadGuide().then(loadSensors);
 loadValidation();
 loadCoverage();
