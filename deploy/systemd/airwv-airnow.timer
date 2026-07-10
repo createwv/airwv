@@ -1,0 +1,14 @@
+# Runs airwv-airnow.service hourly. AirNow publishes a new hourly file each hour;
+# keyless with no quota, so hourly is free and safe.
+#   sudo systemctl enable --now airwv-airnow.timer
+
+[Unit]
+Description=Run AirWV AirNow collection hourly
+
+[Timer]
+OnBootSec=6min
+OnUnitActiveSec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

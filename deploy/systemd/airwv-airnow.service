@@ -1,0 +1,16 @@
+# AirNow live reference collection — one-shot, triggered by airwv-airnow.timer.
+# Pulls EPA AirNow's hourly PM2.5 file (KEYLESS — no rate limit or quota, the same
+# source OpenAQ uses for US live data). Copy both to /etc/systemd/system/, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now airwv-airnow.timer
+
+[Unit]
+Description=AirWV — collect EPA AirNow hourly PM2.5 (live reference, keyless)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=airwv
+WorkingDirectory=/opt/airwv
+EnvironmentFile=/opt/airwv/.env
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.ingest airnow

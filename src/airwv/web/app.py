@@ -100,6 +100,18 @@ COUNTY_REGION = {
 }
 
 
+def _airnow_meta() -> dict[str, str]:
+    """AQSID -> friendly monitor name, from the accumulated AirNow metadata."""
+    try:
+        import json
+
+        cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+        path = Path(cache).with_name("airnow_monitors.json")
+        return {k: (v.get("name") or k) for k, v in json.loads(path.read_text()).items()}
+    except Exception:
+        return {}
+
+
 def _index_to_region() -> dict[str, str]:
     """Map sensor id (PurpleAir index) to a WV region via the registry county."""
     try:
@@ -136,23 +148,26 @@ def create_app(store: Store) -> FastAPI:
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()
+    airnow_names = _airnow_meta()
 
     @app.get("/api/sensors")
     def sensors():
         # SQL aggregation instead of loading every row (was O(all rows) per sensor).
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
-        ref_ids = set(store.sensor_ids_by_source("openaq"))
-        ref_coords = store.coords_from_readings("openaq")
-        archive_ids = set(store.sensor_ids_by_source("epa_airdata"))  # deep history, not the live map
+        # AirNow is the LIVE reference layer; OpenAQ + AirData daily are archive/history.
+        ref_ids = set(store.sensor_ids_by_source("airnow"))
+        ref_coords = store.coords_from_readings("airnow")
+        archive_ids = (set(store.sensor_ids_by_source("epa_airdata"))
+                       | set(store.sensor_ids_by_source("openaq")))
         out = []
         for sid, cov in coverage.items():
             if sid in archive_ids:
-                continue  # EPA AirData daily archive — used for history/validation, not plotted live
+                continue  # historical/archive reference — used for validation, not the live map
             is_ref = sid in ref_ids
-            if is_ref:  # reference monitor (OpenAQ/AirNow) — coords on the readings
+            if is_ref:  # AirNow reference monitor — coords on the readings
                 lat, lon = ref_coords.get(sid, (None, None))
-                name = f"EPA #{sid}"
+                name = airnow_names.get(sid) or f"AirNow {sid}"
             else:       # community sensor — coords/name from the resolved listing
                 lat, lon = coords.get(sid, (None, None))
                 name = names.get(sid, sid)
