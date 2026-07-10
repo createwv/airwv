@@ -503,16 +503,22 @@ function drawMap(sensors){
 }
 let sensorLayer, refLayer;
 // reference monitors are now drawn live in drawMap() (ringed circles, current PM2.5)
-let sourceLayer;
+const SRC_ICON = {power:'⚡', chemical:'⚗️', oil_gas:'🛢️', materials:'⛏️', waste:'🗑️', other:'🏭'};
+const SRC_LABEL = {power:'Power plant', chemical:'Chemical', oil_gas:'Oil & gas',
+  materials:'Metals / mining / materials', waste:'Waste', other:'Other TRI facility'};
+let sourceLayer, allSources_ = [];
 async function loadSources(){
   const data = await j('/api/sources');
+  allSources_ = data.sources;
   if (sourceLayer) sourceLayer.remove();
   sourceLayer = L.layerGroup();
   data.sources.forEach(s => {
     if (s.lat == null || s.lon == null) return;
-    L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:'🏭',
+    const cat = s.category || 'other';
+    L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
       iconSize:[22,22], iconAnchor:[11,11]})})
-      .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}<br>${s.type}<br><i>${s.operator||''}</i>`+
+      .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}`+
+        `<br><b style="color:#7a5b12">${SRC_LABEL[cat]||'Facility'}</b> · ${s.type}<br><i>${s.operator||''}</i>`+
         `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
         `<br><small style="color:#a00">${data.disclaimer||''}</small>`)
       .addTo(sourceLayer);

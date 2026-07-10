@@ -9,7 +9,8 @@
       "operator": "Appalachian Power (AEP)",
       "lat": 38.4728,
       "lon": -81.8236,
-      "citation": "EPA FRS / EIA-860 (public record)"
+      "citation": "EPA FRS / EIA-860 (public record)",
+      "category": "materials"
     },
     {
       "name": "Belle chemical plant (Chemours, former DuPont)",
@@ -17,7 +18,8 @@
       "operator": "Chemours",
       "lat": 38.235,
       "lon": -81.548,
-      "citation": "EPA FRS / TRI (public record)"
+      "citation": "EPA FRS / TRI (public record)",
+      "category": "chemical"
     },
     {
       "name": "Gemark Services Of West Virginia Inc",
@@ -26,7 +28,8 @@
       "state": "WV",
       "lat": 37.285,
       "lon": -81.105,
-      "citation": "EPA TRI (facility 24701GMRKSRTE29)"
+      "citation": "EPA TRI (facility 24701GMRKSRTE29)",
+      "category": "other"
     },
     {
       "name": "Eimco Llc",
@@ -35,7 +38,8 @@
       "state": "WV",
       "lat": 37.2828,
       "lon": -81.2492,
-      "citation": "EPA TRI (facility 24701MCCLMRTE52)"
+      "citation": "EPA TRI (facility 24701MCCLMRTE52)",
+      "category": "other"
     },
     {
       "name": "Airgas Mid America",
@@ -44,7 +48,8 @@
       "state": "WV",
       "lat": 37.2706,
       "lon": -81.2478,
-      "citation": "EPA TRI (facility 24701RGSMD1620C)"
+      "citation": "EPA TRI (facility 24701RGSMD1620C)",
+      "category": "oil_gas"
     },
     {
       "name": "Tabor Machine Co",
@@ -53,7 +58,8 @@
       "state": "WV",
       "lat": 37.2958,
       "lon": -81.2078,
-      "citation": "EPA TRI (facility 24701TBRMCRT52N)"
+      "citation": "EPA TRI (facility 24701TBRMCRT52N)",
+      "category": "other"
     },
     {
       "name": "Herndon Processing Co Llc Keystone No 2 Prep Plant",
@@ -62,7 +68,8 @@
       "state": "WV",
       "lat": 37.5161,
       "lon": -81.3619,
-      "citation": "EPA TRI (facility 24726HRNDNWVRTE)"
+      "citation": "EPA TRI (facility 24726HRNDNWVRTE)",
+      "category": "materials"
     },
     {
       "name": "Talon Manufacturing Co Inc",
@@ -71,7 +78,8 @@
       "state": "WV",
       "lat": 37.5028,
       "lon": -81.3353,
-      "citation": "EPA TRI (facility 24726TLNMFRTE10)"
+      "citation": "EPA TRI (facility 24726TLNMFRTE10)",
+      "category": "other"
     },
     {
       "name": "Fosroc Inc",
@@ -80,7 +88,8 @@
       "state": "WV",
       "lat": 37.3639,
       "lon": -81.0833,
-      "citation": "EPA TRI (facility 24740CLTTNPOBOX)"
+      "citation": "EPA TRI (facility 24740CLTTNPOBOX)",
+      "category": "other"
     },
     {
       "name": "Acme Wood Preserving Inc",
@@ -89,7 +98,8 @@
       "state": "WV",
       "lat": 37.3617,
       "lon": -81.0844,
-      "citation": "EPA TRI (facility 24740CMWDPROGER)"
+      "citation": "EPA TRI (facility 24740CMWDPROGER)",
+      "category": "other"
     },
     {
       "name": "Conn-Weld Industries Llc",
@@ -98,7 +108,8 @@
       "state": "WV",
       "lat": 37.3567,
       "lon": -81.0675,
-      "citation": "EPA TRI (facility 24740CNNWLUSROU)"
+      "citation": "EPA TRI (facility 24740CNNWLUSROU)",
+      "category": "other"
     },
     {
       "name": "Bottling Group Llc Pepsi Bottling Group",
@@ -107,7 +118,8 @@
       "state": "WV",
       "lat": 37.3333,
       "lon": -81.1083,
-      "citation": "EPA TRI (facility 24740PPSCLROGER)"
+      "citation": "EPA TRI (facility 24740PPSCLROGER)",
+      "category": "other"
     },
     {
       "name": "Industrial Plating & Machine I Nc",
@@ -116,7 +128,8 @@
       "state": "WV",
       "lat": 37.3672,
       "lon": -81.0044,
-      "citation": "EPA TRI (facility 24740SWNSN401LA)"
+      "citation": "EPA TRI (facility 24740SWNSN401LA)",
+      "category": "other"
     },
     {
       "name": "Amonate Preparation Plant",
@@ -125,7 +138,8 @@
       "state": "WV",
       "lat": 37.2117,
       "lon": -81.6503,
-      "citation": "EPA TRI (facility 24815MNTPRSTATE)"
+      "citation": "EPA TRI (facility 24815MNTPRSTATE)",
+      "category": "materials"
     },
     {
       "name": "Pc West Virginia Synthetic Fuel #3 Llc",
@@ -134,7 +148,8 @@
       "state": "WV",
       "lat": 37.3914,
       "lon": -81.4642,
-      "citation": "EPA TRI (facility 24829PCWSTEUREK)"
+      "citation": "EPA TRI (facility 24829PCWSTEUREK)",
+      "category": "other"
     },
     {
       "name": "Kepler Processing Co Pocahontas No 51 Coal Prep Plant",
@@ -143,7 +158,8 @@
       "state": "WV",
       "lat": 37.5769,
       "lon": -81.5694,
-      "citation": "EPA TRI (facility 24874KPLRPRTE97)"
+      "citation": "EPA TRI (facility 24874KPLRPRTE97)",
+      "category": "materials"
     },
     {
       "name": "Pinnacle Mining Co Llc  - Pinnacle Mine",
@@ -152,7 +168,8 @@
       "state": "WV",
       "lat": 37.5342,
       "lon": -81.5011,
-      "citation": "EPA TRI (facility 24874SSTLMPINNA)"
+      "citation": "EPA TRI (facility 24874SSTLMPINNA)",
+      "category": "materials"
     },
     {
       "name": "Appalachian Electronic Instrum Ents Inc",
@@ -161,7 +178,8 @@
       "state": "WV",
       "lat": 37.7689,
       "lon": -80.4672,
-      "citation": "EPA TRI (facility 24902PPLCH100AE)"
+      "citation": "EPA TRI (facility 24902PPLCH100AE)",
+      "category": "other"
     },
     {
       "name": "Us Bureau Of Prisons Alderson Federal Prison Camp",
@@ -170,7 +188,8 @@
       "state": "WV",
       "lat": 37.7242,
       "lon": -80.6703,
-      "citation": "EPA TRI (facility 24910SDPTFGLENR)"
+      "citation": "EPA TRI (facility 24910SDPTFGLENR)",
+      "category": "other"
     },
     {
       "name": "Howes Leather Co Inc",
@@ -179,7 +198,8 @@
       "state": "WV",
       "lat": 38.5439,
       "lon": -79.8083,
-      "citation": "EPA TRI (facility 24920HWSLTRT250)"
+      "citation": "EPA TRI (facility 24920HWSLTRT250)",
+      "category": "other"
     },
     {
       "name": "Judy Fencecraft Inc",
@@ -188,7 +208,8 @@
       "state": "WV",
       "lat": 38.5406,
       "lon": -79.7764,
-      "citation": "EPA TRI (facility 24920JDYFNBOX97)"
+      "citation": "EPA TRI (facility 24920JDYFNBOX97)",
+      "category": "other"
     },
     {
       "name": "Hanover Shoe Co Marlinton Plant",
@@ -197,7 +218,8 @@
       "state": "WV",
       "lat": 38.2283,
       "lon": -80.0911,
-      "citation": "EPA TRI (facility 24954HNVRS3002N)"
+      "citation": "EPA TRI (facility 24954HNVRS3002N)",
+      "category": "other"
     },
     {
       "name": "American Foam Technologies Inc",
@@ -206,7 +228,8 @@
       "state": "WV",
       "lat": 37.8653,
       "lon": -81.3983,
-      "citation": "EPA TRI (facility 24957MRCNFMCLAU)"
+      "citation": "EPA TRI (facility 24957MRCNFMCLAU)",
+      "category": "other"
     },
     {
       "name": "American Foam Technologies",
@@ -215,7 +238,8 @@
       "state": "WV",
       "lat": 37.6667,
       "lon": -80.5,
-      "citation": "EPA TRI (facility 24970JFFYFRIVER)"
+      "citation": "EPA TRI (facility 24970JFFYFRIVER)",
+      "category": "other"
     },
     {
       "name": "Goodrich Corp Deicing & Specialty Systems Div",
@@ -224,7 +248,8 @@
       "state": "WV",
       "lat": 37.6181,
       "lon": -80.5306,
-      "citation": "EPA TRI (facility 24983BFGDRRT5BO)"
+      "citation": "EPA TRI (facility 24983BFGDRRT5BO)",
+      "category": "chemical"
     },
     {
       "name": "Wva Manufacturing Llc",
@@ -233,7 +258,8 @@
       "state": "WV",
       "lat": 38.1378,
       "lon": -81.2786,
-      "citation": "EPA TRI (facility 25002LKMMTBOX61)"
+      "citation": "EPA TRI (facility 25002LKMMTBOX61)",
+      "category": "other"
     },
     {
       "name": "Occidental Chemical Corp",
@@ -242,7 +268,8 @@
       "state": "WV",
       "lat": 38.2347,
       "lon": -81.5458,
-      "citation": "EPA TRI (facility 25015CCDNTDUPON)"
+      "citation": "EPA TRI (facility 25015CCDNTDUPON)",
+      "category": "chemical"
     },
     {
       "name": "Chemours Belle Plant",
@@ -251,7 +278,8 @@
       "state": "WV",
       "lat": 38.2428,
       "lon": -81.5594,
-      "citation": "EPA TRI (facility 25015DPNTB901WE)"
+      "citation": "EPA TRI (facility 25015DPNTB901WE)",
+      "category": "chemical"
     },
     {
       "name": "Little Creek Dock Co",
@@ -260,7 +288,8 @@
       "state": "WV",
       "lat": 38.2033,
       "lon": -81.4761,
-      "citation": "EPA TRI (facility 25015LTTLC2978E)"
+      "citation": "EPA TRI (facility 25015LTTLC2978E)",
+      "category": "other"
     },
     {
       "name": "Vandalia Resources Inc",
@@ -269,7 +298,8 @@
       "state": "WV",
       "lat": 38.3867,
       "lon": -81.0283,
-      "citation": "EPA TRI (facility 25019VNDLRCOUNT)"
+      "citation": "EPA TRI (facility 25019VNDLRCOUNT)",
+      "category": "materials"
     },
     {
       "name": "Pond Fork Preparation Plant",
@@ -278,7 +308,8 @@
       "state": "WV",
       "lat": 37.94,
       "lon": -81.7014,
-      "citation": "EPA TRI (facility 25028JPTRHWVRTE)"
+      "citation": "EPA TRI (facility 25028JPTRHWVRTE)",
+      "category": "materials"
     },
     {
       "name": "Appalachian Fuels Llc",
@@ -287,7 +318,8 @@
       "state": "WV",
       "lat": 38.1528,
       "lon": -81.2403,
-      "citation": "EPA TRI (facility 25031PPLCHUSRTE)"
+      "citation": "EPA TRI (facility 25031PPLCHUSRTE)",
+      "category": "other"
     },
     {
       "name": "Toyota Motor Manufacturing West Virginia Inc",
@@ -296,7 +328,8 @@
       "state": "WV",
       "lat": 38.5919,
       "lon": -82.0025,
-      "citation": "EPA TRI (facility 25033TYTMT1SUGA)"
+      "citation": "EPA TRI (facility 25033TYTMT1SUGA)",
+      "category": "other"
     },
     {
       "name": "Panther Llc",
@@ -305,7 +338,8 @@
       "state": "WV",
       "lat": 38.165,
       "lon": -81.4783,
-      "citation": "EPA TRI (facility 25061PNTHRWETBR)"
+      "citation": "EPA TRI (facility 25061PNTHRWETBR)",
+      "category": "other"
     },
     {
       "name": "Remington Llc",
@@ -314,7 +348,8 @@
       "state": "WV",
       "lat": 38.0908,
       "lon": -81.5292,
-      "citation": "EPA TRI (facility 25067RMNGTSLAUG)"
+      "citation": "EPA TRI (facility 25067RMNGTSLAUG)",
+      "category": "other"
     },
     {
       "name": "Diamond Electric Manufacturing Corp",
@@ -323,7 +358,8 @@
       "state": "WV",
       "lat": 38.5417,
       "lon": -81.9481,
-      "citation": "EPA TRI (facility 25070DMNDLSTRT6)"
+      "citation": "EPA TRI (facility 25070DMNDLSTRT6)",
+      "category": "other"
     },
     {
       "name": "Bayer Materialscience Llc",
@@ -332,7 +368,8 @@
       "state": "WV",
       "lat": 38.3822,
       "lon": -81.7783,
-      "citation": "EPA TRI (facility 25112CWSTVROUTE)"
+      "citation": "EPA TRI (facility 25112CWSTVROUTE)",
+      "category": "chemical"
     },
     {
       "name": "Fmc Corp",
@@ -341,7 +378,8 @@
       "state": "WV",
       "lat": 38.3808,
       "lon": -81.7864,
-      "citation": "EPA TRI (facility 25112FMCCRRT25X)"
+      "citation": "EPA TRI (facility 25112FMCCRRT25X)",
+      "category": "other"
     },
     {
       "name": "Union Carbide Corp Institute Facility",
@@ -350,7 +388,8 @@
       "state": "WV",
       "lat": 38.3822,
       "lon": -81.7783,
-      "citation": "EPA TRI (facility 25112NNCRBRTE25)"
+      "citation": "EPA TRI (facility 25112NNCRBRTE25)",
+      "category": "chemical"
     },
     {
       "name": "Erp Environmental - Beth Station Prep",
@@ -359,7 +398,8 @@
       "state": "WV",
       "lat": 38.1111,
       "lon": -81.8542,
-      "citation": "EPA TRI (facility 25130HBTMNUSRT1)"
+      "citation": "EPA TRI (facility 25130HBTMNUSRT1)",
+      "category": "other"
     },
     {
       "name": "Omar Mining Co",
@@ -368,7 +408,8 @@
       "state": "WV",
       "lat": 38.015,
       "lon": -81.7294,
-      "citation": "EPA TRI (facility 25130MRMNNRTE85)"
+      "citation": "EPA TRI (facility 25130MRMNNRTE85)",
+      "category": "materials"
     },
     {
       "name": "Independence Coal Co Inc",
@@ -377,7 +418,8 @@
       "state": "WV",
       "lat": 38.0156,
       "lon": -81.7542,
-      "citation": "EPA TRI (facility 25130NDPNDHC98B)"
+      "citation": "EPA TRI (facility 25130NDPNDHC98B)",
+      "category": "materials"
     },
     {
       "name": "Endurance Mining",
@@ -386,7 +428,8 @@
       "state": "WV",
       "lat": 37.9181,
       "lon": -81.7464,
-      "citation": "EPA TRI (facility 25130NDRNCHC78P)"
+      "citation": "EPA TRI (facility 25130NDRNCHC78P)",
+      "category": "materials"
     },
     {
       "name": "Ac&S Inc",
@@ -395,7 +438,8 @@
       "state": "WV",
       "lat": 38.4333,
       "lon": -81.8583,
-      "citation": "EPA TRI (facility 25143CSNCXWEST1)"
+      "citation": "EPA TRI (facility 25143CSNCXWEST1)",
+      "category": "other"
     },
     {
       "name": "Catalyst Refiners Inc",
@@ -404,7 +448,8 @@
       "state": "WV",
       "lat": 38.3547,
       "lon": -81.7928,
-      "citation": "EPA TRI (facility 25143CTLYS1580F)"
+      "citation": "EPA TRI (facility 25143CTLYS1580F)",
+      "category": "oil_gas"
     },
     {
       "name": "Great Lakes Chemical Corp",
@@ -413,7 +458,8 @@
       "state": "WV",
       "lat": 38.435,
       "lon": -81.8456,
-      "citation": "EPA TRI (facility 25143FMCCRPLANT)"
+      "citation": "EPA TRI (facility 25143FMCCRPLANT)",
+      "category": "chemical"
     },
     {
       "name": "Kincaid Enterprises Inc",
@@ -422,7 +468,8 @@
       "state": "WV",
       "lat": 38.4278,
       "lon": -81.8417,
-      "citation": "EPA TRI (facility 25143KNCDNPLANT)"
+      "citation": "EPA TRI (facility 25143KNCDNPLANT)",
+      "category": "other"
     },
     {
       "name": "Brenntag Mid-South Inc.",
@@ -431,7 +478,8 @@
       "state": "WV",
       "lat": 38.42,
       "lon": -81.84,
-      "citation": "EPA TRI (facility 25143PBSCHPLANT)"
+      "citation": "EPA TRI (facility 25143PBSCHPLANT)",
+      "category": "other"
     },
     {
       "name": "Republic Container Co",
@@ -440,7 +488,8 @@
       "state": "WV",
       "lat": 38.7083,
       "lon": -82.4053,
-      "citation": "EPA TRI (facility 25143RPBLCVISCO)"
+      "citation": "EPA TRI (facility 25143RPBLCVISCO)",
+      "category": "other"
     },
     {
       "name": "Solutia-Ops At Flexsys Nitro",
@@ -449,7 +498,8 @@
       "state": "WV",
       "lat": 38.4369,
       "lon": -81.8456,
-      "citation": "EPA TRI (facility 25143SLTPR1MONS)"
+      "citation": "EPA TRI (facility 25143SLTPR1MONS)",
+      "category": "other"
     },
     {
       "name": "Itw Insulation Systems  Nitro Plant",
@@ -458,7 +508,8 @@
       "state": "WV",
       "lat": 38.4358,
       "lon": -81.8419,
-      "citation": "EPA TRI (facility 25143TWNSL19IND)"
+      "citation": "EPA TRI (facility 25143TWNSL19IND)",
+      "category": "other"
     },
     {
       "name": "Airgas Usa, Llc",
@@ -467,7 +518,8 @@
       "state": "WV",
       "lat": 38.4972,
       "lon": -81.8347,
-      "citation": "EPA TRI (facility 25159VRGNWSTATE)"
+      "citation": "EPA TRI (facility 25159VRGNWSTATE)",
+      "category": "oil_gas"
     },
     {
       "name": "Azz Galvanizing-Pilot",
@@ -476,7 +528,8 @@
       "state": "WV",
       "lat": 38.4611,
       "lon": -81.7844,
-      "citation": "EPA TRI (facility 25159VSPLTMANIL)"
+      "citation": "EPA TRI (facility 25159VSPLTMANIL)",
+      "category": "other"
     },
     {
       "name": "West Virginia Steel Corp.",
@@ -485,7 +538,8 @@
       "state": "WV",
       "lat": 38.5119,
       "lon": -81.7914,
-      "citation": "EPA TRI (facility 25159WSTVRWRIGH)"
+      "citation": "EPA TRI (facility 25159WSTVRWRIGH)",
+      "category": "materials"
     },
     {
       "name": "American Stone-Mix Inc",
@@ -494,7 +548,8 @@
       "state": "WV",
       "lat": 38.4019,
       "lon": -81.8489,
-      "citation": "EPA TRI (facility 25177MRCNS400OL)"
+      "citation": "EPA TRI (facility 25177MRCNS400OL)",
+      "category": "other"
     },
     {
       "name": "Elk Run Coal Co Llc",
@@ -503,7 +558,8 @@
       "state": "WV",
       "lat": 38.0081,
       "lon": -81.5717,
-      "citation": "EPA TRI (facility 25193LKRNCPOBOX)"
+      "citation": "EPA TRI (facility 25193LKRNCPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Progress Coal Co",
@@ -512,7 +568,8 @@
       "state": "WV",
       "lat": 37.92,
       "lon": -81.5717,
-      "citation": "EPA TRI (facility 25204PRGRSCUNTY)"
+      "citation": "EPA TRI (facility 25204PRGRSCUNTY)",
+      "category": "materials"
     },
     {
       "name": "American Electric Power Amos Plant",
@@ -521,7 +578,8 @@
       "state": "WV",
       "lat": 38.4731,
       "lon": -81.8236,
-      "citation": "EPA TRI (facility 25213JHNMS1530W)"
+      "citation": "EPA TRI (facility 25213JHNMS1530W)",
+      "category": "power"
     },
     {
       "name": "Plasma Processing Corp",
@@ -530,7 +588,8 @@
       "state": "WV",
       "lat": 38.1542,
       "lon": -81.9208,
-      "citation": "EPA TRI (facility 25262PLSMPJACKS)"
+      "citation": "EPA TRI (facility 25262PLSMPJACKS)",
+      "category": "materials"
     },
     {
       "name": "American Alloys  Inc",
@@ -539,7 +598,8 @@
       "state": "WV",
       "lat": 38.9575,
       "lon": -81.9264,
-      "citation": "EPA TRI (facility 25265MRCNLRT62X)"
+      "citation": "EPA TRI (facility 25265MRCNLRT62X)",
+      "category": "materials"
     },
     {
       "name": "Goodrich Aircraft Interior Products",
@@ -548,7 +608,8 @@
       "state": "WV",
       "lat": 38.7931,
       "lon": -81.3383,
-      "citation": "EPA TRI (facility 25276BFXXXROANE)"
+      "citation": "EPA TRI (facility 25276BFXXXROANE)",
+      "category": "other"
     },
     {
       "name": "Stella-Jones Corporation",
@@ -557,7 +618,8 @@
       "state": "WV",
       "lat": 38.8683,
       "lon": -81.4053,
-      "citation": "EPA TRI (facility 25276BRKPRROUTE)"
+      "citation": "EPA TRI (facility 25276BRKPRROUTE)",
+      "category": "other"
     },
     {
       "name": "Armacell Llc",
@@ -566,7 +628,8 @@
       "state": "WV",
       "lat": 38.8042,
       "lon": -81.3542,
-      "citation": "EPA TRI (facility 25276MNRCH388MA)"
+      "citation": "EPA TRI (facility 25276MNRCH388MA)",
+      "category": "other"
     },
     {
       "name": "West Virginia Steel Corp",
@@ -575,7 +638,8 @@
       "state": "WV",
       "lat": 38.3519,
       "lon": -81.6242,
-      "citation": "EPA TRI (facility 25301WSTVR900BR)"
+      "citation": "EPA TRI (facility 25301WSTVR900BR)",
+      "category": "materials"
     },
     {
       "name": "United Dairy Inc.  (Valley Bell)",
@@ -584,7 +648,8 @@
       "state": "WV",
       "lat": 38.3631,
       "lon": -81.6467,
-      "citation": "EPA TRI (facility 25302BRDNN508RO)"
+      "citation": "EPA TRI (facility 25302BRDNN508RO)",
+      "category": "other"
     },
     {
       "name": "Covestro Llc",
@@ -593,7 +658,8 @@
       "state": "WV",
       "lat": 38.3678,
       "lon": -81.6872,
-      "citation": "EPA TRI (facility 25303CWSTV437MA)"
+      "citation": "EPA TRI (facility 25303CWSTV437MA)",
+      "category": "chemical"
     },
     {
       "name": "Fmc Corp Spring Hill Plant",
@@ -602,7 +668,8 @@
       "state": "WV",
       "lat": 38.3708,
       "lon": -81.6958,
-      "citation": "EPA TRI (facility 25303FMCCR3200M)"
+      "citation": "EPA TRI (facility 25303FMCCR3200M)",
+      "category": "other"
     },
     {
       "name": "Innovative Water Care Llc",
@@ -611,7 +678,8 @@
       "state": "WV",
       "lat": 38.3667,
       "lon": -81.7061,
-      "citation": "EPA TRI (facility 25303LNCRP95MAC)"
+      "citation": "EPA TRI (facility 25303LNCRP95MAC)",
+      "category": "other"
     },
     {
       "name": "Union Carbide Corp Technology Park Operations",
@@ -620,7 +688,8 @@
       "state": "WV",
       "lat": 38.3583,
       "lon": -81.7097,
-      "citation": "EPA TRI (facility 25303NNCRB32003)"
+      "citation": "EPA TRI (facility 25303NNCRB32003)",
+      "category": "chemical"
     },
     {
       "name": "Union Carbide Corp South Charleston Facility",
@@ -629,7 +698,8 @@
       "state": "WV",
       "lat": 38.3686,
       "lon": -81.6967,
-      "citation": "EPA TRI (facility 25303NNCRB437MA)"
+      "citation": "EPA TRI (facility 25303NNCRB437MA)",
+      "category": "chemical"
     },
     {
       "name": "South Charleston Stamping & Manufacturing Co",
@@ -638,7 +708,8 @@
       "state": "WV",
       "lat": 38.3653,
       "lon": -81.7014,
-      "citation": "EPA TRI (facility 25303STHCH3100M)"
+      "citation": "EPA TRI (facility 25303STHCH3100M)",
+      "category": "other"
     },
     {
       "name": "Eastman Chemical Co Eastman Facility",
@@ -647,7 +718,8 @@
       "state": "WV",
       "lat": 38.3678,
       "lon": -81.6872,
-      "citation": "EPA TRI (facility 25303TXSST437XX)"
+      "citation": "EPA TRI (facility 25303TXSST437XX)",
+      "category": "chemical"
     },
     {
       "name": "Pennzoil-Quaker State Co Etowah Terminal",
@@ -656,7 +728,8 @@
       "state": "WV",
       "lat": 38.3692,
       "lon": -81.6056,
-      "citation": "EPA TRI (facility 25311PNNZL1015B)"
+      "citation": "EPA TRI (facility 25311PNNZL1015B)",
+      "category": "oil_gas"
     },
     {
       "name": "Mplx Terminals Llc - Charleston Wv Terminal",
@@ -665,7 +738,8 @@
       "state": "WV",
       "lat": 38.3517,
       "lon": -81.6492,
-      "citation": "EPA TRI (facility 25314XXNCHSTAND)"
+      "citation": "EPA TRI (facility 25314XXNCHSTAND)",
+      "category": "oil_gas"
     },
     {
       "name": "Praxair Com",
@@ -674,7 +748,8 @@
       "state": "WV",
       "lat": 38.2392,
       "lon": -81.56,
-      "citation": "EPA TRI (facility 25315LQDCR10637)"
+      "citation": "EPA TRI (facility 25315LQDCR10637)",
+      "category": "other"
     },
     {
       "name": "Brentwood Industries Inc",
@@ -683,7 +758,8 @@
       "state": "WV",
       "lat": 39.3889,
       "lon": -78.0236,
-      "citation": "EPA TRI (facility 25401BRNTW2011I)"
+      "citation": "EPA TRI (facility 25401BRNTW2011I)",
+      "category": "other"
     },
     {
       "name": "Chem-Pak Inc",
@@ -692,7 +768,8 @@
       "state": "WV",
       "lat": 39.3892,
       "lon": -78.0217,
-      "citation": "EPA TRI (facility 25401CHMPK242CO)"
+      "citation": "EPA TRI (facility 25401CHMPK242CO)",
+      "category": "other"
     },
     {
       "name": "Ecolab Inc",
@@ -701,7 +778,8 @@
       "state": "WV",
       "lat": 39.4119,
       "lon": -77.9006,
-      "citation": "EPA TRI (facility 25401CLBNC942BA)"
+      "citation": "EPA TRI (facility 25401CLBNC942BA)",
+      "category": "other"
     },
     {
       "name": "Continental Brick Co",
@@ -710,7 +788,8 @@
       "state": "WV",
       "lat": 39.4328,
       "lon": -77.9583,
-      "citation": "EPA TRI (facility 25401CNTNN154CH)"
+      "citation": "EPA TRI (facility 25401CNTNN154CH)",
+      "category": "other"
     },
     {
       "name": "Argos Usa - Martinsburg",
@@ -719,7 +798,8 @@
       "state": "WV",
       "lat": 39.4344,
       "lon": -77.9794,
-      "citation": "EPA TRI (facility 25401CPTLCSOUTH)"
+      "citation": "EPA TRI (facility 25401CPTLCSOUTH)",
+      "category": "other"
     },
     {
       "name": "World Kitchen Inc Martinsburg Plant",
@@ -728,7 +808,8 @@
       "state": "WV",
       "lat": 39.3839,
       "lon": -78.005,
-      "citation": "EPA TRI (facility 25401CRNNGROUTE)"
+      "citation": "EPA TRI (facility 25401CRNNGROUTE)",
+      "category": "other"
     },
     {
       "name": "Griffith Energy Services Inc Boyd Ave Wv",
@@ -737,7 +818,8 @@
       "state": "WV",
       "lat": 39.4633,
       "lon": -77.9653,
-      "citation": "EPA TRI (facility 25401GRFFTBOYDA)"
+      "citation": "EPA TRI (facility 25401GRFFTBOYDA)",
+      "category": "other"
     },
     {
       "name": "Maax Us Corp.",
@@ -746,7 +828,8 @@
       "state": "WV",
       "lat": 39.5,
       "lon": -77.95,
-      "citation": "EPA TRI (facility 25401KRPLS2011M)"
+      "citation": "EPA TRI (facility 25401KRPLS2011M)",
+      "category": "other"
     },
     {
       "name": "Quad/Graphics Inc",
@@ -755,7 +838,8 @@
       "state": "WV",
       "lat": 39.5106,
       "lon": -77.9561,
-      "citation": "EPA TRI (facility 25401QDGRP855CA)"
+      "citation": "EPA TRI (facility 25401QDGRP855CA)",
+      "category": "other"
     },
     {
       "name": "Sexton Can Co Inc",
@@ -764,7 +848,8 @@
       "state": "WV",
       "lat": 39.4375,
       "lon": -78.9583,
-      "citation": "EPA TRI (facility 25401SXTNCFAIRF)"
+      "citation": "EPA TRI (facility 25401SXTNCFAIRF)",
+      "category": "other"
     },
     {
       "name": "Lippert Components Inc Plant 21",
@@ -773,7 +858,8 @@
       "state": "WV",
       "lat": 39.4903,
       "lon": -78.2947,
-      "citation": "EPA TRI (facility 25411LPPRT63JRH)"
+      "citation": "EPA TRI (facility 25411LPPRT63JRH)",
+      "category": "other"
     },
     {
       "name": "Tom Seely Furniture",
@@ -782,7 +868,8 @@
       "state": "WV",
       "lat": 39.5575,
       "lon": -78.2664,
-      "citation": "EPA TRI (facility 25411SLYPN522SO)"
+      "citation": "EPA TRI (facility 25411SLYPN522SO)",
+      "category": "other"
     },
     {
       "name": "Griffith Energy Services Inc-Charlestown",
@@ -791,7 +878,8 @@
       "state": "WV",
       "lat": 39.2867,
       "lon": -77.8711,
-      "citation": "EPA TRI (facility 25414GRFFTMARTI)"
+      "citation": "EPA TRI (facility 25414GRFFTMARTI)",
+      "category": "other"
     },
     {
       "name": "Fasloc Inc Potomac River Plant",
@@ -800,7 +888,8 @@
       "state": "WV",
       "lat": 39.5417,
       "lon": -77.9083,
-      "citation": "EPA TRI (facility 25419DPNTPROUTE)"
+      "citation": "EPA TRI (facility 25419DPNTPROUTE)",
+      "category": "other"
     },
     {
       "name": "National Fruit Product Co Inc",
@@ -809,7 +898,8 @@
       "state": "WV",
       "lat": 39.3658,
       "lon": -78.0792,
-      "citation": "EPA TRI (facility 25420NTNLFRTE1B)"
+      "citation": "EPA TRI (facility 25420NTNLFRTE1B)",
+      "category": "other"
     },
     {
       "name": "Knauf Insulation Inc.",
@@ -818,7 +908,8 @@
       "state": "WV",
       "lat": 39.405,
       "lon": -78.0231,
-      "citation": "EPA TRI (facility 25428GRDNFI81TA)"
+      "citation": "EPA TRI (facility 25428GRDNFI81TA)",
+      "category": "other"
     },
     {
       "name": "Knouse Foods Co-Op Inc",
@@ -827,7 +918,8 @@
       "state": "WV",
       "lat": 39.6167,
       "lon": -78.05,
-      "citation": "EPA TRI (facility 25428KNSFDOLDRT)"
+      "citation": "EPA TRI (facility 25428KNSFDOLDRT)",
+      "category": "other"
     },
     {
       "name": "Dalb Inc",
@@ -836,7 +928,8 @@
       "state": "WV",
       "lat": 39.3542,
       "lon": -77.875,
-      "citation": "EPA TRI (facility 25430DLBNC105IN)"
+      "citation": "EPA TRI (facility 25430DLBNC105IN)",
+      "category": "other"
     },
     {
       "name": "Automated Merchandising Systems Inc.",
@@ -845,7 +938,8 @@
       "state": "WV",
       "lat": 39.3581,
       "lon": -77.8622,
-      "citation": "EPA TRI (facility 25430TMTDM109WB)"
+      "citation": "EPA TRI (facility 25430TMTDM109WB)",
+      "category": "other"
     },
     {
       "name": "Utc Fire & Security",
@@ -854,7 +948,8 @@
       "state": "WV",
       "lat": 39.2983,
       "lon": -77.8631,
-      "citation": "EPA TRI (facility 25438BDGRPNMILD)"
+      "citation": "EPA TRI (facility 25438BDGRPNMILD)",
+      "category": "other"
     },
     {
       "name": "Ufp Ranson Llc",
@@ -863,7 +958,8 @@
       "state": "WV",
       "lat": 39.3086,
       "lon": -77.8603,
-      "citation": "EPA TRI (facility 25438NVRSLPOBOX)"
+      "citation": "EPA TRI (facility 25438NVRSLPOBOX)",
+      "category": "other"
     },
     {
       "name": "Sturm Rapid Response Center",
@@ -872,7 +968,8 @@
       "state": "WV",
       "lat": 38.4006,
       "lon": -82.2836,
-      "citation": "EPA TRI (facility 25504STRMD1305M)"
+      "citation": "EPA TRI (facility 25504STRMD1305M)",
+      "category": "other"
     },
     {
       "name": "Panther Creek - Samples",
@@ -881,7 +978,8 @@
       "state": "WV",
       "lat": 38.0506,
       "lon": -81.475,
-      "citation": "EPA TRI (facility 25507CTNRY5914C)"
+      "citation": "EPA TRI (facility 25507CTNRY5914C)",
+      "category": "materials"
     },
     {
       "name": "Kanawha River Terminals Inc",
@@ -890,7 +988,8 @@
       "state": "WV",
       "lat": 38.3972,
       "lon": -82.5583,
-      "citation": "EPA TRI (facility 25507KNWHRMAINS)"
+      "citation": "EPA TRI (facility 25507KNWHRMAINS)",
+      "category": "other"
     },
     {
       "name": "American National Rubber",
@@ -899,7 +998,8 @@
       "state": "WV",
       "lat": 38.3917,
       "lon": -82.5586,
-      "citation": "EPA TRI (facility 25507MRCNNMAINH)"
+      "citation": "EPA TRI (facility 25507MRCNNMAINH)",
+      "category": "other"
     },
     {
       "name": "Service Wire Culloden",
@@ -908,7 +1008,8 @@
       "state": "WV",
       "lat": 38.4172,
       "lon": -82.0536,
-      "citation": "EPA TRI (facility 25510SRVCW300DA)"
+      "citation": "EPA TRI (facility 25510SRVCW300DA)",
+      "category": "other"
     },
     {
       "name": "Icl-Ip America Inc",
@@ -917,7 +1018,8 @@
       "state": "WV",
       "lat": 38.7767,
       "lon": -82.2083,
-      "citation": "EPA TRI (facility 25515KZCHMSTATE)"
+      "citation": "EPA TRI (facility 25515KZCHMSTATE)",
+      "category": "chemical"
     },
     {
       "name": "Willert Home Products",
@@ -926,7 +1028,8 @@
       "state": "WV",
       "lat": 38.4069,
       "lon": -82.585,
-      "citation": "EPA TRI (facility 25530KNVCH21STB)"
+      "citation": "EPA TRI (facility 25530KNVCH21STB)",
+      "category": "other"
     },
     {
       "name": "Braskem America Inc Neal Plant",
@@ -935,7 +1038,8 @@
       "state": "WV",
       "lat": 38.3722,
       "lon": -82.5953,
-      "citation": "EPA TRI (facility 25530RSTCHOLDBI)"
+      "citation": "EPA TRI (facility 25530RSTCHOLDBI)",
+      "category": "other"
     },
     {
       "name": "Aoc Materials Llc",
@@ -944,7 +1048,8 @@
       "state": "WV",
       "lat": 38.3678,
       "lon": -82.5958,
-      "citation": "EPA TRI (facility 25530SHLNDBIGSA)"
+      "citation": "EPA TRI (facility 25530SHLNDBIGSA)",
+      "category": "other"
     },
     {
       "name": "Rustoleum Corp",
@@ -953,7 +1058,8 @@
       "state": "WV",
       "lat": 38.5511,
       "lon": -82.2844,
-      "citation": "EPA TRI (facility 25537PRKSC7850O)"
+      "citation": "EPA TRI (facility 25537PRKSC7850O)",
+      "category": "other"
     },
     {
       "name": "Us Defense National Stockpile Center Point Pleasant Depot",
@@ -962,7 +1068,8 @@
       "state": "WV",
       "lat": 38.8706,
       "lon": -82.135,
-      "citation": "EPA TRI (facility 25550SDFNS2601M)"
+      "citation": "EPA TRI (facility 25550SDFNS2601M)",
+      "category": "other"
     },
     {
       "name": "Wheeling-Pittsburgh Coal Co",
@@ -971,7 +1078,8 @@
       "state": "WV",
       "lat": 37.7244,
       "lon": -81.9989,
-      "citation": "EPA TRI (facility 25638WPCLCRTE44)"
+      "citation": "EPA TRI (facility 25638WPCLCRTE44)",
+      "category": "materials"
     },
     {
       "name": "Rawl Sales & Processing Co",
@@ -980,7 +1088,8 @@
       "state": "WV",
       "lat": 37.6506,
       "lon": -82.1878,
-      "citation": "EPA TRI (facility 25678RWLSLRTE49)"
+      "citation": "EPA TRI (facility 25678RWLSLRTE49)",
+      "category": "materials"
     },
     {
       "name": "Production Efficiency Corp",
@@ -989,7 +1098,8 @@
       "state": "WV",
       "lat": 37.695,
       "lon": -82.1419,
-      "citation": "EPA TRI (facility 25690PRDCTRT655)"
+      "citation": "EPA TRI (facility 25690PRDCTRT655)",
+      "category": "other"
     },
     {
       "name": "Bek Engineering Co (Dba Level 1 Fasteners)",
@@ -998,7 +1108,8 @@
       "state": "WV",
       "lat": 38.4167,
       "lon": -82.5,
-      "citation": "EPA TRI (facility 25701BKNGN3THIR)"
+      "citation": "EPA TRI (facility 25701BKNGN3THIR)",
+      "category": "other"
     },
     {
       "name": "Owens-Brockway Glass Container Inc",
@@ -1007,7 +1118,8 @@
       "state": "WV",
       "lat": 38.3764,
       "lon": -82.4631,
-      "citation": "EPA TRI (facility 25701WNSLL8THAV)"
+      "citation": "EPA TRI (facility 25701WNSLL8THAV)",
+      "category": "materials"
     },
     {
       "name": "Xcel-Premet Inc",
@@ -1016,7 +1128,8 @@
       "state": "WV",
       "lat": 38.3894,
       "lon": -82.4519,
-      "citation": "EPA TRI (facility 25701XCLPR2140P)"
+      "citation": "EPA TRI (facility 25701XCLPR2140P)",
+      "category": "other"
     },
     {
       "name": "D & E Industries Inc",
@@ -1025,7 +1138,8 @@
       "state": "WV",
       "lat": 38.46,
       "lon": -82.3094,
-      "citation": "EPA TRI (facility 25702DNSTRKYLEL)"
+      "citation": "EPA TRI (facility 25702DNSTRKYLEL)",
+      "category": "other"
     },
     {
       "name": "J H Fletcher & Co",
@@ -1034,7 +1148,8 @@
       "state": "WV",
       "lat": 38.4117,
       "lon": -82.4653,
-      "citation": "EPA TRI (facility 25702JHFLT707WE)"
+      "citation": "EPA TRI (facility 25702JHFLT707WE)",
+      "category": "other"
     },
     {
       "name": "Alcon Research Ltd.",
@@ -1043,7 +1158,8 @@
       "state": "WV",
       "lat": 38.4597,
       "lon": -82.3083,
-      "citation": "EPA TRI (facility 25702LCNLB6065K)"
+      "citation": "EPA TRI (facility 25702LCNLB6065K)",
+      "category": "other"
     },
     {
       "name": "American Medical Indl Supply Inc",
@@ -1052,7 +1168,8 @@
       "state": "WV",
       "lat": 38.4281,
       "lon": -82.4206,
-      "citation": "EPA TRI (facility 25703MRCNM22122)"
+      "citation": "EPA TRI (facility 25703MRCNM22122)",
+      "category": "other"
     },
     {
       "name": "Rubberlite Inc",
@@ -1061,7 +1178,8 @@
       "state": "WV",
       "lat": 38.4306,
       "lon": -82.4139,
-      "citation": "EPA TRI (facility 25703RBRLT2501G)"
+      "citation": "EPA TRI (facility 25703RBRLT2501G)",
+      "category": "other"
     },
     {
       "name": "Swva Inc",
@@ -1070,7 +1188,8 @@
       "state": "WV",
       "lat": 38.4269,
       "lon": -82.4272,
-      "citation": "EPA TRI (facility 25703STLFW17THS)"
+      "citation": "EPA TRI (facility 25703STLFW17THS)",
+      "category": "materials"
     },
     {
       "name": "Transfab Inc",
@@ -1079,7 +1198,8 @@
       "state": "WV",
       "lat": 38.4594,
       "lon": -82.3083,
-      "citation": "EPA TRI (facility 25703TRNSFKYLEL)"
+      "citation": "EPA TRI (facility 25703TRNSFKYLEL)",
+      "category": "other"
     },
     {
       "name": "Columbia Paint Corp",
@@ -1088,7 +1208,8 @@
       "state": "WV",
       "lat": 38.4106,
       "lon": -82.465,
-      "citation": "EPA TRI (facility 25704CLMBP641JA)"
+      "citation": "EPA TRI (facility 25704CLMBP641JA)",
+      "category": "other"
     },
     {
       "name": "Huntington Plating Inc",
@@ -1097,7 +1218,8 @@
       "state": "WV",
       "lat": 38.4114,
       "lon": -82.4653,
-      "citation": "EPA TRI (facility 25704HNTNG625MO)"
+      "citation": "EPA TRI (facility 25704HNTNG625MO)",
+      "category": "other"
     },
     {
       "name": "J.H. Fletcher & Co.",
@@ -1106,7 +1228,8 @@
       "state": "WV",
       "lat": 38.4167,
       "lon": -82.375,
-      "citation": "EPA TRI (facility 25705JHFLT402HI)"
+      "citation": "EPA TRI (facility 25705JHFLT402HI)",
+      "category": "other"
     },
     {
       "name": "Acf Huntington Inc.",
@@ -1115,7 +1238,8 @@
       "state": "WV",
       "lat": 38.3983,
       "lon": -82.4208,
-      "citation": "EPA TRI (facility 25710CFNDS2300T)"
+      "citation": "EPA TRI (facility 25710CFNDS2300T)",
+      "category": "other"
     },
     {
       "name": "Huntington Publishing Co",
@@ -1124,7 +1248,8 @@
       "state": "WV",
       "lat": 38.4194,
       "lon": -82.4439,
-      "citation": "EPA TRI (facility 25710HNTNG9465T)"
+      "citation": "EPA TRI (facility 25710HNTNG9465T)",
+      "category": "other"
     },
     {
       "name": "Thistle Processing Llc",
@@ -1133,7 +1258,8 @@
       "state": "WV",
       "lat": 38.4125,
       "lon": -82.3842,
-      "citation": "EPA TRI (facility 25720NCLLYRIVER)"
+      "citation": "EPA TRI (facility 25720NCLLYRIVER)",
+      "category": "materials"
     },
     {
       "name": "Gravefork Coal Handling Facility",
@@ -1142,7 +1268,8 @@
       "state": "WV",
       "lat": 37.6736,
       "lon": -81.3717,
-      "citation": "EPA TRI (facility 25865GRVFRRTE54)"
+      "citation": "EPA TRI (facility 25865GRVFRRTE54)",
+      "category": "materials"
     },
     {
       "name": "Georgia-Pacific Wood Products Llc - Mt. Hope Osb",
@@ -1151,7 +1278,8 @@
       "state": "WV",
       "lat": 37.9028,
       "lon": -81.1875,
-      "citation": "EPA TRI (facility 25880GRGPC79NOR)"
+      "citation": "EPA TRI (facility 25880GRGPC79NOR)",
+      "category": "other"
     },
     {
       "name": "Cue Of West Virginia Llc",
@@ -1160,7 +1288,8 @@
       "state": "WV",
       "lat": 37.8797,
       "lon": -81.1856,
-      "citation": "EPA TRI (facility 25880LNTXNPRICE)"
+      "citation": "EPA TRI (facility 25880LNTXNPRICE)",
+      "category": "other"
     },
     {
       "name": "East Gulf Preparation Plant",
@@ -1169,7 +1298,8 @@
       "state": "WV",
       "lat": 37.64,
       "lon": -81.285,
-      "citation": "EPA TRI (facility 25915LFTFRRTE33)"
+      "citation": "EPA TRI (facility 25915LFTFRRTE33)",
+      "category": "materials"
     },
     {
       "name": "Georgia-Pacific Corp Rainelle Wv",
@@ -1178,7 +1308,8 @@
       "state": "WV",
       "lat": 37.9764,
       "lon": -80.7656,
-      "citation": "EPA TRI (facility 25962GRGPCSNAKE)"
+      "citation": "EPA TRI (facility 25962GRGPCSNAKE)",
+      "category": "other"
     },
     {
       "name": "Meadwestvaco Corp Rupert Area",
@@ -1187,7 +1318,8 @@
       "state": "WV",
       "lat": 38.05,
       "lon": -80.6042,
-      "citation": "EPA TRI (facility 25984WSTVC2007T)"
+      "citation": "EPA TRI (facility 25984WSTVC2007T)",
+      "category": "other"
     },
     {
       "name": "Blue Ribbon Paint Co",
@@ -1196,7 +1328,8 @@
       "state": "WV",
       "lat": 40.0589,
       "lon": -80.7267,
-      "citation": "EPA TRI (facility 26003BLRBB2321M)"
+      "citation": "EPA TRI (facility 26003BLRBB2321M)",
+      "category": "other"
     },
     {
       "name": "Centre Foundry & Machine Co",
@@ -1205,7 +1338,8 @@
       "state": "WV",
       "lat": 40.1039,
       "lon": -80.7019,
-      "citation": "EPA TRI (facility 26003CNTRF74WAR)"
+      "citation": "EPA TRI (facility 26003CNTRF74WAR)",
+      "category": "materials"
     },
     {
       "name": "Coronet Foods Inc East",
@@ -1214,7 +1348,8 @@
       "state": "WV",
       "lat": 40.0811,
       "lon": -80.7178,
-      "citation": "EPA TRI (facility 26003CRNTF225MC)"
+      "citation": "EPA TRI (facility 26003CRNTF225MC)",
+      "category": "other"
     },
     {
       "name": "Custom Marble Corp",
@@ -1223,7 +1358,8 @@
       "state": "WV",
       "lat": 40.0367,
       "lon": -80.6672,
-      "citation": "EPA TRI (facility 26003CSTMM90ECO)"
+      "citation": "EPA TRI (facility 26003CSTMM90ECO)",
+      "category": "other"
     },
     {
       "name": "Hubco Bronze Llc",
@@ -1232,7 +1368,8 @@
       "state": "WV",
       "lat": 40.0789,
       "lon": -80.6844,
-      "citation": "EPA TRI (facility 26003HBCBR3INDU)"
+      "citation": "EPA TRI (facility 26003HBCBR3INDU)",
+      "category": "other"
     },
     {
       "name": "Hubco Bronze Inc.",
@@ -1241,7 +1378,8 @@
       "state": "WV",
       "lat": 40.0583,
       "lon": -80.7125,
-      "citation": "EPA TRI (facility 26003HBCNC21418)"
+      "citation": "EPA TRI (facility 26003HBCNC21418)",
+      "category": "other"
     },
     {
       "name": "Hess Co Industries Of Wv Inc",
@@ -1250,7 +1388,8 @@
       "state": "WV",
       "lat": 40.1833,
       "lon": -80.65,
-      "citation": "EPA TRI (facility 26003HSSCN7020T)"
+      "citation": "EPA TRI (facility 26003HSSCN7020T)",
+      "category": "other"
     },
     {
       "name": "Ohio Valley Steel Co Fabrication Div",
@@ -1259,7 +1398,8 @@
       "state": "WV",
       "lat": 40.0619,
       "lon": -80.7114,
-      "citation": "EPA TRI (facility 26003HVLLY20THS)"
+      "citation": "EPA TRI (facility 26003HVLLY20THS)",
+      "category": "materials"
     },
     {
       "name": "Ohio Valley Steel Co Bumgardner Fndy Div",
@@ -1268,7 +1408,8 @@
       "state": "WV",
       "lat": 40.0478,
       "lon": -80.6656,
-      "citation": "EPA TRI (facility 26003HVLLYCOMMU)"
+      "citation": "EPA TRI (facility 26003HVLLYCOMMU)",
+      "category": "materials"
     },
     {
       "name": "Posi Clean Inc",
@@ -1277,7 +1418,8 @@
       "state": "WV",
       "lat": 40.0533,
       "lon": -80.7261,
-      "citation": "EPA TRI (facility 26003PSCLN33RDC)"
+      "citation": "EPA TRI (facility 26003PSCLN33RDC)",
+      "category": "other"
     },
     {
       "name": "Positech International Inc",
@@ -1286,7 +1428,8 @@
       "state": "WV",
       "lat": 40.1144,
       "lon": -80.7039,
-      "citation": "EPA TRI (facility 26003PSTCH170NO)"
+      "citation": "EPA TRI (facility 26003PSTCH170NO)",
+      "category": "other"
     },
     {
       "name": "Safety-Kleen Systems Wheeling (Whe)",
@@ -1295,7 +1438,8 @@
       "state": "WV",
       "lat": 40.075,
       "lon": -80.7078,
-      "citation": "EPA TRI (facility 26003SFTYK10IND)"
+      "citation": "EPA TRI (facility 26003SFTYK10IND)",
+      "category": "other"
     },
     {
       "name": "Swisher International Inc",
@@ -1304,7 +1448,8 @@
       "state": "WV",
       "lat": 40.1108,
       "lon": -80.7264,
-      "citation": "EPA TRI (facility 26003SWSHR4000W)"
+      "citation": "EPA TRI (facility 26003SWSHR4000W)",
+      "category": "other"
     },
     {
       "name": "Wheeling-Pittsburgh Steel Corp Labelle Plant",
@@ -1313,7 +1458,8 @@
       "state": "WV",
       "lat": 40.0556,
       "lon": -80.7222,
-      "citation": "EPA TRI (facility 26003WHLNG31STS)"
+      "citation": "EPA TRI (facility 26003WHLNG31STS)",
+      "category": "materials"
     },
     {
       "name": "Shoemaker Mine",
@@ -1322,7 +1468,8 @@
       "state": "WV",
       "lat": 40.02,
       "lon": -80.7306,
-      "citation": "EPA TRI (facility 26031CNSLDRTE2X)"
+      "citation": "EPA TRI (facility 26031CNSLDRTE2X)",
+      "category": "materials"
     },
     {
       "name": "Laclede Steel Benwood",
@@ -1331,7 +1478,8 @@
       "state": "WV",
       "lat": 40.0083,
       "lon": -80.7333,
-      "citation": "EPA TRI (facility 26031LCLDS8THMC)"
+      "citation": "EPA TRI (facility 26031LCLDS8THMC)",
+      "category": "materials"
     },
     {
       "name": "Boc Industrial Gases",
@@ -1340,7 +1488,8 @@
       "state": "WV",
       "lat": 40.5633,
       "lon": -80.6592,
-      "citation": "EPA TRI (facility 26034RCNDSRTE2S)"
+      "citation": "EPA TRI (facility 26034RCNDSRTE2S)",
+      "category": "oil_gas"
     },
     {
       "name": "Congo Corp",
@@ -1349,7 +1498,8 @@
       "state": "WV",
       "lat": 40.6131,
       "lon": -80.5631,
-      "citation": "EPA TRI (facility 26034RRNHF1100M)"
+      "citation": "EPA TRI (facility 26034RRNHF1100M)",
+      "category": "materials"
     },
     {
       "name": "Follansbee Steel Co",
@@ -1358,7 +1508,8 @@
       "state": "WV",
       "lat": 40.3208,
       "lon": -80.5875,
-      "citation": "EPA TRI (facility 26037FLLNS1STAT)"
+      "citation": "EPA TRI (facility 26037FLLNS1STAT)",
+      "category": "materials"
     },
     {
       "name": "Koppers Follansbee Tar Plant",
@@ -1367,7 +1518,8 @@
       "state": "WV",
       "lat": 40.3369,
       "lon": -80.6061,
-      "citation": "EPA TRI (facility 26037KPPRSKOPPE)"
+      "citation": "EPA TRI (facility 26037KPPRSKOPPE)",
+      "category": "other"
     },
     {
       "name": "Wheeling-Nippon Steel",
@@ -1376,7 +1528,8 @@
       "state": "WV",
       "lat": 40.3275,
       "lon": -80.5958,
-      "citation": "EPA TRI (facility 26037WHLNGPENNM)"
+      "citation": "EPA TRI (facility 26037WHLNGPENNM)",
+      "category": "materials"
     },
     {
       "name": "Mountain State Carbon Llc",
@@ -1385,7 +1538,8 @@
       "state": "WV",
       "lat": 40.3333,
       "lon": -80.6,
-      "citation": "EPA TRI (facility 26037WHLNGROUTE)"
+      "citation": "EPA TRI (facility 26037WHLNGROUTE)",
+      "category": "other"
     },
     {
       "name": "Triangle Wire & Cable Inc",
@@ -1394,7 +1548,8 @@
       "state": "WV",
       "lat": 39.9361,
       "lon": -80.7556,
-      "citation": "EPA TRI (facility 26038TRNGL1701W)"
+      "citation": "EPA TRI (facility 26038TRNGL1701W)",
+      "category": "other"
     },
     {
       "name": "Columbian Chemicals Co",
@@ -1403,7 +1558,8 @@
       "state": "WV",
       "lat": 39.7978,
       "lon": -80.8239,
-      "citation": "EPA TRI (facility 26041CLMBNROUTE)"
+      "citation": "EPA TRI (facility 26041CLMBNROUTE)",
+      "category": "chemical"
     },
     {
       "name": "American Electric Power Kammer/Mitchell Plant",
@@ -1412,7 +1568,8 @@
       "state": "WV",
       "lat": 39.8461,
       "lon": -80.8186,
-      "citation": "EPA TRI (facility 26041KMMRPRTE2X)"
+      "citation": "EPA TRI (facility 26041KMMRPRTE2X)",
+      "category": "power"
     },
     {
       "name": "Hanlin Chemicals West Virginia Inc",
@@ -1421,7 +1578,8 @@
       "state": "WV",
       "lat": 39.9028,
       "lon": -80.8067,
-      "citation": "EPA TRI (facility 26041LCPCHROUTE)"
+      "citation": "EPA TRI (facility 26041LCPCHROUTE)",
+      "category": "chemical"
     },
     {
       "name": "Rain Cii Carbon  Llc",
@@ -1430,7 +1588,8 @@
       "state": "WV",
       "lat": 39.8336,
       "lon": -80.8206,
-      "citation": "EPA TRI (facility 26041VNTRCRTE2S)"
+      "citation": "EPA TRI (facility 26041VNTRCRTE2S)",
+      "category": "other"
     },
     {
       "name": "Homer Laughlin China Co",
@@ -1439,7 +1598,8 @@
       "state": "WV",
       "lat": 40.6222,
       "lon": -80.6106,
-      "citation": "EPA TRI (facility 26050HMRLGSIXTH)"
+      "citation": "EPA TRI (facility 26050HMRLGSIXTH)",
+      "category": "other"
     },
     {
       "name": "Newchem, Inc.",
@@ -1448,7 +1608,8 @@
       "state": "WV",
       "lat": 40.5083,
       "lon": -80.5931,
-      "citation": "EPA TRI (facility 26050NWLLSPOBOX)"
+      "citation": "EPA TRI (facility 26050NWLLSPOBOX)",
+      "category": "other"
     },
     {
       "name": "Pennzoil-Quaker State (Dba Sopus Products)",
@@ -1457,7 +1618,8 @@
       "state": "WV",
       "lat": 40.6,
       "lon": -80.6333,
-      "citation": "EPA TRI (facility 26050QKRSTRT2XX)"
+      "citation": "EPA TRI (facility 26050QKRSTRT2XX)",
+      "category": "oil_gas"
     },
     {
       "name": "Ergon West Virginia Inc",
@@ -1466,7 +1628,8 @@
       "state": "WV",
       "lat": 40.6167,
       "lon": -80.625,
-      "citation": "EPA TRI (facility 26050RGNWSSTATE)"
+      "citation": "EPA TRI (facility 26050RGNWSSTATE)",
+      "category": "other"
     },
     {
       "name": "P B & S Chemical Co Inc Proctor Plant",
@@ -1475,7 +1638,8 @@
       "state": "WV",
       "lat": 39.75,
       "lon": -80.86,
-      "citation": "EPA TRI (facility 26055PBSCHRTE2B)"
+      "citation": "EPA TRI (facility 26055PBSCHRTE2B)",
+      "category": "chemical"
     },
     {
       "name": "Chrome Deposit Corp",
@@ -1484,7 +1648,8 @@
       "state": "WV",
       "lat": 40.3881,
       "lon": -80.615,
-      "citation": "EPA TRI (facility 26062CHRMD2894B)"
+      "citation": "EPA TRI (facility 26062CHRMD2894B)",
+      "category": "other"
     },
     {
       "name": "Holcim (Us) Inc.",
@@ -1493,7 +1658,8 @@
       "state": "WV",
       "lat": 40.385,
       "lon": -80.6058,
-      "citation": "EPA TRI (facility 26062HLCMS4996F)"
+      "citation": "EPA TRI (facility 26062HLCMS4996F)",
+      "category": "other"
     },
     {
       "name": "Levolor Co Weirton Plant",
@@ -1502,7 +1668,8 @@
       "state": "WV",
       "lat": 40.3833,
       "lon": -80.6167,
-      "citation": "EPA TRI (facility 26062LVLRL2898B)"
+      "citation": "EPA TRI (facility 26062LVLRL2898B)",
+      "category": "other"
     },
     {
       "name": "Crown Cork & Seal Co (Usa) Inc Crown Closure Div",
@@ -1511,7 +1678,8 @@
       "state": "WV",
       "lat": 40.3872,
       "lon": -80.6211,
-      "citation": "EPA TRI (facility 26062NCHRH3011B)"
+      "citation": "EPA TRI (facility 26062NCHRH3011B)",
+      "category": "other"
     },
     {
       "name": "Neo Industries (Weirton) Inc.",
@@ -1520,7 +1688,8 @@
       "state": "WV",
       "lat": 40.3747,
       "lon": -80.6256,
-      "citation": "EPA TRI (facility 26062NNDST3025B)"
+      "citation": "EPA TRI (facility 26062NNDST3025B)",
+      "category": "other"
     },
     {
       "name": "Applied Dynamics",
@@ -1529,7 +1698,8 @@
       "state": "WV",
       "lat": 40.3897,
       "lon": -80.6175,
-      "citation": "EPA TRI (facility 26062PPLDD200FO)"
+      "citation": "EPA TRI (facility 26062PPLDD200FO)",
+      "category": "other"
     },
     {
       "name": "Pori International Inc",
@@ -1538,7 +1708,8 @@
       "state": "WV",
       "lat": 40.4167,
       "lon": -80.5917,
-      "citation": "EPA TRI (facility 26062PRNTRLEEAV)"
+      "citation": "EPA TRI (facility 26062PRNTRLEEAV)",
+      "category": "other"
     },
     {
       "name": "Precoat Metals",
@@ -1547,7 +1718,8 @@
       "state": "WV",
       "lat": 40.3867,
       "lon": -80.6061,
-      "citation": "EPA TRI (facility 26062RLLCT4502F)"
+      "citation": "EPA TRI (facility 26062RLLCT4502F)",
+      "category": "other"
     },
     {
       "name": "Air Products & Chemicals Inc Weirton Wv Facility",
@@ -1556,7 +1728,8 @@
       "state": "WV",
       "lat": 40.4319,
       "lon": -80.6014,
-      "citation": "EPA TRI (facility 26062RPRDC4THAN)"
+      "citation": "EPA TRI (facility 26062RPRDC4THAN)",
+      "category": "chemical"
     },
     {
       "name": "Ball Aerosol & Specialty Container Inc",
@@ -1565,7 +1738,8 @@
       "state": "WV",
       "lat": 40.3892,
       "lon": -80.6217,
-      "citation": "EPA TRI (facility 26062SCNCM3028B)"
+      "citation": "EPA TRI (facility 26062SCNCM3028B)",
+      "category": "chemical"
     },
     {
       "name": "Sal Chemical Co Inc",
@@ -1574,7 +1748,8 @@
       "state": "WV",
       "lat": 40.3903,
       "lon": -80.625,
-      "citation": "EPA TRI (facility 26062SLCHM3036B)"
+      "citation": "EPA TRI (facility 26062SLCHM3036B)",
+      "category": "chemical"
     },
     {
       "name": "Banner Fibreboard Co",
@@ -1583,7 +1758,8 @@
       "state": "WV",
       "lat": 40.2833,
       "lon": -80.6083,
-      "citation": "EPA TRI (facility 26070BNNRFWVAST)"
+      "citation": "EPA TRI (facility 26070BNNRFWVAST)",
+      "category": "other"
     },
     {
       "name": "Eagle Manufacturing Co",
@@ -1592,7 +1768,8 @@
       "state": "WV",
       "lat": 40.2869,
       "lon": -80.6103,
-      "citation": "EPA TRI (facility 26070GLMNF24THC)"
+      "citation": "EPA TRI (facility 26070GLMNF24THC)",
+      "category": "other"
     },
     {
       "name": "Schott Scientific Glass",
@@ -1601,7 +1778,8 @@
       "state": "WV",
       "lat": 39.2594,
       "lon": -81.5361,
-      "citation": "EPA TRI (facility 26101CRNNG1624S)"
+      "citation": "EPA TRI (facility 26101CRNNG1624S)",
+      "category": "materials"
     },
     {
       "name": "Ames Co Plant #2",
@@ -1610,7 +1788,8 @@
       "state": "WV",
       "lat": 39.2514,
       "lon": -81.5367,
-      "citation": "EPA TRI (facility 26101MSCPL3301C)"
+      "citation": "EPA TRI (facility 26101MSCPL3301C)",
+      "category": "other"
     },
     {
       "name": "Ames True Temper Plant 1",
@@ -1619,7 +1798,8 @@
       "state": "WV",
       "lat": 39.2456,
       "lon": -81.5261,
-      "citation": "EPA TRI (facility 26101MSCPL3801C)"
+      "citation": "EPA TRI (facility 26101MSCPL3801C)",
+      "category": "other"
     },
     {
       "name": "B-T Energy Corp",
@@ -1628,7 +1808,8 @@
       "state": "WV",
       "lat": 39.2475,
       "lon": -81.5575,
-      "citation": "EPA TRI (facility 26102BTNRG516CA)"
+      "citation": "EPA TRI (facility 26102BTNRG516CA)",
+      "category": "other"
     },
     {
       "name": "Mountain State Steel Castings, Inc",
@@ -1637,7 +1818,8 @@
       "state": "WV",
       "lat": 39.2475,
       "lon": -81.5575,
-      "citation": "EPA TRI (facility 26102MNTNS300BR)"
+      "citation": "EPA TRI (facility 26102MNTNS300BR)",
+      "category": "materials"
     },
     {
       "name": "Johns Manville Corp",
@@ -1646,7 +1828,8 @@
       "state": "WV",
       "lat": 39.3167,
       "lon": -81.5556,
-      "citation": "EPA TRI (facility 26105MNVLL29053)"
+      "citation": "EPA TRI (facility 26105MNVLL29053)",
+      "category": "other"
     },
     {
       "name": "Axens N.A. Inc.",
@@ -1655,7 +1838,8 @@
       "state": "WV",
       "lat": 39.3561,
       "lon": -81.3058,
-      "citation": "EPA TRI (facility 26134CRTRN74CAT)"
+      "citation": "EPA TRI (facility 26134CRTRN74CAT)",
+      "category": "other"
     },
     {
       "name": "Phibro Animal Health Corp",
@@ -1664,7 +1848,8 @@
       "state": "WV",
       "lat": 39.3536,
       "lon": -81.3125,
-      "citation": "EPA TRI (facility 26134MRCNC1DUGG)"
+      "citation": "EPA TRI (facility 26134MRCNC1DUGG)",
+      "category": "other"
     },
     {
       "name": "Pleasants Power Station",
@@ -1673,7 +1858,8 @@
       "state": "WV",
       "lat": 39.3678,
       "lon": -81.1292,
-      "citation": "EPA TRI (facility 26134PLSNTNO1PO)"
+      "citation": "EPA TRI (facility 26134PLSNTNO1PO)",
+      "category": "power"
     },
     {
       "name": "Bfgoodrich Aerospace",
@@ -1682,7 +1868,8 @@
       "state": "WV",
       "lat": 38.9108,
       "lon": -81.9139,
-      "citation": "EPA TRI (facility 26147BFGDRRT1BO)"
+      "citation": "EPA TRI (facility 26147BFGDRRT1BO)",
+      "category": "other"
     },
     {
       "name": "Rubber Crafters Inc",
@@ -1691,7 +1878,8 @@
       "state": "WV",
       "lat": 38.9347,
       "lon": -81.0931,
-      "citation": "EPA TRI (facility 26147RBBRCROUTE)"
+      "citation": "EPA TRI (facility 26147RBBRCROUTE)",
+      "category": "other"
     },
     {
       "name": "Covestro",
@@ -1700,7 +1888,8 @@
       "state": "WV",
       "lat": 39.7264,
       "lon": -80.8306,
-      "citation": "EPA TRI (facility 26155MBYCRSTATE)"
+      "citation": "EPA TRI (facility 26155MBYCRSTATE)",
+      "category": "chemical"
     },
     {
       "name": "Westlake Natrium Llc",
@@ -1709,7 +1898,8 @@
       "state": "WV",
       "lat": 39.7369,
       "lon": -80.8408,
-      "citation": "EPA TRI (facility 26155PPGNDSTATE)"
+      "citation": "EPA TRI (facility 26155PPGNDSTATE)",
+      "category": "other"
     },
     {
       "name": "Corning Inc",
@@ -1718,7 +1908,8 @@
       "state": "WV",
       "lat": 39.6083,
       "lon": -80.95,
-      "citation": "EPA TRI (facility 26159CRNNGFIRST)"
+      "citation": "EPA TRI (facility 26159CRNNGFIRST)",
+      "category": "other"
     },
     {
       "name": "Hartley Manufacturing Co",
@@ -1727,7 +1918,8 @@
       "state": "WV",
       "lat": 38.9369,
       "lon": -81.7583,
-      "citation": "EPA TRI (facility 26164HRTLYRTE68)"
+      "citation": "EPA TRI (facility 26164HRTLYRTE68)",
+      "category": "oil_gas"
     },
     {
       "name": "Century Aluminum Of West Virginia Inc",
@@ -1736,7 +1928,8 @@
       "state": "WV",
       "lat": 38.9358,
       "lon": -81.8233,
-      "citation": "EPA TRI (facility 26164KSRLMPOBOX)"
+      "citation": "EPA TRI (facility 26164KSRLMPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Constellium Rolled Products Ravenswood Llc",
@@ -1745,7 +1938,8 @@
       "state": "WV",
       "lat": 38.9358,
       "lon": -81.8364,
-      "citation": "EPA TRI (facility 26164PCHNYROUTE)"
+      "citation": "EPA TRI (facility 26164PCHNYROUTE)",
+      "category": "other"
     },
     {
       "name": "Mpm Silicones Llc",
@@ -1754,7 +1948,8 @@
       "state": "WV",
       "lat": 39.4894,
       "lon": -81.09,
-      "citation": "EPA TRI (facility 26175NNCRBSTATE)"
+      "citation": "EPA TRI (facility 26175NNCRBSTATE)",
+      "category": "other"
     },
     {
       "name": "Precision International Llc",
@@ -1763,7 +1958,8 @@
       "state": "WV",
       "lat": 39.5603,
       "lon": -80.9989,
-      "citation": "EPA TRI (facility 26175PRCSN435BU)"
+      "citation": "EPA TRI (facility 26175PRCSN435BU)",
+      "category": "other"
     },
     {
       "name": "Rpr Ind Inc",
@@ -1772,7 +1968,8 @@
       "state": "WV",
       "lat": 39.0944,
       "lon": -81.0772,
-      "citation": "EPA TRI (facility 26178RBBRCROUTE)"
+      "citation": "EPA TRI (facility 26178RBBRCROUTE)",
+      "category": "other"
     },
     {
       "name": "Delrin Usa Llc",
@@ -1781,7 +1978,8 @@
       "state": "WV",
       "lat": 39.27,
       "lon": -81.6692,
-      "citation": "EPA TRI (facility 26180DPNTWDUPON)"
+      "citation": "EPA TRI (facility 26180DPNTWDUPON)",
+      "category": "other"
     },
     {
       "name": "Aga Gas Inc",
@@ -1790,7 +1988,8 @@
       "state": "WV",
       "lat": 39.2461,
       "lon": -81.7683,
-      "citation": "EPA TRI (facility 26181GGSNCDUPON)"
+      "citation": "EPA TRI (facility 26181GGSNCDUPON)",
+      "category": "oil_gas"
     },
     {
       "name": "Northwest Pipe Co",
@@ -1799,7 +1998,8 @@
       "state": "WV",
       "lat": 39.2544,
       "lon": -81.6928,
-      "citation": "EPA TRI (facility 26181LBFSTRTE89)"
+      "citation": "EPA TRI (facility 26181LBFSTRTE89)",
+      "category": "other"
     },
     {
       "name": "Cabot Corp",
@@ -1808,7 +2008,8 @@
       "state": "WV",
       "lat": 39.3406,
       "lon": -81.3503,
-      "citation": "EPA TRI (facility 26184CBTCRSTATE)"
+      "citation": "EPA TRI (facility 26184CBTCRSTATE)",
+      "category": "other"
     },
     {
       "name": "Farr Manufacturing & Engineering Co",
@@ -1817,7 +2018,8 @@
       "state": "WV",
       "lat": 39.3897,
       "lon": -81.4406,
-      "citation": "EPA TRI (facility 26187FRRMN200AR)"
+      "citation": "EPA TRI (facility 26187FRRMN200AR)",
+      "category": "other"
     },
     {
       "name": "Fenton Art Glass Co",
@@ -1826,7 +2028,8 @@
       "state": "WV",
       "lat": 39.4028,
       "lon": -81.4617,
-      "citation": "EPA TRI (facility 26187THFNT700EL)"
+      "citation": "EPA TRI (facility 26187THFNT700EL)",
+      "category": "materials"
     },
     {
       "name": "Walker Systems Inc",
@@ -1835,7 +2038,8 @@
       "state": "WV",
       "lat": 39.3925,
       "lon": -81.4669,
-      "citation": "EPA TRI (facility 26187WLKRS1000I)"
+      "citation": "EPA TRI (facility 26187WLKRS1000I)",
+      "category": "other"
     },
     {
       "name": "Cytec Industries Inc",
@@ -1844,7 +2048,8 @@
       "state": "WV",
       "lat": 39.3561,
       "lon": -81.3058,
-      "citation": "EPA TRI (facility 26190MRCNCSTRT2)"
+      "citation": "EPA TRI (facility 26190MRCNCSTRT2)",
+      "category": "other"
     },
     {
       "name": "Corhart Refractories",
@@ -1853,7 +2058,8 @@
       "state": "WV",
       "lat": 38.9911,
       "lon": -80.2442,
-      "citation": "EPA TRI (facility 26201CRHRTROUTE)"
+      "citation": "EPA TRI (facility 26201CRHRTROUTE)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co - Buckh Annon",
@@ -1862,7 +2068,8 @@
       "state": "WV",
       "lat": 38.9833,
       "lon": -80.2167,
-      "citation": "EPA TRI (facility 26201CSTLLFIFTH)"
+      "citation": "EPA TRI (facility 26201CSTLLFIFTH)",
+      "category": "other"
     },
     {
       "name": "Savin Lumber",
@@ -1871,7 +2078,8 @@
       "state": "WV",
       "lat": 39.0431,
       "lon": -80.2272,
-      "citation": "EPA TRI (facility 26201SVNLM35TUR)"
+      "citation": "EPA TRI (facility 26201SVNLM35TUR)",
+      "category": "other"
     },
     {
       "name": "Smr Technologies Inc",
@@ -1880,7 +2088,8 @@
       "state": "WV",
       "lat": 38.2283,
       "lon": -80.5842,
-      "citation": "EPA TRI (facility 26202SMRTCSTARR)"
+      "citation": "EPA TRI (facility 26202SMRTCSTARR)",
+      "category": "other"
     },
     {
       "name": "Brooks Run Coal Preparation Plant",
@@ -1889,7 +2098,8 @@
       "state": "WV",
       "lat": 38.5178,
       "lon": -80.6128,
-      "citation": "EPA TRI (facility 26203BRKSR61MIS)"
+      "citation": "EPA TRI (facility 26203BRKSR61MIS)",
+      "category": "materials"
     },
     {
       "name": "Columbia Forest Products Columbia West Virginia Corp",
@@ -1898,7 +2108,8 @@
       "state": "WV",
       "lat": 38.3417,
       "lon": -80.6583,
-      "citation": "EPA TRI (facility 26205CLMBW111CA)"
+      "citation": "EPA TRI (facility 26205CLMBW111CA)",
+      "category": "other"
     },
     {
       "name": "Jeld-Wen",
@@ -1907,7 +2118,8 @@
       "state": "WV",
       "lat": 38.3469,
       "lon": -80.6569,
-      "citation": "EPA TRI (facility 26205JLDWN600JE)"
+      "citation": "EPA TRI (facility 26205JLDWN600JE)",
+      "category": "other"
     },
     {
       "name": "Icg Eastern Llc Birch River Mine",
@@ -1916,7 +2128,8 @@
       "state": "WV",
       "lat": 38.4222,
       "lon": -80.4294,
-      "citation": "EPA TRI (facility 26206VRGRNRTE82)"
+      "citation": "EPA TRI (facility 26206VRGRNRTE82)",
+      "category": "materials"
     },
     {
       "name": "Coastal Lumber Co - Hacke R Valley",
@@ -1925,7 +2138,8 @@
       "state": "WV",
       "lat": 38.6333,
       "lon": -80.4,
-      "citation": "EPA TRI (facility 26222CSTLLWVRTE)"
+      "citation": "EPA TRI (facility 26222CSTLLWVRTE)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co - Poe Run Sawmill",
@@ -1934,7 +2148,8 @@
       "state": "WV",
       "lat": 38.9167,
       "lon": -79.8167,
-      "citation": "EPA TRI (facility 26241CSTLL1105U)"
+      "citation": "EPA TRI (facility 26241CSTLL1105U)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co Elkins Yard",
@@ -1943,7 +2158,8 @@
       "state": "WV",
       "lat": 38.9167,
       "lon": -79.85,
-      "citation": "EPA TRI (facility 26241CSTLLFIFTE)"
+      "citation": "EPA TRI (facility 26241CSTLLFIFTE)",
+      "category": "other"
     },
     {
       "name": "Guttman Oil Co",
@@ -1952,7 +2168,8 @@
       "state": "WV",
       "lat": 38.8603,
       "lon": -79.8633,
-      "citation": "EPA TRI (facility 26241GTTMNRTE21)"
+      "citation": "EPA TRI (facility 26241GTTMNRTE21)",
+      "category": "oil_gas"
     },
     {
       "name": "Meadwestvaco Corp Elkins Area",
@@ -1961,7 +2178,8 @@
       "state": "WV",
       "lat": 38.7694,
       "lon": -80.0139,
-      "citation": "EPA TRI (facility 26241WSTVC525CE)"
+      "citation": "EPA TRI (facility 26241WSTVC525CE)",
+      "category": "other"
     },
     {
       "name": "Ahf Products",
@@ -1970,7 +2188,8 @@
       "state": "WV",
       "lat": 38.8172,
       "lon": -79.8781,
-      "citation": "EPA TRI (facility 26253BRCHRRTE25)"
+      "citation": "EPA TRI (facility 26253BRCHRRTE25)",
+      "category": "other"
     },
     {
       "name": "Concast Metal Prods Co",
@@ -1979,7 +2198,8 @@
       "state": "WV",
       "lat": 38.7833,
       "lon": -79.8917,
-      "citation": "EPA TRI (facility 26259CNCSTRTES2)"
+      "citation": "EPA TRI (facility 26259CNCSTRTES2)",
+      "category": "other"
     },
     {
       "name": "Eastern Hardwoods - Dailey Sawmill",
@@ -1988,7 +2208,8 @@
       "state": "WV",
       "lat": 38.7933,
       "lon": -79.9,
-      "citation": "EPA TRI (facility 26259CSTLLHWY25)"
+      "citation": "EPA TRI (facility 26259CSTLLHWY25)",
+      "category": "other"
     },
     {
       "name": "Northwest Hardwoods Inc-Dailey Yard",
@@ -1997,7 +2218,8 @@
       "state": "WV",
       "lat": 38.8,
       "lon": -79.8833,
-      "citation": "EPA TRI (facility 26259CSTLLHWY2A)"
+      "citation": "EPA TRI (facility 26259CSTLLHWY2A)",
+      "category": "other"
     },
     {
       "name": "Parsons Footwear Inc",
@@ -2006,7 +2228,8 @@
       "state": "WV",
       "lat": 39.0917,
       "lon": -80.2069,
-      "citation": "EPA TRI (facility 26287PRSNS222DA)"
+      "citation": "EPA TRI (facility 26287PRSNS222DA)",
+      "category": "other"
     },
     {
       "name": "Agama Glass Technologies Llc",
@@ -2015,7 +2238,8 @@
       "state": "WV",
       "lat": 39.2725,
       "lon": -80.3061,
-      "citation": "EPA TRI (facility 26301GLCNV423TU)"
+      "citation": "EPA TRI (facility 26301GLCNV423TU)",
+      "category": "materials"
     },
     {
       "name": "Lockheed Martin Aeronautical Systems Co",
@@ -2024,7 +2248,8 @@
       "state": "WV",
       "lat": 39.2833,
       "lon": -80.3167,
-      "citation": "EPA TRI (facility 26301LCKHDBRIDG)"
+      "citation": "EPA TRI (facility 26301LCKHDBRIDG)",
+      "category": "other"
     },
     {
       "name": "Wellslee Coca-Cola",
@@ -2033,7 +2258,8 @@
       "state": "WV",
       "lat": 39.25,
       "lon": -80.3181,
-      "citation": "EPA TRI (facility 26301WLLSLRT20S)"
+      "citation": "EPA TRI (facility 26301WLLSLRT20S)",
+      "category": "oil_gas"
     },
     {
       "name": "West Virginia Welding (Dba West Virginia Welding)",
@@ -2042,7 +2268,8 @@
       "state": "WV",
       "lat": 39.2833,
       "lon": -80.35,
-      "citation": "EPA TRI (facility 26301WVRGSSTADI)"
+      "citation": "EPA TRI (facility 26301WVRGSSTADI)",
+      "category": "oil_gas"
     },
     {
       "name": "Amsted Graphite Materials",
@@ -2051,7 +2278,8 @@
       "state": "WV",
       "lat": 39.2561,
       "lon": -80.2931,
-      "citation": "EPA TRI (facility 26323CRCRBPHILI)"
+      "citation": "EPA TRI (facility 26323CRCRBPHILI)",
+      "category": "other"
     },
     {
       "name": "Prebena Na Fastener Corp",
@@ -2060,7 +2288,8 @@
       "state": "WV",
       "lat": 39.2203,
       "lon": -80.2542,
-      "citation": "EPA TRI (facility 26330PRBNNRTE1B)"
+      "citation": "EPA TRI (facility 26330PRBNNRTE1B)",
+      "category": "other"
     },
     {
       "name": "Pratt & Whitney Engine Services Inc.",
@@ -2069,7 +2298,8 @@
       "state": "WV",
       "lat": 39.2997,
       "lon": -80.2228,
-      "citation": "EPA TRI (facility 26330PRTTWBENED)"
+      "citation": "EPA TRI (facility 26330PRTTWBENED)",
+      "category": "other"
     },
     {
       "name": "Rex-Hide Industries Inc",
@@ -2078,7 +2308,8 @@
       "state": "WV",
       "lat": 39.3653,
       "lon": -80.0525,
-      "citation": "EPA TRI (facility 26354RXHDNCOUNT)"
+      "citation": "EPA TRI (facility 26354RXHDNCOUNT)",
+      "category": "other"
     },
     {
       "name": "Harrison Power Station",
@@ -2087,7 +2318,8 @@
       "state": "WV",
       "lat": 39.3836,
       "lon": -80.3161,
-      "citation": "EPA TRI (facility 26366HRRSNRTE20)"
+      "citation": "EPA TRI (facility 26366HRRSNRTE20)",
+      "category": "power"
     },
     {
       "name": "Composite Pool Corp",
@@ -2096,7 +2328,8 @@
       "state": "WV",
       "lat": 39.1033,
       "lon": -80.3994,
-      "citation": "EPA TRI (facility 26378CMPST473IN)"
+      "citation": "EPA TRI (facility 26378CMPST473IN)",
+      "category": "other"
     },
     {
       "name": "Ptc Alliance Jane Lew Plant",
@@ -2105,7 +2338,8 @@
       "state": "WV",
       "lat": 39.1089,
       "lon": -80.4064,
-      "citation": "EPA TRI (facility 26378PTTSBPOBOX)"
+      "citation": "EPA TRI (facility 26378PTTSBPOBOX)",
+      "category": "other"
     },
     {
       "name": "Latham Pool Products Inc D/B/A Viking Pools-Wv",
@@ -2114,7 +2348,8 @@
       "state": "WV",
       "lat": 39.1014,
       "lon": -80.4014,
-      "citation": "EPA TRI (facility 26378VKNGP439IN)"
+      "citation": "EPA TRI (facility 26378VKNGP439IN)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co - Smithburg",
@@ -2123,7 +2358,8 @@
       "state": "WV",
       "lat": 39.2833,
       "lon": -80.7167,
-      "citation": "EPA TRI (facility 26436CSTLLHWY50)"
+      "citation": "EPA TRI (facility 26436CSTLLHWY50)",
+      "category": "other"
     },
     {
       "name": "Glass Works Wv Llc",
@@ -2132,7 +2368,8 @@
       "state": "WV",
       "lat": 39.0369,
       "lon": -80.4536,
-      "citation": "EPA TRI (facility 26452LGLSS631EA)"
+      "citation": "EPA TRI (facility 26452LGLSS631EA)",
+      "category": "materials"
     },
     {
       "name": "Patriot Mining Co Inc Osage Mine",
@@ -2141,7 +2378,8 @@
       "state": "WV",
       "lat": 39.6333,
       "lon": -80.0322,
-      "citation": "EPA TRI (facility 26504PTRTM1090C)"
+      "citation": "EPA TRI (facility 26504PTRTM1090C)",
+      "category": "materials"
     },
     {
       "name": "Patriot Mining Co Inc  Dents Run Mine",
@@ -2150,7 +2388,8 @@
       "state": "WV",
       "lat": 39.6386,
       "lon": -80.0706,
-      "citation": "EPA TRI (facility 26504PTRTM12MIA)"
+      "citation": "EPA TRI (facility 26504PTRTM12MIA)",
+      "category": "materials"
     },
     {
       "name": "Patriot Mining Co Inc  Metz Mine",
@@ -2159,7 +2398,8 @@
       "state": "WV",
       "lat": 39.6447,
       "lon": -80.0222,
-      "citation": "EPA TRI (facility 26504PTRTM12MIL)"
+      "citation": "EPA TRI (facility 26504PTRTM12MIL)",
+      "category": "materials"
     },
     {
       "name": "Patriot Mining Co Inc Crown Mine",
@@ -2168,7 +2408,8 @@
       "state": "WV",
       "lat": 39.5875,
       "lon": -80.0969,
-      "citation": "EPA TRI (facility 26504PTRTM22MIL)"
+      "citation": "EPA TRI (facility 26504PTRTM22MIL)",
+      "category": "materials"
     },
     {
       "name": "Morgantown Energy Associates",
@@ -2177,7 +2418,8 @@
       "state": "WV",
       "lat": 39.6397,
       "lon": -79.9606,
-      "citation": "EPA TRI (facility 26505MRGNT555BE)"
+      "citation": "EPA TRI (facility 26505MRGNT555BE)",
+      "category": "other"
     },
     {
       "name": "Mylan Pharmaceuticals Inc",
@@ -2186,7 +2428,8 @@
       "state": "WV",
       "lat": 39.6167,
       "lon": -79.95,
-      "citation": "EPA TRI (facility 26505MYLNP781CH)"
+      "citation": "EPA TRI (facility 26505MYLNP781CH)",
+      "category": "other"
     },
     {
       "name": "Swanson Plating Corp Inc.",
@@ -2195,7 +2438,8 @@
       "state": "WV",
       "lat": 39.5333,
       "lon": -80.0033,
-      "citation": "EPA TRI (facility 26505SWNSNSTATE)"
+      "citation": "EPA TRI (facility 26505SWNSNSTATE)",
+      "category": "other"
     },
     {
       "name": "Si Group Inc - South Plant",
@@ -2204,7 +2448,8 @@
       "state": "WV",
       "lat": 39.5994,
       "lon": -79.9708,
-      "citation": "EPA TRI (facility 26505WSTMR1000D)"
+      "citation": "EPA TRI (facility 26505WSTMR1000D)",
+      "category": "other"
     },
     {
       "name": "Si Group Inc -North Plant",
@@ -2213,7 +2458,8 @@
       "state": "WV",
       "lat": 39.61,
       "lon": -79.9761,
-      "citation": "EPA TRI (facility 26505WSTMRMORGA)"
+      "citation": "EPA TRI (facility 26505WSTMRMORGA)",
+      "category": "other"
     },
     {
       "name": "Craft Run Mine Facility",
@@ -2222,7 +2468,8 @@
       "state": "WV",
       "lat": 39.7039,
       "lon": -79.9814,
-      "citation": "EPA TRI (facility 26507CRFTR1MILE)"
+      "citation": "EPA TRI (facility 26507CRFTR1MILE)",
+      "category": "materials"
     },
     {
       "name": "Mepco Inc Crooked Run Facility",
@@ -2231,7 +2478,8 @@
       "state": "WV",
       "lat": 39.7167,
       "lon": -79.9694,
-      "citation": "EPA TRI (facility 26507CRKDRWVCUN)"
+      "citation": "EPA TRI (facility 26507CRKDRWVCUN)",
+      "category": "other"
     },
     {
       "name": "Crawdad Portal A Facility",
@@ -2240,7 +2488,8 @@
       "state": "WV",
       "lat": 39.7097,
       "lon": -79.9836,
-      "citation": "EPA TRI (facility 26507CRWDD1MILE)"
+      "citation": "EPA TRI (facility 26507CRWDD1MILE)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co - Hazelton Yard",
@@ -2249,7 +2498,8 @@
       "state": "WV",
       "lat": 39.6667,
       "lon": -79.5167,
-      "citation": "EPA TRI (facility 26525CSTLL249HA)"
+      "citation": "EPA TRI (facility 26525CSTLL249HA)",
+      "category": "other"
     },
     {
       "name": "Patriot Mining Company Inc Guston Run South",
@@ -2258,7 +2508,8 @@
       "state": "WV",
       "lat": 39.6711,
       "lon": -80.055,
-      "citation": "EPA TRI (facility 26527PTRTMSTATE)"
+      "citation": "EPA TRI (facility 26527PTRTMSTATE)",
+      "category": "materials"
     },
     {
       "name": "Coastal Coal Co Llc Albright Plant",
@@ -2267,7 +2518,8 @@
       "state": "WV",
       "lat": 39.4847,
       "lon": -79.6394,
-      "citation": "EPA TRI (facility 26537CSTLC84ALB)"
+      "citation": "EPA TRI (facility 26537CSTLC84ALB)",
+      "category": "materials"
     },
     {
       "name": "Matthews International Corp",
@@ -2276,7 +2528,8 @@
       "state": "WV",
       "lat": 39.4744,
       "lon": -79.6967,
-      "citation": "EPA TRI (facility 26537SHDWBSISLE)"
+      "citation": "EPA TRI (facility 26537SHDWBSISLE)",
+      "category": "other"
     },
     {
       "name": "Coresco Inc Booths Creek Facility",
@@ -2285,7 +2538,8 @@
       "state": "WV",
       "lat": 39.5172,
       "lon": -79.9686,
-      "citation": "EPA TRI (facility 26541CRSCBGOSHE)"
+      "citation": "EPA TRI (facility 26541CRSCBGOSHE)",
+      "category": "other"
     },
     {
       "name": "Coresco Llc Maidsville Complex",
@@ -2294,7 +2548,8 @@
       "state": "WV",
       "lat": 39.7069,
       "lon": -79.9686,
-      "citation": "EPA TRI (facility 26541CRSCNRTE10)"
+      "citation": "EPA TRI (facility 26541CRSCNRTE10)",
+      "category": "other"
     },
     {
       "name": "Crawdad Portal B",
@@ -2303,7 +2558,8 @@
       "state": "WV",
       "lat": 39.7078,
       "lon": -79.9992,
-      "citation": "EPA TRI (facility 26541CRWDD2141L)"
+      "citation": "EPA TRI (facility 26541CRWDD2141L)",
+      "category": "other"
     },
     {
       "name": "Fort Martin Power Station",
@@ -2312,7 +2568,8 @@
       "state": "WV",
       "lat": 39.7,
       "lon": -79.9167,
-      "citation": "EPA TRI (facility 26541FRTMRRTE53)"
+      "citation": "EPA TRI (facility 26541FRTMRRTE53)",
+      "category": "power"
     },
     {
       "name": "Patriot Mining Co Inc  Guston Run Mine",
@@ -2321,7 +2578,8 @@
       "state": "WV",
       "lat": 39.6731,
       "lon": -80.0642,
-      "citation": "EPA TRI (facility 26546PTRTMUSRTE)"
+      "citation": "EPA TRI (facility 26546PTRTMUSRTE)",
+      "category": "materials"
     },
     {
       "name": "Superior Fibers",
@@ -2330,7 +2588,8 @@
       "state": "WV",
       "lat": 39.5064,
       "lon": -79.805,
-      "citation": "EPA TRI (facility 26547HLLNCROUTE)"
+      "citation": "EPA TRI (facility 26547HLLNCROUTE)",
+      "category": "other"
     },
     {
       "name": "Helmick Corp",
@@ -2339,7 +2598,8 @@
       "state": "WV",
       "lat": 39.475,
       "lon": -80.1458,
-      "citation": "EPA TRI (facility 26554HLMCK8THBE)"
+      "citation": "EPA TRI (facility 26554HLMCK8THBE)",
+      "category": "other"
     },
     {
       "name": "Ruskin Co",
@@ -2348,7 +2608,8 @@
       "state": "WV",
       "lat": 39.4447,
       "lon": -80.1586,
-      "citation": "EPA TRI (facility 26554MCCLM2030P)"
+      "citation": "EPA TRI (facility 26554MCCLM2030P)",
+      "category": "other"
     },
     {
       "name": "Nd Fairmont Llc",
@@ -2357,7 +2618,8 @@
       "state": "WV",
       "lat": 39.4944,
       "lon": -80.1283,
-      "citation": "EPA TRI (facility 26554MRCNF702AF)"
+      "citation": "EPA TRI (facility 26554MRCNF702AF)",
+      "category": "other"
     },
     {
       "name": "Industrial Resources Inc",
@@ -2366,7 +2628,8 @@
       "state": "WV",
       "lat": 39.4683,
       "lon": -80.1742,
-      "citation": "EPA TRI (facility 26554NDSTR1INDU)"
+      "citation": "EPA TRI (facility 26554NDSTR1INDU)",
+      "category": "other"
     },
     {
       "name": "Philips Lighting Co",
@@ -2375,7 +2638,8 @@
       "state": "WV",
       "lat": 39.5167,
       "lon": -80.1333,
-      "citation": "EPA TRI (facility 26554PHLPSHOULT)"
+      "citation": "EPA TRI (facility 26554PHLPSHOULT)",
+      "category": "other"
     },
     {
       "name": "Creative Label Co",
@@ -2384,7 +2648,8 @@
       "state": "WV",
       "lat": 39.5,
       "lon": -80.125,
-      "citation": "EPA TRI (facility 26554THCRT1100H)"
+      "citation": "EPA TRI (facility 26554THCRT1100H)",
+      "category": "other"
     },
     {
       "name": "Novelis Corp",
@@ -2393,7 +2658,8 @@
       "state": "WV",
       "lat": 39.4911,
       "lon": -80.1083,
-      "citation": "EPA TRI (facility 26555LCNRLSPEED)"
+      "citation": "EPA TRI (facility 26555LCNRLSPEED)",
+      "category": "other"
     },
     {
       "name": "Loveridge Mine",
@@ -2402,7 +2668,8 @@
       "state": "WV",
       "lat": 39.6044,
       "lon": -80.2836,
-      "citation": "EPA TRI (facility 26570LVRDGCOUNT)"
+      "citation": "EPA TRI (facility 26570LVRDGCOUNT)",
+      "category": "materials"
     },
     {
       "name": "Federal #2 Preparation Plant",
@@ -2411,7 +2678,8 @@
       "state": "WV",
       "lat": 39.675,
       "lon": -80.2667,
-      "citation": "EPA TRI (facility 26570STRNS1044M)"
+      "citation": "EPA TRI (facility 26570STRNS1044M)",
+      "category": "materials"
     },
     {
       "name": "American Bituminous Power Partners Lp",
@@ -2420,7 +2688,8 @@
       "state": "WV",
       "lat": 39.5561,
       "lon": -80.2514,
-      "citation": "EPA TRI (facility 26574MRCNBRTE17)"
+      "citation": "EPA TRI (facility 26574MRCNBRTE17)",
+      "category": "other"
     },
     {
       "name": "Blacksville #2 Mine",
@@ -2429,7 +2698,8 @@
       "state": "WV",
       "lat": 39.7078,
       "lon": -80.2944,
-      "citation": "EPA TRI (facility 26590BLCKSRTE7W)"
+      "citation": "EPA TRI (facility 26590BLCKSRTE7W)",
+      "category": "materials"
     },
     {
       "name": "Appalachian Timber Services Llc",
@@ -2438,7 +2708,8 @@
       "state": "WV",
       "lat": 38.6539,
       "lon": -80.6928,
-      "citation": "EPA TRI (facility 26601PPLCHOLDFA)"
+      "citation": "EPA TRI (facility 26601PPLCHOLDFA)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co - Frametown",
@@ -2447,7 +2718,8 @@
       "state": "WV",
       "lat": 38.6472,
       "lon": -80.85,
-      "citation": "EPA TRI (facility 26623CSTLLHC61B)"
+      "citation": "EPA TRI (facility 26623CSTLLHC61B)",
+      "category": "other"
     },
     {
       "name": "Coastal Lumber Co Gassaway Sawmill",
@@ -2456,7 +2728,8 @@
       "state": "WV",
       "lat": 38.655,
       "lon": -80.84,
-      "citation": "EPA TRI (facility 26624CSTLLRTE4X)"
+      "citation": "EPA TRI (facility 26624CSTLLRTE4X)",
+      "category": "oil_gas"
     },
     {
       "name": "Weyerhaeuser Nr Co - Sutton Osb",
@@ -2465,7 +2738,8 @@
       "state": "WV",
       "lat": 38.7619,
       "lon": -80.6553,
-      "citation": "EPA TRI (facility 26627WYRHSUSHWY)"
+      "citation": "EPA TRI (facility 26627WYRHSUSHWY)",
+      "category": "other"
     },
     {
       "name": "Peerless Eagle Plant No 1",
@@ -2474,7 +2748,8 @@
       "state": "WV",
       "lat": 38.2769,
       "lon": -80.9139,
-      "citation": "EPA TRI (facility 26651PRLSSCAMPF)"
+      "citation": "EPA TRI (facility 26651PRLSSCAMPF)",
+      "category": "materials"
     },
     {
       "name": "Power Mountain Coal Co Preparation Plant",
@@ -2483,7 +2758,8 @@
       "state": "WV",
       "lat": 38.3025,
       "lon": -80.9986,
-      "citation": "EPA TRI (facility 26667PWRMNNO2JE)"
+      "citation": "EPA TRI (facility 26667PWRMNNO2JE)",
+      "category": "materials"
     },
     {
       "name": "Green Valley Coal Co",
@@ -2492,7 +2768,8 @@
       "state": "WV",
       "lat": 38.1511,
       "lon": -80.6881,
-      "citation": "EPA TRI (facility 26676GRNVLPOBOX)"
+      "citation": "EPA TRI (facility 26676GRNVLPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Buffalo Coal Co Inc C-1",
@@ -2501,7 +2778,8 @@
       "state": "WV",
       "lat": 39.1408,
       "lon": -79.2917,
-      "citation": "EPA TRI (facility 26707BFFLCRTE90)"
+      "citation": "EPA TRI (facility 26707BFFLCRTE90)",
+      "category": "materials"
     },
     {
       "name": "Vindex Energy Corp A-34 Prep Plant",
@@ -2510,7 +2788,8 @@
       "state": "WV",
       "lat": 39.2131,
       "lon": -79.3178,
-      "citation": "EPA TRI (facility 26707BFFLCRTE9A)"
+      "citation": "EPA TRI (facility 26707BFFLCRTE9A)",
+      "category": "materials"
     },
     {
       "name": "Coastal Lumber Co - Horse Shoe Run",
@@ -2519,7 +2798,8 @@
       "state": "WV",
       "lat": 39.2667,
       "lon": -79.5,
-      "citation": "EPA TRI (facility 26716CSTLLRTE1B)"
+      "citation": "EPA TRI (facility 26716CSTLLRTE1B)",
+      "category": "other"
     },
     {
       "name": "Dominion North Branch Power Station",
@@ -2528,7 +2808,8 @@
       "state": "WV",
       "lat": 39.2642,
       "lon": -79.33,
-      "citation": "EPA TRI (facility 26720NRTHB2000E)"
+      "citation": "EPA TRI (facility 26720NRTHB2000E)",
+      "category": "power"
     },
     {
       "name": "Koppers Inc (Green Spring Wv)",
@@ -2537,7 +2818,8 @@
       "state": "WV",
       "lat": 39.5333,
       "lon": -78.625,
-      "citation": "EPA TRI (facility 26722KPPRSRAILR)"
+      "citation": "EPA TRI (facility 26722KPPRSRAILR)",
+      "category": "other"
     },
     {
       "name": "Carroll Mfg International",
@@ -2546,7 +2828,8 @@
       "state": "WV",
       "lat": 39.4403,
       "lon": -78.9525,
-      "citation": "EPA TRI (facility 26726CRRLLWAXLE)"
+      "citation": "EPA TRI (facility 26726CRRLLWAXLE)",
+      "category": "other"
     },
     {
       "name": "Kingsford Manufacturing Co",
@@ -2555,7 +2838,8 @@
       "state": "WV",
       "lat": 39.4786,
       "lon": -79.0669,
-      "citation": "EPA TRI (facility 26726KNGSFRTE46)"
+      "citation": "EPA TRI (facility 26726KNGSFRTE46)",
+      "category": "other"
     },
     {
       "name": "Kessel Lumber Supply Inc",
@@ -2564,7 +2848,8 @@
       "state": "WV",
       "lat": 39.3917,
       "lon": -79.0083,
-      "citation": "EPA TRI (facility 26726KSSLLSTARR)"
+      "citation": "EPA TRI (facility 26726KSSLLSTARR)",
+      "category": "other"
     },
     {
       "name": "Allegany Ballistics Lab (Nirop)",
@@ -2573,7 +2858,8 @@
       "state": "WV",
       "lat": 39.5583,
       "lon": -78.8417,
-      "citation": "EPA TRI (facility 26726LLGNYWESTV)"
+      "citation": "EPA TRI (facility 26726LLGNYWESTV)",
+      "category": "other"
     },
     {
       "name": "Anchor Glass Container Corp",
@@ -2582,7 +2868,8 @@
       "state": "WV",
       "lat": 39.4583,
       "lon": -78.9583,
-      "citation": "EPA TRI (facility 26726NCHRGWAXLE)"
+      "citation": "EPA TRI (facility 26726NCHRGWAXLE)",
+      "category": "materials"
     },
     {
       "name": "Romney Shoe Co",
@@ -2591,7 +2878,8 @@
       "state": "WV",
       "lat": 39.3628,
       "lon": -78.7561,
-      "citation": "EPA TRI (facility 26757RMNYSDRAWE)"
+      "citation": "EPA TRI (facility 26757RMNYSDRAWE)",
+      "category": "other"
     },
     {
       "name": "Hanover Shoe Co Franklin Plant",
@@ -2600,7 +2888,8 @@
       "state": "WV",
       "lat": 38.6083,
       "lon": -79.3569,
-      "citation": "EPA TRI (facility 26807HNVRSRTE22)"
+      "citation": "EPA TRI (facility 26807HNVRSRTE22)",
+      "category": "other"
     },
     {
       "name": "Capon Valley Marble",
@@ -2609,7 +2898,8 @@
       "state": "WV",
       "lat": 39.0508,
       "lon": -78.9828,
-      "citation": "EPA TRI (facility 26836CPNVLBEANS)"
+      "citation": "EPA TRI (facility 26836CPNVLBEANS)",
+      "category": "other"
     },
     {
       "name": "Pilgrim'S Pride Corp Moorefield Prepared Foods Plant",
@@ -2618,7 +2908,8 @@
       "state": "WV",
       "lat": 39.0572,
       "lon": -78.9719,
-      "citation": "EPA TRI (facility 26836HSTRN104SM)"
+      "citation": "EPA TRI (facility 26836HSTRN104SM)",
+      "category": "other"
     },
     {
       "name": "American Woodmark Moorefield Plant",
@@ -2627,7 +2918,8 @@
       "state": "WV",
       "lat": 39.0608,
       "lon": -78.9653,
-      "citation": "EPA TRI (facility 26836MRCNW117SF)"
+      "citation": "EPA TRI (facility 26836MRCNW117SF)",
+      "category": "other"
     },
     {
       "name": "American Woodmark Hardy County Plant",
@@ -2636,7 +2928,8 @@
       "state": "WV",
       "lat": 39.0408,
       "lon": -79.2039,
-      "citation": "EPA TRI (facility 26836MRCNWROUTE)"
+      "citation": "EPA TRI (facility 26836MRCNWROUTE)",
+      "category": "other"
     },
     {
       "name": "Pilgrim'S Pride Corp Moorefield Fresh Facility",
@@ -2645,7 +2938,8 @@
       "state": "WV",
       "lat": 39.0594,
       "lon": -78.9822,
-      "citation": "EPA TRI (facility 26836RCKNGPOTOM)"
+      "citation": "EPA TRI (facility 26836RCKNGPOTOM)",
+      "category": "other"
     },
     {
       "name": "Pilgrim'S Pride Corp Moorefield Feedmill",
@@ -2654,7 +2948,8 @@
       "state": "WV",
       "lat": 39.045,
       "lon": -78.9825,
-      "citation": "EPA TRI (facility 26836WMPLRHWY22)"
+      "citation": "EPA TRI (facility 26836WMPLRHWY22)",
+      "category": "other"
     },
     {
       "name": "Riviera Cabinets Inc",
@@ -2663,7 +2958,8 @@
       "state": "OH",
       "lat": 39.7167,
       "lon": -80.5,
-      "citation": "EPA TRI (facility 43130RVRCB3200O)"
+      "citation": "EPA TRI (facility 43130RVRCB3200O)",
+      "category": "other"
     },
     {
       "name": "Ohio Valley Coal Resources Inc.",
@@ -2672,7 +2968,8 @@
       "state": "OH",
       "lat": 39.9069,
       "lon": -80.9903,
-      "citation": "EPA TRI (facility 43902HVLLY56854)"
+      "citation": "EPA TRI (facility 43902HVLLY56854)",
+      "category": "materials"
     },
     {
       "name": "Cardinal Plant",
@@ -2681,7 +2978,8 @@
       "state": "OH",
       "lat": 40.2522,
       "lon": -80.6483,
-      "citation": "EPA TRI (facility 43913CRDNL306CO)"
+      "citation": "EPA TRI (facility 43913CRDNL306CO)",
+      "category": "other"
     },
     {
       "name": "Ferro Corp Porcelain Plant",
@@ -2690,7 +2988,8 @@
       "state": "OH",
       "lat": 40.6319,
       "lon": -80.5494,
-      "citation": "EPA TRI (facility 43920FRRCR1230R)"
+      "citation": "EPA TRI (facility 43920FRRCR1230R)",
+      "category": "other"
     },
     {
       "name": "Mason Color Works Inc.",
@@ -2699,7 +2998,8 @@
       "state": "OH",
       "lat": 40.6158,
       "lon": -80.5786,
-      "citation": "EPA TRI (facility 43920MSNCL250EA)"
+      "citation": "EPA TRI (facility 43920MSNCL250EA)",
+      "category": "other"
     },
     {
       "name": "Heritage Thermal Services",
@@ -2708,7 +3008,8 @@
       "state": "OH",
       "lat": 40.6317,
       "lon": -80.5436,
-      "citation": "EPA TRI (facility 43920VNRLL1250S)"
+      "citation": "EPA TRI (facility 43920VNRLL1250S)",
+      "category": "other"
     },
     {
       "name": "Wallover Oil Co Inc",
@@ -2717,7 +3018,8 @@
       "state": "OH",
       "lat": 40.6306,
       "lon": -80.5528,
-      "citation": "EPA TRI (facility 43920WLLVR401VI)"
+      "citation": "EPA TRI (facility 43920WLLVR401VI)",
+      "category": "oil_gas"
     },
     {
       "name": "Ormet Aluminum Mill Products Corp",
@@ -2726,7 +3028,8 @@
       "state": "OH",
       "lat": 39.7047,
       "lon": -80.8497,
-      "citation": "EPA TRI (facility 43931CNSLDSTATE)"
+      "citation": "EPA TRI (facility 43931CNSLDSTATE)",
+      "category": "materials"
     },
     {
       "name": "Ormet Primary Aluminum Corp",
@@ -2735,7 +3038,8 @@
       "state": "OH",
       "lat": 39.7039,
       "lon": -80.8489,
-      "citation": "EPA TRI (facility 43931RMTCRPOBOX)"
+      "citation": "EPA TRI (facility 43931RMTCRPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Capitol Manufacturing Lansing Facility",
@@ -2744,7 +3048,8 @@
       "state": "OH",
       "lat": 40.0686,
       "lon": -80.8125,
-      "citation": "EPA TRI (facility 43934CPTLM1700C)"
+      "citation": "EPA TRI (facility 43934CPTLM1700C)",
+      "category": "other"
     },
     {
       "name": "Turf Care Supply Llc.",
@@ -2753,7 +3058,8 @@
       "state": "OH",
       "lat": 40.1014,
       "lon": -80.7222,
-      "citation": "EPA TRI (facility 43935LSCMR100PI)"
+      "citation": "EPA TRI (facility 43935LSCMR100PI)",
+      "category": "other"
     },
     {
       "name": "Rg Steel Wheeling, Llc",
@@ -2762,7 +3068,8 @@
       "state": "OH",
       "lat": 40.1,
       "lon": -80.7167,
-      "citation": "EPA TRI (facility 43935WHLNG1134M)"
+      "citation": "EPA TRI (facility 43935WHLNG1134M)",
+      "category": "materials"
     },
     {
       "name": "R. E. Burger Plant",
@@ -2771,7 +3078,8 @@
       "state": "OH",
       "lat": 39.9092,
       "lon": -80.7606,
-      "citation": "EPA TRI (facility 43947FRSTN57246)"
+      "citation": "EPA TRI (facility 43947FRSTN57246)",
+      "category": "power"
     },
     {
       "name": "Barium & Chemicals Inc",
@@ -2780,7 +3088,8 @@
       "state": "OH",
       "lat": 40.4011,
       "lon": -80.6231,
-      "citation": "EPA TRI (facility 43952BRMCHCOUNT)"
+      "citation": "EPA TRI (facility 43952BRMCHCOUNT)",
+      "category": "chemical"
     },
     {
       "name": "Jsw Steel Usa Ohio Inc.",
@@ -2789,7 +3098,8 @@
       "state": "OH",
       "lat": 40.3167,
       "lon": -80.6,
-      "citation": "EPA TRI (facility 43952WHLNGMCLIS)"
+      "citation": "EPA TRI (facility 43952WHLNGMCLIS)",
+      "category": "materials"
     },
     {
       "name": "Severstal Wheeling, Inc.",
@@ -2798,7 +3108,8 @@
       "state": "OH",
       "lat": 40.3519,
       "lon": -80.6169,
-      "citation": "EPA TRI (facility 43952WHLNGSOUTH)"
+      "citation": "EPA TRI (facility 43952WHLNGSOUTH)",
+      "category": "other"
     },
     {
       "name": "Hancock Manufacturing Co Inc",
@@ -2807,7 +3118,8 @@
       "state": "OH",
       "lat": 40.4753,
       "lon": -80.6078,
-      "citation": "EPA TRI (facility 43964HNCCKCLEVE)"
+      "citation": "EPA TRI (facility 43964HNCCKCLEVE)",
+      "category": "other"
     },
     {
       "name": "Titanium Metals Corp",
@@ -2816,7 +3128,8 @@
       "state": "OH",
       "lat": 40.4469,
       "lon": -80.6081,
-      "citation": "EPA TRI (facility 43964TMTDV100TI)"
+      "citation": "EPA TRI (facility 43964TMTDV100TI)",
+      "category": "other"
     },
     {
       "name": "Barretts Minerals Inc",
@@ -2825,7 +3138,8 @@
       "state": "OH",
       "lat": 40.5903,
       "lon": -80.6667,
-      "citation": "EPA TRI (facility 43968BRRTT2400C)"
+      "citation": "EPA TRI (facility 43968BRRTT2400C)",
+      "category": "materials"
     },
     {
       "name": "Sterling China Co Inc",
@@ -2834,7 +3148,8 @@
       "state": "OH",
       "lat": 40.6033,
       "lon": -80.6417,
-      "citation": "EPA TRI (facility 43968STRLN12COM)"
+      "citation": "EPA TRI (facility 43968STRLN12COM)",
+      "category": "other"
     },
     {
       "name": "Ohio Coatings Co",
@@ -2843,7 +3158,8 @@
       "state": "OH",
       "lat": 40.1475,
       "lon": -80.7108,
-      "citation": "EPA TRI (facility 43971HCTNG2100T)"
+      "citation": "EPA TRI (facility 43971HCTNG2100T)",
+      "category": "materials"
     },
     {
       "name": "Safety-Kleen Systems (419601)",
@@ -2852,7 +3168,8 @@
       "state": "OH",
       "lat": 40.1256,
       "lon": -80.7119,
-      "citation": "EPA TRI (facility 44509SFTYK11711)"
+      "citation": "EPA TRI (facility 44509SFTYK11711)",
+      "category": "other"
     },
     {
       "name": "Elco Corp",
@@ -2861,7 +3178,8 @@
       "state": "OH",
       "lat": 39.1783,
       "lon": -81.7539,
-      "citation": "EPA TRI (facility 45033THLCCSTATE)"
+      "citation": "EPA TRI (facility 45033THLCCSTATE)",
+      "category": "other"
     },
     {
       "name": "Astro Containers Inc",
@@ -2870,7 +3188,8 @@
       "state": "OH",
       "lat": 38.0,
       "lon": -80.0,
-      "citation": "EPA TRI (facility 45241STRCN2795S)"
+      "citation": "EPA TRI (facility 45241STRCN2795S)",
+      "category": "other"
     },
     {
       "name": "Gavin Power Llc",
@@ -2879,7 +3198,8 @@
       "state": "OH",
       "lat": 38.9356,
       "lon": -82.1164,
-      "citation": "EPA TRI (facility 45620MRCNL7397N)"
+      "citation": "EPA TRI (facility 45620MRCNL7397N)",
+      "category": "power"
     },
     {
       "name": "Gkn Sinter Metals - Gallipolis",
@@ -2888,7 +3208,8 @@
       "state": "OH",
       "lat": 38.8267,
       "lon": -82.1689,
-      "citation": "EPA TRI (facility 45631FDRLM2160E)"
+      "citation": "EPA TRI (facility 45631FDRLM2160E)",
+      "category": "other"
     },
     {
       "name": "Kyger Creek Station",
@@ -2897,7 +3218,8 @@
       "state": "OH",
       "lat": 38.9144,
       "lon": -82.1289,
-      "citation": "EPA TRI (facility 45631HVLLY5758O)"
+      "citation": "EPA TRI (facility 45631HVLLY5758O)",
+      "category": "other"
     },
     {
       "name": "L & L Scrap Metals & Recycling",
@@ -2906,7 +3228,8 @@
       "state": "OH",
       "lat": 38.8167,
       "lon": -82.2208,
-      "citation": "EPA TRI (facility 45631LLSCR128TE)"
+      "citation": "EPA TRI (facility 45631LLSCR128TE)",
+      "category": "waste"
     },
     {
       "name": "Rockwell Automation Inc",
@@ -2915,7 +3238,8 @@
       "state": "OH",
       "lat": 38.8389,
       "lon": -82.2306,
-      "citation": "EPA TRI (facility 45631RCKWL250MC)"
+      "citation": "EPA TRI (facility 45631RCKWL250MC)",
+      "category": "oil_gas"
     },
     {
       "name": "South Point Ethanol",
@@ -2924,7 +3248,8 @@
       "state": "OH",
       "lat": 38.4358,
       "lon": -82.6,
-      "citation": "EPA TRI (facility 45680STHPNCOUNT)"
+      "citation": "EPA TRI (facility 45680STHPNCOUNT)",
+      "category": "other"
     },
     {
       "name": "Ineos Nova Llc",
@@ -2933,7 +3258,8 @@
       "state": "OH",
       "lat": 39.2808,
       "lon": -81.6369,
-      "citation": "EPA TRI (facility 45714HNTSMTOWNS)"
+      "citation": "EPA TRI (facility 45714HNTSMTOWNS)",
+      "category": "other"
     },
     {
       "name": "Raiser Aluminum & Chemical Corp",
@@ -2942,7 +3268,8 @@
       "state": "OH",
       "lat": 39.2814,
       "lon": -81.6597,
-      "citation": "EPA TRI (facility 45714KSRLMFARSO)"
+      "citation": "EPA TRI (facility 45714KSRLMFARSO)",
+      "category": "materials"
     },
     {
       "name": "International Converter Inc Belpre",
@@ -2951,7 +3278,8 @@
       "state": "OH",
       "lat": 39.2814,
       "lon": -81.6128,
-      "citation": "EPA TRI (facility 45714NTRNT721FA)"
+      "citation": "EPA TRI (facility 45714NTRNT721FA)",
+      "category": "other"
     },
     {
       "name": "Kraton Corp",
@@ -2960,7 +3288,8 @@
       "state": "OH",
       "lat": 39.2794,
       "lon": -81.6439,
-      "citation": "EPA TRI (facility 45714SHLLC2982W)"
+      "citation": "EPA TRI (facility 45714SHLLC2982W)",
+      "category": "chemical"
     },
     {
       "name": "Orion Engineered Carbons Belpre",
@@ -2969,7 +3298,8 @@
       "state": "OH",
       "lat": 39.3033,
       "lon": -81.5658,
-      "citation": "EPA TRI (facility 45714SHLNDHWY7N)"
+      "citation": "EPA TRI (facility 45714SHLNDHWY7N)",
+      "category": "other"
     },
     {
       "name": "Dupont Little Hocking Service Center",
@@ -2978,7 +3308,8 @@
       "state": "OH",
       "lat": 39.2792,
       "lon": -81.6958,
-      "citation": "EPA TRI (facility 45742DPNTPTOWNS)"
+      "citation": "EPA TRI (facility 45742DPNTPTOWNS)",
+      "category": "chemical"
     },
     {
       "name": "Profusion Industries Llc",
@@ -2987,7 +3318,8 @@
       "state": "OH",
       "lat": 39.4472,
       "lon": -81.4603,
-      "citation": "EPA TRI (facility 45750BFGDRBFGOO)"
+      "citation": "EPA TRI (facility 45750BFGDRBFGOO)",
+      "category": "other"
     },
     {
       "name": "Americas Styrenics Llc - Marietta",
@@ -2996,7 +3328,8 @@
       "state": "OH",
       "lat": 39.3728,
       "lon": -81.5153,
-      "citation": "EPA TRI (facility 45750CHVRNROUTE)"
+      "citation": "EPA TRI (facility 45750CHVRNROUTE)",
+      "category": "other"
     },
     {
       "name": "Thermo Fisher Scientific (Asheville) Llc",
@@ -3005,7 +3338,8 @@
       "state": "OH",
       "lat": 39.445,
       "lon": -81.4417,
-      "citation": "EPA TRI (facility 45750FRMSCMILLC)"
+      "citation": "EPA TRI (facility 45750FRMSCMILLC)",
+      "category": "other"
     },
     {
       "name": "American Municipal Power  Richard H Gorsuch Station",
@@ -3014,7 +3348,8 @@
       "state": "OH",
       "lat": 39.3672,
       "lon": -81.5208,
-      "citation": "EPA TRI (facility 45750GRSCHRTE7S)"
+      "citation": "EPA TRI (facility 45750GRSCHRTE7S)",
+      "category": "other"
     },
     {
       "name": "Eramet Marietta Inc",
@@ -3023,7 +3358,8 @@
       "state": "OH",
       "lat": 39.3667,
       "lon": -81.5219,
-      "citation": "EPA TRI (facility 45750LKMMTROUTE)"
+      "citation": "EPA TRI (facility 45750LKMMTROUTE)",
+      "category": "other"
     },
     {
       "name": "Solvay Specialty Polymers Usa Llc",
@@ -3032,7 +3368,8 @@
       "state": "OH",
       "lat": 39.3722,
       "lon": -81.5139,
-      "citation": "EPA TRI (facility 45750MCPRFPOBOX)"
+      "citation": "EPA TRI (facility 45750MCPRFPOBOX)",
+      "category": "chemical"
     },
     {
       "name": "Magnum Magnetics",
@@ -3041,7 +3378,8 @@
       "state": "OH",
       "lat": 39.4711,
       "lon": -81.485,
-      "citation": "EPA TRI (facility 45750MGNMMRTE3M)"
+      "citation": "EPA TRI (facility 45750MGNMMRTE3M)",
+      "category": "other"
     },
     {
       "name": "Mplx Terminals Llc - Marietta Oh Terminal",
@@ -3050,7 +3388,8 @@
       "state": "OH",
       "lat": 39.3836,
       "lon": -81.4911,
-      "citation": "EPA TRI (facility 45750MRTTHOLDRT)"
+      "citation": "EPA TRI (facility 45750MRTTHOLDRT)",
+      "category": "oil_gas"
     },
     {
       "name": "Marietta Industrial Enterprise S Inc.",
@@ -3059,7 +3398,8 @@
       "state": "OH",
       "lat": 39.3458,
       "lon": -81.5472,
-      "citation": "EPA TRI (facility 45750MRTTNOHIOS)"
+      "citation": "EPA TRI (facility 45750MRTTNOHIOS)",
+      "category": "other"
     },
     {
       "name": "Airolite Co",
@@ -3068,7 +3408,8 @@
       "state": "OH",
       "lat": 39.4303,
       "lon": -81.4794,
-      "citation": "EPA TRI (facility 45750THRLT114WE)"
+      "citation": "EPA TRI (facility 45750THRLT114WE)",
+      "category": "other"
     },
     {
       "name": "Vanguard Paints & Finishes Inc",
@@ -3077,7 +3418,8 @@
       "state": "OH",
       "lat": 39.425,
       "lon": -81.4242,
-      "citation": "EPA TRI (facility 45750VNGRD1409G)"
+      "citation": "EPA TRI (facility 45750VNGRD1409G)",
+      "category": "other"
     },
     {
       "name": "Energizer Holdings Inc",
@@ -3086,7 +3428,8 @@
       "state": "OH",
       "lat": 39.3764,
       "lon": -81.5244,
-      "citation": "EPA TRI (facility 45750VRDYBCOUNT)"
+      "citation": "EPA TRI (facility 45750VRDYBCOUNT)",
+      "category": "other"
     },
     {
       "name": "Union Electric Steel Corp",
@@ -3095,7 +3438,8 @@
       "state": "PA",
       "lat": 40.4069,
       "lon": -80.4056,
-      "citation": "EPA TRI (facility 15021NNLCTPOBOX)"
+      "citation": "EPA TRI (facility 15021NNLCTPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Arrow Terminals",
@@ -3104,7 +3448,8 @@
       "state": "PA",
       "lat": 40.6414,
       "lon": -80.4192,
-      "citation": "EPA TRI (facility 15052RRWTRRD2XX)"
+      "citation": "EPA TRI (facility 15052RRWTRRD2XX)",
+      "category": "materials"
     },
     {
       "name": "Langeloth Metallurgical Co",
@@ -3113,7 +3458,8 @@
       "state": "PA",
       "lat": 40.3631,
       "lon": -80.4,
-      "citation": "EPA TRI (facility 15054CLMXMMAINS)"
+      "citation": "EPA TRI (facility 15054CLMXMMAINS)",
+      "category": "other"
     },
     {
       "name": "Mplx Terminals Llc - Midland Pa Terminal",
@@ -3122,7 +3468,8 @@
       "state": "PA",
       "lat": 40.63,
       "lon": -80.4419,
-      "citation": "EPA TRI (facility 15059MDLNDRTE68)"
+      "citation": "EPA TRI (facility 15059MDLNDRTE68)",
+      "category": "oil_gas"
     },
     {
       "name": "Keywell Corp Vac Air Alloys Div",
@@ -3131,7 +3478,8 @@
       "state": "PA",
       "lat": 40.6353,
       "lon": -80.4581,
-      "citation": "EPA TRI (facility 15059SGKYW10THS)"
+      "citation": "EPA TRI (facility 15059SGKYW10THS)",
+      "category": "materials"
     },
     {
       "name": "Whemco-Steel Castings Inc",
@@ -3140,7 +3488,8 @@
       "state": "PA",
       "lat": 40.6311,
       "lon": -80.4497,
-      "citation": "EPA TRI (facility 15059WSTHMONE12)"
+      "citation": "EPA TRI (facility 15059WSTHMONE12)",
+      "category": "materials"
     },
     {
       "name": "Bvpv Styrenics Llc",
@@ -3149,7 +3498,8 @@
       "state": "PA",
       "lat": 40.6233,
       "lon": -80.3606,
-      "citation": "EPA TRI (facility 15061RCCHMFRANK)"
+      "citation": "EPA TRI (facility 15061RCCHMFRANK)",
+      "category": "other"
     },
     {
       "name": "Gold Bond Building Products - Shippingport",
@@ -3158,7 +3508,8 @@
       "state": "PA",
       "lat": 40.625,
       "lon": -80.4167,
-      "citation": "EPA TRI (facility 15077NWNGC168SH)"
+      "citation": "EPA TRI (facility 15077NWNGC168SH)",
+      "category": "other"
     },
     {
       "name": "Pittsburgh Indl Plating",
@@ -3167,7 +3518,8 @@
       "state": "PA",
       "lat": 40.5,
       "lon": -80.5,
-      "citation": "EPA TRI (facility 15202PTTSB1HERR)"
+      "citation": "EPA TRI (facility 15202PTTSB1HERR)",
+      "category": "other"
     },
     {
       "name": "V-Bat Div",
@@ -3176,7 +3528,8 @@
       "state": "PA",
       "lat": 40.1556,
       "lon": -80.2917,
-      "citation": "EPA TRI (facility 15301VBTPLPOBOX)"
+      "citation": "EPA TRI (facility 15301VBTPLPOBOX)",
+      "category": "chemical"
     },
     {
       "name": "West Penn Wire/Cdt - Wa",
@@ -3185,7 +3538,8 @@
       "state": "PA",
       "lat": 40.1569,
       "lon": -80.2958,
-      "citation": "EPA TRI (facility 15301WSTPN2833W)"
+      "citation": "EPA TRI (facility 15301WSTPN2833W)",
+      "category": "other"
     },
     {
       "name": "Anderson Fittings",
@@ -3194,7 +3548,8 @@
       "state": "PA",
       "lat": 39.7228,
       "lon": -80.2617,
-      "citation": "EPA TRI (facility 15316CCRTFCOUNT)"
+      "citation": "EPA TRI (facility 15316CCRTFCOUNT)",
+      "category": "other"
     },
     {
       "name": "Morgantown Technical Services Inc",
@@ -3203,7 +3558,8 @@
       "state": "PA",
       "lat": 39.7392,
       "lon": -80.0578,
-      "citation": "EPA TRI (facility 15349MRGNT303ME)"
+      "citation": "EPA TRI (facility 15349MRGNT303ME)",
+      "category": "other"
     },
     {
       "name": "Kyowa Of America Corp",
@@ -3212,7 +3568,8 @@
       "state": "PA",
       "lat": 39.8997,
       "lon": -80.1403,
-      "citation": "EPA TRI (facility 15370KYWFM317ER)"
+      "citation": "EPA TRI (facility 15370KYWFM317ER)",
+      "category": "other"
     },
     {
       "name": "Cumberland Coal Resources Lp",
@@ -3221,7 +3578,8 @@
       "state": "PA",
       "lat": 39.7947,
       "lon": -80.1636,
-      "citation": "EPA TRI (facility 15370RGCMB855KI)"
+      "citation": "EPA TRI (facility 15370RGCMB855KI)",
+      "category": "materials"
     },
     {
       "name": "Rag Emerald Resources Lp",
@@ -3230,7 +3588,8 @@
       "state": "PA",
       "lat": 39.8956,
       "lon": -80.1969,
-      "citation": "EPA TRI (facility 15370RGMRL158PO)"
+      "citation": "EPA TRI (facility 15370RGMRL158PO)",
+      "category": "materials"
     },
     {
       "name": "West Penn Wire/Cdt - Wb",
@@ -3239,7 +3598,8 @@
       "state": "PA",
       "lat": 39.8975,
       "lon": -80.1308,
-      "citation": "EPA TRI (facility 15370WSTPNSTATE)"
+      "citation": "EPA TRI (facility 15370WSTPNSTATE)",
+      "category": "other"
     },
     {
       "name": "Hansen Engineering Inc",
@@ -3248,7 +3608,8 @@
       "state": "PA",
       "lat": 40.0422,
       "lon": -80.5119,
-      "citation": "EPA TRI (facility 15376HNSNNRTE1B)"
+      "citation": "EPA TRI (facility 15376HNSNNRTE1B)",
+      "category": "other"
     },
     {
       "name": "Bailey/Enlow Fork Mining Compl Ex",
@@ -3257,7 +3618,8 @@
       "state": "PA",
       "lat": 39.9708,
       "lon": -80.4181,
-      "citation": "EPA TRI (facility 15377BLYNL332EN)"
+      "citation": "EPA TRI (facility 15377BLYNL332EN)",
+      "category": "materials"
     },
     {
       "name": "Gerome Manufacturing Co Inc",
@@ -3266,7 +3628,8 @@
       "state": "PA",
       "lat": 39.8642,
       "lon": -79.7456,
-      "citation": "EPA TRI (facility 15401GRMMFOLIVE)"
+      "citation": "EPA TRI (facility 15401GRMMFOLIVE)",
+      "category": "other"
     },
     {
       "name": "Community Playthings",
@@ -3275,7 +3638,8 @@
       "state": "PA",
       "lat": 39.8333,
       "lon": -79.5833,
-      "citation": "EPA TRI (facility 15437CMMNTROUTE)"
+      "citation": "EPA TRI (facility 15437CMMNTROUTE)",
+      "category": "other"
     },
     {
       "name": "Northwest Hardwoods Inc. - Hopwood Sawmill",
@@ -3284,7 +3648,8 @@
       "state": "PA",
       "lat": 39.875,
       "lon": -79.7083,
-      "citation": "EPA TRI (facility 15445CSTLLSUMMI)"
+      "citation": "EPA TRI (facility 15445CSTLLSUMMI)",
+      "category": "other"
     },
     {
       "name": "Pbs Coals Strip Complex (Job 220)",
@@ -3293,7 +3658,8 @@
       "state": "PA",
       "lat": 39.8692,
       "lon": -78.9775,
-      "citation": "EPA TRI (facility 15530PBSCL585WA)"
+      "citation": "EPA TRI (facility 15530PBSCL585WA)",
+      "category": "materials"
     },
     {
       "name": "4 Guys Inc",
@@ -3302,7 +3668,8 @@
       "state": "PA",
       "lat": 39.8011,
       "lon": -79.0431,
-      "citation": "EPA TRI (facility 155524GYSN23IND)"
+      "citation": "EPA TRI (facility 155524GYSN23IND)",
+      "category": "other"
     },
     {
       "name": "Keystone Aluminum Inc",
@@ -3311,7 +3678,8 @@
       "state": "PA",
       "lat": 40.5,
       "lon": -80.5,
-      "citation": "EPA TRI (facility 16046KYSTN126MY)"
+      "citation": "EPA TRI (facility 16046KYSTN126MY)",
+      "category": "materials"
     },
     {
       "name": "Fairfield Shoe Co",
@@ -3320,7 +3688,8 @@
       "state": "PA",
       "lat": 39.7856,
       "lon": -79.3583,
-      "citation": "EPA TRI (facility 17320FRFLDPOBOX)"
+      "citation": "EPA TRI (facility 17320FRFLDPOBOX)",
+      "category": "other"
     },
     {
       "name": "Stewart Connector Systems Inc",
@@ -3329,7 +3698,8 @@
       "state": "PA",
       "lat": 39.8319,
       "lon": -79.6875,
-      "citation": "EPA TRI (facility 17327STWRT11118)"
+      "citation": "EPA TRI (facility 17327STWRT11118)",
+      "category": "other"
     },
     {
       "name": "Packaging Corp Of America",
@@ -3338,7 +3708,8 @@
       "state": "PA",
       "lat": 39.8197,
       "lon": -79.8036,
-      "citation": "EPA TRI (facility 17331PCKNG435GI)"
+      "citation": "EPA TRI (facility 17331PCKNG435GI)",
+      "category": "other"
     },
     {
       "name": "Griffith Energy Services Inc Bare",
@@ -3347,7 +3718,8 @@
       "state": "MD",
       "lat": 39.5639,
       "lon": -78.0256,
-      "citation": "EPA TRI (facility 21157GRFFT8SULL)"
+      "citation": "EPA TRI (facility 21157GRFFT8SULL)",
+      "category": "other"
     },
     {
       "name": "Us Marine/ Brunswick Family Boats Co Inc.",
@@ -3356,7 +3728,8 @@
       "state": "MD",
       "lat": 39.6019,
       "lon": -78.7511,
-      "citation": "EPA TRI (facility 21502BYLNRDAYRD)"
+      "citation": "EPA TRI (facility 21502BYLNRDAYRD)",
+      "category": "other"
     },
     {
       "name": "U.S. Marine/Brunswick Family Boat Co Inc",
@@ -3365,7 +3738,8 @@
       "state": "MD",
       "lat": 39.6019,
       "lon": -78.7519,
-      "citation": "EPA TRI (facility 21502BYLNRDAYRO)"
+      "citation": "EPA TRI (facility 21502BYLNRDAYRO)",
+      "category": "other"
     },
     {
       "name": "Fibred-Maryland Inc",
@@ -3374,7 +3748,8 @@
       "state": "MD",
       "lat": 39.5667,
       "lon": -78.7333,
-      "citation": "EPA TRI (facility 21502FBRDNRT4BO)"
+      "citation": "EPA TRI (facility 21502FBRDNRT4BO)",
+      "category": "other"
     },
     {
       "name": "Potomac Farms Dairy",
@@ -3383,7 +3758,8 @@
       "state": "MD",
       "lat": 39.65,
       "lon": -78.7469,
-      "citation": "EPA TRI (facility 21502PTMCFRACES)"
+      "citation": "EPA TRI (facility 21502PTMCFRACES)",
+      "category": "other"
     },
     {
       "name": "Schroeder Industries",
@@ -3392,7 +3768,8 @@
       "state": "MD",
       "lat": 39.615,
       "lon": -78.7622,
-      "citation": "EPA TRI (facility 21502SCHRD45QUE)"
+      "citation": "EPA TRI (facility 21502SCHRD45QUE)",
+      "category": "other"
     },
     {
       "name": "Aes Warrior Run Inc",
@@ -3401,7 +3778,8 @@
       "state": "MD",
       "lat": 39.5944,
       "lon": -78.7456,
-      "citation": "EPA TRI (facility 21502SWRRR11600)"
+      "citation": "EPA TRI (facility 21502SWRRR11600)",
+      "category": "other"
     },
     {
       "name": "Lonaconing Mine 5",
@@ -3410,7 +3788,8 @@
       "state": "MD",
       "lat": 39.5833,
       "lon": -78.9667,
-      "citation": "EPA TRI (facility 21539LNCNNRTE36)"
+      "citation": "EPA TRI (facility 21539LNCNNRTE36)",
+      "category": "materials"
     },
     {
       "name": "Mount Savage Specialty Refractories Co",
@@ -3419,7 +3798,8 @@
       "state": "MD",
       "lat": 39.6936,
       "lon": -78.8822,
-      "citation": "EPA TRI (facility 21545MTSVGFOUND)"
+      "citation": "EPA TRI (facility 21545MTSVGFOUND)",
+      "category": "chemical"
     },
     {
       "name": "Maryland Ribbon Co",
@@ -3428,7 +3808,8 @@
       "state": "MD",
       "lat": 39.5333,
       "lon": -77.7333,
-      "citation": "EPA TRI (facility 21740MRYLN857WI)"
+      "citation": "EPA TRI (facility 21740MRYLN857WI)",
+      "category": "other"
     },
     {
       "name": "Metal Finishing Inc",
@@ -3437,7 +3818,8 @@
       "state": "MD",
       "lat": 39.4608,
       "lon": -77.7078,
-      "citation": "EPA TRI (facility 21740MTLFN743BO)"
+      "citation": "EPA TRI (facility 21740MTLFN743BO)",
+      "category": "other"
     },
     {
       "name": "C &O Canal National Historical Park",
@@ -3446,7 +3828,8 @@
       "state": "MD",
       "lat": 39.4394,
       "lon": -77.7931,
-      "citation": "EPA TRI (facility 21740SNTLP185DU)"
+      "citation": "EPA TRI (facility 21740SNTLP185DU)",
+      "category": "other"
     },
     {
       "name": "Fleetwood Travel Trailers Of Maryland Inc #28",
@@ -3455,7 +3838,8 @@
       "state": "MD",
       "lat": 39.6956,
       "lon": -78.1925,
-      "citation": "EPA TRI (facility 21750FLTWD35SOU)"
+      "citation": "EPA TRI (facility 21750FLTWD35SOU)",
+      "category": "other"
     },
     {
       "name": "Rayloc",
@@ -3464,7 +3848,8 @@
       "state": "MD",
       "lat": 39.6931,
       "lon": -78.1583,
-      "citation": "EPA TRI (facility 21750GNNPR100RA)"
+      "citation": "EPA TRI (facility 21750GNNPR100RA)",
+      "category": "other"
     },
     {
       "name": "Lanco Pennland",
@@ -3473,7 +3858,8 @@
       "state": "MD",
       "lat": 39.7158,
       "lon": -78.1856,
-      "citation": "EPA TRI (facility 21750JFFRS14738)"
+      "citation": "EPA TRI (facility 21750JFFRS14738)",
+      "category": "other"
     },
     {
       "name": "Valley Energy Co",
@@ -3482,7 +3868,8 @@
       "state": "VA",
       "lat": 39.1586,
       "lon": -77.7175,
-      "citation": "EPA TRI (facility 20132VLLYD103HI)"
+      "citation": "EPA TRI (facility 20132VLLYD103HI)",
+      "category": "other"
     },
     {
       "name": "Crown Cork & Seal Co Inc",
@@ -3491,7 +3878,8 @@
       "state": "VA",
       "lat": 39.1203,
       "lon": -78.1406,
-      "citation": "EPA TRI (facility 22601CRWNCPOBOX)"
+      "citation": "EPA TRI (facility 22601CRWNCPOBOX)",
+      "category": "other"
     },
     {
       "name": "Cives Steel Co Mid Atlantic Div",
@@ -3500,7 +3888,8 @@
       "state": "VA",
       "lat": 39.2086,
       "lon": -78.1508,
-      "citation": "EPA TRI (facility 22601CVSSTPOBOX)"
+      "citation": "EPA TRI (facility 22601CVSSTPOBOX)",
+      "category": "materials"
     },
     {
       "name": "Audiopak Inc",
@@ -3509,7 +3898,8 @@
       "state": "VA",
       "lat": 39.0911,
       "lon": -78.1756,
-      "citation": "EPA TRI (facility 22601DPKNC1680T)"
+      "citation": "EPA TRI (facility 22601DPKNC1680T)",
+      "category": "other"
     },
     {
       "name": "Fleetwood Travel Trailers Of Virginia Inc #14",
@@ -3518,7 +3908,8 @@
       "state": "VA",
       "lat": 39.1406,
       "lon": -78.1794,
-      "citation": "EPA TRI (facility 22601FLTWD380BA)"
+      "citation": "EPA TRI (facility 22601FLTWD380BA)",
+      "category": "other"
     },
     {
       "name": "Henkel-Harris Co Inc",
@@ -3527,7 +3918,8 @@
       "state": "VA",
       "lat": 39.1447,
       "lon": -78.1733,
-      "citation": "EPA TRI (facility 22601HNKLHPLEAS)"
+      "citation": "EPA TRI (facility 22601HNKLHPLEAS)",
+      "category": "other"
     },
     {
       "name": "Kingspan Insulation Llc",
@@ -3536,7 +3928,8 @@
       "state": "VA",
       "lat": 39.2131,
       "lon": -78.14,
-      "citation": "EPA TRI (facility 22601MCFMPROUTE)"
+      "citation": "EPA TRI (facility 22601MCFMPROUTE)",
+      "category": "other"
     },
     {
       "name": "Quarles Petroleum Inc. Winchester Bulk Plant",
@@ -3545,7 +3938,8 @@
       "state": "VA",
       "lat": 39.1956,
       "lon": -78.155,
-      "citation": "EPA TRI (facility 22601QRLSP779SM)"
+      "citation": "EPA TRI (facility 22601QRLSP779SM)",
+      "category": "oil_gas"
     },
     {
       "name": "Rubbermaid Inc Commercial Prods",
@@ -3554,7 +3948,8 @@
       "state": "VA",
       "lat": 39.1181,
       "lon": -78.1181,
-      "citation": "EPA TRI (facility 22601RBBRM3124V)"
+      "citation": "EPA TRI (facility 22601RBBRM3124V)",
+      "category": "other"
     },
     {
       "name": "Ashworth Brothers Inc",
@@ -3563,7 +3958,8 @@
       "state": "VA",
       "lat": 39.1444,
       "lon": -78.1861,
-      "citation": "EPA TRI (facility 22601SHWRT450AR)"
+      "citation": "EPA TRI (facility 22601SHWRT450AR)",
+      "category": "other"
     },
     {
       "name": "Lear Corp Winchester",
@@ -3572,7 +3968,8 @@
       "state": "VA",
       "lat": 39.1647,
       "lon": -78.1789,
-      "citation": "EPA TRI (facility 22601SLLVN181BA)"
+      "citation": "EPA TRI (facility 22601SLLVN181BA)",
+      "category": "other"
     },
     {
       "name": "Hp Hood Llc",
@@ -3581,7 +3978,8 @@
       "state": "VA",
       "lat": 39.1292,
       "lon": -78.1917,
-      "citation": "EPA TRI (facility 22602HPHDX160HO)"
+      "citation": "EPA TRI (facility 22602HPHDX160HO)",
+      "category": "other"
     },
     {
       "name": "Green Bay Packaging Inc. Winchester Coated Products Div.",
@@ -3590,7 +3988,8 @@
       "state": "VA",
       "lat": 39.2086,
       "lon": -78.1442,
-      "citation": "EPA TRI (facility 22603GRNBY285PA)"
+      "citation": "EPA TRI (facility 22603GRNBY285PA)",
+      "category": "other"
     },
     {
       "name": "Qg Printing Ii Corp",
@@ -3599,7 +3998,8 @@
       "state": "VA",
       "lat": 39.2183,
       "lon": -78.1442,
-      "citation": "EPA TRI (facility 22603QBCRW16CEN)"
+      "citation": "EPA TRI (facility 22603QBCRW16CEN)",
+      "category": "other"
     },
     {
       "name": "Shockey Precast Group",
@@ -3608,7 +4008,8 @@
       "state": "VA",
       "lat": 39.2053,
       "lon": -78.1558,
-      "citation": "EPA TRI (facility 22603SHCKY1057M)"
+      "citation": "EPA TRI (facility 22603SHCKY1057M)",
+      "category": "other"
     },
     {
       "name": "Stanley Door Systems Winchester",
@@ -3617,7 +4018,8 @@
       "state": "VA",
       "lat": 39.2583,
       "lon": -78.1983,
-      "citation": "EPA TRI (facility 22603STNLY985EB)"
+      "citation": "EPA TRI (facility 22603STNLY985EB)",
+      "category": "other"
     },
     {
       "name": "New Bedford Technology Llc",
@@ -3626,7 +4028,8 @@
       "state": "VA",
       "lat": 39.2194,
       "lon": -78.1481,
-      "citation": "EPA TRI (facility 22603SWRDN1481L)"
+      "citation": "EPA TRI (facility 22603SWRDN1481L)",
+      "category": "other"
     },
     {
       "name": "Betco Supreme Inc.",
@@ -3635,7 +4038,8 @@
       "state": "VA",
       "lat": 39.2169,
       "lon": -78.1553,
-      "citation": "EPA TRI (facility 22604SPRMB1515T)"
+      "citation": "EPA TRI (facility 22604SPRMB1515T)",
+      "category": "other"
     },
     {
       "name": "Siemens Vdo Automotive",
@@ -3644,7 +4048,8 @@
       "state": "VA",
       "lat": 39.2,
       "lon": -78.15,
-      "citation": "EPA TRI (facility 22604VDNRT188BR)"
+      "citation": "EPA TRI (facility 22604VDNRT188BR)",
+      "category": "other"
     },
     {
       "name": "Griffith Energy Services Inc-Berryville",
@@ -3653,7 +4058,8 @@
       "state": "VA",
       "lat": 39.1514,
       "lon": -77.9792,
-      "citation": "EPA TRI (facility 22611CLRKC618EM)"
+      "citation": "EPA TRI (facility 22611CLRKC618EM)",
+      "category": "other"
     },
     {
       "name": "American Woodmark Co. Berryville Plant",
@@ -3662,7 +4068,8 @@
       "state": "VA",
       "lat": 39.1444,
       "lon": -77.9808,
-      "citation": "EPA TRI (facility 22611MRCNW109BY)"
+      "citation": "EPA TRI (facility 22611MRCNW109BY)",
+      "category": "other"
     },
     {
       "name": "O-N Minerals (Chemstone) Winchester Lime Plant",
@@ -3671,7 +4078,8 @@
       "state": "VA",
       "lat": 39.2542,
       "lon": -78.0875,
-      "citation": "EPA TRI (facility 22624GLBLSONEQU)"
+      "citation": "EPA TRI (facility 22624GLBLSONEQU)",
+      "category": "materials"
     },
     {
       "name": "Trelleborg Marine Systems Usa, Inc.",
@@ -3680,7 +4088,8 @@
       "state": "VA",
       "lat": 39.2567,
       "lon": -78.0953,
-      "citation": "EPA TRI (facility 22624SWRDNROUTE)"
+      "citation": "EPA TRI (facility 22624SWRDNROUTE)",
+      "category": "other"
     },
     {
       "name": "Baugh Northeast Co-Op Inc",
@@ -3689,7 +4098,8 @@
       "state": "VA",
       "lat": 38.9942,
       "lon": -78.17,
-      "citation": "EPA TRI (facility 22630BGHNR1BAUG)"
+      "citation": "EPA TRI (facility 22630BGHNR1BAUG)",
+      "category": "other"
     },
     {
       "name": "Axalta Coating Systems Usa Llc-Front Royal Plant",
@@ -3698,7 +4108,8 @@
       "state": "VA",
       "lat": 38.9808,
       "lon": -78.1742,
-      "citation": "EPA TRI (facility 22630DPNTFPOBOX)"
+      "citation": "EPA TRI (facility 22630DPNTFPOBOX)",
+      "category": "other"
     },
     {
       "name": "Fisher Diagnostics A Div Of Fisher Scientific Co",
@@ -3707,7 +4118,8 @@
       "state": "VA",
       "lat": 39.0178,
       "lon": -78.2917,
-      "citation": "EPA TRI (facility 22645FSHRD8365V)"
+      "citation": "EPA TRI (facility 22645FSHRD8365V)",
+      "category": "other"
     },
     {
       "name": "Stowe Woodward",
@@ -3716,7 +4128,8 @@
       "state": "VA",
       "lat": 39.0169,
       "lon": -78.2911,
-      "citation": "EPA TRI (facility 22645STWWDRTE11)"
+      "citation": "EPA TRI (facility 22645STWWDRTE11)",
+      "category": "other"
     },
     {
       "name": "Technicon Instruments Corp",
@@ -3725,7 +4138,8 @@
       "state": "VA",
       "lat": 39.0178,
       "lon": -78.2917,
-      "citation": "EPA TRI (facility 22645TCHNCRTE11)"
+      "citation": "EPA TRI (facility 22645TCHNCRTE11)",
+      "category": "other"
     },
     {
       "name": "Valley Milk Products",
@@ -3734,7 +4148,8 @@
       "state": "VA",
       "lat": 38.9764,
       "lon": -78.3583,
-      "citation": "EPA TRI (facility 22657BRDNN329EA)"
+      "citation": "EPA TRI (facility 22657BRDNN329EA)",
+      "category": "other"
     },
     {
       "name": "O-N Minerals (Chemstone) Strasburg Lime Plant",
@@ -3743,7 +4158,8 @@
       "state": "VA",
       "lat": 39.0222,
       "lon": -78.3333,
-      "citation": "EPA TRI (facility 22657GLBLS1696O)"
+      "citation": "EPA TRI (facility 22657GLBLS1696O)",
+      "category": "materials"
     },
     {
       "name": "Lsc Communications / Strasburg",
@@ -3752,7 +4168,8 @@
       "state": "VA",
       "lat": 38.9894,
       "lon": -78.3539,
-      "citation": "EPA TRI (facility 22657SHNNDROUTE)"
+      "citation": "EPA TRI (facility 22657SHNNDROUTE)",
+      "category": "other"
     },
     {
       "name": "Iac-Strasburg,Llc",
@@ -3761,7 +4178,8 @@
       "state": "VA",
       "lat": 38.9892,
       "lon": -78.3542,
-      "citation": "EPA TRI (facility 22657TMTVNEASTQ)"
+      "citation": "EPA TRI (facility 22657TMTVNEASTQ)",
+      "category": "other"
     },
     {
       "name": "Fibermaster Ltd",
@@ -3770,7 +4188,8 @@
       "state": "VA",
       "lat": 38.6694,
       "lon": -78.9389,
-      "citation": "EPA TRI (facility 22701FBRMS982JA)"
+      "citation": "EPA TRI (facility 22701FBRMS982JA)",
+      "category": "other"
     },
     {
       "name": "Mountain View Rendering Comp",
@@ -3779,7 +4198,8 @@
       "state": "VA",
       "lat": 38.8753,
       "lon": -78.6103,
-      "citation": "EPA TRI (facility 22824MNTNVSTATE)"
+      "citation": "EPA TRI (facility 22824MNTNVSTATE)",
+      "category": "other"
     },
     {
       "name": "George'S Chicken Llc",
@@ -3788,7 +4208,8 @@
       "state": "VA",
       "lat": 38.8778,
       "lon": -78.6131,
-      "citation": "EPA TRI (facility 22824RCCFRRTE42)"
+      "citation": "EPA TRI (facility 22824RCCFRRTE42)",
+      "category": "other"
     },
     {
       "name": "Bluefield Beverage Co",
@@ -3797,7 +4218,8 @@
       "state": "VA",
       "lat": 37.2361,
       "lon": -81.3056,
-      "citation": "EPA TRI (facility 24605BLFLDRT2BO)"
+      "citation": "EPA TRI (facility 24605BLFLDRT2BO)",
+      "category": "other"
     },
     {
       "name": "Consolidation Coal Co Buchanan Mine",
@@ -3806,7 +4228,8 @@
       "state": "VA",
       "lat": 37.1608,
       "lon": -81.9864,
-      "citation": "EPA TRI (facility 24627BCHNNRTE63)"
+      "citation": "EPA TRI (facility 24627BCHNNRTE63)",
+      "category": "materials"
     },
     {
       "name": "Consol Energy Inc Vp 8 Mine Garden Plant",
@@ -3815,7 +4238,8 @@
       "state": "VA",
       "lat": 37.1667,
       "lon": -82.0144,
-      "citation": "EPA TRI (facility 24631CNSLNRTE62)"
+      "citation": "EPA TRI (facility 24631CNSLNRTE62)",
+      "category": "materials"
     },
     {
       "name": "Virginian Metal Prods Co, Inc",
@@ -3824,7 +4248,8 @@
       "state": "VA",
       "lat": 37.2,
       "lon": -81.1333,
-      "citation": "EPA TRI (facility 24641VRGNN2706C)"
+      "citation": "EPA TRI (facility 24641VRGNN2706C)",
+      "category": "other"
     },
     {
       "name": "Pyott Boone Electronics",
@@ -3833,7 +4258,8 @@
       "state": "VA",
       "lat": 37.1731,
       "lon": -81.4758,
-      "citation": "EPA TRI (facility 24651PYTTBRT650)"
+      "citation": "EPA TRI (facility 24651PYTTBRT650)",
+      "category": "other"
     },
     {
       "name": "Jewell Coke Co Lp",
@@ -3842,7 +4268,8 @@
       "state": "VA",
       "lat": 37.2336,
       "lon": -82.0431,
-      "citation": "EPA TRI (facility 24656JWLLCHWY46)"
+      "citation": "EPA TRI (facility 24656JWLLCHWY46)",
+      "category": "materials"
     },
     {
       "name": "A C Marble Inc",
@@ -3851,7 +4278,8 @@
       "state": "KY",
       "lat": 38.4667,
       "lon": -82.625,
-      "citation": "EPA TRI (facility 41101CMRBL2767M)"
+      "citation": "EPA TRI (facility 41101CMRBL2767M)",
+      "category": "other"
     },
     {
       "name": "City Of Ashland Wwtp",
@@ -3860,7 +4288,8 @@
       "state": "KY",
       "lat": 38.4747,
       "lon": -82.6239,
-      "citation": "EPA TRI (facility 41101CTYFS26THS)"
+      "citation": "EPA TRI (facility 41101CTYFS26THS)",
+      "category": "other"
     },
     {
       "name": "Harsco Co Heckett Multiserv Plant 20",
@@ -3869,7 +4298,8 @@
       "state": "KY",
       "lat": 38.4914,
       "lon": -82.4939,
-      "citation": "EPA TRI (facility 41101HCKTTARMCO)"
+      "citation": "EPA TRI (facility 41101HCKTTARMCO)",
+      "category": "other"
     },
     {
       "name": "Ashland Hide Co Inc",
@@ -3878,7 +4308,8 @@
       "state": "KY",
       "lat": 38.475,
       "lon": -82.6278,
-      "citation": "EPA TRI (facility 41105CLWRN50025)"
+      "citation": "EPA TRI (facility 41105CLWRN50025)",
+      "category": "other"
     },
     {
       "name": "Ak Steel Corp Ashland Works - Coke Plant",
@@ -3887,7 +4318,8 @@
       "state": "KY",
       "lat": 38.4583,
       "lon": -82.6106,
-      "citation": "EPA TRI (facility 41105RMCST4000E)"
+      "citation": "EPA TRI (facility 41105RMCST4000E)",
+      "category": "materials"
     },
     {
       "name": "Armco Steel Co Lp Grey Iron Fndy",
@@ -3896,7 +4328,8 @@
       "state": "KY",
       "lat": 38.4844,
       "lon": -82.6289,
-      "citation": "EPA TRI (facility 41105RMCSTGREEN)"
+      "citation": "EPA TRI (facility 41105RMCSTGREEN)",
+      "category": "materials"
     },
     {
       "name": "Catlettsburg Refining Llc",
@@ -3905,7 +4338,8 @@
       "state": "KY",
       "lat": 38.3775,
       "lon": -82.5925,
-      "citation": "EPA TRI (facility 41114CTLTTPOBOX)"
+      "citation": "EPA TRI (facility 41114CTLTTPOBOX)",
+      "category": "oil_gas"
     },
     {
       "name": "Big Sandy Ky Asphalt",
@@ -3914,7 +4348,8 @@
       "state": "KY",
       "lat": 38.3294,
       "lon": -82.5828,
-      "citation": "EPA TRI (facility 41129BGSND15085)"
+      "citation": "EPA TRI (facility 41129BGSND15085)",
+      "category": "oil_gas"
     },
     {
       "name": "Calgon Carbon Corp",
@@ -3923,7 +4358,8 @@
       "state": "KY",
       "lat": 38.3375,
       "lon": -82.59,
-      "citation": "EPA TRI (facility 41129CLGNCUSROU)"
+      "citation": "EPA TRI (facility 41129CLGNCUSROU)",
+      "category": "other"
     },
     {
       "name": "Burke Plant",
@@ -3932,7 +4368,8 @@
       "state": "KY",
       "lat": 37.4719,
       "lon": -82.2822,
-      "citation": "EPA TRI (facility 41539BRKPL991LO)"
+      "citation": "EPA TRI (facility 41539BRKPL991LO)",
+      "category": "materials"
     }
   ]
 }

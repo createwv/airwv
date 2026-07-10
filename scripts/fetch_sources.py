@@ -99,6 +99,35 @@ def fetch_state_tri(state: str) -> list[dict]:
     return rows
 
 
+def categorize(name: str, ftype: str = "", operator: str = "") -> str:
+    """Best-effort category from the facility name/type (keyword rules, first match).
+
+    Coarse but useful for map filtering; refine later with NAICS/industry codes.
+    """
+    s = f"{name} {operator} {ftype}".upper()
+
+    def has(*ks):
+        return any(k in s for k in ks)
+
+    # coal/mining/processing first, so a coal prep plant run by an "…Energy" company
+    # isn't miscaught as power
+    if has("COAL", "MINING", " MINE", "PREPARATION", "PREP PLANT", "PROCESSING", "COKE",
+           "QUARRY", "STEEL", "ALUMIN", "SMELT", "FOUNDRY", "ALLOY", "CEMENT", "GLASS"):
+        return "materials"
+    if has("POWER PLANT", "POWER STATION", "POWER CO", "ELECTRIC POWER", "GENERATING",
+           "GENERATION", "MON POWER", "APPALACHIAN POWER", "POWER LLC"):
+        return "power"
+    if has("CHEMICAL", "CHEMOURS", "DUPONT", "DOW ", "BAYER", "COVESTRO", "UNION CARBIDE",
+           "SPECIALTY", "POLYMER", "PLASTIC", "RESIN", "AGRI", "FERTILIZER"):
+        return "chemical"
+    if has("GAS", "OIL", "PETROLEUM", "PIPELINE", "COMPRESSOR", "MIDSTREAM", "REFIN",
+           "EQT", "ANTERO", "MPLX", "MARATHON", "WELL"):
+        return "oil_gas"
+    if has("LANDFILL", "WASTE", "DISPOSAL", "RECYCL", "SANITAT"):
+        return "waste"
+    return "other"
+
+
 def to_source(rec: dict) -> dict | None:
     if str(rec.get("fac_closed_ind") or "") == "1":
         return None
@@ -115,11 +144,13 @@ def to_source(rec: dict) -> dict | None:
         return None
     op = (rec.get("standardized_parent_company") or rec.get("parent_co_name") or "").strip()
     operator = op.title() if op and op.upper() not in ("NA", "N/A", "NONE") else None
+    name = (rec.get("facility_name") or "").title().strip()
     return {
-        "name": (rec.get("facility_name") or "").title().strip(),
+        "name": name,
         "type": "TRI-listed facility (reports toxic releases)",
         "operator": operator,
         "state": state or None,
+        "category": categorize(name, "", operator or ""),
         "lat": round(lat, 4),
         "lon": round(lon, 4),
         "citation": f"EPA TRI (facility {rec.get('tri_facility_id')})",
