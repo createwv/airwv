@@ -66,7 +66,10 @@ for the whole state.
                                           └────────────┘
 ```
 
-Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Where the air-quality
+data comes from — community (PurpleAir) + government reference monitors pulled
+**directly from EPA AirNow & AirData, keyless** — is in
+[docs/DATA-SOURCES.md](docs/DATA-SOURCES.md).
 
 ## Tech stack
 

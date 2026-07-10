@@ -282,11 +282,13 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 
 Grow the network and secure the record.
 
-- [x] Reference-monitor data — **EPA AirData** map layer (13 WV monitors) +
-      **OpenAQ live client** (`ingest reference`), **verified live**: AirNow
-      government monitors (independent of our PurpleAir sensors), hourly history
-      back to ~2016, 429 rate-limit handling. First pull: 3,874 readings / 24
-      monitors. Community sensors' daytime PM2.5 (~7-8) match Kanawha regs (~7).
+- [x] Reference-monitor data — now sourced **directly from EPA, keyless & quota-free**
+      (see [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md)): **`ingest airnow`** pulls
+      AirNow's hourly file for the **live layer** (110 WV+border monitors, real site
+      names), **`ingest airdata`** bulk-imports AQS daily files for **history**
+      (232K+ readings, 2007–2024). We reached these via **OpenAQ** (credited) then
+      went direct to avoid its quota/ToS. The OpenAQ client (`ingest reference`)
+      remains as an optional, quota-safe fallback (hard daily cap + circuit breaker).
 - [x] **Sensor-vs-reference validation** (`ingest validate`) — pairs each
       community sensor with its nearest reference monitor, correlates daily-median
       PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
@@ -294,8 +296,9 @@ Grow the network and secure the record.
 - [x] Historical reference pull (`reference --start/--end`) to match sensor windows.
 - [x] **Validation panel on the dashboard** — the `validate` table live at
       `/api/validate`, color-coded r + bias, with a malfunction flag on absurd bias.
-- [ ] Plot the OpenAQ reference monitors on the map as a live layer (distinct from
-      the static EPA AirData 📍 layer).
+- [x] Plot live reference monitors on the map — AirNow monitors as ringed circles,
+      colored by current PM2.5, real site names (OpenAQ + AirData daily are archive,
+      excluded from the live map).
 - [~] **EPA PurpleAir bias correction** — DONE: `correction.py` (Barkjohn 2021,
       `0.524·PA_cf1 − 0.0862·RH + 5.75`), `validate --correct` + dashboard toggle;
       raw +3–5 µg/m³ bias collapses to ~−1.5 and r improves. STILL TO DO: expose
