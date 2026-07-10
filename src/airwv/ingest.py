@@ -465,7 +465,8 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
 
 
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
-                 store=None, coords: dict | None = None, correct: bool = False) -> list[dict]:
+                 store=None, coords: dict | None = None, correct: bool = False,
+                 window_days: int = 90) -> list[dict]:
     """Validate community sensors against the nearest OpenAQ reference monitor.
 
     For each community (PurpleAir) sensor, find the closest regulatory monitor and
@@ -497,17 +498,18 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
                 if idx and rec.get("latitude") is not None:
                     coords[idx] = (rec["latitude"], rec["longitude"])
 
+    # Validation looks at recent tracking only — bound the window so we don't load a
+    # decade of reference history (that made this endpoint time out).
+    since = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=window_days)
+
     # Reference monitors: coords + daily medians (coords stored on the readings).
     monitors = []
-    ref_min = None  # earliest reference ts — community readings before this can't overlap
     for rid in reference:
-        rows = store.readings_for_sensor(rid)
+        rows = store.readings_for_sensor(rid, since=since)
         lat = next((r.lat for r in rows if r.lat is not None), None)
         lon = next((r.lon for r in rows if r.lon is not None), None)
         if lat is None:
             continue
-        if rows and (ref_min is None or rows[0].ts < ref_min):
-            ref_min = rows[0].ts
         monitors.append((rid, lat, lon, dict(daily_medians(rows, field))))
     if not monitors:
         log.warning("reference readings have no coordinates — re-pull with `ingest reference`")
@@ -525,7 +527,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         if cid not in coords:
             continue
         clat, clon = coords[cid]
-        crows = store.readings_for_sensor(cid, since=ref_min)  # only the overlap window
+        crows = store.readings_for_sensor(cid, since=since)  # recent window only
         if correct and field == "pm2_5":
             from airwv.correction import corrected_daily_medians
             cdaily = corrected_daily_medians(crows)
