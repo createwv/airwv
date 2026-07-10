@@ -33,6 +33,7 @@ class Config:
     poll_interval_seconds: int
     index_cache_path: Path
     openaq_api_key: str = ""  # optional — reference-monitor data
+    openaq_daily_cap: int = 1000  # HARD cap on OpenAQ requests/day — never exceed the free quota
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -60,4 +61,5 @@ class Config:
             poll_interval_seconds=poll_interval,
             index_cache_path=Path(index_cache),
             openaq_api_key=os.environ.get("OPENAQ_API_KEY", "").strip(),
+            openaq_daily_cap=int(os.environ.get("OPENAQ_DAILY_CAP", "1000")),
         )

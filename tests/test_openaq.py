@@ -8,7 +8,18 @@ import respx
 from airwv.config import Config
 from airwv.ingest import run_reference
 from airwv.sources.base import Reading
-from airwv.sources.openaq import OPENAQ_BASE, OpenAQSource, parse_measurements
+import json as _json
+from datetime import date as _date
+
+import pytest
+
+from airwv.sources.openaq import (
+    OPENAQ_BASE,
+    OpenAQAuthError,
+    OpenAQBudgetExceeded,
+    OpenAQSource,
+    parse_measurements,
+)
 from airwv.storage import Store
 
 
@@ -61,6 +72,34 @@ def test_run_reference_stores_openaq_readings(tmp_path):
     n = run_reference(config, source=_FakeOpenAQ(), store=store, now=datetime(2026, 7, 2, tzinfo=timezone.utc))
     assert n == 1
     assert store.readings_for_sensor("9")[0].source == "openaq"
+
+
+def test_daily_budget_blocks_when_exceeded(tmp_path):
+    usage = tmp_path / "usage.json"
+    usage.write_text(_json.dumps({_date.today().isoformat(): 5}))
+    src = OpenAQSource("k", daily_cap=5, usage_path=usage)
+    assert src.remaining_today() == 0
+    with pytest.raises(OpenAQBudgetExceeded):
+        src._get("/locations", {})  # cap reached — must not hit the network
+
+
+def test_budget_persists_and_counts(tmp_path):
+    usage = tmp_path / "usage.json"
+    src = OpenAQSource("k", daily_cap=3, usage_path=usage)
+    assert src.remaining_today() == 3
+    src._record_request(); src._record_request()
+    # a fresh client reads the same persisted tally (survives across runs/timer fires)
+    assert OpenAQSource("k", daily_cap=3, usage_path=usage).remaining_today() == 1
+
+
+@respx.mock
+def test_auth_error_stops_immediately(tmp_path):
+    route = respx.get(f"{OPENAQ_BASE}/locations").mock(
+        return_value=httpx.Response(401, json={"detail": "Invalid credentials"}))
+    src = OpenAQSource("k", daily_cap=1000, usage_path=tmp_path / "u.json", min_interval=0)
+    with pytest.raises(OpenAQAuthError):
+        src._get("/locations", {})
+    assert route.call_count == 1  # no retry storm on a suspended key
 
 
 def test_run_reference_no_key_is_noop(tmp_path):

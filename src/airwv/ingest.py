@@ -431,9 +431,11 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
         log.warning("OPENAQ_API_KEY not set — get a free key at https://explore.openaq.org/register")
         return 0
 
-    from airwv.sources.openaq import OpenAQSource
+    from airwv.sources.openaq import OpenAQAuthError, OpenAQBudgetExceeded, OpenAQSource
 
-    source = source or OpenAQSource(config.openaq_api_key)
+    source = source or OpenAQSource(
+        config.openaq_api_key, daily_cap=config.openaq_daily_cap,
+        usage_path=config.index_cache_path.parent / "openaq_usage.json")
     store = store or Store.from_config(config)
     store.create_schema()
     now = now or datetime.now(tz=timezone.utc)
@@ -441,26 +443,36 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
     start = start or (end - timedelta(days=days))
     step = timedelta(days=max(1, window_days))
 
-    locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
-    total = 0
-    for loc in locations:
-        lat, lon = loc.get("lat"), loc.get("lon")
-        for sensor_id in loc.get("pm25_sensor_ids", []):
-            w_start = start
-            while w_start < end:
-                w_end = min(w_start + step, end)
-                if not refresh and store.count_readings(str(sensor_id), w_start, w_end) > 0:
+    total, n_loc, stopped = 0, 0, None
+    try:
+        locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
+        n_loc = len(locations)
+        for loc in locations:
+            lat, lon = loc.get("lat"), loc.get("lon")
+            for sensor_id in loc.get("pm25_sensor_ids", []):
+                w_start = start
+                while w_start < end:
+                    w_end = min(w_start + step, end)
+                    if not refresh and store.count_readings(str(sensor_id), w_start, w_end) > 0:
+                        w_start = w_end
+                        continue  # gap-aware: window already stored
+                    try:
+                        total += store.save_readings(source.fetch_measurements(
+                            sensor_id, w_start, w_end, lat=lat, lon=lon))
+                    except (OpenAQBudgetExceeded, OpenAQAuthError):
+                        raise  # stop the whole run — don't keep hammering
+                    except Exception as exc:  # one bad window shouldn't abort the pull
+                        log.warning("openaq fetch failed for sensor %s %s..%s: %s",
+                                    sensor_id, w_start.date(), w_end.date(), exc)
                     w_start = w_end
-                    continue  # gap-aware: window already stored
-                try:
-                    total += store.save_readings(source.fetch_measurements(
-                        sensor_id, w_start, w_end, lat=lat, lon=lon))
-                except Exception as exc:  # one bad window shouldn't abort the pull
-                    log.warning("openaq fetch failed for sensor %s %s..%s: %s",
-                                sensor_id, w_start.date(), w_end.date(), exc)
-                w_start = w_end
-    log.info("openaq reference: %d readings from %d monitor location(s), %s..%s",
-             total, len(locations), start.date(), end.date())
+    except OpenAQBudgetExceeded as exc:
+        stopped = "budget"
+        log.warning("openaq: %s (resumes next run — gap-aware, no re-pull of stored windows)", exc)
+    except OpenAQAuthError as exc:
+        stopped = "auth"
+        log.error("openaq STOPPED — %s. Fix the key/account before re-running; not retrying.", exc)
+    log.info("openaq reference: %d readings from %d monitor location(s), %s..%s%s",
+             total, n_loc, start.date(), end.date(), "  [stopped early: " + stopped + "]" if stopped else "")
     return total
 
 

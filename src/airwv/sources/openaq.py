@@ -12,14 +12,24 @@ against the live API on first use (as we did with PurpleAir).
 
 from __future__ import annotations
 
+import json
 import time
-from datetime import datetime
+from datetime import date, datetime
+from pathlib import Path
 
 import httpx
 
 from airwv.sources.base import Reading
 
 OPENAQ_BASE = "https://api.openaq.org/v3"
+
+
+class OpenAQAuthError(RuntimeError):
+    """OpenAQ rejected the key (401/403) — invalid or account suspended. Stop now."""
+
+
+class OpenAQBudgetExceeded(RuntimeError):
+    """Today's request budget is used up — stop until tomorrow (never exceed quota)."""
 PM25_PARAMETER_ID = 2  # OpenAQ parameter id for pm25
 
 
@@ -54,13 +64,42 @@ class OpenAQSource:
 
     name = "openaq"
 
-    def __init__(self, api_key: str, timeout: float = 30.0, min_interval: float = 1.1):
+    def __init__(self, api_key: str, timeout: float = 30.0, min_interval: float = 1.1,
+                 daily_cap: int = 1000, usage_path=None):
         if not api_key:
             raise ValueError("OpenAQ API key is required (set OPENAQ_API_KEY)")
         self._api_key = api_key
         self._timeout = timeout
         self._min_interval = min_interval  # proactive throttle: free tier is ~60/min
         self._last_request = 0.0           # time.monotonic() of the last request
+        # HARD daily request budget — persisted so it holds across runs (the timer
+        # makes a fresh client each hour). We never send more than daily_cap/day.
+        self._daily_cap = daily_cap
+        self._usage_path = Path(usage_path) if usage_path else None
+        self._usage = self._load_usage()
+
+    def _load_usage(self) -> dict:
+        if self._usage_path and self._usage_path.exists():
+            try:
+                return json.loads(self._usage_path.read_text())
+            except Exception:
+                return {}
+        return {}
+
+    def _used_today(self) -> int:
+        return int(self._usage.get(date.today().isoformat(), 0))
+
+    def remaining_today(self) -> int:
+        return max(0, self._daily_cap - self._used_today()) if self._daily_cap else 1 << 30
+
+    def _record_request(self) -> None:
+        today = date.today().isoformat()
+        self._usage = {today: self._usage.get(today, 0) + 1}  # keep only today's tally
+        if self._usage_path:
+            try:
+                self._usage_path.write_text(json.dumps(self._usage))
+            except Exception:
+                pass
 
     def _throttle(self, sleeper) -> None:
         """Space requests ≥ min_interval apart so we stay under the rate limit."""
@@ -70,17 +109,24 @@ class OpenAQSource:
                 sleeper(gap)
         self._last_request = time.monotonic()
 
-    def _get(self, path: str, params: dict, retries: int = 5, sleeper=time.sleep) -> dict:
-        """GET with proactive throttle + retry on 429 (free tier ~60/min), honoring Retry-After."""
+    def _get(self, path: str, params: dict, retries: int = 4, sleeper=time.sleep) -> dict:
+        """GET with a hard daily budget, per-minute throttle, 429 retry, and a
+        stop-immediately circuit breaker on 401/403 (invalid/suspended key)."""
+        if self._daily_cap and self._used_today() >= self._daily_cap:
+            raise OpenAQBudgetExceeded(
+                f"daily OpenAQ request cap ({self._daily_cap}) reached — stopping until tomorrow")
         for attempt in range(retries):
             self._throttle(sleeper)
+            self._record_request()  # count every request we actually send
             with httpx.Client(timeout=self._timeout) as client:
                 resp = client.get(f"{OPENAQ_BASE}{path}",
                                   headers={"X-API-Key": self._api_key}, params=params)
+            if resp.status_code in (401, 403):
+                raise OpenAQAuthError(
+                    f"OpenAQ returned {resp.status_code} — key invalid or account suspended: {resp.text[:120]}")
             if resp.status_code == 429 and attempt < retries - 1:
-                # honor Retry-After; cap high enough to ride out an hourly-cap reset
                 wait = float(resp.headers.get("Retry-After") or (5 * 2 ** attempt))
-                sleeper(min(wait, 300))
+                sleeper(min(wait, 120))
                 continue
             resp.raise_for_status()
             return resp.json()
