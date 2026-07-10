@@ -52,8 +52,13 @@ Registry `date_installed` gives real history depth per sensor.
 | **1. Finish Create WV** | 5 (9 of 14 done) | 11.9 | **2.9M** ($29) | 17.6M ($176) |
 | **2. EWV / WVCAG network** | 40 | 46.6 | **11.4M** ($114) | 68.6M ($686) |
 | **1+2 = all owned (54)** | 45 remaining | 58.5 | **14.4M** ($144) | 86.1M ($861) |
-| **3. All WV public (~3.5 yr)** | 1,351 | 4,728 | **1.16B** ($11.6k) | 6.96B ($69.6k) |
-| **3. All WV public (~6.5 yr)** | 1,351 | 8,782 | **2.15B** ($21.5k) | 12.9B ($129k) |
+| **3. All WV public (~3.5 yr)** | **~170** | 595 | **146M** ($1.5k) | 876M ($8.8k) |
+| **3. All WV public (~6.5 yr)** | **~170** | 1,105 | **271M** ($2.7k) | 1.63B ($16.3k) |
+
+> **Note on the WV public count:** the raw listing has **1,351** PurpleAir units, but
+> that's the whole WV *bounding box* (spills into 5 neighboring states). Only **~170
+> are inside West Virginia** (and that still includes indoor + inactive). Tier 3 above
+> uses ~170; the full-bbox 1,351 would be ~8× larger (billions of points).
 
 **Reading it:**
 - **Tier 1 fits inside the ~5.7M we already have** (2.9M hourly) — no new ask needed.

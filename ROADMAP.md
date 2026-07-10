@@ -304,6 +304,15 @@ Grow the network and secure the record.
       sensor (196533) has no RH so it drops from corrected view — keep it visible.
 - [ ] **FracTracker collaboration** — pull/link their WV ArcGIS feature services
       (oil & gas, compressors, pipelines) once we have the service URLs or a data share.
+- [ ] **Federation / multi-org (CAG runs their own instance)** — instead of Create WV
+      requesting points for all 54 network sensors, **WVCAG runs its own AirWV
+      instance under its own PurpleAir org + key**, and the two **share/federate
+      data** (both run the same open-source app; neither pools keys — cleaner
+      governance + each org owns its own grant). Needs: a data-sharing mechanism
+      (read-only API export/import or a shared/replicated store), org tagging, and a
+      combined public view. **Discuss with Morgan (CAG)** before asking PurpleAir for
+      the whole network. Pairs with the tiered points estimate in
+      [`docs/PURPLEAIR-POINTS.md`](docs/PURPLEAIR-POINTS.md).
 - [ ] Additional community-sensor sources beyond PurpleAir
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
