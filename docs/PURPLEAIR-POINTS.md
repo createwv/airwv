@@ -38,12 +38,47 @@ When asking for additional points, answer these (verbatim from PurpleAir):
 4. **Historical:** each sensor's full record since install (2023–2025 → present).
 5. **Real-time:** hourly collection going forward (~24 calls/day × ~14 sensors).
 
+## Tiered points estimate (hard calculation, 2026-07-10)
+
+**Cost model (measured):** our 15-field rich set costs **~28 points/row** (row =
+one sensor at one timestamp; 688k rows ≈ 19.3M pts confirms it). 100k points = $1.
+Rows per sensor-year: **hourly 8,760** (~245k pts), **10-min 52,560** (~1.47M pts).
+Registry `date_installed` gives real history depth per sensor.
+
+**Budget:** 25M grant · ~19.3M spent · **~5.7M remaining** *(verify live balance).*
+
+| Tier | Sensors to pull | Sensor-yrs | **Hourly** | **10-min** |
+|---|---|---|---|---|
+| **1. Finish Create WV** | 5 (9 of 14 done) | 11.9 | **2.9M** ($29) | 17.6M ($176) |
+| **2. EWV / WVCAG network** | 40 | 46.6 | **11.4M** ($114) | 68.6M ($686) |
+| **1+2 = all owned (54)** | 45 remaining | 58.5 | **14.4M** ($144) | 86.1M ($861) |
+| **3. All WV public (~3.5 yr)** | 1,351 | 4,728 | **1.16B** ($11.6k) | 6.96B ($69.6k) |
+| **3. All WV public (~6.5 yr)** | 1,351 | 8,782 | **2.15B** ($21.5k) | 12.9B ($129k) |
+
+**Reading it:**
+- **Tier 1 fits inside the ~5.7M we already have** (2.9M hourly) — no new ask needed.
+- **All owned (54) at hourly = ~14.4M** → ask PurpleAir for **~10M more** beyond the
+  remaining balance. Honest, nonprofit-scoped.
+- **Tier 3 is not feasible as a full historical backfill** (1–13 *billion* points).
+  Reframe: lean fields + hourly + shallow depth; **real-time-only going forward**;
+  or a **near-source subset** (sensors within ~3 mi of documented polluters — ties
+  to the source-proximity panel).
+
+**Levers:** 10-min ≈ **6×** hourly; a **lean field set** (~5 core fields) ≈ **⅓ the
+cost** (~9 pts/row) — big for Tier 3; depth scales linearly. Ongoing real-time uses
+the cheaper `/sensors` endpoint (not the history rate), so recurring collection is
+comparatively inexpensive vs. the one-time backfill.
+
+**Recommended ask (all owned, scoped):** 54 sensors (14 Create WV + 40 WVCAG/EWV),
+15-field rich set, **hourly** history since install (~2024–2026), hourly real-time
+ongoing → **~14.4M total, ~10M new**. (10-min reserved for a small near-source subset.)
+
 ## Future asks (when we scale)
 
-- **All EWV / WVCAG network** (~54 sensors) — same fields, 10-min history.
-- **All WV public sensors** (~560) — only if a statewide net is wanted; much larger.
-- Estimate points before asking (measured rate ~10–12 pts/row incl. our field set;
-  see README "API points & history strategy") and request to actual need.
+- **All WV public sensors (~1,351)** — only for a statewide historical net, and only
+  with a lean field set / shallow depth / subset; the full 15-field decade pull is
+  1–13 billion points ($11k–$129k), so scope hard or go real-time-only.
+- Re-estimate before every ask with the cost model above; request to actual need.
 
 ## Etiquette
 
