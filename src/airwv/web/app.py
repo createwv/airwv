@@ -45,6 +45,16 @@ PM25_BANDS = [
     {"max": None, "label": "Hazardous", "color": "#7e0023"},
 ]
 
+# EPA PM10 AQI categories (24-hr µg/m³ upper bounds; last is open-ended).
+PM10_BANDS = [
+    {"max": 54.0, "label": "Good", "color": "#00e400"},
+    {"max": 154.0, "label": "Moderate", "color": "#ffff00"},
+    {"max": 254.0, "label": "Unhealthy for sensitive groups", "color": "#ff7e00"},
+    {"max": 354.0, "label": "Unhealthy", "color": "#ff0000"},
+    {"max": 424.0, "label": "Very unhealthy", "color": "#8f3f97"},
+    {"max": None, "label": "Hazardous", "color": "#7e0023"},
+]
+
 # VOC (Bosch gas index) is relative/uncalibrated — rough guidance only.
 VOC_BANDS = [
     {"max": 100.0, "label": "Typical", "color": "#00e400"},
@@ -287,6 +297,7 @@ def create_app(store: Store) -> FastAPI:
     def guide():
         return {
             "pm2_5": PM25_BANDS,
+            "pm10": PM10_BANDS,
             "voc": VOC_BANDS,
             "voc_note": "VOC is a relative gas index (uncalibrated, drifts per sensor) — trends and comparisons at one sensor are meaningful; absolute cross-sensor values are not.",
         }
@@ -380,6 +391,10 @@ INDEX_HTML = """<!doctype html>
   .layers .children { padding:2px 0 0 20px; display:flex; flex-direction:column; gap:1px; }
   .layers label { display:block; }
   .layers .cnt { color:#aaa; font-size:11px; }
+  .layers .srow { cursor:pointer; padding:1px 2px; border-radius:3px; }
+  .layers .srow:hover { color:var(--brand); background:#f0f4f8; }
+  .layers .srow.on { font-weight:700; color:#111; }
+  .layers .srow.on::before { content:'●'; color:var(--brand-accent); margin-right:4px; font-size:10px; }
   button { padding:6px 12px; font-size:13px; cursor:pointer; }
   table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
@@ -405,7 +420,6 @@ INDEX_HTML = """<!doctype html>
 <div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
 <div class="controls">
-  <div><b>Sensors</b><div id="sensors" class="sensorlist"></div></div>
   <label>Metric <select id="field">
     <option value="pm2_5">PM2.5</option>
     <option value="voc">VOC</option>
@@ -440,7 +454,7 @@ INDEX_HTML = """<!doctype html>
     <th>Distance</th><th>Days</th><th>Correlation (r)</th><th>Bias vs. reference</th></tr></thead><tbody></tbody></table>
   <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
 </div>
-<div class="card"><h2>Health guide — what the levels mean</h2><div id="guide" class="guide"></div></div>
+<div class="card"><h2>Health guide — what the levels mean <span class="meta" style="font-weight:400">(for the selected metric)</span></h2><div id="guide" class="guide"></div></div>
 <div class="card"><h2>About AirWV</h2>
   <div class="about">
     <p><b>Empower WV — community eco monitoring</b> is a community air-quality
@@ -461,21 +475,35 @@ const $ = id => document.getElementById(id);
 const j = async u => (await fetch(u)).json();
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
 let map, markers = {}, allSensors = [], GUIDE = null;
+let chartSet = new Set();   // sensor ids currently plotted (click a row or a map dot to toggle)
+function toggleChart(sid){
+  if (chartSet.has(sid)) chartSet.delete(sid); else chartSet.add(sid);
+  // update the tree row(s) in place (don't rebuild — that would collapse open groups)
+  document.querySelectorAll(`.srow[data-sid="${sid}"]`).forEach(el => el.classList.toggle('on', chartSet.has(sid)));
+  redrawSensors(); render();
+}
 
-async function loadGuide(){
-  GUIDE = await j('/api/guide');
-  const bands = (arr, unit) => arr.map((b,i) => {
+const GUIDE_META = {pm2_5:['PM2.5',' µg/m³'], pm10:['PM10',' µg/m³'], voc:['VOC',' (relative index)']};
+function guideBands(field){ return field==='pm2_5'?GUIDE?.pm2_5 : field==='pm10'?GUIDE?.pm10 : field==='voc'?GUIDE?.voc : null; }
+async function loadGuide(){ GUIDE = await j('/api/guide'); renderGuide(); }
+function renderGuide(){
+  if (!GUIDE) return;
+  const field = $('field').value, arr = guideBands(field);
+  if (!arr){
+    $('guide').innerHTML = `<div class="note">No standard health thresholds for this metric — watch trends and cross-sensor comparisons instead.</div>`;
+    return;
+  }
+  const [label, unit] = GUIDE_META[field];
+  const chips = arr.map((b,i) => {
     const lo = i === 0 ? 0 : arr[i-1].max;
     const range = b.max == null ? `${lo}+` : `${lo}–${b.max}`;
     return `<span class="chip"><span class="sw" style="background:${b.color}"></span>${b.label} (${range}${unit})</span>`;
   }).join('');
-  $('guide').innerHTML =
-    '<b style="flex-basis:100%">PM2.5 (µg/m³)</b>' + bands(GUIDE.pm2_5, '') +
-    '<b style="flex-basis:100%;margin-top:6px">VOC (relative index)</b>' + bands(GUIDE.voc, '') +
-    `<div class="note">${GUIDE.voc_note}</div>`;
+  $('guide').innerHTML = `<b style="flex-basis:100%">${label}${unit}</b>` + chips +
+    (field==='voc' ? `<div class="note">${GUIDE.voc_note}</div>` : '');
 }
 function bandShapes(field, yMax){
-  const arr = field === 'pm2_5' ? GUIDE?.pm2_5 : field === 'voc' ? GUIDE?.voc : null;
+  const arr = guideBands(field);
   if (!arr) return [];
   const shapes = [];
   arr.forEach((b,i) => {
@@ -490,11 +518,10 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  // the picker lists community sensors; reference monitors show on the map as a layer
-  const community = allSensors.filter(s => s.kind !== 'reference');
-  $('sensors').innerHTML = community.map((x,i) =>
-    `<label><input type="checkbox" value="${x.sensor_id}" ${i===0?'checked':''}> ${x.name}</label>`).join('');
-  $('sensors').querySelectorAll('input').forEach(c => c.addEventListener('change', render));
+  // default: chart EWV Glasgow 1 (falls back to the first community sensor)
+  const glasgow = allSensors.find(s => /glasgow/i.test(s.name)) ||
+                  allSensors.find(s => s.kind === 'community' && s.lat != null);
+  if (glasgow) chartSet.add(glasgow.sensor_id);
   drawMap(allSensors);
   render();
 }
@@ -522,18 +549,20 @@ function redrawSensors(){
   refLayer = L.layerGroup();
   allSensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
+    const charted = chartSet.has(x.sensor_id);
+    // charted markers get a gold highlight ring so map ⇔ chart stay in sync
+    const ring = charted ? {color:'#c9992f', weight:4} : null;
+    const pop = `<b>${x.name}</b>${x.kind==='reference'?'<br><i>reference monitor (EPA/AirNow)</i>':''}`+
+      `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`+
+      `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
-      L.circleMarker([x.lat, x.lon], {radius:8, color:'#111', weight:3, fillColor:x.color, fillOpacity:0.85})
-        .bindPopup(`<b>${x.name}</b><br><i>reference monitor (EPA/AirNow)</i>`+
-          `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
-        .addTo(refLayer);
+      L.circleMarker([x.lat, x.lon], {radius:8, color:(ring?ring.color:'#111'), weight:(ring?ring.weight:3), fillColor:x.color, fillOpacity:0.85})
+        .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(refLayer);
     } else {
       if (!layerState.community || layerState.regions[x.region] === false) return;
-      L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
-        .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
-        .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
-        .addTo(sensorLayer);
+      L.circleMarker([x.lat, x.lon], {radius:9, color:(ring?ring.color:'#333'), weight:(ring?ring.weight:1), fillColor:x.color, fillOpacity:0.9})
+        .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(sensorLayer);
     }
   });
   sensorLayer.addTo(map);
@@ -580,24 +609,37 @@ function buildLayers(){
   cats.forEach(c=>{ if(!(c in layerState.cats)) layerState.cats[c]=true; });
   const row = (attr,val,checked,label,cnt)=>
     `<label><input type="checkbox" data-${attr}="${val}" ${checked?'checked':''}> ${label} <span class="cnt">${cnt}</span></label>`;
-  const regionRows = regions.map(r=>row('region',r,layerState.regions[r],r,rCounts[r])).join('');
+  // community: each region is a <details> (visibility checkbox) holding clickable sensor rows
+  const byRegion = {};
+  comm.forEach(s => { (byRegion[s.region] = byRegion[s.region] || []).push(s); });
+  const regionBlocks = regions.map(r => {
+    const rows = (byRegion[r]||[]).sort((a,b)=>a.name.localeCompare(b.name)).map(s =>
+      `<div class="srow${chartSet.has(s.sensor_id)?' on':''}" data-sid="${s.sensor_id}">${s.name}</div>`).join('');
+    return `<details><summary><input type="checkbox" data-region="${r}" ${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
+  }).join('');
   const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
   $('layers').innerHTML =
-    `<b style="font-size:12px;color:#555">Map layers</b>`+
-    `<details><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionRows}</div></details>`+
+    `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(click a sensor to chart it)</span></b>`+
+    `<details open><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionBlocks}</div></details>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`;
-  // parent checkboxes shouldn't toggle the <details> open/close
-  ['L-community','L-sources'].forEach(id=> $(id).addEventListener('click', e=>e.stopPropagation()));
-  $('L-community').onchange = e=>{ layerState.community=e.target.checked; regions.forEach(r=>layerState.regions[r]=e.target.checked); redrawSensors(); buildLayers(); };
+  // checkboxes in a <summary> shouldn't toggle its open/close
+  $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
+  // updates happen in place (no rebuild) so open groups stay open
+  $('L-community').onchange = e=>{ layerState.community=e.target.checked;
+    regions.forEach(r=>layerState.regions[r]=e.target.checked);
+    $('layers').querySelectorAll('[data-region]').forEach(cb=>{cb.checked=e.target.checked;cb.indeterminate=false;}); redrawSensors(); };
   $('L-reference').onchange = e=>{ layerState.reference=e.target.checked; redrawSensors(); };
-  $('L-sources').onchange = e=>{ layerState.sources=e.target.checked; cats.forEach(c=>layerState.cats[c]=e.target.checked); redrawSources(); buildLayers(); };
+  $('L-sources').onchange = e=>{ layerState.sources=e.target.checked;
+    cats.forEach(c=>layerState.cats[c]=e.target.checked);
+    $('layers').querySelectorAll('[data-cat]').forEach(cb=>cb.checked=e.target.checked); redrawSources(); };
   $('layers').querySelectorAll('[data-region]').forEach(cb=> cb.onchange=e=>{
     layerState.regions[e.target.dataset.region]=e.target.checked;
     layerState.community=regions.some(r=>layerState.regions[r]); redrawSensors(); syncParents(regions,cats); });
   $('layers').querySelectorAll('[data-cat]').forEach(cb=> cb.onchange=e=>{
     layerState.cats[e.target.dataset.cat]=e.target.checked;
     layerState.sources=cats.some(c=>layerState.cats[c]); redrawSources(); syncParents(regions,cats); });
+  $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
 }
 function syncParents(regions,cats){
@@ -633,14 +675,23 @@ async function loadValidation(){
   $('validatenote').textContent = d.note;
 }
 
-const box = id => $('sensors').querySelector(`input[value="${id}"]`);
-const selected = () => [...$('sensors').querySelectorAll('input:checked')].map(c => c.value);
+const selected = () => [...chartSet];
 function range(){ const s=$('start').value, e=$('end').value;
   return (s?`&start=${s}`:'') + (e?`&end=${e}`:''); }
 
+const nameOf = id => (allSensors.find(s=>s.sensor_id===id)||{}).name || id;
 async function render(){
   const ids = selected(), field = $('field').value, rng = range();
   $('dl').href = ids.length ? `/api/export/${ids[0]}.csv` : '#';
+  if (!ids.length){
+    Plotly.newPlot('ts', [], {margin:{t:10,r:10,b:40,l:45},
+      annotations:[{text:'Click a sensor (map or list) to chart it', showarrow:false, font:{color:'#999'}}]},
+      {responsive:true, displayModeBar:false});
+    Plotly.newPlot('diurnal', [], {margin:{t:10,r:10,b:40,l:45}}, {responsive:true, displayModeBar:false});
+    $('cmp').querySelector('tbody').innerHTML = '';
+    $('trendinfo').textContent = '';
+    return;
+  }
   const tsTraces = [], diTraces = [];
   const series = await Promise.all(ids.map(id => j(`/api/series/${id}?field=${field}${rng}`)));
   series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
@@ -672,6 +723,13 @@ async function render(){
       msg += `  ·  event: +${p.customdata[0]} over baseline (z=${p.customdata[1]})`;
     $('detail').textContent = msg;
   });
+  gd.on('plotly_legendclick', e => {           // click a legend name to remove that sensor
+    const nm = e.data[e.curveNumber].name;
+    if (nm === 'event' || nm === 'trend') return true;
+    const sid = [...chartSet].find(id => nameOf(id) === nm);
+    if (sid) { toggleChart(sid); return false; }
+    return true;
+  });
 
   const dis = await Promise.all(ids.map(id => j(`/api/diurnal/${id}?field=${field}${rng}`)));
   dis.forEach((d,i) => diTraces.push({x:d.hours.map(h=>h.hour), y:d.hours.map(h=>h.median),
@@ -685,7 +743,7 @@ async function render(){
     `<tr><td>${s.name}</td><td>${s.day ?? '—'}</td><td>${s.night ?? '—'}</td>
      <td><b>${s.night_day_ratio ?? '—'}</b></td></tr>`).join('');
 }
-$('field').addEventListener('change', render);
+$('field').addEventListener('change', () => { render(); renderGuide(); });
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
