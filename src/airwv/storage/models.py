@@ -17,7 +17,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import DateTime, Float, Integer, JSON, String, UniqueConstraint
+from sqlalchemy import DateTime, Float, Index, Integer, JSON, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -36,6 +36,8 @@ class ReadingRow(Base):
     __tablename__ = "readings"
     __table_args__ = (
         UniqueConstraint("source", "sensor_id", "ts", name="uq_reading_source_sensor_ts"),
+        # per-sensor time-ordered lookups (latest value, coverage, series) at scale
+        Index("ix_reading_sensor_ts", "sensor_id", "ts"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

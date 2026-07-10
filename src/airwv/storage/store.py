@@ -146,14 +146,21 @@ class Store:
         return {sid: {"count": c, "first_ts": mn, "last_ts": mx} for sid, c, mn, mx in rows}
 
     def latest_value_per_sensor(self, field: str = "pm2_5") -> dict[str, float]:
-        """Most recent non-null value of ``field`` per sensor, in one windowed query."""
+        """Most recent non-null value of ``field`` per sensor.
+
+        Per-sensor indexed LIMIT-1 lookups (fast with the (sensor_id, ts) index) —
+        a single window function over millions of rows was far slower.
+        """
         col = getattr(ReadingRow, field)
-        rn = func.row_number().over(
-            partition_by=ReadingRow.sensor_id, order_by=ReadingRow.ts.desc()).label("rn")
-        sub = select(ReadingRow.sensor_id.label("sid"), col.label("val"), rn).where(col.isnot(None)).subquery()
+        out: dict[str, float] = {}
         with self._session_factory() as session:
-            rows = session.execute(select(sub.c.sid, sub.c.val).where(sub.c.rn == 1)).all()
-        return {sid: val for sid, val in rows}
+            for sid in session.scalars(select(ReadingRow.sensor_id).distinct()):
+                val = session.scalar(
+                    select(col).where((ReadingRow.sensor_id == sid) & col.isnot(None))
+                    .order_by(ReadingRow.ts.desc()).limit(1))
+                if val is not None:
+                    out[sid] = val
+        return out
 
     def coverage_overall(self) -> dict:
         """Overall first/last timestamp + total rows across all sensors (fast)."""
@@ -169,14 +176,18 @@ class Store:
         Used for reference monitors (OpenAQ), whose coords live on the readings
         rather than in the community listing.
         """
-        rn = func.row_number().over(
-            partition_by=ReadingRow.sensor_id, order_by=ReadingRow.ts.desc()).label("rn")
-        sub = select(ReadingRow.sensor_id.label("sid"), ReadingRow.lat.label("lat"),
-                     ReadingRow.lon.label("lon"), rn).where(
-            (ReadingRow.source == source) & ReadingRow.lat.isnot(None)).subquery()
+        out: dict[str, tuple] = {}
         with self._session_factory() as session:
-            rows = session.execute(select(sub.c.sid, sub.c.lat, sub.c.lon).where(sub.c.rn == 1)).all()
-        return {sid: (lat, lon) for sid, lat, lon in rows}
+            sids = list(session.scalars(
+                select(ReadingRow.sensor_id).where(ReadingRow.source == source).distinct()))
+            for sid in sids:
+                row = session.execute(
+                    select(ReadingRow.lat, ReadingRow.lon).where(
+                        (ReadingRow.sensor_id == sid) & (ReadingRow.source == source)
+                        & ReadingRow.lat.isnot(None)).limit(1)).first()
+                if row:
+                    out[sid] = (row[0], row[1])
+        return out
 
     # -- subscriptions -----------------------------------------------------
 
