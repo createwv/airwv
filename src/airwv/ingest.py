@@ -413,12 +413,19 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
 
 
 def run_reference(config: Config, days: int = 7, source=None, store=None, now: datetime | None = None,
-                  start: datetime | None = None, end: datetime | None = None) -> int:
+                  start: datetime | None = None, end: datetime | None = None,
+                  window_days: int = 30, refresh: bool = False) -> int:
     """Pull WV reference-monitor PM2.5 from OpenAQ into storage (source='openaq').
 
     Enables validating community sensors against regulatory-grade data. Needs
     OPENAQ_API_KEY (free at explore.openaq.org). Pass --start/--end (ISO dates) to
-    pull a historical window matching your sensor data; otherwise the last N days.
+    pull a historical window; otherwise the last N days.
+
+    Deep history is fetched in ``window_days`` chunks (one OpenAQ call maxes at 1000
+    points ≈ 40 days of hourly data). Backfill is **gap-aware** — a window that
+    already has stored data is skipped, so re-runs resume cheaply — unless
+    ``refresh`` is set (the ongoing collector uses it to re-pull recent days and
+    catch late-arriving measurements; save_readings upserts, so no duplicates).
     """
     if source is None and not config.openaq_api_key:
         log.warning("OPENAQ_API_KEY not set — get a free key at https://explore.openaq.org/register")
@@ -432,16 +439,26 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
     now = now or datetime.now(tz=timezone.utc)
     end = end or now
     start = start or (end - timedelta(days=days))
+    step = timedelta(days=max(1, window_days))
 
     locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
     total = 0
     for loc in locations:
+        lat, lon = loc.get("lat"), loc.get("lon")
         for sensor_id in loc.get("pm25_sensor_ids", []):
-            try:
-                total += store.save_readings(source.fetch_measurements(
-                    sensor_id, start, end, lat=loc.get("lat"), lon=loc.get("lon")))
-            except Exception as exc:  # one bad sensor shouldn't abort the pull
-                log.warning("openaq fetch failed for sensor %s: %s", sensor_id, exc)
+            w_start = start
+            while w_start < end:
+                w_end = min(w_start + step, end)
+                if not refresh and store.count_readings(str(sensor_id), w_start, w_end) > 0:
+                    w_start = w_end
+                    continue  # gap-aware: window already stored
+                try:
+                    total += store.save_readings(source.fetch_measurements(
+                        sensor_id, w_start, w_end, lat=lat, lon=lon))
+                except Exception as exc:  # one bad window shouldn't abort the pull
+                    log.warning("openaq fetch failed for sensor %s %s..%s: %s",
+                                sensor_id, w_start.date(), w_end.date(), exc)
+                w_start = w_end
     log.info("openaq reference: %d readings from %d monitor location(s), %s..%s",
              total, len(locations), start.date(), end.date())
     return total
@@ -790,8 +807,12 @@ def main(argv: list[str] | None = None) -> None:
     alerts.add_argument("--send", action="store_true", help="actually deliver notifications")
     reference = sub.add_parser("reference", help="pull EPA/OpenAQ reference monitors (needs OPENAQ_API_KEY)")
     reference.add_argument("--days", type=int, default=7, help="how many days back to pull (default 7)")
-    reference.add_argument("--start", help="ISO start date for a historical window (e.g. 2024-01-01)")
+    reference.add_argument("--start", help="ISO start date for a historical window (e.g. 2016-01-01)")
     reference.add_argument("--end", help="ISO end date (default now)")
+    reference.add_argument("--window-days", type=int, default=30,
+                           help="chunk size for deep backfills (default 30; keep <40 for hourly data)")
+    reference.add_argument("--refresh", action="store_true",
+                           help="re-pull windows even if already stored (for ongoing/late data)")
     validate = sub.add_parser("validate", help="community sensors vs nearest reference monitor (no API cost)")
     validate.add_argument("--field", default="pm2_5", help="field to validate (default pm2_5)")
     validate.add_argument("--min-days", type=int, default=5, help="min overlapping days to report a pair")
@@ -849,7 +870,8 @@ def main(argv: list[str] | None = None) -> None:
                 return None
             dt = datetime.fromisoformat(s)
             return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
-        run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end))
+        run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end),
+                      window_days=args.window_days, refresh=args.refresh)
     elif command == "validate":
         run_validate(config, field=args.field, min_days=args.min_days, correct=args.correct)
     elif command == "run":

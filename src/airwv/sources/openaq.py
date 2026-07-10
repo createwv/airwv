@@ -54,21 +54,33 @@ class OpenAQSource:
 
     name = "openaq"
 
-    def __init__(self, api_key: str, timeout: float = 30.0):
+    def __init__(self, api_key: str, timeout: float = 30.0, min_interval: float = 1.1):
         if not api_key:
             raise ValueError("OpenAQ API key is required (set OPENAQ_API_KEY)")
         self._api_key = api_key
         self._timeout = timeout
+        self._min_interval = min_interval  # proactive throttle: free tier is ~60/min
+        self._last_request = 0.0           # time.monotonic() of the last request
 
-    def _get(self, path: str, params: dict, retries: int = 4, sleeper=time.sleep) -> dict:
-        """GET with retry on 429 (free tier is ~60 req/min), honoring Retry-After."""
+    def _throttle(self, sleeper) -> None:
+        """Space requests ≥ min_interval apart so we stay under the rate limit."""
+        if self._min_interval > 0:
+            gap = self._min_interval - (time.monotonic() - self._last_request)
+            if gap > 0:
+                sleeper(gap)
+        self._last_request = time.monotonic()
+
+    def _get(self, path: str, params: dict, retries: int = 5, sleeper=time.sleep) -> dict:
+        """GET with proactive throttle + retry on 429 (free tier ~60/min), honoring Retry-After."""
         for attempt in range(retries):
+            self._throttle(sleeper)
             with httpx.Client(timeout=self._timeout) as client:
                 resp = client.get(f"{OPENAQ_BASE}{path}",
                                   headers={"X-API-Key": self._api_key}, params=params)
             if resp.status_code == 429 and attempt < retries - 1:
-                wait = float(resp.headers.get("Retry-After") or (2 ** attempt))
-                sleeper(min(wait, 30))
+                # honor Retry-After; cap high enough to ride out an hourly-cap reset
+                wait = float(resp.headers.get("Retry-After") or (5 * 2 ** attempt))
+                sleeper(min(wait, 300))
                 continue
             resp.raise_for_status()
             return resp.json()

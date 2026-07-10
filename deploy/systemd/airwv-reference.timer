@@ -1,0 +1,16 @@
+# Runs airwv-reference.service hourly. EPA/AirNow regulatory monitors report
+# hourly (and AirNow data often lands an hour+ late), so hourly collection is the
+# right cadence — more often gains nothing. OpenAQ is free, so no points concern.
+#   sudo systemctl enable --now airwv-reference.timer
+# Check: systemctl list-timers airwv-reference.timer
+
+[Unit]
+Description=Run AirWV reference-monitor collection hourly
+
+[Timer]
+OnBootSec=8min
+OnUnitActiveSec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

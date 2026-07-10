@@ -1,0 +1,22 @@
+# AirWV reference-monitor collection — a one-shot run triggered by
+# airwv-reference.timer. Pulls EPA/AirNow PM2.5 from OpenAQ (FREE — no PurpleAir
+# points), so it's safe to run continuously. Copy both files to
+# /etc/systemd/system/, edit paths/user, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now airwv-reference.timer
+#
+# Needs OPENAQ_API_KEY in the EnvironmentFile (free at explore.openaq.org).
+# --refresh re-pulls the recent window so late-arriving regulatory data is caught
+# (save_readings upserts, so no duplicates).
+
+[Unit]
+Description=AirWV — collect OpenAQ/EPA reference monitors (free, no PurpleAir points)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=airwv
+WorkingDirectory=/opt/airwv
+EnvironmentFile=/opt/airwv/.env
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.ingest reference --days 2 --refresh
