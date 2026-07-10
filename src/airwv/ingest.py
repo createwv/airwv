@@ -635,9 +635,12 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
 
     store = store or Store.from_config(config)
     community = store.sensor_ids_by_source("purpleair")
-    reference = store.sensor_ids_by_source("openaq")
+    # AirNow is the live reference going forward; OpenAQ's stored data still has deep
+    # recent history, so we use both and let overlap decide (AirNow takes over as it
+    # accumulates). AirData daily is excluded here — different cadence/period.
+    reference = store.sensor_ids_by_source("airnow") + store.sensor_ids_by_source("openaq")
     if not reference:
-        log.warning("no reference data yet — run `ingest reference` first")
+        log.warning("no reference data yet — run `ingest airnow` (or `ingest reference`) first")
         return []
 
     # Community sensor coords: passed in, or from the resolved public-sensor listing.
@@ -687,10 +690,19 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
             cdaily = dict(daily_medians(crows, field))
         if not cdaily:
             continue
-        rid, rlat, rlon, rdaily = min(monitors, key=lambda m: haversine(clat, clon, m[1], m[2]))
-        common = sorted(set(cdaily) & set(rdaily))
-        if len(common) < min_days:
+        # nearest monitor that actually has enough overlapping days (a brand-new
+        # AirNow monitor with 1 day loses to a co-located OpenAQ one with deep history)
+        best = None
+        for rid, rlat, rlon, rdaily in monitors:
+            common = sorted(set(cdaily) & set(rdaily))
+            if len(common) < min_days:
+                continue
+            dist = haversine(clat, clon, rlat, rlon)
+            if best is None or dist < best[0]:
+                best = (dist, rid, rlat, rlon, common)
+        if best is None:
             continue
+        dist, rid, rlat, rlon, common = best
         cs = [cdaily[d] for d in common]
         rs = [rdaily[d] for d in common]
         try:
@@ -698,7 +710,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         except statistics.StatisticsError:
             r = None  # a channel was flat over the window
         results.append({
-            "sensor": cid, "monitor": rid, "distance_km": round(haversine(clat, clon, rlat, rlon), 1),
+            "sensor": cid, "monitor": rid, "distance_km": round(dist, 1),
             "days": len(common), "r": None if r is None else round(r, 2),
             "bias": round(statistics.mean(c - s for c, s in zip(cs, rs)), 2),
         })
