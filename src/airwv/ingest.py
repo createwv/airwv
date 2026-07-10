@@ -482,12 +482,15 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
 
     # Reference monitors: coords + daily medians (coords stored on the readings).
     monitors = []
+    ref_min = None  # earliest reference ts — community readings before this can't overlap
     for rid in reference:
         rows = store.readings_for_sensor(rid)
         lat = next((r.lat for r in rows if r.lat is not None), None)
         lon = next((r.lon for r in rows if r.lon is not None), None)
         if lat is None:
             continue
+        if rows and (ref_min is None or rows[0].ts < ref_min):
+            ref_min = rows[0].ts
         monitors.append((rid, lat, lon, dict(daily_medians(rows, field))))
     if not monitors:
         log.warning("reference readings have no coordinates — re-pull with `ingest reference`")
@@ -505,7 +508,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         if cid not in coords:
             continue
         clat, clon = coords[cid]
-        crows = store.readings_for_sensor(cid)
+        crows = store.readings_for_sensor(cid, since=ref_min)  # only the overlap window
         if correct and field == "pm2_5":
             from airwv.correction import corrected_daily_medians
             cdaily = corrected_daily_medians(crows)

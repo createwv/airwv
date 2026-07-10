@@ -133,6 +133,36 @@ class Store:
                 latest[sid] = rows[-1]
         return latest
 
+    def sensor_coverage(self) -> dict[str, dict]:
+        """Per-sensor row count + first/last timestamp via SQL aggregation (fast).
+
+        Avoids loading every row just to summarize — one GROUP BY instead.
+        """
+        with self._session_factory() as session:
+            rows = session.execute(
+                select(ReadingRow.sensor_id, func.count(), func.min(ReadingRow.ts), func.max(ReadingRow.ts))
+                .group_by(ReadingRow.sensor_id)
+            ).all()
+        return {sid: {"count": c, "first_ts": mn, "last_ts": mx} for sid, c, mn, mx in rows}
+
+    def latest_value_per_sensor(self, field: str = "pm2_5") -> dict[str, float]:
+        """Most recent non-null value of ``field`` per sensor, in one windowed query."""
+        col = getattr(ReadingRow, field)
+        rn = func.row_number().over(
+            partition_by=ReadingRow.sensor_id, order_by=ReadingRow.ts.desc()).label("rn")
+        sub = select(ReadingRow.sensor_id.label("sid"), col.label("val"), rn).where(col.isnot(None)).subquery()
+        with self._session_factory() as session:
+            rows = session.execute(select(sub.c.sid, sub.c.val).where(sub.c.rn == 1)).all()
+        return {sid: val for sid, val in rows}
+
+    def coverage_overall(self) -> dict:
+        """Overall first/last timestamp + total rows across all sensors (fast)."""
+        with self._session_factory() as session:
+            c, mn, mx = session.execute(
+                select(func.count(), func.min(ReadingRow.ts), func.max(ReadingRow.ts))
+            ).one()
+        return {"count": c or 0, "first_ts": mn, "last_ts": mx}
+
     # -- subscriptions -----------------------------------------------------
 
     def add_subscription(self, **fields) -> int:

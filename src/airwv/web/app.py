@@ -102,19 +102,19 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/api/sensors")
     def sensors():
+        # SQL aggregation instead of loading every row (was O(all rows) per sensor).
+        coverage = store.sensor_coverage()
+        latest = store.latest_value_per_sensor("pm2_5")
         out = []
-        for sid in store.distinct_sensor_ids():
-            rows = store.readings_for_sensor(sid)
-            if not rows:
-                continue
-            latest_pm = next((r.pm2_5 for r in reversed(rows) if r.pm2_5 is not None), None)
+        for sid, cov in coverage.items():
             lat, lon = coords.get(sid, (None, None))
+            latest_pm = latest.get(sid)
             out.append({
                 "sensor_id": sid,
                 "name": names.get(sid, sid),
-                "count": len(rows),
-                "first_ts": rows[0].ts.isoformat(),
-                "last_ts": rows[-1].ts.isoformat(),
+                "count": cov["count"],
+                "first_ts": cov["first_ts"].isoformat() if cov["first_ts"] else None,
+                "last_ts": cov["last_ts"].isoformat() if cov["last_ts"] else None,
                 "lat": lat,
                 "lon": lon,
                 "latest_pm2_5": latest_pm,
