@@ -115,14 +115,21 @@ class Store:
             return list(session.scalars(
                 select(ReadingRow.sensor_id).where(ReadingRow.source == source).distinct()))
 
-    def readings_for_sensor(self, sensor_id: str, since=None) -> list[ReadingRow]:
-        """Return a sensor's readings in chronological order (optionally since a time)."""
+    def readings_for_sensor(self, sensor_id: str, since=None, until=None) -> list[ReadingRow]:
+        """A sensor's readings in chronological order, optionally bounded to [since, until]."""
         with self._session_factory() as session:
             stmt = select(ReadingRow).where(ReadingRow.sensor_id == sensor_id)
             if since is not None:
                 stmt = stmt.where(ReadingRow.ts >= since)
+            if until is not None:
+                stmt = stmt.where(ReadingRow.ts <= until)
             stmt = stmt.order_by(ReadingRow.ts.asc())
             return list(session.scalars(stmt))
+
+    def last_ts_for_sensor(self, sensor_id: str):
+        """Most recent timestamp for a sensor (indexed max — used to pick a default window)."""
+        with self._session_factory() as session:
+            return session.scalar(select(func.max(ReadingRow.ts)).where(ReadingRow.sensor_id == sensor_id))
 
     def latest_reading_per_sensor(self) -> dict[str, ReadingRow]:
         """Most recent stored reading for each sensor."""

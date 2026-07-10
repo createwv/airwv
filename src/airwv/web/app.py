@@ -16,7 +16,7 @@ from __future__ import annotations
 import os
 import statistics
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -181,18 +181,26 @@ def create_app(store: Store) -> FastAPI:
         if field not in FIELDS:
             raise HTTPException(status_code=400, detail=f"unknown field {field!r}")
 
+    def _windowed(sensor_id: str, start=None, end=None, default_days: int = 90):
+        """Readings bounded to [start, end]; with no start, default to the sensor's
+        last ``default_days`` of data — keeps per-sensor endpoints fast at scale
+        (the whole history is millions of rows). Query-level (indexed), not Python."""
+        lo, hi = _parse_date(start), _parse_date(end)
+        since = datetime.combine(lo, time.min) if lo else None
+        until = datetime.combine(hi, time.max) if hi else None
+        if since is None:
+            last = store.last_ts_for_sensor(sensor_id)
+            if last is not None:
+                since = last - timedelta(days=default_days)
+        return store.readings_for_sensor(sensor_id, since=since, until=until)
+
     @app.get("/api/series/{sensor_id}")
     def series(sensor_id: str, field: str = "pm2_5", start: str | None = None, end: str | None = None):
         _check_field(field)
-        lo = _parse_date(start)
-        hi = _parse_date(end)
         buckets: dict = defaultdict(list)
-        for r in store.readings_for_sensor(sensor_id):
+        for r in _windowed(sensor_id, start, end):
             value = getattr(r, field)
             if value is None:
-                continue
-            day = r.ts.date()
-            if (lo and day < lo) or (hi and day > hi):
                 continue
             buckets[r.ts.replace(minute=0, second=0, microsecond=0)].append(value)
         points = [
@@ -202,20 +210,21 @@ def create_app(store: Store) -> FastAPI:
         return {"sensor_id": sensor_id, "name": names.get(sensor_id, sensor_id), "field": field, "points": points}
 
     @app.get("/api/compare")
-    def compare(sensors: str, field: str = "pm2_5"):
+    def compare(sensors: str, field: str = "pm2_5", start: str | None = None, end: str | None = None):
         _check_field(field)
         from airwv.analysis import diurnal_amplitude
 
         out = []
         for sid in [s for s in sensors.split(",") if s]:
-            amp = diurnal_amplitude(store.readings_for_sensor(sid), field=field)
+            amp = diurnal_amplitude(_windowed(sid, start, end), field=field)
             out.append({"sensor_id": sid, "name": names.get(sid, sid), **amp})
         return {"field": field, "sensors": out}
 
     @app.get("/api/events/{sensor_id}")
-    def events(sensor_id: str, field: str = "pm2_5", threshold: float = 6.0):
+    def events(sensor_id: str, field: str = "pm2_5", threshold: float = 6.0,
+               start: str | None = None, end: str | None = None):
         _check_field(field)
-        found = detrend_events(store.readings_for_sensor(sensor_id), field=field, z_threshold=threshold)
+        found = detrend_events(_windowed(sensor_id, start, end), field=field, z_threshold=threshold)
         return {
             "sensor_id": sensor_id,
             "field": field,
@@ -226,11 +235,12 @@ def create_app(store: Store) -> FastAPI:
         }
 
     @app.get("/api/trend/{sensor_id}")
-    def trend(sensor_id: str, field: str = "pm2_5", min_days: int = 14):
+    def trend(sensor_id: str, field: str = "pm2_5", min_days: int = 14,
+              start: str | None = None, end: str | None = None):
         _check_field(field)
         from airwv.analysis import is_worsening, linear_trend
 
-        t = linear_trend(store.readings_for_sensor(sensor_id), field=field, min_days=min_days)
+        t = linear_trend(_windowed(sensor_id, start, end), field=field, min_days=min_days)
         return {
             "sensor_id": sensor_id, "field": field, "direction": t.direction,
             "pct_change": t.pct_change, "slope_per_30d": t.slope_per_30d,
@@ -240,12 +250,7 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/api/diurnal/{sensor_id}")
     def diurnal(sensor_id: str, field: str = "voc", start: str | None = None, end: str | None = None):
         _check_field(field)
-        lo, hi = _parse_date(start), _parse_date(end)
-        rows = [
-            r for r in store.readings_for_sensor(sensor_id)
-            if not ((lo and r.ts.date() < lo) or (hi and r.ts.date() > hi))
-        ]
-        profile = hour_of_day_profile(rows, field=field)
+        profile = hour_of_day_profile(_windowed(sensor_id, start, end), field=field)
         return {
             "sensor_id": sensor_id,
             "name": names.get(sensor_id, sensor_id),
@@ -376,7 +381,13 @@ INDEX_HTML = """<!doctype html>
   .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
   select { padding:6px 10px; font-size:14px; }
   .meta { color:#666; font-size:13px; }
-  .card { background:#fff; margin:16px 20px; border:1px solid #e5e5e8; border-radius:8px; }
+  .card { background:#fff; margin:16px 20px; border:1px solid #e5e5e8; border-radius:8px; position:relative; }
+  .busyover { position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.6); z-index:600; border-radius:8px; }
+  .busyover.on { display:flex; }
+  .spinner { width:30px; height:30px; border:3px solid #d3dbe4; border-top-color:var(--brand);
+    border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   .card h2 { font-size:14px; margin:0; padding:10px 14px; border-bottom:1px solid #eee; color:#444; }
   .chart { height:320px; }
   #map { height:360px; border-radius:0 0 8px 8px; }
@@ -435,16 +446,16 @@ INDEX_HTML = """<!doctype html>
 </div>
 <div class="layerbar"><div id="layers" class="layers"></div></div>
 <div class="meta" id="coverage" style="padding:0 20px 8px"></div>
-<div class="card"><h2>Sensor map</h2><div id="map"></div>
+<div class="card"><h2>Sensor map</h2><div class="busyover on" id="b-map"><div class="spinner"></div></div><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
     <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · ◎ ringed = reference monitor · click a community marker to chart it</div>
 </div>
 <div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
-  <span class="meta" id="trendinfo"></span></h2><div id="ts" class="chart"></div>
+  <span class="meta" id="trendinfo"></span></h2><div class="busyover" id="b-ts"><div class="spinner"></div></div><div id="ts" class="chart"></div>
   <div class="meta" id="detail" style="padding:6px 14px">Click a point (or event ×) for detail.</div>
 </div>
-<div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div id="diurnal" class="chart"></div></div>
+<div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div class="busyover" id="b-di"><div class="spinner"></div></div><div id="diurnal" class="chart"></div></div>
 <div class="card"><h2>Day vs. overnight compare</h2>
   <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
 </div>
@@ -473,6 +484,7 @@ INDEX_HTML = """<!doctype html>
 <script>
 const $ = id => document.getElementById(id);
 const j = async u => (await fetch(u)).json();
+const busy = (id,on) => { const el=$(id); if(el) el.classList.toggle('on', on); };
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
 let map, markers = {}, allSensors = [], GUIDE = null;
 let chartSet = new Set();   // sensor ids currently plotted (click a row or a map dot to toggle)
@@ -534,8 +546,10 @@ const layerState = {community:true, reference:true, sources:true, regions:{}, ca
 function drawMap(sensors){
   if (!map){
     map = L.map('map').setView([38.35, -81.6], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    const tile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
+    tile.on('load', () => busy('b-map', false));      // hide spinner once tiles are in
+    setTimeout(() => busy('b-map', false), 5000);     // fallback
   }
   redrawSensors();
   const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
@@ -692,14 +706,15 @@ async function render(){
     $('trendinfo').textContent = '';
     return;
   }
+  busy('b-ts', true); busy('b-di', true);
   const tsTraces = [], diTraces = [];
   const series = await Promise.all(ids.map(id => j(`/api/series/${id}?field=${field}${rng}`)));
   series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
     mode:'lines', name:s.name, line:{color:COLORS[i%COLORS.length], width:1.3}}));
   if (ids.length === 1){
     const [ev, tr] = await Promise.all([
-      j(`/api/events/${ids[0]}?field=${field}`),
-      j(`/api/trend/${ids[0]}?field=${field}`),
+      j(`/api/events/${ids[0]}?field=${field}${rng}`),
+      j(`/api/trend/${ids[0]}?field=${field}${rng}`),
     ]);
     if (ev.events.length) tsTraces.push({x:ev.events.map(e=>e.ts), y:ev.events.map(e=>e.value),
       mode:'markers', name:'event', marker:{color:'#e00', symbol:'x', size:9},
@@ -731,14 +746,16 @@ async function render(){
     return true;
   });
 
+  busy('b-ts', false);
   const dis = await Promise.all(ids.map(id => j(`/api/diurnal/${id}?field=${field}${rng}`)));
   dis.forEach((d,i) => diTraces.push({x:d.hours.map(h=>h.hour), y:d.hours.map(h=>h.median),
     mode:'lines+markers', name:d.name, line:{color:COLORS[i%COLORS.length]}}));
   Plotly.newPlot('diurnal', diTraces, {margin:{t:10,r:10,b:40,l:45},
     xaxis:{title:'hour of day (ET)', dtick:2}, yaxis:{title:field}, legend:{orientation:'h'}},
     {responsive:true, displayModeBar:false});
+  busy('b-di', false);
 
-  const cmp = await j(`/api/compare?sensors=${ids.join(',')}&field=${field}`);
+  const cmp = await j(`/api/compare?sensors=${ids.join(',')}&field=${field}${rng}`);
   $('cmp').querySelector('tbody').innerHTML = cmp.sensors.map(s =>
     `<tr><td>${s.name}</td><td>${s.day ?? '—'}</td><td>${s.night ?? '—'}</td>
      <td><b>${s.night_day_ratio ?? '—'}</b></td></tr>`).join('');
