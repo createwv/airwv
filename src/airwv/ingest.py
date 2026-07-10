@@ -476,6 +476,69 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
     return total
 
 
+# EPA AirData state FIPS codes: WV + the states it borders.
+AIRDATA_STATES = {"54": "WV", "39": "OH", "42": "PA", "24": "MD", "51": "VA", "21": "KY"}
+
+
+def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88101",
+                store=None, states=None) -> int:
+    """Bulk-import EPA AirData **daily** PM2.5 history into storage (source='epa_airdata').
+
+    EPA publishes pre-generated annual files (``daily_{param}_{year}.zip``) — keyless,
+    no rate limit, no quota. This is the right tool for the deep historical record
+    (param 88101 = PM2.5 FRM/FEM); OpenAQ stays for recent/live hourly data. WV +
+    bordering states; one daily-mean reading per monitor per day (upserted).
+    """
+    import csv
+    import io
+    import zipfile
+    from collections import defaultdict
+
+    import httpx
+
+    from airwv.sources.base import Reading
+
+    store = store or Store.from_config(config)
+    store.create_schema()
+    want = set(states or AIRDATA_STATES)
+    total = 0
+    for year in range(start_year, end_year + 1):
+        url = f"https://aqs.epa.gov/aqsweb/airdata/daily_{param}_{year}.zip"
+        log.info("airdata: downloading %s", url)
+        try:
+            content = httpx.get(url, timeout=300, follow_redirects=True).content
+            zf = zipfile.ZipFile(io.BytesIO(content))
+        except Exception as exc:
+            log.warning("airdata: %s unavailable (%s) — skipping", year, exc)
+            continue
+        agg: dict = defaultdict(list)  # (site, date) -> [daily means]
+        meta: dict = {}                # site -> (lat, lon)
+        with zf.open(zf.namelist()[0]) as fh:
+            for row in csv.DictReader(io.TextIOWrapper(fh, encoding="utf-8")):
+                if row.get("State Code") not in want:
+                    continue
+                try:
+                    val = float(row["Arithmetic Mean"])
+                    lat, lon = float(row["Latitude"]), float(row["Longitude"])
+                    ts = datetime.strptime(row["Date Local"], "%Y-%m-%d")
+                except (ValueError, KeyError):
+                    continue
+                site = f"{row['State Code']}-{row['County Code']}-{row['Site Num']}"
+                agg[(site, ts)].append(val)
+                meta[site] = (lat, lon)
+        readings = [
+            Reading(source="epa_airdata", sensor_id=site, ts=ts,
+                    pm2_5=round(sum(vals) / len(vals), 1), lat=meta[site][0], lon=meta[site][1])
+            for (site, ts), vals in agg.items()
+        ]
+        n = store.save_readings(readings)
+        total += n
+        log.info("airdata %s: %d daily readings from %d monitors", year, n, len({k[0] for k in agg}))
+    log.info("airdata: %d total daily readings stored (source=epa_airdata, %d–%d)",
+             total, start_year, end_year)
+    return total
+
+
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
                  store=None, coords: dict | None = None, correct: bool = False,
                  window_days: int = 90) -> list[dict]:
@@ -827,6 +890,10 @@ def main(argv: list[str] | None = None) -> None:
                            help="chunk size for deep backfills (default 30; keep <40 for hourly data)")
     reference.add_argument("--refresh", action="store_true",
                            help="re-pull windows even if already stored (for ongoing/late data)")
+    airdata = sub.add_parser("airdata", help="bulk-import EPA AirData daily PM2.5 history (keyless, no quota)")
+    airdata.add_argument("--start-year", type=int, default=2016, help="first year (default 2016)")
+    airdata.add_argument("--end-year", type=int, default=2024, help="last year (default 2024; recent years lag)")
+    airdata.add_argument("--param", default="88101", help="EPA parameter code (88101 = PM2.5 FRM/FEM)")
     validate = sub.add_parser("validate", help="community sensors vs nearest reference monitor (no API cost)")
     validate.add_argument("--field", default="pm2_5", help="field to validate (default pm2_5)")
     validate.add_argument("--min-days", type=int, default=5, help="min overlapping days to report a pair")
@@ -886,6 +953,8 @@ def main(argv: list[str] | None = None) -> None:
             return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end),
                       window_days=args.window_days, refresh=args.refresh)
+    elif command == "airdata":
+        run_airdata(config, args.start_year, args.end_year, param=args.param)
     elif command == "validate":
         run_validate(config, field=args.field, min_days=args.min_days, correct=args.correct)
     elif command == "run":

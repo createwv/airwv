@@ -87,12 +87,17 @@ class Store:
         if suspect:
             log.warning("%d/%d readings flagged suspect (out-of-range values)", suspect, len(rows))
 
-        stmt = self._upsert_stmt(rows)
-        if stmt is not None:
+        # Batch so we never exceed the driver's bind-parameter limit (SQLite/Postgres)
+        # on large bulk imports (e.g. a year of EPA AirData is tens of thousands of rows).
+        batch = 500
+        if self._upsert_stmt(rows[:1]) is not None:
+            written = 0
             with self._session_factory() as session:
-                result = session.execute(stmt)
+                for i in range(0, len(rows), batch):
+                    result = session.execute(self._upsert_stmt(rows[i:i + batch]))
+                    written += result.rowcount
                 session.commit()
-                return result.rowcount
+            return written
 
         # Portable fallback for dialects without native upsert: check-then-write.
         return self._save_readings_fallback(rows)

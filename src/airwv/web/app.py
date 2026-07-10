@@ -144,8 +144,11 @@ def create_app(store: Store) -> FastAPI:
         latest = store.latest_value_per_sensor("pm2_5")
         ref_ids = set(store.sensor_ids_by_source("openaq"))
         ref_coords = store.coords_from_readings("openaq")
+        archive_ids = set(store.sensor_ids_by_source("epa_airdata"))  # deep history, not the live map
         out = []
         for sid, cov in coverage.items():
+            if sid in archive_ids:
+                continue  # EPA AirData daily archive — used for history/validation, not plotted live
             is_ref = sid in ref_ids
             if is_ref:  # reference monitor (OpenAQ/AirNow) — coords on the readings
                 lat, lon = ref_coords.get(sid, (None, None))
