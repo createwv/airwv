@@ -105,13 +105,22 @@ def create_app(store: Store) -> FastAPI:
         # SQL aggregation instead of loading every row (was O(all rows) per sensor).
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
+        ref_ids = set(store.sensor_ids_by_source("openaq"))
+        ref_coords = store.coords_from_readings("openaq")
         out = []
         for sid, cov in coverage.items():
-            lat, lon = coords.get(sid, (None, None))
+            is_ref = sid in ref_ids
+            if is_ref:  # reference monitor (OpenAQ/AirNow) — coords on the readings
+                lat, lon = ref_coords.get(sid, (None, None))
+                name = f"EPA #{sid}"
+            else:       # community sensor — coords/name from the resolved listing
+                lat, lon = coords.get(sid, (None, None))
+                name = names.get(sid, sid)
             latest_pm = latest.get(sid)
             out.append({
                 "sensor_id": sid,
-                "name": names.get(sid, sid),
+                "name": name,
+                "kind": "reference" if is_ref else "community",
                 "count": cov["count"],
                 "first_ts": cov["first_ts"].isoformat() if cov["first_ts"] else None,
                 "last_ts": cov["last_ts"].isoformat() if cov["last_ts"] else None,
@@ -122,6 +131,13 @@ def create_app(store: Store) -> FastAPI:
             })
         out.sort(key=lambda s: s["name"])
         return out
+
+    @app.get("/api/coverage")
+    def coverage():
+        c = store.coverage_overall()
+        return {"count": c["count"],
+                "first_ts": c["first_ts"].isoformat() if c["first_ts"] else None,
+                "last_ts": c["last_ts"].isoformat() if c["last_ts"] else None}
 
     def _check_field(field: str):
         if field not in FIELDS:
@@ -367,13 +383,14 @@ INDEX_HTML = """<!doctype html>
   <button id="clear">Clear dates</button>
   <a id="dl" href="#" download>⬇ Download CSV</a>
   <label><input type="checkbox" id="showsensors" checked> ● community sensors</label>
+  <label><input type="checkbox" id="showref" checked> ◎ reference monitors</label>
   <label><input type="checkbox" id="showsources" checked> 🏭 pollution sources</label>
-  <label><input type="checkbox" id="showref" checked> 📍 EPA monitors</label>
 </div>
+<div class="meta" id="coverage" style="padding:0 20px 8px"></div>
 <div class="card"><h2>Sensor map</h2><div id="map"></div>
   <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
-    <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · click a marker to toggle</div>
+    <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · ◎ ringed = reference monitor · click a community marker to chart it</div>
 </div>
 <div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
   <span class="meta" id="trendinfo"></span></h2><div id="ts" class="chart"></div>
@@ -439,11 +456,18 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  $('sensors').innerHTML = allSensors.map((x,i) =>
+  // the picker lists community sensors; reference monitors show on the map as a layer
+  const community = allSensors.filter(s => s.kind !== 'reference');
+  $('sensors').innerHTML = community.map((x,i) =>
     `<label><input type="checkbox" value="${x.sensor_id}" ${i===0?'checked':''}> ${x.name}</label>`).join('');
   $('sensors').querySelectorAll('input').forEach(c => c.addEventListener('change', render));
   drawMap(allSensors);
   render();
+}
+async function loadCoverage(){
+  const c = await j('/api/coverage');
+  if (c.first_ts) $('coverage').textContent =
+    `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
 function drawMap(sensors){
   if (!map){
@@ -452,37 +476,33 @@ function drawMap(sensors){
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
   }
   if (sensorLayer) sensorLayer.remove();
+  if (refLayer) refLayer.remove();
   sensorLayer = L.layerGroup();
+  refLayer = L.layerGroup();
   const pts = [];
   sensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
-    L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
-      .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${x.count} readings`)
-      .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
-      .addTo(sensorLayer);
-    pts.push([x.lat, x.lon]);
+    if (x.kind === 'reference') {
+      // reference monitor: same PM2.5 color, but a bold ring = regulatory-grade
+      L.circleMarker([x.lat, x.lon], {radius:8, color:'#111', weight:3, fillColor:x.color, fillOpacity:0.85})
+        .bindPopup(`<b>${x.name}</b><br><i>reference monitor (EPA/AirNow)</i>`+
+          `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
+        .addTo(refLayer);
+    } else {
+      L.circleMarker([x.lat, x.lon], {radius:9, color:'#333', weight:1, fillColor:x.color, fillOpacity:0.9})
+        .bindPopup(`<b>${x.name}</b><br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`)
+        .on('click', () => { const c = box(x.sensor_id); if(c){ c.checked = !c.checked; render(); } })
+        .addTo(sensorLayer);
+      pts.push([x.lat, x.lon]);
+    }
   });
   if ($('showsensors').checked) sensorLayer.addTo(map);
+  if ($('showref').checked) refLayer.addTo(map);
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
-  loadReference();
 }
-let sensorLayer;
-let refLayer;
-async function loadReference(){
-  const data = await j('/api/reference-monitors');
-  if (refLayer) refLayer.remove();
-  refLayer = L.layerGroup();
-  data.monitors.forEach(m => {
-    if (m.lat == null || m.lon == null) return;
-    L.marker([m.lat, m.lon], {icon: L.divIcon({className:'', html:'📍', iconSize:[20,20], iconAnchor:[10,20]})})
-      .bindPopup(`<b>${m.name}</b> (${m.county} Co.)<br>EPA regulatory monitor`+
-        `<br>2024 mean PM2.5: <b>${m.mean_pm25}</b> µg/m³ (${m.days} days)`+
-        `<br><small>${m.citation||''}</small>`)
-      .addTo(refLayer);
-  });
-  if ($('showref').checked) refLayer.addTo(map);
-}
+let sensorLayer, refLayer;
+// reference monitors are now drawn live in drawMap() (ringed circles, current PM2.5)
 let sourceLayer;
 async function loadSources(){
   const data = await j('/api/sources');
@@ -596,6 +616,7 @@ $('showref').addEventListener('change', e => {
 });
 loadGuide().then(loadSensors);
 loadValidation();
+loadCoverage();
 $('epacorrect').addEventListener('change', loadValidation);
 </script>
 </body>

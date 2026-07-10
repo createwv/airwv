@@ -163,6 +163,21 @@ class Store:
             ).one()
         return {"count": c or 0, "first_ts": mn, "last_ts": mx}
 
+    def coords_from_readings(self, source: str) -> dict[str, tuple]:
+        """One (lat, lon) per sensor for a source, from stored readings.
+
+        Used for reference monitors (OpenAQ), whose coords live on the readings
+        rather than in the community listing.
+        """
+        rn = func.row_number().over(
+            partition_by=ReadingRow.sensor_id, order_by=ReadingRow.ts.desc()).label("rn")
+        sub = select(ReadingRow.sensor_id.label("sid"), ReadingRow.lat.label("lat"),
+                     ReadingRow.lon.label("lon"), rn).where(
+            (ReadingRow.source == source) & ReadingRow.lat.isnot(None)).subquery()
+        with self._session_factory() as session:
+            rows = session.execute(select(sub.c.sid, sub.c.lat, sub.c.lon).where(sub.c.rn == 1)).all()
+        return {sid: (lat, lon) for sid, lat, lon in rows}
+
     # -- subscriptions -----------------------------------------------------
 
     def add_subscription(self, **fields) -> int:
