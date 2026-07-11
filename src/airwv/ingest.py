@@ -982,7 +982,8 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
     airdata = sub.add_parser("airdata", help="bulk-import EPA AirData daily PM2.5 history (keyless, no quota)")
     airdata.add_argument("--start-year", type=int, default=2016, help="first year (default 2016)")
-    airdata.add_argument("--end-year", type=int, default=2024, help="last year (default 2024; recent years lag)")
+    airdata.add_argument("--end-year", type=int, default=datetime.now(tz=timezone.utc).year,
+                         help="last year (default: current; EPA finalizes recent years months late, 404s skip)")
     airdata.add_argument("--param", default="88101", help="EPA parameter code (88101 = PM2.5 FRM/FEM)")
     validate = sub.add_parser("validate", help="community sensors vs nearest reference monitor (no API cost)")
     validate.add_argument("--field", default="pm2_5", help="field to validate (default pm2_5)")
