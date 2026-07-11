@@ -299,22 +299,37 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"note": "", "monitors": []}
 
+    _validate_cache: dict = {}
+
     @app.get("/api/validate")
     def validate(correct: bool = False):
-        """Community sensors vs their nearest regulatory reference monitor."""
+        """Community sensors vs their nearest regulatory reference monitor.
+
+        Aggregates years of data, so it's cached for 30 min (it doesn't change
+        minute-to-minute) rather than recomputed on every page load.
+        """
+        import time as _t
+
         from airwv.ingest import run_validate
+
+        hit = _validate_cache.get(correct)
+        if hit and _t.time() - hit[0] < 1800:
+            return hit[1]
 
         results = run_validate(store=store, coords=coords, correct=correct)
         for r in results:
             r["sensor_name"] = names.get(r["sensor"], r["sensor"])
-        note = ("Each community sensor is paired with its nearest regulatory "
-                "reference monitor (OpenAQ/AirNow). r = daily-median correlation "
-                "(1.0 = perfect tracking); bias = sensor − reference (µg/m³). "
-                "High r validates the sensor; a wild bias flags a malfunction.")
+        note = ("Each community sensor is paired with its nearest regulatory reference "
+                "monitor (EPA AirNow / AirData / OpenAQ), correlating daily PM2.5 over "
+                "their full overlap (up to years). r = correlation (1.0 = perfect "
+                "tracking); bias = sensor − reference (µg/m³). High r validates the "
+                "sensor; a wild bias or low r flags a problem.")
         if correct:
             note += (" PM2.5 is EPA-corrected (Barkjohn 2021), which pulls raw "
                      "PurpleAir's high bias down toward reference grade.")
-        return {"results": results, "corrected": correct, "note": note}
+        resp = {"results": results, "corrected": correct, "note": note}
+        _validate_cache[correct] = (_t.time(), resp)
+        return resp
 
     @app.get("/api/guide")
     def guide():
