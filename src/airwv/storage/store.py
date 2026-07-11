@@ -174,6 +174,39 @@ class Store:
                     out[sid] = val
         return out
 
+    def daily_avg(self, sensor_id: str, field: str = "pm2_5", since=None, until=None) -> dict:
+        """Daily average of ``field`` for a sensor, aggregated in SQL (fast over years —
+        avoids loading raw rows for validation). Returns {date: value}."""
+        from datetime import date as _date
+
+        col = getattr(ReadingRow, field)
+        day = func.date(ReadingRow.ts)
+        stmt = select(day, func.avg(col)).where((ReadingRow.sensor_id == sensor_id) & col.isnot(None))
+        if since is not None:
+            stmt = stmt.where(ReadingRow.ts >= since)
+        if until is not None:
+            stmt = stmt.where(ReadingRow.ts <= until)
+        with self._session_factory() as session:
+            rows = session.execute(stmt.group_by(day)).all()
+        return {_date.fromisoformat(str(d)[:10]): float(v) for d, v in rows if v is not None}
+
+    def daily_avg_corrected(self, sensor_id: str, since=None, until=None) -> dict:
+        """Daily average of EPA-corrected PM2.5 (Barkjohn: 0.524·PA − 0.0862·RH + 5.75),
+        computed in SQL. Only days with both PM2.5 and humidity."""
+        from datetime import date as _date
+
+        expr = 0.524 * ReadingRow.pm2_5 - 0.0862 * ReadingRow.humidity + 5.75
+        day = func.date(ReadingRow.ts)
+        stmt = select(day, func.avg(expr)).where(
+            (ReadingRow.sensor_id == sensor_id) & ReadingRow.pm2_5.isnot(None) & ReadingRow.humidity.isnot(None))
+        if since is not None:
+            stmt = stmt.where(ReadingRow.ts >= since)
+        if until is not None:
+            stmt = stmt.where(ReadingRow.ts <= until)
+        with self._session_factory() as session:
+            rows = session.execute(stmt.group_by(day)).all()
+        return {_date.fromisoformat(str(d)[:10]): max(0.0, float(v)) for d, v in rows if v is not None}
+
     def coverage_overall(self) -> dict:
         """Overall first/last timestamp + total rows across all sensors (fast)."""
         with self._session_factory() as session:

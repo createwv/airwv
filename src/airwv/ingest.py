@@ -618,7 +618,7 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
 
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
                  store=None, coords: dict | None = None, correct: bool = False,
-                 window_days: int = 90) -> list[dict]:
+                 window_days: int = 1200) -> list[dict]:
     """Validate community sensors against the nearest OpenAQ reference monitor.
 
     For each community (PurpleAir) sensor, find the closest regulatory monitor and
@@ -631,16 +631,16 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
     """
     import statistics
 
-    from airwv.analysis.trends import daily_medians
-
     store = store or Store.from_config(config)
     community = store.sensor_ids_by_source("purpleair")
-    # AirNow is the live reference going forward; OpenAQ's stored data still has deep
-    # recent history, so we use both and let overlap decide (AirNow takes over as it
-    # accumulates). AirData daily is excluded here — different cadence/period.
-    reference = store.sensor_ids_by_source("airnow") + store.sensor_ids_by_source("openaq")
-    if not reference:
-        log.warning("no reference data yet — run `ingest airnow` (or `ingest reference`) first")
+    # ALL reference sources: AirNow (live), OpenAQ (stored recent), EPA AirData (deep
+    # certified daily history). Daily values are aggregated in SQL, so we can validate
+    # over years — including against the AirData record — without loading raw rows.
+    ref_coords: dict[str, tuple] = {}
+    for src in ("airnow", "openaq", "epa_airdata"):
+        ref_coords.update(store.coords_from_readings(src))
+    if not ref_coords:
+        log.warning("no reference data yet — run `ingest airnow` / `ingest airdata` first")
         return []
 
     # Community sensor coords: passed in, or from the resolved public-sensor listing.
@@ -653,22 +653,8 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
                 if idx and rec.get("latitude") is not None:
                     coords[idx] = (rec["latitude"], rec["longitude"])
 
-    # Validation looks at recent tracking only — bound the window so we don't load a
-    # decade of reference history (that made this endpoint time out).
-    since = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=window_days)
-
-    # Reference monitors: coords + daily medians (coords stored on the readings).
-    monitors = []
-    for rid in reference:
-        rows = store.readings_for_sensor(rid, since=since)
-        lat = next((r.lat for r in rows if r.lat is not None), None)
-        lon = next((r.lon for r in rows if r.lon is not None), None)
-        if lat is None:
-            continue
-        monitors.append((rid, lat, lon, dict(daily_medians(rows, field))))
-    if not monitors:
-        log.warning("reference readings have no coordinates — re-pull with `ingest reference`")
-        return []
+    since = None if not window_days else (
+        datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=window_days))
 
     def haversine(a_lat, a_lon, b_lat, b_lon) -> float:
         r = 6371.0
@@ -677,32 +663,38 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
         h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
         return 2 * r * math.asin(math.sqrt(h))
 
-    results = []
+    # Only the ~6 nearest monitors per community sensor are candidates, so we aggregate
+    # a couple dozen monitors — not hundreds — regardless of how many are in the DB.
+    comm_near, candidates = {}, set()
     for cid in community:
         if cid not in coords:
             continue
         clat, clon = coords[cid]
-        crows = store.readings_for_sensor(cid, since=since)  # recent window only
-        if correct and field == "pm2_5":
-            from airwv.correction import corrected_daily_medians
-            cdaily = corrected_daily_medians(crows)
-        else:
-            cdaily = dict(daily_medians(crows, field))
+        near = sorted(ref_coords, key=lambda r: haversine(clat, clon, *ref_coords[r]))[:6]
+        comm_near[cid] = near
+        candidates.update(near)
+    mon_daily = {r: store.daily_avg(r, field, since=since) for r in candidates}
+
+    results = []
+    for cid, near in comm_near.items():
+        clat, clon = coords[cid]
+        cdaily = (store.daily_avg_corrected(cid, since=since) if correct and field == "pm2_5"
+                  else store.daily_avg(cid, field, since=since))
         if not cdaily:
             continue
-        # nearest monitor that actually has enough overlapping days (a brand-new
-        # AirNow monitor with 1 day loses to a co-located OpenAQ one with deep history)
+        # nearest monitor that actually has enough overlapping days
         best = None
-        for rid, rlat, rlon, rdaily in monitors:
+        for r in near:
+            rdaily = mon_daily.get(r) or {}
             common = sorted(set(cdaily) & set(rdaily))
             if len(common) < min_days:
                 continue
-            dist = haversine(clat, clon, rlat, rlon)
+            dist = haversine(clat, clon, *ref_coords[r])
             if best is None or dist < best[0]:
-                best = (dist, rid, rlat, rlon, common, rdaily)
+                best = (dist, r, common, rdaily)
         if best is None:
             continue
-        dist, rid, rlat, rlon, common, rdaily = best
+        dist, rid, common, rdaily = best
         cs = [cdaily[d] for d in common]
         rs = [rdaily[d] for d in common]
         try:
