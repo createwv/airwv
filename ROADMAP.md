@@ -161,32 +161,28 @@ Make the data visible and usable.
 
 #### Dashboard restructure (modes, layers, labeling) — see [`docs/FRONTEND.md`](docs/FRONTEND.md)
 
-- [ ] **Hierarchical layers tree** — replace flat checkboxes with a collapsible
-      tree (▸ closed by default, parent + leaf checkboxes, tri-state parent).
-      Sensor parents **Community Sensors** and **EPA / Reference Monitors** (toggle
-      at parent or individual level), plus **Pollution Sources** and **Community
-      Reports** groups. Community sensors **sub-group by region** (Kanawha Valley,
-      Ohio Valley, Eastern Panhandle, North Central…) via a county→WV-region map.
+- [x] **Hierarchical layers tree** — collapsible tree (▸ closed by default, parent +
+      leaf checkboxes, tri-state). Community Sensors **sub-grouped by WV region**,
+      EPA/Reference Monitors, and Pollution Sources with **per-category** toggles.
 - [ ] **⭐ My Sensors (follow list)** — let users star sensors they care about;
       persists (localStorage now, account-based later) as a pinned top group.
-- [ ] **Pollution-source categories** — `category` field on sources (power /
-      chemical / oil-gas / TRI-other; later rail/highway) so you can turn off, e.g.,
-      *all power plants*. Category sub-toggles under the Sources layer.
-- [ ] **Name the EPA monitors** — persist each reference monitor's real AirNow site
-      name (we already fetch it from OpenAQ `locations`, just don't store it) and
-      display it; fall back to **`EPA #<id>`**. Community sensors keep EWV names.
-- [ ] **Explicit default time window** — on load, show the actual data span
-      ("Showing all data · first point → last point") from real min/max timestamps;
-      updates with selection/date-range. Cheap `GET /api/coverage` (or fold into
-      `/api/sensors`).
+- [x] **Pollution-source categories** — `category` on all 437 sources (power /
+      chemical / oil-gas / materials / waste), distinct map icons + per-category
+      toggles in the layers tree. NAICS-based refinement TBD.
+- [x] **Name the EPA monitors** — live reference monitors show their real **AirNow
+      site names** (`data/airnow_monitors.json`); community sensors keep EWV names.
+- [x] **Explicit default time window** — `GET /api/coverage` + a "Showing all data ·
+      first → last" line from real min/max timestamps.
 - [ ] **Three modes** — move off the single scroll to **Overview** (public landing:
       at-a-glance + active flags + *sign up for alerts* + *report a concern* + updates
       feed; feedback in footer), **Analysis** (today's power dashboard), and **Admin**
       (token-gated panels: reports · feedback · air-quality flagging · trends).
-- [ ] **Frontend architecture decision** — pick before the mode restructure.
-      Recommended: **Jinja2 templates + three mode pages + small vanilla/Alpine
-      modules (no build step)**; reserve a Svelte/Vite SPA for if the admin console
-      outgrows that. (We're FastAPI + vanilla JS today — *not* Django.)
+      *Enabled by the Jinja2 refactor below — likely comes BEFORE the reporting UI.*
+- [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
+      no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
+- [ ] **Jinja2 refactor** — split the monolithic `INDEX_HTML` string into templates
+      (base shell + dashboard + static JS/CSS) and a routing skeleton with room for
+      `/admin` and `/overview`. The enabling step for modes **and** the reporting UI.
 - [ ] **Sensor category metadata** — `network`/`ownership` fields (PurpleAir vs
       EPA/AirNow vs future sensors; Create WV-owned vs partner; indoor/outdoor) to
       power the tree sub-grouping. Foundation: readings already carry `source`.
@@ -216,10 +212,9 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
-- [ ] **Source categories + filters** — categorize documented sources (coal/power,
-      chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
-      toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
-      field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
+- [x] **Source categories + filters** — DONE (see "Pollution-source categories"
+      above): `category` on all sources, distinct icons, per-category toggles in the
+      layers tree. NAICS-based refinement still TBD.
 - [x] **Source-proximity panel ("around a polluter")** — DONE: pick any of the 437
       sources (datalist) → nearest sensors with **distance + 8-way compass bearing**,
       **zone bands** (near-field <1mi / vicinity 1–3mi / downwind 3–10mi), nearest
