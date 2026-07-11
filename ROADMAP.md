@@ -254,8 +254,10 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       (held / unverified / flagged / feedback) with verify · enrich · approve-field
       (org/photo/reading) · merge · remove · respond, + CLI mirror. This is the
       "admin end" that makes the staged trust model real.
-- [ ] **Migrations (Alembic)** — needed for the `reports` / `readings_community` /
-      `feedback` tables (create_all won't ALTER the shared DB); long-standing gap.
+- [x] **Migrations (Alembic)** — DONE: Alembic set up (batch mode = SQLite ALTER
+      support), baseline migration, `AIRWV_DATABASE_URL`-aware env; both DBs stamped.
+      Long-standing gap closed. **Reporting tables created** (`reports` /
+      `readings_community` / `feedback` — staged-trust `Report` model). Next: intake API.
 - [ ] **"Report to WV DEP"** — surface the official channel to report an
       environmental concern/complaint to WV DEP (their complaint form + spill/
       emergency line) from the dashboard, alongside a community report. *Verify the
