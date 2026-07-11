@@ -102,3 +102,82 @@ class Subscription(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Report(Base):
+    """A community-reported environmental concern. Staged trust model (see
+    docs/COMMUNITY-REPORTING.md): a light report is auto-screened, published as
+    *unverified* (or *held*), then a maintainer can verify/enrich it. Sensitive
+    fields (suspected org, contact, ip) stay private unless a reviewer approves them.
+    """
+
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    domain: Mapped[str] = mapped_column(String(32), index=True)   # air|water|soil|wildlife|violation|other
+    category: Mapped[str] = mapped_column(String(64), default="")
+    description: Mapped[str] = mapped_column(String(2000), default="")
+
+    lat: Mapped[float] = mapped_column(Float)                     # exact (stored); public view jittered
+    lon: Mapped[float] = mapped_column(Float)
+    area_label: Mapped[str | None] = mapped_column(String(120), nullable=True)  # coarse area, not a street
+
+    # published_unverified | held | confirmed | removed | merged
+    stage: Mapped[str] = mapped_column(String(24), default="published_unverified", index=True)
+    screen_reason: Mapped[str | None] = mapped_column(String(120), nullable=True)  # why auto-held
+    flags_count: Mapped[int] = mapped_column(Integer, default=0)
+    verified_by: Mapped[str | None] = mapped_column(String(120), nullable=True)
+
+    # naming is input-allowed but publish-gated
+    suspected_org: Mapped[str | None] = mapped_column(String(200), nullable=True)  # PRIVATE until org_public
+    org_public: Mapped[bool] = mapped_column(default=False)
+
+    photo_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    photo_ok: Mapped[bool] = mapped_column(default=False)  # held until a maintainer approves the image
+
+    contact_email: Mapped[str | None] = mapped_column(String(200), nullable=True)  # PRIVATE — never public
+    contact_phone: Mapped[str | None] = mapped_column(String(40), nullable=True)   # PRIVATE
+    ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)          # PRIVATE — rate-limit/abuse
+    mod_note: Mapped[str | None] = mapped_column(String(500), nullable=True)        # PRIVATE — maintainer notes
+
+
+class CommunityReading(Base):
+    """An optional structured measurement a resident submits (air/water/soil), tied
+    to a report or standalone. Clearly community-submitted; not mixed into the sensor
+    network unless verified."""
+
+    __tablename__ = "readings_community"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    report_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+
+    domain: Mapped[str] = mapped_column(String(32))
+    parameter: Mapped[str] = mapped_column(String(64))   # PM2.5, pH, turbidity, ...
+    value: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(32))
+    method: Mapped[str | None] = mapped_column(String(200), nullable=True)  # device / how measured
+    taken_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    verified: Mapped[bool] = mapped_column(default=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class Feedback(Base):
+    """Site feedback — a bug report / idea / question about the website itself.
+    Routed to maintainers; not shown on the map."""
+
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    kind: Mapped[str] = mapped_column(String(16), default="idea")  # bug | idea | question
+    message: Mapped[str] = mapped_column(String(2000))
+    page: Mapped[str | None] = mapped_column(String(300), nullable=True)   # url/context
+    contact: Mapped[str | None] = mapped_column(String(200), nullable=True)  # PRIVATE
+    status: Mapped[str] = mapped_column(String(16), default="new", index=True)  # new | triaged | done
+    ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)   # PRIVATE

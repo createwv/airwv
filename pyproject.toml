@@ -20,6 +20,7 @@ web = [
     "fastapi>=0.110",     # dashboard API
     "uvicorn>=0.29",      # ASGI server
     "jinja2>=3.1",        # HTML templates (base shell + pages)
+    "alembic>=1.13",      # schema migrations (ALTERs create_all can't do)
 ]
 dev = [
     "pytest>=8.0",

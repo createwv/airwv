@@ -97,3 +97,26 @@ ones PurpleAir already publishes.
   for production and durability.
 - **GitHub Actions is a poor fit** for the collector — runners are ephemeral, so
   a local SQLite DB wouldn't persist. Use a host with durable storage.
+
+## Schema migrations (Alembic)
+
+Schema is defined by the models in `airwv/storage/models.py`. `create_schema()`
+(create_all) creates any **missing tables** — but can't **alter** existing ones, so
+column changes go through **Alembic** (batch mode is on for SQLite ALTER support).
+
+```bash
+# fresh database — create everything:
+alembic upgrade head
+
+# EXISTING database that already has tables (created earlier by create_all):
+python -c "from airwv.storage import Store; import os; \
+  Store(os.environ.get('AIRWV_DATABASE_URL') or 'sqlite:///airwv.sqlite').create_schema()"
+alembic stamp head          # mark it at the baseline; future `alembic upgrade head` applies changes
+
+# after editing a model, generate + apply a migration:
+alembic revision --autogenerate -m "add column X"
+alembic upgrade head
+```
+
+Alembic reads `AIRWV_DATABASE_URL` (same as the app), so run these from the repo root
+with the env loaded (`set -a; . ./.env; set +a`).
