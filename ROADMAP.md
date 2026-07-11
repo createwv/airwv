@@ -229,9 +229,17 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       ground-level/fugitive emissions; local vicinity **1–3 mi**; tall stacks
       (power plants) can peak **1–10 mi downwind** (plume touchdown), so raw distance
       undersells them.* Needs a bearing calc (haversine already in `validate`) +
-      source search. **Follow-up (the rigorous version): wind-direction weighting**
-      — rank/weight *downwind* sensors, tying into the overnight-accumulation finding
-      (Nitro/John Amos 1.98×). Pairs with a wind-rose data source.
+      source search.
+- [x] **Wind weighting — Level 1 (prevailing wind)** — DONE: 🌀 toggle re-ranks
+      sensors by **downwind exposure** = `rose[opposite(bearing)] × exp(−mi/3)`, from
+      per-station **wind roses** built off keyless NWS/ASOS data (Iowa Environmental
+      Mesonet, `scripts/fetch_wind.py` → `wind_roses.json`; WV is W/SW-prevailing).
+      Science + how-we-handle-it documented in
+      [`docs/WIND-AND-DISPERSION.md`](docs/WIND-AND-DISPERSION.md).
+- [ ] **Wind weighting — Level 2 (event-based)** — correlate a sensor's *elevated*
+      readings with the hours it's actually downwind (near-causal; hourly ASOS wind
+      in the DB aligned to readings). Operationalizes the overnight-accumulation
+      finding (Nitro/John Amos 1.98×). AERMOD-style plume modeling stays out of scope.
 - [~] **Community reporting & feedback** — DESIGNED (v2 of the design):
       [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Now a **staged
       pipeline**: light auto pre-screen → published *unverified* → maintainer

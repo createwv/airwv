@@ -1,0 +1,159 @@
+{
+  "note": "Prevailing wind roses (frequency wind blows FROM each direction), 2025. Source: Iowa Environmental Mesonet / NWS ASOS. Used to weight sensors by downwind exposure to a source (Level 1 \u2014 see docs/WIND-AND-DISPERSION.md).",
+  "year": 2025,
+  "stations": [
+    {
+      "station": "CRW",
+      "name": "Charleston",
+      "lat": 38.3792,
+      "lon": -81.5903,
+      "obs": 66079,
+      "rose": {
+        "N": 0.0761,
+        "NE": 0.0891,
+        "E": 0.0603,
+        "SE": 0.0808,
+        "S": 0.1342,
+        "SW": 0.2254,
+        "W": 0.2179,
+        "NW": 0.1161
+      }
+    },
+    {
+      "station": "HTS",
+      "name": "Huntington",
+      "lat": 38.3667,
+      "lon": -82.558,
+      "obs": 86568,
+      "rose": {
+        "N": 0.1001,
+        "NE": 0.0874,
+        "E": 0.1196,
+        "SE": 0.0495,
+        "S": 0.1849,
+        "SW": 0.2194,
+        "W": 0.1624,
+        "NW": 0.0767
+      }
+    },
+    {
+      "station": "PKB",
+      "name": "Parkersburg",
+      "lat": 39.3451,
+      "lon": -81.4392,
+      "obs": 76557,
+      "rose": {
+        "N": 0.0843,
+        "NE": 0.0635,
+        "E": 0.0813,
+        "SE": 0.0598,
+        "S": 0.1941,
+        "SW": 0.1748,
+        "W": 0.2468,
+        "NW": 0.0954
+      }
+    },
+    {
+      "station": "CKB",
+      "name": "Clarksburg",
+      "lat": 39.2966,
+      "lon": -80.2281,
+      "obs": 72631,
+      "rose": {
+        "N": 0.1107,
+        "NE": 0.0721,
+        "E": 0.0568,
+        "SE": 0.0427,
+        "S": 0.173,
+        "SW": 0.2134,
+        "W": 0.2547,
+        "NW": 0.0765
+      }
+    },
+    {
+      "station": "MGW",
+      "name": "Morgantown",
+      "lat": 39.6429,
+      "lon": -79.9161,
+      "obs": 84554,
+      "rose": {
+        "N": 0.1133,
+        "NE": 0.0396,
+        "E": 0.0495,
+        "SE": 0.0583,
+        "S": 0.2479,
+        "SW": 0.2585,
+        "W": 0.149,
+        "NW": 0.0837
+      }
+    },
+    {
+      "station": "EKN",
+      "name": "Elkins",
+      "lat": 38.8894,
+      "lon": -79.8571,
+      "obs": 61338,
+      "rose": {
+        "N": 0.0836,
+        "NE": 0.0112,
+        "E": 0.0224,
+        "SE": 0.0998,
+        "S": 0.1458,
+        "SW": 0.1132,
+        "W": 0.3272,
+        "NW": 0.1968
+      }
+    },
+    {
+      "station": "BKW",
+      "name": "Beckley",
+      "lat": 37.7873,
+      "lon": -81.1242,
+      "obs": 91466,
+      "rose": {
+        "N": 0.103,
+        "NE": 0.0218,
+        "E": 0.0465,
+        "SE": 0.1971,
+        "S": 0.1237,
+        "SW": 0.1677,
+        "W": 0.1972,
+        "NW": 0.1432
+      }
+    },
+    {
+      "station": "BLF",
+      "name": "Bluefield",
+      "lat": 37.2957,
+      "lon": -81.2043,
+      "obs": 87642,
+      "rose": {
+        "N": 0.0369,
+        "NE": 0.0187,
+        "E": 0.0836,
+        "SE": 0.0785,
+        "S": 0.0953,
+        "SW": 0.1323,
+        "W": 0.4355,
+        "NW": 0.1191
+      }
+    },
+    {
+      "station": "LWB",
+      "name": "Lewisburg",
+      "lat": 37.8583,
+      "lon": -80.3994,
+      "obs": 10053,
+      "rose": {
+        "N": 0.1612,
+        "NE": 0.0956,
+        "E": 0.0385,
+        "SE": 0.0421,
+        "S": 0.1002,
+        "SW": 0.1508,
+        "W": 0.2771,
+        "NW": 0.1345
+      }
+    }
+  ]
+}

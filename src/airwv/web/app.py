@@ -288,6 +288,16 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"tier": "documented", "disclaimer": "", "sources": []}
 
+    @app.get("/api/wind-roses")
+    def wind_roses():
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "wind_roses.json"
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"stations": []}
+
     @app.get("/api/reference-monitors")
     def reference_monitors():
         try:
@@ -489,14 +499,16 @@ INDEX_HTML = """<!doctype html>
     <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
     <datalist id="srclist"></datalist>
     <button id="chartnear" disabled>⬈ Chart nearest community sensors</button>
-    <span class="meta">rings on map: 1 mi &amp; 3 mi</span>
+    <label title="Rank by how often the wind carries the plume toward each sensor, not just distance"><input type="checkbox" id="windweight"> 🌀 weight by wind</label>
+    <span class="meta">rings: 1 &amp; 3 mi</span>
   </div>
   <div class="meta" id="proxsector" style="padding:0 14px 4px"></div>
   <div class="meta" id="proxsci" style="padding:0 14px 8px; color:#7a5b12">
     Near-field <b>&lt;1 mi</b> = clearest signal for ground-level/fugitive emissions · vicinity <b>1–3 mi</b> ·
-    tall stacks (power plants) can peak <b>1–10 mi downwind</b>, so wind direction matters as much as distance.</div>
-  <table id="proxtable"><thead><tr><th>Sensor</th><th>Type</th><th>Distance</th><th>Direction</th><th>Zone</th></tr></thead><tbody>
-    <tr><td colspan="5" style="color:#999">Pick a pollution source above to see the sensors around it.</td></tr></tbody></table>
+    tall stacks (power plants) can peak <b>1–10 mi downwind</b>, so wind direction matters as much as distance
+    (<a href="https://github.com/createwv/airwv/blob/main/docs/WIND-AND-DISPERSION.md" target="_blank" rel="noopener">how we handle this</a>).</div>
+  <table id="proxtable"><thead><tr><th>Sensor</th><th>Type</th><th>Distance</th><th>Direction</th><th>Downwind</th><th>Zone</th></tr></thead><tbody>
+    <tr><td colspan="6" style="color:#999">Pick a pollution source above to see the sensors around it.</td></tr></tbody></table>
 </div>
 <div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
   <span class="meta" id="trendinfo"></span></h2><div class="busyover" id="b-ts"><div class="spinner"></div></div><div id="ts" class="chart"></div>
@@ -658,27 +670,44 @@ function bearing8(la1,lo1,la2,lo2){
   return DIRS[Math.round(((Math.atan2(y,x)*180/Math.PI+360)%360)/45)%8];
 }
 const zone = mi => mi<1 ? 'near-field (<1 mi)' : mi<3 ? 'vicinity (1–3 mi)' : mi<10 ? 'downwind range (3–10 mi)' : 'far';
-let proxRings = null, proxNearest = [];
+let proxRings = null, proxNearest = [], windRoses = [];
+async function loadWindRoses(){ try { windRoses = (await j('/api/wind-roses')).stations || []; } catch(e){} }
+const opposite = d => DIRS[(DIRS.indexOf(d)+4)%8];
+function nearestStation(lat,lon){
+  let best=null; windRoses.forEach(s=>{ const d=haversineMi(lat,lon,s.lat,s.lon); if(!best||d<best._d) best={...s,_d:d}; }); return best;
+}
+const prevailing = rose => Object.keys(rose).reduce((a,b)=> rose[b]>rose[a]?b:a);
 function showProximity(name){
   const src = allSources_.find(s => s.name === name && s.lat != null);
   const tb = document.querySelector('#proxtable tbody');
-  if (!src){ tb.innerHTML='<tr><td colspan="5" style="color:#999">Pick a pollution source above.</td></tr>';
+  if (!src){ tb.innerHTML='<tr><td colspan="6" style="color:#999">Pick a pollution source above.</td></tr>';
     $('chartnear').disabled=true; $('proxsector').textContent=''; if(proxRings){proxRings.remove();proxRings=null;} return; }
-  const near = allSensors.filter(s => s.lat != null).map(s => ({
-    ...s, mi: haversineMi(src.lat,src.lon,s.lat,s.lon), dir: bearing8(src.lat,src.lon,s.lat,s.lon)
-  })).sort((a,b) => a.mi - b.mi);
+  const weighted = $('windweight').checked && windRoses.length;
+  const station = weighted ? nearestStation(src.lat, src.lon) : null;
+  const rose = station ? station.rose : null;
+  const near = allSensors.filter(s => s.lat != null).map(s => {
+    const mi = haversineMi(src.lat,src.lon,s.lat,s.lon), dir = bearing8(src.lat,src.lon,s.lat,s.lon);
+    // wind FROM the opposite of the sensor's bearing carries the plume toward it
+    const dwFreq = rose ? (rose[opposite(dir)] || 0) : null;
+    const score = weighted ? dwFreq * Math.exp(-mi/3) : 1/(mi+0.3);
+    return {...s, mi, dir, dwFreq, score};
+  }).sort((a,b) => b.score - a.score);
   proxNearest = near.filter(s => s.kind === 'community').slice(0,6);
   $('chartnear').disabled = proxNearest.length === 0;
   tb.innerHTML = near.slice(0,14).map(s => `<tr>
     <td>${s.name}</td><td>${s.kind==='reference'?'◎ reference':'● community'}</td>
     <td>${s.mi.toFixed(1)} mi</td><td>${s.dir}</td>
+    <td>${s.dwFreq==null?'—':Math.round(s.dwFreq*100)+'%'}</td>
     <td style="color:${s.mi<1?'#a00':s.mi<3?'#7a5b12':'#666'}">${zone(s.mi)}</td></tr>`).join('');
-  // nearest community sensor in each compass sector
-  const bySec={};
-  near.filter(s=>s.kind==='community').forEach(s=>{ if(!bySec[s.dir]||s.mi<bySec[s.dir].mi) bySec[s.dir]=s; });
-  $('proxsector').innerHTML = '<b>Nearest community sensor by direction:</b> ' +
-    (DIRS.filter(d=>bySec[d]).map(d=>`${d} ${bySec[d].name} (${bySec[d].mi.toFixed(1)}mi)`).join(' · ') || '—');
-  // map: rings + focus
+  if (weighted && station){
+    const p = prevailing(rose);
+    $('proxsector').innerHTML = `<b>🌀 Weighted by wind</b> — nearest station <b>${station.name}</b>, wind usually <b>from ${p}</b> (${Math.round(rose[p]*100)}%). Ranked by downwind exposure × proximity; "Downwind" = how often the wind carries the plume toward that sensor.`;
+  } else {
+    const bySec={};
+    near.filter(s=>s.kind==='community').forEach(s=>{ if(!bySec[s.dir]||s.mi<bySec[s.dir].mi) bySec[s.dir]=s; });
+    $('proxsector').innerHTML = '<b>Nearest community sensor by direction:</b> ' +
+      (DIRS.filter(d=>bySec[d]).map(d=>`${d} ${bySec[d].name} (${bySec[d].mi.toFixed(1)}mi)`).join(' · ') || '—');
+  }
   if (proxRings) proxRings.remove();
   proxRings = L.layerGroup();
   [1,3].forEach(mi => L.circle([src.lat,src.lon], {radius:mi*1609.34, color:'#a00', weight:1, fill:false, dashArray:'4'}).addTo(proxRings));
@@ -688,7 +717,9 @@ function showProximity(name){
   if (map) map.setView([src.lat, src.lon], 10);
 }
 function initProximity(){
+  loadWindRoses();
   $('srcpick').addEventListener('change', e => showProximity(e.target.value.trim()));
+  $('windweight').addEventListener('change', () => showProximity($('srcpick').value.trim()));
   $('chartnear').addEventListener('click', () => {
     proxNearest.forEach(s => chartSet.add(s.sensor_id));
     proxNearest.forEach(s => document.querySelectorAll(`.srow[data-sid="${s.sensor_id}"]`).forEach(el => el.classList.add('on')));
