@@ -1,0 +1,73 @@
+/* Empower WV brand palette — blue / gold / purple. */
+  :root { --brand:#4a7fb0; --brand-accent:#c9992f; --brand-purple:#7a6fb0; --sky:#a9c4dc; --bg:#f4f7f9; }
+  body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
+  /* Parallax hero: still sky gradient + panning cloud layers + still logo.
+     Height scales with viewport width -> more sky on desktop, compact on mobile. */
+  header { position:relative; overflow:hidden; height:clamp(185px, 24vw, 320px);
+    background:linear-gradient(to top, #f7ca89 4%, #e4d1ab 18%, #cddcd7 38%, #c5e0e8 49%, #a1bcd1 82%);
+    display:flex; align-items:center; justify-content:center; }
+  header .cloud { position:absolute; bottom:0; left:50%; width:120%; height:auto;
+    transform:translateX(-50%); pointer-events:none; }
+  /* Same duration so all layers turn the corners together. Gold(back) + white
+     (front) sway one way; blue(mid) counter-sways (alternate-reverse). Amplitude
+     gives the depth (subtle back, bold front) and bumps up on desktop. */
+  header .c-gold  { --amp:16px; animation: sway 30s ease-in-out infinite alternate; }
+  header .c-blue  { --amp:24px; animation: sway 30s ease-in-out infinite alternate-reverse; }
+  header .c-white { --amp:36px; animation: sway 30s ease-in-out infinite alternate; }
+  @media (min-width:820px){
+    header .c-gold  { --amp:30px; }
+    header .c-blue  { --amp:46px; }
+    header .c-white { --amp:66px; }
+  }
+  @keyframes sway { 0%,9%{transform:translateX(calc(-50% - var(--amp)))} 91%,100%{transform:translateX(calc(-50% + var(--amp)))} }
+  @media (prefers-reduced-motion:reduce){ header .cloud{animation:none} }
+  /* Logo: floors ~165px on narrow screens (≈30vw near 570px), scales at 20vw
+     through desktop, capped so it stays in the banner on big monitors. */
+  header img.logo { position:relative; z-index:2; height:clamp(165px, 20vw, 230px); width:auto; max-width:92%;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
+  .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
+    padding:8px 20px; font-size:13px; text-align:center; }
+  .betabar { background:#fff4d6; color:#7a5b12; border-bottom:1px solid #f0e0b0;
+    padding:6px 20px; font-size:12.5px; text-align:center; }
+  .betabar b { color:#8a4b00; }
+  .controls { padding:14px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  select { padding:6px 10px; font-size:14px; }
+  .meta { color:#666; font-size:13px; }
+  .card { background:#fff; margin:16px 20px; border:1px solid #e5e5e8; border-radius:8px; position:relative; }
+  .busyover { position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.6); z-index:600; border-radius:8px; }
+  .busyover.on { display:flex; }
+  .spinner { width:30px; height:30px; border:3px solid #d3dbe4; border-top-color:var(--brand);
+    border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .card h2 { font-size:14px; margin:0; padding:10px 14px; border-bottom:1px solid #eee; color:#444; }
+  .chart { height:320px; }
+  #map { height:360px; border-radius:0 0 8px 8px; }
+  .legend { font-size:12px; color:#666; padding:6px 14px; }
+  .sensorlist { display:flex; flex-direction:column; gap:2px; max-height:120px; overflow:auto;
+    border:1px solid #ddd; border-radius:6px; padding:6px 10px; font-size:13px; min-width:200px; }
+  .layerbar { padding:2px 20px 4px; }
+  .layers { font-size:13px; display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; }
+  .layers > b { align-self:center; }
+  .layers details { min-width:150px; }
+  .layers summary { cursor:pointer; user-select:none; padding:1px 0; }
+  .layers .children { padding:2px 0 0 20px; display:flex; flex-direction:column; gap:1px; }
+  .layers label { display:block; }
+  .layers .cnt { color:#aaa; font-size:11px; }
+  .layers .srow { cursor:pointer; padding:1px 2px; border-radius:3px; }
+  .layers .srow:hover { color:var(--brand); background:#f0f4f8; }
+  .layers .srow.on { font-weight:700; color:#111; }
+  .layers .srow.on::before { content:'●'; color:var(--brand-accent); margin-right:4px; font-size:10px; }
+  button { padding:6px 12px; font-size:13px; cursor:pointer; }
+  table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
+  th { color:#666; font-weight:600; }
+  .guide { padding:10px 14px; display:flex; flex-wrap:wrap; gap:8px; }
+  .guide .chip { display:flex; align-items:center; gap:6px; font-size:12px; border:1px solid #eee;
+    border-radius:6px; padding:4px 8px; }
+  .guide .sw { width:14px; height:14px; border-radius:3px; border:1px solid #0002; }
+  .guide .note { flex-basis:100%; color:#666; font-size:12px; margin-top:4px; }
+  .about { padding:10px 14px; font-size:13px; color:#444; max-width:70ch; }
+  .about a { color:var(--brand); }
+  footer { text-align:center; color:#888; font-size:12px; padding:20px; }
+  footer a { color:var(--brand-accent); }

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="controls">
+  <label>Metric <select id="field">
+    <option value="pm2_5">PM2.5</option>
+    <option value="voc">VOC</option>
+    <option value="pm10">PM10</option>
+    <option value="pm1_0">PM1.0</option>
+    <option value="temperature">Temperature</option>
+    <option value="humidity">Humidity</option>
+  </select></label>
+  <label>From <input type="date" id="start"></label>
+  <label>To <input type="date" id="end"></label>
+  <button id="clear">Clear dates</button>
+  <a id="dl" href="#" download>⬇ Download CSV</a>
+</div>
+<div class="layerbar"><div id="layers" class="layers"></div></div>
+<div class="meta" id="coverage" style="padding:0 20px 8px"></div>
+<div class="card"><h2>Sensor map</h2><div class="busyover on" id="b-map"><div class="spinner"></div></div><div id="map"></div>
+  <div class="legend">PM2.5 µg/m³: <span style="color:#00e400">●</span> &lt;12
+    <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
+    <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · ◎ ringed = reference monitor · click a community marker to chart it</div>
+</div>
+<div class="card"><h2>Around a pollution source — nearest sensors by distance &amp; direction</h2>
+  <div style="padding:10px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+    <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
+    <datalist id="srclist"></datalist>
+    <button id="chartnear" disabled>⬈ Chart nearest community sensors</button>
+    <label title="Rank by how often the wind carries the plume toward each sensor, not just distance"><input type="checkbox" id="windweight"> 🌀 weight by wind</label>
+    <span class="meta">rings: 1 &amp; 3 mi</span>
+  </div>
+  <div class="meta" id="proxsector" style="padding:0 14px 4px"></div>
+  <div class="meta" id="proxsci" style="padding:0 14px 8px; color:#7a5b12">
+    Near-field <b>&lt;1 mi</b> = clearest signal for ground-level/fugitive emissions · vicinity <b>1–3 mi</b> ·
+    tall stacks (power plants) can peak <b>1–10 mi downwind</b>, so wind direction matters as much as distance
+    (<a href="https://github.com/createwv/airwv/blob/main/docs/WIND-AND-DISPERSION.md" target="_blank" rel="noopener">how we handle this</a>).</div>
+  <table id="proxtable"><thead><tr><th>Sensor</th><th>Type</th><th>Distance</th><th>Direction</th><th>Downwind</th><th>Zone</th></tr></thead><tbody>
+    <tr><td colspan="6" style="color:#999">Pick a pollution source above to see the sensors around it.</td></tr></tbody></table>
+</div>
+<div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
+  <span class="meta" id="trendinfo"></span></h2><div class="busyover" id="b-ts"><div class="spinner"></div></div><div id="ts" class="chart"></div>
+  <div class="meta" id="detail" style="padding:6px 14px">Click a point (or event ×) for detail.</div>
+</div>
+<div class="card"><h2>Time-of-day profile (median by local hour, ET)</h2><div class="busyover" id="b-di"><div class="spinner"></div></div><div id="diurnal" class="chart"></div></div>
+<div class="card"><h2>Day vs. overnight compare</h2>
+  <table id="cmp"><thead><tr><th>Sensor</th><th>Day (9-17)</th><th>Night (0-5)</th><th>Night/Day</th></tr></thead><tbody></tbody></table>
+</div>
+<div class="card"><h2>Validation — community sensors vs. regulatory reference monitors
+  <label style="float:right;font-weight:400;font-size:12px"><input type="checkbox" id="epacorrect"> EPA-corrected PM2.5</label></h2>
+  <table id="validate"><thead><tr><th>Community sensor</th><th>Nearest reference monitor</th>
+    <th>Distance</th><th>Days</th><th>Correlation (r)</th><th>Bias vs. reference</th></tr></thead><tbody></tbody></table>
+  <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
+</div>
+<div class="card"><h2>Health guide — what the levels mean <span class="meta" style="font-weight:400">(for the selected metric)</span></h2><div id="guide" class="guide"></div></div>
+<div class="card"><h2>About AirWV</h2>
+  <div class="about">
+    <p><b>Empower WV — community eco monitoring</b> is a community air-quality
+    initiative for West Virginia, powered by the open-source AirWV project. It
+    collects readings from community <a href="https://www2.purpleair.com/"
+    target="_blank" rel="noopener">PurpleAir</a> sensors, stores long-term history,
+    and surfaces trends, anomalies, and alerts. It grew out of the
+    <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
+    Valley Air Quality Monitoring project</a> (Create WV, WVCAG, and partners).</p>
+    <p>Data shown is from community sensors and is provided as-is for awareness, not
+    regulatory use. Source &amp; docs:
+    <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">github.com/createwv/airwv</a>.</p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/app.js"></script>
+{% endblock %}

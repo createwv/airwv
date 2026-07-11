@@ -87,7 +87,8 @@ def test_budget_persists_and_counts(tmp_path):
     usage = tmp_path / "usage.json"
     src = OpenAQSource("k", daily_cap=3, usage_path=usage)
     assert src.remaining_today() == 3
-    src._record_request(); src._record_request()
+    src._record_request()
+    src._record_request()
     # a fresh client reads the same persisted tally (survives across runs/timer fires)
     assert OpenAQSource("k", daily_cap=3, usage_path=usage).remaining_today() == 1
 

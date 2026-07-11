@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empower WV — Community Eco Monitoring</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <img class="cloud c-gold"  src="/static/banner-clouds-gold.svg"  alt="">
+  <img class="cloud c-blue"  src="/static/banner-clouds-blue.svg"  alt="">
+  <img class="cloud c-white" src="/static/banner-clouds-white.svg" alt="">
+  <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
+</header>
+<div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
+<div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
+{% block content %}{% endblock %}
+<footer>AirWV · open-source · <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a></footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>
