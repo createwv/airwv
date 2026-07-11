@@ -699,10 +699,10 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
                 continue
             dist = haversine(clat, clon, rlat, rlon)
             if best is None or dist < best[0]:
-                best = (dist, rid, rlat, rlon, common)
+                best = (dist, rid, rlat, rlon, common, rdaily)
         if best is None:
             continue
-        dist, rid, rlat, rlon, common = best
+        dist, rid, rlat, rlon, common, rdaily = best
         cs = [cdaily[d] for d in common]
         rs = [rdaily[d] for d in common]
         try:
