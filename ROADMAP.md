@@ -180,9 +180,10 @@ Make the data visible and usable.
       *Enabled by the Jinja2 refactor below — likely comes BEFORE the reporting UI.*
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
-- [ ] **Jinja2 refactor** — split the monolithic `INDEX_HTML` string into templates
-      (base shell + dashboard + static JS/CSS) and a routing skeleton with room for
-      `/admin` and `/overview`. The enabling step for modes **and** the reporting UI.
+- [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
+      `templates/base.html` (shared shell) + `templates/dashboard.html`, with CSS/JS
+      in `static/app.css`/`app.js`. New pages (`/overview`, `/admin`, reporting) now
+      just extend `base.html`. The enabling step for modes **and** the reporting UI.
 - [ ] **Sensor category metadata** — `network`/`ownership` fields (PurpleAir vs
       EPA/AirNow vs future sensors; Create WV-owned vs partner; indoor/outdoor) to
       power the tree sub-grouping. Foundation: readings already carry `source`.
