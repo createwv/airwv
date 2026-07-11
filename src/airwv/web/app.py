@@ -484,6 +484,20 @@ INDEX_HTML = """<!doctype html>
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
     <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · ◎ ringed = reference monitor · click a community marker to chart it</div>
 </div>
+<div class="card"><h2>Around a pollution source — nearest sensors by distance &amp; direction</h2>
+  <div style="padding:10px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+    <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
+    <datalist id="srclist"></datalist>
+    <button id="chartnear" disabled>⬈ Chart nearest community sensors</button>
+    <span class="meta">rings on map: 1 mi &amp; 3 mi</span>
+  </div>
+  <div class="meta" id="proxsector" style="padding:0 14px 4px"></div>
+  <div class="meta" id="proxsci" style="padding:0 14px 8px; color:#7a5b12">
+    Near-field <b>&lt;1 mi</b> = clearest signal for ground-level/fugitive emissions · vicinity <b>1–3 mi</b> ·
+    tall stacks (power plants) can peak <b>1–10 mi downwind</b>, so wind direction matters as much as distance.</div>
+  <table id="proxtable"><thead><tr><th>Sensor</th><th>Type</th><th>Distance</th><th>Direction</th><th>Zone</th></tr></thead><tbody>
+    <tr><td colspan="5" style="color:#999">Pick a pollution source above to see the sensors around it.</td></tr></tbody></table>
+</div>
 <div class="card"><h2>Time series (hourly median) — red × = events, dashed = trend (single sensor)
   <span class="meta" id="trendinfo"></span></h2><div class="busyover" id="b-ts"><div class="spinner"></div></div><div id="ts" class="chart"></div>
   <div class="meta" id="detail" style="padding:6px 14px">Click a point (or event ×) for detail.</div>
@@ -626,6 +640,60 @@ async function loadSources(){
   allSources_ = data.sources; srcDisclaimer = data.disclaimer || '';
   redrawSources();
   buildLayers();
+  $('srclist').innerHTML = allSources_.filter(s=>s.lat!=null)
+    .map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}">`).join('');
+}
+// ---- Source-proximity: pick a polluter, see the sensors around it by distance + bearing ----
+const DIRS = ['N','NE','E','SE','S','SW','W','NW'];
+function haversineMi(la1,lo1,la2,lo2){
+  const R=6371, rad=x=>x*Math.PI/180;
+  const dp=rad(la2-la1), dl=rad(lo2-lo1);
+  const h=Math.sin(dp/2)**2 + Math.cos(rad(la1))*Math.cos(rad(la2))*Math.sin(dl/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h))*0.621371;
+}
+function bearing8(la1,lo1,la2,lo2){
+  const rad=x=>x*Math.PI/180;
+  const y=Math.sin(rad(lo2-lo1))*Math.cos(rad(la2));
+  const x=Math.cos(rad(la1))*Math.sin(rad(la2))-Math.sin(rad(la1))*Math.cos(rad(la2))*Math.cos(rad(lo2-lo1));
+  return DIRS[Math.round(((Math.atan2(y,x)*180/Math.PI+360)%360)/45)%8];
+}
+const zone = mi => mi<1 ? 'near-field (<1 mi)' : mi<3 ? 'vicinity (1–3 mi)' : mi<10 ? 'downwind range (3–10 mi)' : 'far';
+let proxRings = null, proxNearest = [];
+function showProximity(name){
+  const src = allSources_.find(s => s.name === name && s.lat != null);
+  const tb = document.querySelector('#proxtable tbody');
+  if (!src){ tb.innerHTML='<tr><td colspan="5" style="color:#999">Pick a pollution source above.</td></tr>';
+    $('chartnear').disabled=true; $('proxsector').textContent=''; if(proxRings){proxRings.remove();proxRings=null;} return; }
+  const near = allSensors.filter(s => s.lat != null).map(s => ({
+    ...s, mi: haversineMi(src.lat,src.lon,s.lat,s.lon), dir: bearing8(src.lat,src.lon,s.lat,s.lon)
+  })).sort((a,b) => a.mi - b.mi);
+  proxNearest = near.filter(s => s.kind === 'community').slice(0,6);
+  $('chartnear').disabled = proxNearest.length === 0;
+  tb.innerHTML = near.slice(0,14).map(s => `<tr>
+    <td>${s.name}</td><td>${s.kind==='reference'?'◎ reference':'● community'}</td>
+    <td>${s.mi.toFixed(1)} mi</td><td>${s.dir}</td>
+    <td style="color:${s.mi<1?'#a00':s.mi<3?'#7a5b12':'#666'}">${zone(s.mi)}</td></tr>`).join('');
+  // nearest community sensor in each compass sector
+  const bySec={};
+  near.filter(s=>s.kind==='community').forEach(s=>{ if(!bySec[s.dir]||s.mi<bySec[s.dir].mi) bySec[s.dir]=s; });
+  $('proxsector').innerHTML = '<b>Nearest community sensor by direction:</b> ' +
+    (DIRS.filter(d=>bySec[d]).map(d=>`${d} ${bySec[d].name} (${bySec[d].mi.toFixed(1)}mi)`).join(' · ') || '—');
+  // map: rings + focus
+  if (proxRings) proxRings.remove();
+  proxRings = L.layerGroup();
+  [1,3].forEach(mi => L.circle([src.lat,src.lon], {radius:mi*1609.34, color:'#a00', weight:1, fill:false, dashArray:'4'}).addTo(proxRings));
+  L.marker([src.lat,src.lon], {icon:L.divIcon({className:'', html:'🎯', iconSize:[24,24], iconAnchor:[12,12]})})
+    .bindPopup(`<b>${src.name}</b><br>proximity center`).addTo(proxRings);
+  proxRings.addTo(map);
+  if (map) map.setView([src.lat, src.lon], 10);
+}
+function initProximity(){
+  $('srcpick').addEventListener('change', e => showProximity(e.target.value.trim()));
+  $('chartnear').addEventListener('click', () => {
+    proxNearest.forEach(s => chartSet.add(s.sensor_id));
+    proxNearest.forEach(s => document.querySelectorAll(`.srow[data-sid="${s.sensor_id}"]`).forEach(el => el.classList.add('on')));
+    redrawSensors(); render();
+  });
 }
 function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
@@ -801,6 +869,7 @@ $('clear').addEventListener('click', () => { $('start').value=''; $('end').value
 loadGuide().then(loadSensors);
 loadValidation();
 loadCoverage();
+initProximity();
 $('epacorrect').addEventListener('change', loadValidation);
 </script>
 </body>
