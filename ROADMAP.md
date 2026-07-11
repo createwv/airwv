@@ -220,11 +220,11 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       chemical, oil & gas, TRI-listed, rail, highway, landfill/other) and let users
       toggle each category on/off — not just the whole 🏭 layer. Needs a `category`
       field on sources (partly derivable from TRI/EIA type) + a grouped filter UI.
-- [ ] **Source-proximity panel ("around a polluter")** — pick a pollution source
-      (search e.g. *DOW / Union Carbide*, *John Amos*) and see the sensors around it
-      with **distance + compass bearing**: nearest overall + nearest in each of the
-      8 sectors (N/NE/E/SE/S/SW/W/NW). Then **pivot the dashboard to those sensors**
-      (series / diurnal / overnight) to inspect a source's signature.
+- [x] **Source-proximity panel ("around a polluter")** — DONE: pick any of the 437
+      sources (datalist) → nearest sensors with **distance + 8-way compass bearing**,
+      **zone bands** (near-field <1mi / vicinity 1–3mi / downwind 3–10mi), nearest
+      community sensor per sector, 1mi & 3mi map rings, and a **"chart nearest"**
+      button that pivots the dashboard to the 6 closest. Client-side.
       *Distance bands (scientific): near-field **< 1 mi (~1.6 km)** = clearest for
       ground-level/fugitive emissions; local vicinity **1–3 mi**; tall stacks
       (power plants) can peak **1–10 mi downwind** (plume touchdown), so raw distance
