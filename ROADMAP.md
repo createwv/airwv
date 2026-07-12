@@ -443,8 +443,11 @@ people-direct water education and connect it to air).
 - [~] **Water in Events** — DONE (first): events now carry a **medium** (air/water) badge;
       the **2014 Freedom Industries MCHM spill (Elk River, Charleston)** is seeded as the
       first water event (documented, cited). Future spills/advisories + water-data overlays TBD.
-- [ ] **Water in Sources** — many facilities hold **NPDES water-discharge permits** as
-      well as air permits; show both on a facility page (one plant, air *and* water).
+- [~] **Water in Sources** — v1 BUILT: `scripts/fetch_water_sources.py` adds 92 WV **NPDES**
+      major dischargers (EPA ECHO, keyless) to the Sources page as a **💧 water-discharge**
+      category, each linking to its full **ECHO compliance record** (air · water · waste) —
+      the 'one facility, both media' payoff. *Still: match NPDES permits onto the existing
+      air/TRI entries (dedupe), discharge/violation badges, minors beyond majors.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
