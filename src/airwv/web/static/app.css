@@ -71,3 +71,22 @@
   .about a { color:var(--brand); }
   footer { text-align:center; color:#888; font-size:12px; padding:20px; }
   footer a { color:var(--brand-accent); }
+  /* report / feedback modal */
+  button.primary { background:var(--brand); color:#fff; border:none; }
+  button.primary:disabled { opacity:.5; cursor:not-allowed; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none;
+    align-items:center; justify-content:center; z-index:1000; }
+  .modal.on { display:flex; }
+  .modalbox { background:#fff; border-radius:10px; max-width:460px; width:92%;
+    max-height:88vh; overflow:auto; padding:0 18px 18px; box-shadow:0 10px 44px rgba(0,0,0,.3); }
+  .modalbox h3 { position:sticky; top:0; background:#fff; margin:0; padding:14px 0 8px;
+    border-bottom:1px solid #eee; font-size:16px; }
+  .modalbox h3 .x { float:right; border:none; background:none; font-size:22px; line-height:1;
+    cursor:pointer; color:#999; padding:0; }
+  .rform { display:flex; flex-direction:column; gap:10px; padding-top:12px; }
+  .rform label { display:flex; flex-direction:column; gap:3px; font-size:13px; color:#444; }
+  .rform input, .rform select, .rform textarea { padding:7px 9px; font-size:14px;
+    border:1px solid #ccc; border-radius:6px; font-family:inherit; }
+  .rform .hp { position:absolute !important; left:-9999px; }
+  .rloc { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .rnote { font-size:12px; color:#7a5b12; background:#fff4d6; padding:7px 9px; border-radius:6px; }

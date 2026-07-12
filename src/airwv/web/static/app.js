@@ -58,7 +58,7 @@ async function loadCoverage(){
   if (c.first_ts) $('coverage').textContent =
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
-const layerState = {community:true, reference:true, sources:true, regions:{}, cats:{}};
+const layerState = {community:true, reference:true, sources:true, reports:true, regions:{}, cats:{}};
 function drawMap(sensors){
   if (!map){
     map = L.map('map').setView([38.35, -81.6], 8);
@@ -66,11 +66,13 @@ function drawMap(sensors){
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     tile.on('load', () => busy('b-map', false));      // hide spinner once tiles are in
     setTimeout(() => busy('b-map', false), 5000);     // fallback
+    map.on('click', onMapClickForReport);             // place a report pin when in "set location" mode
   }
   redrawSensors();
   const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
+  loadReports();
 }
 function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
@@ -225,6 +227,7 @@ function buildLayers(){
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(click a sensor to chart it)</span></b>`+
     `<details open><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionBlocks}</div></details>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
+    `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
     `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
   $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
@@ -233,6 +236,7 @@ function buildLayers(){
     regions.forEach(r=>layerState.regions[r]=e.target.checked);
     $('layers').querySelectorAll('[data-region]').forEach(cb=>{cb.checked=e.target.checked;cb.indeterminate=false;}); redrawSensors(); };
   $('L-reference').onchange = e=>{ layerState.reference=e.target.checked; redrawSensors(); };
+  $('L-reports').onchange = e=>{ layerState.reports=e.target.checked; redrawReports(); };
   $('L-sources').onchange = e=>{ layerState.sources=e.target.checked;
     cats.forEach(c=>layerState.cats[c]=e.target.checked);
     $('layers').querySelectorAll('[data-cat]').forEach(cb=>cb.checked=e.target.checked); redrawSources(); };
@@ -353,9 +357,87 @@ $('field').addEventListener('change', () => { render(); renderGuide(); });
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
+// ---- Community reports: 📣 map layer + submit form + site feedback ----
+let reportLayer, allReports = [], placingReport = false, reportLoc = null, reportStart = 0, tmpLocMarker = null;
+const R_ICON = {air:'💨', water:'💧', soil:'🟤', wildlife:'🐾', violation:'⚠️', other:'📣'};
+async function loadReports(){
+  try { allReports = (await j('/api/reports')).results || []; } catch(e){ allReports = []; }
+  redrawReports();
+}
+function redrawReports(){
+  if (reportLayer) reportLayer.remove();
+  reportLayer = L.layerGroup();
+  if (layerState.reports !== false) allReports.forEach(r => {
+    if (r.lat == null) return;
+    L.marker([r.lat, r.lon], {icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
+      .bindPopup(`<b>${R_ICON[r.domain]||'📣'} ${r.category || r.domain}</b>`+
+        (r.description ? `<br>${r.description}` : '')+
+        `<br><small>${r.verified ? '✓ verified' : 'Unverified community report'} · ${(r.created_at||'').slice(0,10)}</small>`+
+        `<br><small style="color:#a00">Community-reported — not a finding of fact.</small>`)
+      .addTo(reportLayer);
+  });
+  reportLayer.addTo(map);
+}
+function onMapClickForReport(e){
+  if (!placingReport) return;
+  placingReport = false;
+  reportLoc = e.latlng;
+  $('r-locinfo').textContent = `📍 set: ${reportLoc.lat.toFixed(4)}, ${reportLoc.lng.toFixed(4)} — click "Set location" to move it`;
+  $('r-submit').disabled = false;
+  if (tmpLocMarker) tmpLocMarker.remove();
+  tmpLocMarker = L.marker([reportLoc.lat, reportLoc.lng]).addTo(map);
+  $('reportmodal').classList.add('on');
+}
+function resetReportForm(){
+  ['r-category','r-desc','r-org','r-email'].forEach(id => $(id).value = '');
+  reportLoc = null; $('r-locinfo').textContent = 'location not set';
+  $('r-submit').disabled = true; $('r-result').textContent = '';
+  if (tmpLocMarker) { tmpLocMarker.remove(); tmpLocMarker = null; }
+}
+async function submitReport(){
+  if (!reportLoc) return;
+  $('r-submit').disabled = true;
+  const body = {
+    domain: $('r-domain').value, category: $('r-category').value.trim(),
+    description: $('r-desc').value.trim(), lat: reportLoc.lat, lon: reportLoc.lng,
+    suspected_org: $('r-org').value.trim() || null, contact_email: $('r-email').value.trim() || null,
+    website: $('r-website').value, elapsed_ms: Date.now() - reportStart,
+  };
+  try {
+    const res = await fetch('/api/reports', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const d = await res.json();
+    if (res.ok){ $('r-result').textContent = d.message || 'Thanks!'; loadReports();
+      setTimeout(() => { $('reportmodal').classList.remove('on'); resetReportForm(); }, 2200); }
+    else { $('r-result').textContent = (typeof d.detail === 'string' ? d.detail : 'Could not submit.'); $('r-submit').disabled = false; }
+  } catch(e){ $('r-result').textContent = 'Error submitting — try again.'; $('r-submit').disabled = false; }
+}
+async function submitFeedback(){
+  if (!$('f-message').value.trim()) { $('f-result').textContent = 'Please add a message.'; return; }
+  $('f-submit').disabled = true;
+  try {
+    const res = await fetch('/api/feedback', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      kind: $('f-kind').value, message: $('f-message').value.trim(), contact: $('f-contact').value.trim() || null,
+      page: location.pathname, website: $('f-website').value })});
+    const d = await res.json();
+    $('f-result').textContent = res.ok ? (d.message || 'Thanks!') : (d.detail || 'Could not send.');
+    if (res.ok) setTimeout(() => { $('feedbackmodal').classList.remove('on'); $('f-message').value=''; $('f-result').textContent=''; $('f-submit').disabled=false; }, 1800);
+    else $('f-submit').disabled = false;
+  } catch(e){ $('f-result').textContent = 'Error — try again.'; $('f-submit').disabled = false; }
+}
+function initReporting(){
+  $('openreport').addEventListener('click', () => { reportStart = Date.now(); $('reportmodal').classList.add('on'); });
+  $('closereport').addEventListener('click', () => $('reportmodal').classList.remove('on'));
+  $('r-setloc').addEventListener('click', () => { placingReport = true; $('r-locinfo').textContent = 'now click the map…'; $('reportmodal').classList.remove('on'); });
+  $('r-submit').addEventListener('click', submitReport);
+  $('openfeedback').addEventListener('click', () => $('feedbackmodal').classList.add('on'));
+  $('closefeedback').addEventListener('click', () => $('feedbackmodal').classList.remove('on'));
+  $('f-submit').addEventListener('click', submitFeedback);
+  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
+}
 // map layer visibility is driven by the layers tree (buildLayers)
 loadGuide().then(loadSensors);
 loadValidation();
 loadCoverage();
 initProximity();
+initReporting();
 $('epacorrect').addEventListener('change', loadValidation);
