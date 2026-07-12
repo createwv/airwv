@@ -203,6 +203,15 @@ Make the data visible and usable.
       pollutant (AirNow carries it — a data/ingest feature, not just copy); a shared/
       expandable **glossary**; WV-specific **emissions/energy** numbers in Climate; possibly
       a "where pollution comes from" diagram; periodic re-verify of the DEP contacts.*
+- [~] **Ozone (EPA AirNow reference layer)** — BUILT going-forward: community PurpleAir
+      sensors (incl. Flex) can't measure ozone (their gas sensor = the BME688 VOC index we
+      already show), so ozone comes from **EPA AirNow** hourly monitors. `ingest airnow` now
+      parses OZONE (ppb) into a new `ozone` column; selectable as a metric on Analysis with
+      8-hour AQI bands; explained on Learn. WV has ~8 ozone monitors (often more than PM2.5).
+      *Still to do: **ozone history** (AirNow only accumulates forward — deep history would
+      come from EPA AirData param 44201, which is daily **ppm** and needs unit conversion to
+      ppb); an ozone **map layer** (color reference monitors by ozone when that metric is
+      picked); summer-ozone context in Learn.*
 - [~] **Events page (curated air/pollution events by region + time)** — **v1 BUILT**
       (`/events`, `events.html`/`events.js`, `Event` model + `/api/events` +
       `/api/admin/events`): public list of events; click → detail with description, cited
