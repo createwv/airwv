@@ -38,6 +38,25 @@ def test_report_notification_shape():
     body = route.calls.last.request.content.decode()
     assert "New air report" in body and "odor" in body
     assert "held for review" in body and "38.350" in body  # real coords in the private channel
+    assert '"username":"AirWV Reports"' in body            # per-message Discord identity
+
+
+@respx.mock
+def test_discord_identity_and_avatar():
+    route = respx.post(DISCORD).mock(return_value=httpx.Response(204))
+    n = ChatNotifier(discord_url=DISCORD, avatar_url="https://air.createwv.org/static/favicon.png")
+    n.send("t", ["x"], username="AirWV")
+    body = route.calls.last.request.content.decode()
+    assert '"username":"AirWV"' in body
+    assert "favicon.png" in body       # avatar_url on the payload
+
+
+@respx.mock
+def test_env_username_overrides_per_message():
+    route = respx.post(DISCORD).mock(return_value=httpx.Response(204))
+    n = ChatNotifier(discord_url=DISCORD, username="Empower WV")   # global override
+    n.notify_report(domain="air", category="", description="d", stage="held", lat=1.0, lon=2.0)
+    assert '"username":"Empower WV"' in route.calls.last.request.content.decode()
 
 
 def test_webhook_failure_never_raises():

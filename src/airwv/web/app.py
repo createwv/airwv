@@ -354,7 +354,7 @@ def create_app(store: Store) -> FastAPI:
                     "AIRWV_SLACK_WEBHOOK_URL and/or AIRWV_DISCORD_WEBHOOK_URL, then restart"}
         notifier.send("✅ AirWV test notification",
                       ["If you can see this, new report + feedback alerts are wired up."],
-                      link_label="Open admin", link_url=notifier.admin_link)
+                      link_label="Open admin", link_url=notifier.admin_link, username="AirWV")
         return {"sent": True, "slack": bool(notifier.slack_url), "discord": bool(notifier.discord_url)}
 
     @app.get("/admin", response_class=HTMLResponse)
