@@ -196,6 +196,7 @@ class Event(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     title: Mapped[str] = mapped_column(String(200))
+    medium: Mapped[str] = mapped_column(String(16), default="air")    # air | water | soil | other
     kind: Mapped[str] = mapped_column(String(32), default="other")   # fire | explosion | haze | spill | odor | other
     region: Mapped[str | None] = mapped_column(String(120), nullable=True)  # place / WV region
     lat: Mapped[float | None] = mapped_column(Float, nullable=True)

@@ -204,6 +204,32 @@ EVENTS = [
              "url": "http://www.barlettandsteele.com/journalism/vf_monsanto_3"},
         ],
     },
+    # ---- water ----
+    {
+        "title": "Freedom Industries chemical spill — Elk River (Charleston)",
+        "medium": "water", "kind": "spill", "region": "Elk River / Charleston (Kanawha Valley)",
+        "lat": 38.383, "lon": -81.603,
+        "start_ts": _utc("2014-01-09T00:00"), "end_ts": _utc("2014-01-13T00:00"),
+        "origin": "Leak of crude MCHM (a coal-washing chemical) from a Freedom Industries tank",
+        "scope": "Regional",
+        "regions_affected": ("~300,000 people across nine counties in the Charleston metro; a "
+                             "multi-day 'Do Not Use' tap-water order"),
+        "captured": False, "sensor_ids": [],
+        "description": (
+            "On January 9, 2014, up to ~7,500 gallons of crude MCHM — a chemical used to wash "
+            "coal — leaked from a Freedom Industries storage tank on the bank of the Elk River in "
+            "Charleston, about 1.5 miles upstream of West Virginia American Water's regional "
+            "intake. It forced a 'Do Not Use' order for tap water affecting roughly 300,000 people "
+            "across nine counties, lifted gradually starting Jan 13. A landmark U.S. drinking-water "
+            "disaster — it led to WV's Aboveground Storage Tank Act, and it's the clearest reason "
+            "to know where your drinking water comes from and what sits upstream of the intake."),
+        "sources": [
+            {"label": "U.S. Chemical Safety Board — final report",
+             "url": "https://www.csb.gov/csb-releases-final-report-into-2014-freedom-industries-mass-contamination-of-charleston-west-virginia-drinking-water-final-report-notes-shortcomings-in-communicating-risks-to-public-and-lack-of-chemical-tank-maintenance-requirements-/"},
+            {"label": "e-WV: The West Virginia Encyclopedia — Elk River Chemical Spill",
+             "url": "https://www.wvencyclopedia.org/entries/2333"},
+        ],
+    },
 ]
 
 

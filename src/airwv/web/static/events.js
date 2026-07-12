@@ -4,6 +4,7 @@ const $ = id => document.getElementById(id);
 const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const KIND = {fire:'🔥', wildfire:'🔥', explosion:'💥', haze:'🌫️', smoke:'🌫️',
               spill:'🛢️', odor:'👃', other:'📌'};
+const MEDIUM = {air:'💨 air', water:'💧 water', soil:'🌱 soil', other:'📍'};
 const COLORS = ['#4a7fb0', '#c9992f', '#7a6fb0', '#c0392b', '#2a7a2a', '#e07b39', '#5a6472'];
 let EVENTS = [], NAMES = {};
 
@@ -20,10 +21,12 @@ function card(e) {
   const badge = e.captured
     ? '<span class="evbadge cap">📈 sensor data</span>'
     : '<span class="evbadge">documented</span>';
+  const med = e.medium && e.medium !== 'air'
+    ? `<span class="evbadge med">${MEDIUM[e.medium] || e.medium}</span>` : '';
   return `<button class="evcard" data-id="${e.id}">
     <span class="evico">${emoji}</span>
     <div class="evcard-body">
-      <div class="evcard-title">${esc(e.title)} ${badge}</div>
+      <div class="evcard-title">${esc(e.title)} ${med} ${badge}</div>
       <div class="evcard-meta">${esc(e.region || '')}${e.region ? ' · ' : ''}${dateRange(e)}</div>
       ${e.description ? `<div class="evcard-desc">${esc(e.description.slice(0, 140))}${e.description.length > 140 ? '…' : ''}</div>` : ''}
     </div></button>`;

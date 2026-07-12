@@ -79,7 +79,7 @@ async function evCreate(){
   const g = id => $(id).value.trim();
   const csv = id => g(id).split(',').map(s => s.trim()).filter(Boolean);
   const body = {
-    title: g('ev-f-title'), kind: g('ev-f-kind'), region: g('ev-f-region') || null,
+    title: g('ev-f-title'), medium: g('ev-f-medium') || 'air', kind: g('ev-f-kind'), region: g('ev-f-region') || null,
     start_ts: g('ev-f-start') || null, end_ts: g('ev-f-end') || null,
     description: g('ev-f-desc') || null, origin: g('ev-f-origin') || null,
     scope: g('ev-f-scope') || null, regions_affected: g('ev-f-regions') || null,
@@ -96,6 +96,8 @@ const EV_FORM = `<div class="acard evform">
   <b>➕ New event</b>
   <input id="ev-f-title" placeholder="Title *">
   <div class="evrow">
+    <select id="ev-f-medium"><option value="air">air</option><option value="water">water</option>
+      <option value="soil">soil</option><option value="other">other</option></select>
     <select id="ev-f-kind"><option value="fire">fire</option><option value="wildfire">wildfire</option>
       <option value="explosion">explosion</option><option value="haze">haze</option>
       <option value="spill">spill</option><option value="odor">odor</option><option value="other">other</option></select>

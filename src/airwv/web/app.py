@@ -69,6 +69,7 @@ class FeedbackStatusIn(BaseModel):
 
 class EventIn(BaseModel):
     title: str
+    medium: str = "air"                    # air | water | soil | other
     kind: str = "other"                    # fire | explosion | haze | spill | odor | other
     region: str | None = None
     lat: float | None = None
@@ -339,7 +340,7 @@ def create_app(store: Store) -> FastAPI:
 
     def _event_dict(e) -> dict:
         return {
-            "id": e.id, "title": e.title, "kind": e.kind, "region": e.region,
+            "id": e.id, "title": e.title, "medium": e.medium, "kind": e.kind, "region": e.region,
             "lat": e.lat, "lon": e.lon,
             "start_ts": e.start_ts.isoformat() if e.start_ts else None,
             "end_ts": e.end_ts.isoformat() if e.end_ts else None,
@@ -428,7 +429,7 @@ def create_app(store: Store) -> FastAPI:
     @app.post("/api/admin/events")
     def admin_event_create(body: EventIn, _: bool = Depends(_require_admin)):
         eid = store.add_event(
-            title=body.title[:200], kind=body.kind, region=(body.region or None),
+            title=body.title[:200], medium=body.medium, kind=body.kind, region=(body.region or None),
             lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
             description=(body.description or None), origin=(body.origin or None),
             scope=(body.scope or None), regions_affected=(body.regions_affected or None),
@@ -443,7 +444,7 @@ def create_app(store: Store) -> FastAPI:
         if action == "delete":
             return {"ok": store.delete_event(event_id)}
         ok = store.update_event(
-            event_id, title=body.title[:200], kind=body.kind, region=body.region,
+            event_id, title=body.title[:200], medium=body.medium, kind=body.kind, region=body.region,
             lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
             description=body.description, origin=body.origin, scope=body.scope,
             regions_affected=body.regions_affected, captured=body.captured,
