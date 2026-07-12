@@ -447,17 +447,18 @@ people-direct water education and connect it to air).
       well as air permits; show both on a facility page (one plant, air *and* water).
 
 ### Cross-medium education & systemic issues
-- [ ] **Air ↔ water explainer** — where the same pollution shows up in *both* media and
+*(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
+- [x] **Air ↔ water explainer** — where the same pollution shows up in *both* media and
       where each is exclusive; how they interact (deposition, runoff, shared sources).
-- [ ] **Combined sewer overflows (CSOs)** — education that it's our *systems*, not only
+- [x] **Combined sewer overflows (CSOs)** — education that it's our *systems*, not only
       individual polluters: aging combined storm+sewage systems dump untreated sewage
       into rivers (e.g., the **Kanawha**) during rain — possibly the main reason to think
       twice about swimming. (Verify current CSO facts/permits before publishing.)
-- [ ] **Drinking-water source mapping** — flag **where each community's drinking water
+- [~] **Drinking-water source mapping** — flag **where each community's drinking water
       comes from** (e.g., **Elk River intake for Charleston**, down to the withdrawal
       point). Education on source water + a hook for **alerts** (upstream spill → warn
       downstream intakes). Sources: WV Bureau for Public Health source-water assessments.
-- [ ] **Recreation & fish-consumption guidance** — plain-language "can you swim/boat/eat
+- [x] **Recreation & fish-consumption guidance** — plain-language "can you swim/boat/eat
       the fish?" per river, from **WV DHHR/DEP fish-consumption advisories** + the DEP
       **303(d) impaired-streams / integrated report**; explain **how to read the river
       maps** (why so many segments look "impaired," what the categories mean).
