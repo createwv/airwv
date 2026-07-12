@@ -37,14 +37,18 @@ async function sensorNames() {
 }
 
 async function drawChart(e) {
-  const pad = 36 * 3600 * 1000;  // ±1.5 days around the window
+  const pad = 48 * 3600 * 1000;  // ±2 days around the window
   const t0 = e.start_ts ? new Date(e.start_ts).getTime() - pad : null;
   const t1 = (e.end_ts ? new Date(e.end_ts) : new Date(e.start_ts)).getTime() + pad;
+  // /api/series defaults to a sensor's LAST 90 days, so historical events need explicit
+  // date bounds or they come back empty. Pass the padded window as start/end (YYYY-MM-DD).
+  const ymd = ms => new Date(ms).toISOString().slice(0, 10);
+  const q = (t0 && t1) ? `&start=${ymd(t0)}&end=${ymd(t1)}` : '';
   const traces = [];
   for (let i = 0; i < e.sensor_ids.length; i++) {
     const sid = e.sensor_ids[i];
     try {
-      const d = await (await fetch(`/api/series/${sid}?field=pm2_5`)).json();
+      const d = await (await fetch(`/api/series/${sid}?field=pm2_5${q}`)).json();
       const pts = (d.points || []).filter(p => {
         const t = new Date(p.ts).getTime();
         return (!t0 || t >= t0) && t <= t1;

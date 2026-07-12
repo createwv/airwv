@@ -51,9 +51,12 @@ EVENTS = [
         "origin": "Wildfires across central & western Canada (smoke transported ~1000s of miles)",
         "scope": "Continental",
         "regions_affected": ("Much of Canada and the eastern U.S. — the Midwest, Northeast, "
-                             "and Appalachia including WV, VA, KY and TN"),
+                             "and Appalachia. Our sensors registered it across WV statewide: "
+                             "the Kanawha Valley, North Central (Fairmont), the Eastern "
+                             "Panhandle (Shenandoah Jct), and the Mid-Ohio Valley (Parkersburg)"),
         "captured": True,
-        "sensor_ids": ["197127", "196533", "216019", "216007", "196535", "197121"],
+        # region-spanning set (Kanawha / N-Central / E-Panhandle / Mid-Ohio) — shows statewide reach
+        "sensor_ids": ["197127", "263579", "263585", "214373", "263581", "263587", "264043"],
         "description": (
             "Smoke from major wildfires across central and western Canada was carried into "
             "Appalachia in early June 2025, pushing air into the Moderate range. Our Kanawha "
@@ -75,10 +78,10 @@ EVENTS = [
         "start_ts": _utc("2024-11-06T00:00"), "end_ts": _utc("2024-11-09T00:00"),
         "origin": "Drought-driven forest fires in the southern WV coalfields",
         "scope": "Regional",
-        "regions_affected": ("Southern WV coalfields (Logan, Mingo, Kanawha, Wayne, Lincoln) "
-                             "and the Kanawha Valley"),
+        "regions_affected": ("Southern WV coalfields (Logan, Mingo, Kanawha, Wayne, Lincoln); "
+                             "smoke settled across the Kanawha Valley, where our sensors caught it"),
         "captured": True,
-        "sensor_ids": ["197127", "197121", "196535", "216019", "215965", "196533"],
+        "sensor_ids": ["197127", "197121", "215985", "187103", "196533", "216019", "208639"],
         "description": (
             "Severe drought fueled a heavy fall fire season across West Virginia in November "
             "2024 — the Division of Forestry fought multiple large fires in the southern "
