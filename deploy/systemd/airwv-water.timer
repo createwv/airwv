@@ -1,0 +1,14 @@
+# Runs airwv-water.service hourly. USGS instantaneous values update every 15-60 min;
+# keyless with no quota, so hourly is free and safe.
+#   sudo systemctl enable --now airwv-water.timer
+
+[Unit]
+Description=Run AirWV USGS water collection hourly
+
+[Timer]
+OnBootSec=9min
+OnUnitActiveSec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
