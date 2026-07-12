@@ -157,7 +157,9 @@ Make the data visible and usable.
 - [x] **Master map-layer toggles** — community sensors / 🏭 sources / 📍 monitors
       each toggle on/off (sensors now toggle as one layer like the others).
 - [ ] Per-area rollups + trend charts on the dashboard
-- [ ] Embeddable widgets for partner sites; deploy publicly at air.createwv.org
+- [x] **Deployed publicly at air.createwv.org** — live on papa-greatness (Hetzner),
+      NPM/Docker reverse proxy + Cloudflare DNS, systemd services/timers (see
+      deployment notes). *(Embeddable partner widgets still to build.)*
 
 #### Dashboard restructure (modes, layers, labeling) — see [`docs/FRONTEND.md`](docs/FRONTEND.md)
 
@@ -236,28 +238,35 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       readings with the hours it's actually downwind (near-causal; hourly ASOS wind
       in the DB aligned to readings). Operationalizes the overnight-accumulation
       finding (Nitro/John Amos 1.98×). AERMOD-style plume modeling stays out of scope.
-- [~] **Community reporting & feedback** — DESIGNED (v2 of the design):
-      [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md). Now a **staged
-      pipeline**: light auto pre-screen → published *unverified* → maintainer
-      **verify/enrich** → *confirmed*. **Broadened scope** (air / water / soil /
-      wildlife / suspected-violation / other). **Progressive disclosure** — dead
-      simple by default, optional advanced tools (name an org, enter a reading,
-      photo, contact). **Naming is input-allowed but publish-gated** (private until
-      a reviewer confirms). Keeps EXIF strip, ~150 m jitter, rate-limit + honeypot.
+- [x] **Community reporting & feedback** — BUILT & LIVE (design v2:
+      [`docs/COMMUNITY-REPORTING.md`](docs/COMMUNITY-REPORTING.md)). **Staged
+      pipeline**: light auto pre-screen (`reporting.screen`) → published *unverified*
+      → maintainer **verify** → *confirmed*. **Broadened scope** (air / water / soil /
+      wildlife / suspected-violation / other). **Progressive disclosure** — simple by
+      default, optional advanced tools (name an org, contact). **Naming is
+      input-allowed but publish-gated**. Keeps ~150 m jitter, per-IP rate-limit +
+      honeypot + min-time. Intake `POST /api/reports` + `GET /api/reports` (public
+      jittered projection) + 📣 map layer with domain markers.
 - [ ] **Community readings** — optional structured measurements (air/water/soil),
-      community-submitted + clearly unverified; own map layer once verified.
-- [ ] **Site feedback form** — bug / idea / question about the website itself,
-      footer-reachable, routed to maintainers (not mapped) — `feedback` table.
-- [ ] **Maintainer pipeline: notifications** — new reports/feedback ping a
-      **Slack/Discord webhook** (`AIRWV_REPORT_WEBHOOK`, reuse alerts webhook util).
-- [ ] **Admin / moderation & verification console** (priority) — token-gated queues
-      (held / unverified / flagged / feedback) with verify · enrich · approve-field
-      (org/photo/reading) · merge · remove · respond, + CLI mirror. This is the
-      "admin end" that makes the staged trust model real.
+      community-submitted + clearly unverified; own map layer once verified. *(table
+      exists; entry UI still to build)*
+- [x] **Site feedback form** — bug / idea / question about the website, footer
+      button → `POST /api/feedback`, routed to maintainers (not mapped) — `feedback` table.
+- [x] **Maintainer pipeline: notifications** — new reports/feedback ping **Slack
+      &/or Discord** incoming webhooks (`notify/chat.py`; `AIRWV_SLACK_WEBHOOK_URL` /
+      `AIRWV_DISCORD_WEBHOOK_URL`), as a background task (best-effort, never blocks a
+      submission). Per-message identity ("AirWV Reports" / "AirWV Feedback") + favicon
+      avatar; `/admin` **Test notifications** button (`POST /api/admin/notify-test`).
+      *Follow-up: Discord avatar not rendering yet — revisit.*
+- [x] **Admin / moderation & verification console** — BUILT: token-gated
+      (`AIRWV_ADMIN_TOKEN` / `X-Admin-Token`, fails closed) `/admin` page + queues
+      (held / unverified / flagged / confirmed / all / feedback) with **verify ·
+      publish · approve-org · remove** and feedback triage. *Deferred: enrich/edit,
+      merge, respond-to-reporter, CLI mirror — and a real login (shared token for now).*
 - [x] **Migrations (Alembic)** — DONE: Alembic set up (batch mode = SQLite ALTER
       support), baseline migration, `AIRWV_DATABASE_URL`-aware env; both DBs stamped.
-      Long-standing gap closed. **Reporting tables created** (`reports` /
-      `readings_community` / `feedback` — staged-trust `Report` model). Next: intake API.
+      Long-standing gap closed. Reporting tables live (`reports` / `readings_community`
+      / `feedback` — staged-trust `Report` model). Intake API + admin now built on top.
 - [ ] **"Report to WV DEP"** — surface the official channel to report an
       environmental concern/complaint to WV DEP (their complaint form + spill/
       emergency line) from the dashboard, alongside a community report. *Verify the
