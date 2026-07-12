@@ -36,6 +36,20 @@ from airwv.storage import Store
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 
+def _asset_version() -> str:
+    """A cache-busting stamp for static assets — the newest static-file mtime. Changes on
+    every deploy (git pull touches the files + the app restarts), so ?v=<stamp> makes
+    browsers/Cloudflare fetch fresh CSS/JS immediately instead of serving a stale copy."""
+    static = Path(__file__).parent / "static"
+    try:
+        return str(int(max(p.stat().st_mtime for p in static.glob("*.*"))))
+    except Exception:
+        return "1"
+
+
+TEMPLATES.env.globals["asset_v"] = _asset_version()
+
+
 class ReportIn(BaseModel):
     domain: str
     category: str = ""

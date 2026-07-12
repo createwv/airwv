@@ -28,6 +28,6 @@
 {% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
-<script src="/static/events.js"></script>
-<script src="/static/reporting.js"></script>
+<script src="/static/events.js?v={{ asset_v }}"></script>
+<script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

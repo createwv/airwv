@@ -49,6 +49,6 @@
 {% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
-<script src="/static/sources.js"></script>
-<script src="/static/reporting.js"></script>
+<script src="/static/sources.js?v={{ asset_v }}"></script>
+<script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}
