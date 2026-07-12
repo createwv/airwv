@@ -12,9 +12,10 @@ const CAT = {
   oil_gas:  {label: 'Oil & gas',          icon: '🛢️', color: '#7a5b12'},
   materials:{label: 'Metals / materials', icon: '🏗️', color: '#5a6472'},
   waste:    {label: 'Waste',              icon: '♻️', color: '#2a7a2a'},
+  water_discharge: {label: 'Water discharge (NPDES)', icon: '💧', color: '#2c9fd6'},
   other:    {label: 'TRI facility',       icon: '🏭', color: '#4a7fb0'},
 };
-const CAT_ORDER = ['power', 'chemical', 'oil_gas', 'waste', 'materials', 'other'];
+const CAT_ORDER = ['power', 'chemical', 'oil_gas', 'water_discharge', 'waste', 'materials', 'other'];
 
 let SOURCES = [], SENSORS = [], DISCLAIMER = '';
 
@@ -113,6 +114,16 @@ function openDetail(s) {
     <td>${esc(x.name)}</td><td>${x.kind === 'reference' ? '◎ ref' : '● community'}</td>
     <td>${x.mi.toFixed(1)} mi</td><td>${x.dir}</td></tr>`).join('')
     : '<tr><td class="meta">No sensors located yet.</td></tr>';
+  // permit & compliance: NPDES water dischargers link to their EPA ECHO record (air+water+waste)
+  if (s.echo) {
+    $('sd-permit').innerHTML = `NPDES permit <b>${esc(s.permit || '')}</b> — `
+      + `<a href="${esc(s.echo)}" target="_blank" rel="noopener">full EPA ECHO compliance record `
+      + `(air · water · waste) →</a>`;
+  } else {
+    $('sd-permit').innerHTML = 'Detailed permit &amp; compliance history coming soon (EPA ECHO / WV DEP). '
+      + 'Look this facility up on '
+      + '<a href="https://echo.epa.gov/facilities/facility-search" target="_blank" rel="noopener">EPA ECHO</a>.';
+  }
   const q = encodeURIComponent(s.name);
   $('sd-analysis').href = `/air?src=${q}`;
   $('sd-report').href = `/air?src=${q}#report`;

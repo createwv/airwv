@@ -115,9 +115,11 @@ function redrawSensors(){
 }
 let sensorLayer, refLayer, ozoneLayer;
 // reference monitors are now drawn live in drawMap() (ringed circles, current PM2.5)
-const SRC_ICON = {power:'⚡', chemical:'⚗️', oil_gas:'🛢️', materials:'⛏️', waste:'🗑️', other:'🏭'};
+const SRC_ICON = {power:'⚡', chemical:'⚗️', oil_gas:'🛢️', materials:'⛏️', waste:'🗑️',
+  water_discharge:'💧', other:'🏭'};
 const SRC_LABEL = {power:'Power plant', chemical:'Chemical', oil_gas:'Oil & gas',
-  materials:'Metals / mining / materials', waste:'Waste', other:'Other TRI facility'};
+  materials:'Metals / mining / materials', waste:'Waste',
+  water_discharge:'Water discharge (NPDES)', other:'Other TRI facility'};
 let sourceLayer, allSources_ = [], srcDisclaimer = '';
 async function loadSources(){
   const data = await j('/api/sources');
