@@ -463,6 +463,13 @@ people-direct water education and connect it to air).
       maps** (why so many segments look "impaired," what the categories mean).
 
 ### Field science — trained-scientist spot checks
+- [~] **Field-reading intake (verified data, not public reports)** — v1 BUILT: `/field`
+      page (mobile-friendly, admin-token-gated) lets trained submitters log an actual
+      instrument reading — medium, parameter, value/unit, method, geolocation (GPS or
+      map-pick), notes, and a **downscaled meter photo** — stored in `field_readings`
+      (trusted; `/api/field-readings`), rendered on a map + list. *Still: submitter
+      roles beyond the shared token, QA/verify workflow, overlay on Analysis/Water maps,
+      link to events/sources, trend-over-time per spot.* Original idea below:
 - [ ] **Field-reading intake (verified data, not public reports)** — a way for **trained
       Create WV / partner scientists** to submit **actual instrument readings** in the
       field (spot-check VOCs, water conductivity/metals, pH, etc.), with a **photo of the
