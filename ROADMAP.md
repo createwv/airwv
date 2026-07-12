@@ -160,6 +160,13 @@ Make the data visible and usable.
 - [x] **Deployed publicly at air.createwv.org** — live on papa-greatness (Hetzner),
       NPM/Docker reverse proxy + Cloudflare DNS, systemd services/timers (see
       deployment notes). *(Embeddable partner widgets still to build.)*
+- [ ] **Location-scoped API for local embeds** — add geographic filters to the read
+      API (`?region=` / `?near=lat,lon&radius_km=` / `?bbox=`) so a partner or teammate
+      can query just their area's sensors (not all WV) to power a neighborhood widget,
+      app, or bot. Foundation already exists (FastAPI + `/api/sensors`, per-sensor
+      `region`, `/docs` for free); needs the filter params + CORS + rate limiting +
+      documented public endpoints. *A teammate offered to build this — coordinate scope
+      (fixed region vs. flexible radius/bbox) and the consumer (widget / app / bot).*
 
 #### Dashboard restructure (modes, layers, labeling) — see [`docs/FRONTEND.md`](docs/FRONTEND.md)
 
@@ -210,6 +217,19 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       Now **statewide (all WV) + cross-border** (OH/PA/MD/VA/KY facilities within
       ~20km of the WV line, so Ohio-River emitters count) — 437 facilities. Still to
       add: EIA power plants, WV DEP permits + O&G wells.
+- [ ] **Dedicated "Sources & Facilities" page** — a browse experience for the 437
+      documented sources, separate from the Analysis map. Top = sliding **carousel of
+      cards** (with a site/aerial snapshot per place), filterable by category & region;
+      click a card → **detail view**: the facts we cite (name, type, operator, category,
+      citation), **permit & activity** info, **how to contact / report**, and the
+      **nearby-sensors + "chart nearest" panel reused from the source-proximity feature**
+      so you can read a source through the air data around it. Buildable now on
+      `sources.json` + `/api/sources` + the existing proximity logic; the richer permit/
+      contact fields and imagery depend on the two items below. Naming stays neutral per
+      SOURCE-POLICY (e.g. "Facilities" / "Emission sources", not "polluters").
+      **Imagery:** prefer license-clean satellite/aerial thumbnails (Mapbox Static / ESRI
+      World Imagery / USGS NAIP) — Google Street View needs the Maps API and its ToS
+      restricts caching/storing tiles, so treat it as a later, keyed add-on.
 - [ ] **Facility status / permit layer** — toggle facilities by status:
       **active / inactive / approved / requesting (planning/pending)** — the permit
       lifecycle regulated emitters go through. Permit info as a separate field
