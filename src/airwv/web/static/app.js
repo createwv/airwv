@@ -208,7 +208,9 @@ function initProximity(){
 }
 function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
-  sourceLayer = L.layerGroup();
+  sourceLayer = L.markerClusterGroup
+    ? L.markerClusterGroup({chunkedLoading:true, maxClusterRadius:45, spiderfyOnMaxZoom:true})
+    : L.layerGroup();
   if (layerState.sources) allSources_.forEach(s => {
     if (s.lat == null || s.lon == null) return;
     const cat = s.category || 'other';

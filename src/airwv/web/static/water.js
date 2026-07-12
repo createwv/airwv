@@ -43,7 +43,9 @@ function colorFor(site, param) {
 
 function draw() {
   if (layer) layer.remove();
-  layer = L.layerGroup();
+  layer = L.markerClusterGroup
+    ? L.markerClusterGroup({chunkedLoading: true, maxClusterRadius: 45, spiderfyOnMaxZoom: true})
+    : L.layerGroup();
   const meta = WATER_PARAMS[current];
   let withVal = 0;
   SITES.forEach(s => {
