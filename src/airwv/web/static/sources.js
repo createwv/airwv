@@ -43,10 +43,13 @@ function phStyle(cat) {
   const c = CAT[cat] || CAT.other;
   return `background:linear-gradient(135deg,${c.color}22,${c.color}44)`;
 }
+function phInner(icon) {
+  return `<span class="ph-ic">${icon}</span><span class="ph-cap">📷 photo coming soon</span>`;
+}
 function thumb(s, w, h, cls) {
   const c = CAT[s.category] || CAT.other;
   const url = svUrl(s.lat, s.lon, w, h);
-  if (!url) return `<div class="${cls} ph" style="${phStyle(s.category)}"><span>${c.icon}</span></div>`;
+  if (!url) return `<div class="${cls} ph" style="${phStyle(s.category)}">${phInner(c.icon)}</div>`;
   return `<img class="${cls}" loading="lazy" alt="${esc(s.name)}" src="${url}"`
     + ` data-cls="${cls}" data-icon="${c.icon}" data-style="${phStyle(s.category)}" onerror="svFail(this)">`;
 }
@@ -55,7 +58,7 @@ window.svFail = function (img) {
   const d = document.createElement('div');
   d.className = img.dataset.cls + ' ph';
   d.style.cssText = img.dataset.style;
-  d.innerHTML = '<span>' + img.dataset.icon + '</span>';
+  d.innerHTML = phInner(img.dataset.icon);
   img.replaceWith(d);
 };
 
