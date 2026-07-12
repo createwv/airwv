@@ -430,7 +430,9 @@ people-direct water education and connect it to air).
 - [~] **Water data ingestion** — v1 BUILT: `ingest water` pulls **USGS NWIS** real-time
       gauges for WV (keyless) into a tall `water_readings` table (pH, DO, conductance,
       turbidity, temperature, discharge, gage height; ~176 sites), accumulating via a
-      timer like AirNow. *Still: **Water Quality Portal**
+      timer like AirNow. **Water Quality Portal** now added too (`fetch_water_samples.py`):
+      64k WV discrete samples (E. coli, iron/aluminum/manganese, sulfate, nitrate, TDS…) across
+      ~1,960 sites — the history/lab side of water. *Still: **WV DEP**
       (waterqualitydata.us — unified USGS NWIS + EPA WQX/STORET + 400 agencies,
       keyless; discrete samples: pH, DO, turbidity, conductivity, E. coli, nutrients,
       metals, temp) and **USGS NWIS/Water Data APIs** (real-time gauges: flow, gage
