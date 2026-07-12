@@ -22,11 +22,14 @@
     <p class="meta" id="w-detailnote"></p>
   </div>
 
-  <div class="about"><p class="meta">Source: <a href="https://waterservices.usgs.gov/" target="_blank"
-    rel="noopener">USGS NWIS real-time water services</a> (keyless). Provisional data. Water-quality
-    parameters (pH, dissolved oxygen, conductivity, turbidity) are reported at a subset of gauges;
-    most report streamflow and gage height. Health thresholds shown are general aquatic-life
-    guidance, not drinking-water standards.</p></div>
+  <div class="about"><p class="meta">Sources: <a href="https://waterservices.usgs.gov/" target="_blank"
+    rel="noopener">USGS NWIS</a> real-time gauges (flow, gage height, and some pH / oxygen /
+    conductivity / turbidity) and the <a href="https://www.waterqualitydata.us/" target="_blank"
+    rel="noopener">Water Quality Portal</a> (EPA/USGS lab &amp; grab samples — <b>E. coli</b>,
+    metals like iron/aluminum/manganese, sulfate, nitrate, TDS — across hundreds of sites). Portal
+    samples are <b>periodic, not live</b>, so each marker shows its latest-sample date. All data is
+    provisional; thresholds shown are general aquatic-life / secondary standards, not a
+    drinking-water determination.</p></div>
 </div>
 {% include "_modals.html" %}
 {% endblock %}

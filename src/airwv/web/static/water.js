@@ -15,10 +15,23 @@ const WATER_PARAMS = {
   turbidity:   {label: 'Turbidity', unit: 'FNU', note: 'Higher = more suspended sediment (runoff, disturbance).',
                 color: v => v < 10 ? '#00e400' : v < 50 ? '#ffff00' : v < 100 ? '#ff7e00' : '#ff0000'},
   temperature: {label: 'Water temperature', unit: '°C', note: 'Warmer water holds less oxygen.', color: () => '#4a7fb0'},
+  ecoli:       {label: 'E. coli (bacteria)', unit: 'MPN/100mL', note: 'Swim-safety indicator — spikes after rain / sewer overflows. Recreational single-sample limit ~235.',
+                color: v => v < 126 ? '#00e400' : v < 235 ? '#ffff00' : v < 1000 ? '#ff7e00' : '#ff0000'},
+  iron:        {label: 'Iron', unit: 'mg/L', note: 'Mining / acid-drainage indicator. Secondary drinking standard 0.3 mg/L.',
+                color: v => v < 0.3 ? '#00e400' : v < 1 ? '#ffff00' : v < 3 ? '#ff7e00' : '#ff0000'},
+  sulfate:     {label: 'Sulfate', unit: 'mg/L', note: 'Elevated by mining. Secondary standard 250 mg/L.',
+                color: v => v < 250 ? '#00e400' : v < 500 ? '#ffff00' : '#ff0000'},
+  nitrate:     {label: 'Nitrate', unit: 'mg/L', note: 'Nutrient (agriculture/sewage). Drinking-water limit 10 mg/L.',
+                color: v => v < 5 ? '#00e400' : v < 10 ? '#ffff00' : '#ff0000'},
+  tds:         {label: 'Total dissolved solids', unit: 'mg/L', note: 'Overall dissolved content. Secondary standard 500 mg/L.',
+                color: v => v < 500 ? '#00e400' : v < 1000 ? '#ffff00' : '#ff0000'},
+  aluminum:    {label: 'Aluminum', unit: 'mg/L', note: 'Acid-drainage metal.', color: v => v < 0.75 ? '#00e400' : v < 2 ? '#ffff00' : '#ff0000'},
+  manganese:   {label: 'Manganese', unit: 'mg/L', note: 'Mining metal. Secondary standard 0.05 mg/L.', color: v => v < 0.05 ? '#00e400' : v < 0.3 ? '#ffff00' : '#ff0000'},
   discharge:   {label: 'Streamflow', unit: 'cfs', note: 'How much water is flowing past — context for everything else.', color: () => '#4a7fb0'},
   gage_height: {label: 'Gage height', unit: 'ft', note: 'River stage (height) at the gauge.', color: () => '#4a7fb0'},
 };
-const ORDER = ['ph', 'do', 'conductance', 'turbidity', 'temperature', 'discharge', 'gage_height'];
+const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'sulfate', 'nitrate', 'tds',
+               'aluminum', 'manganese', 'turbidity', 'temperature', 'discharge', 'gage_height'];
 
 let SITES = [], map, layer, current = 'ph';
 
@@ -34,32 +47,38 @@ function draw() {
   const meta = WATER_PARAMS[current];
   let withVal = 0;
   SITES.forEach(s => {
-    if (s.lat == null || s.lon == null) return;
     const l = s.latest[current];
-    const col = l ? colorFor(s, current) : NEUTRAL;
-    if (l) withVal++;
-    const val = l ? `${l.value}${meta.unit ? ' ' + meta.unit : ''}` : 'not measured here';
-    L.circleMarker([s.lat, s.lon], {radius: l ? 7 : 4, color: '#333', weight: l ? 1 : 0.5,
-      fillColor: col, fillOpacity: l ? 0.9 : 0.4})
+    if (!l || s.lat == null || s.lon == null) return;   // only plot sites reporting this measure
+    withVal++;
+    const val = `${l.value}${meta.unit ? ' ' + meta.unit : ''}`;
+    const when = l.ts ? new Date(l.ts).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '';
+    L.circleMarker([s.lat, s.lon], {radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
-        + `<br><small>click to chart · USGS ${esc(s.site_id)}</small>`)
+        + (when ? `<br><small>latest sample: ${when}</small>` : '')
+        + `<br><small>click to chart</small>`)
       .on('click', () => showSite(s)).addTo(layer);
   });
   layer.addTo(map);
-  $('w-count').textContent = `· ${withVal} of ${SITES.length} sites report ${meta.label.toLowerCase()}`;
+  $('w-count').textContent = `· ${withVal} sites report ${meta.label.toLowerCase()}`;
   $('w-note').textContent = meta.note;
   $('w-legend').innerHTML = legend(current);
 }
 
 function legend(param) {
   if (['temperature', 'discharge', 'gage_height'].includes(param))
-    return 'Colored dots = sites reporting this measure; faint = not measured here. Click a dot to chart it.';
+    return 'Each dot is a site reporting this measure. Click a dot to chart its history.';
   const swatches = {ph: [['#00e400', '6.5–9 (healthy)'], ['#ffff00', 'slightly off'], ['#ff0000', 'acidic/basic']],
     do: [['#00e400', '≥7'], ['#ffff00', '5–7'], ['#ff7e00', '4–5'], ['#ff0000', '<4 mg/L']],
     conductance: [['#00e400', '<500'], ['#ffff00', '500–1000'], ['#ff7e00', '1000–2000'], ['#ff0000', '>2000 µS/cm']],
-    turbidity: [['#00e400', '<10'], ['#ffff00', '10–50'], ['#ff7e00', '50–100'], ['#ff0000', '>100 FNU']]}[param] || [];
-  return swatches.map(([c, t]) => `<span class="chip"><span class="sw" style="background:${c}"></span>${t}</span>`).join(' ')
-    + ' · faint = not measured here';
+    turbidity: [['#00e400', '<10'], ['#ffff00', '10–50'], ['#ff7e00', '50–100'], ['#ff0000', '>100 FNU']],
+    ecoli: [['#00e400', '<126'], ['#ffff00', '126–235'], ['#ff7e00', '235–1000'], ['#ff0000', '>1000 (unsafe)']],
+    iron: [['#00e400', '<0.3'], ['#ffff00', '0.3–1'], ['#ff7e00', '1–3'], ['#ff0000', '>3 mg/L']],
+    sulfate: [['#00e400', '<250'], ['#ffff00', '250–500'], ['#ff0000', '>500 mg/L']],
+    nitrate: [['#00e400', '<5'], ['#ffff00', '5–10'], ['#ff0000', '>10 mg/L (limit)']],
+    tds: [['#00e400', '<500'], ['#ffff00', '500–1000'], ['#ff0000', '>1000 mg/L']],
+    aluminum: [['#00e400', '<0.75'], ['#ffff00', '0.75–2'], ['#ff0000', '>2 mg/L']],
+    manganese: [['#00e400', '<0.05'], ['#ffff00', '0.05–0.3'], ['#ff0000', '>0.3 mg/L']]}[param] || [];
+  return swatches.map(([c, t]) => `<span class="chip"><span class="sw" style="background:${c}"></span>${t}</span>`).join(' ');
 }
 
 async function showSite(s) {
