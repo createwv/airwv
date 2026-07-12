@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>Air quality events</h1>
+    <p>Notable pollution and air-quality events across West Virginia. Where our community
+       sensors were online, we overlay what they measured — before, during, and after.</p></div>
+
+  <section class="ev-list" id="ev-list">
+    <p class="meta" style="padding:14px">Loading events…</p>
+  </section>
+</div>
+
+<div class="modal" id="ev-detail"><div class="modalbox evbox">
+  <h3><span id="ev-title">Event</span> <button class="x" id="ev-close" type="button">×</button></h3>
+  <div class="ev-meta" id="ev-metaline"></div>
+  <p id="ev-desc" class="ev-desc"></p>
+  <div id="ev-chartwrap" class="ev-chartwrap" style="display:none">
+    <b class="ev-sub">What our sensors measured</b>
+    <div id="ev-chart" class="ev-chart"></div>
+    <p class="meta" id="ev-chartnote"></p>
+  </div>
+  <div id="ev-nodata" class="ev-nodata" style="display:none">
+    📄 This event predates or falls outside our community-sensor coverage — shown as
+    documented context, not from our measurements.</div>
+  <div id="ev-sources" class="ev-section"></div>
+</div></div>
+
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/events.js"></script>
+<script src="/static/reporting.js"></script>
+{% endblock %}

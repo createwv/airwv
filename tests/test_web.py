@@ -123,8 +123,9 @@ def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
     # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
     for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
-                         ("/sources", "sources.js"), ("/learn", "reporting.js"),
-                         ("/about", "reporting.js"), ("/admin", "admin.js")]:
+                         ("/sources", "sources.js"), ("/events", "events.js"),
+                         ("/learn", "reporting.js"), ("/about", "reporting.js"),
+                         ("/admin", "admin.js")]:
         r = c.get(path)
         assert r.status_code == 200, path
         assert "modenav" in r.text and script in r.text, path
@@ -132,3 +133,19 @@ def test_mode_pages_render(tmp_path):
     assert ">Home</a>" in c.get("/").text
     assert "Air Quality Index" in c.get("/learn").text
     assert "Where the data comes from" in c.get("/about").text
+
+
+def test_events_api_and_admin(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = _client(tmp_path)
+    assert c.get("/api/events").json()["results"] == []          # empty at first
+    hdr = {"X-Admin-Token": "secret"}
+    r = c.post("/api/admin/events", json={"title": "Test fire", "kind": "fire",
+              "captured": True, "sensor_ids": ["197127"], "status": "published"}, headers=hdr)
+    assert r.status_code == 200
+    pub = c.get("/api/events").json()["results"]
+    assert len(pub) == 1 and pub[0]["title"] == "Test fire" and pub[0]["sensor_ids"] == ["197127"]
+    assert c.get("/api/admin/events").status_code == 401          # gated
+    eid = pub[0]["id"]
+    c.post(f"/api/admin/events/{eid}?action=delete", json={"title": "x"}, headers=hdr)
+    assert c.get("/api/events").json()["results"] == []

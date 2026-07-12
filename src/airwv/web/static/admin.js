@@ -54,11 +54,70 @@ function fbCard(f){
       <button onclick="fbAct(${f.id},'done')">Done</button></div></div>`;
 }
 
+function eventCard(e){
+  const when = [e.start_ts, e.end_ts].filter(Boolean).map(s => s.slice(0,10)).join(' → ');
+  return `<div class="acard">
+    <div><b>#${e.id} ${esc(e.title)}</b> <span class="tag">${esc(e.status)}</span>
+      <span class="tag">${esc(e.kind)}</span>
+      ${e.captured ? '<span class="tag cap">📈 sensor data</span>' : ''}</div>
+    <div class="meta">${esc(e.region||'')}${e.region?' · ':''}${when} · ${(e.sensor_ids||[]).length} sensor(s) · ${(e.sources||[]).length} source(s)</div>
+    <div class="arow">
+      ${e.status !== 'published' ? `<button onclick="evSet(${e.id},'published')">Publish</button>` : `<button onclick="evSet(${e.id},'draft')">Unpublish</button>`}
+      <button class="danger" onclick="evDelete(${e.id})">Delete</button></div></div>`;
+}
+async function evSet(id, status){
+  const e = ADMIN_EVENTS.find(x => x.id === id); if (!e) return;
+  await adminFetch(`/api/admin/events/${id}`, {method:'POST', body: JSON.stringify({...e, status})});
+  loadQueue();
+}
+async function evDelete(id){
+  if (!confirm('Delete this event?')) return;
+  await adminFetch(`/api/admin/events/${id}?action=delete`, {method:'POST', body: JSON.stringify({title:'x'})});
+  loadQueue();
+}
+async function evCreate(){
+  const g = id => $(id).value.trim();
+  const body = {
+    title: g('ev-f-title'), kind: g('ev-f-kind'), region: g('ev-f-region') || null,
+    start_ts: g('ev-f-start') || null, end_ts: g('ev-f-end') || null,
+    description: g('ev-f-desc') || null, captured: $('ev-f-captured').checked,
+    sensor_ids: g('ev-f-sensors').split(',').map(s => s.trim()).filter(Boolean),
+    sources: g('ev-f-srcurl') ? [{label: g('ev-f-srclabel') || g('ev-f-srcurl'), url: g('ev-f-srcurl')}] : [],
+    status: 'published',
+  };
+  if (!body.title){ alert('Title required'); return; }
+  await adminFetch('/api/admin/events', {method:'POST', body: JSON.stringify(body)});
+  loadQueue();
+}
+const EV_FORM = `<div class="acard evform">
+  <b>➕ New event</b>
+  <input id="ev-f-title" placeholder="Title *">
+  <div class="evrow">
+    <select id="ev-f-kind"><option value="fire">fire</option><option value="wildfire">wildfire</option>
+      <option value="explosion">explosion</option><option value="haze">haze</option>
+      <option value="spill">spill</option><option value="odor">odor</option><option value="other">other</option></select>
+    <input id="ev-f-region" placeholder="Region / place">
+  </div>
+  <div class="evrow"><label class="evlbl">Start <input id="ev-f-start" type="date"></label>
+    <label class="evlbl">End <input id="ev-f-end" type="date"></label></div>
+  <textarea id="ev-f-desc" rows="3" placeholder="Description"></textarea>
+  <label class="evchk"><input type="checkbox" id="ev-f-captured"> Our sensors captured this</label>
+  <input id="ev-f-sensors" placeholder="Sensor ids, comma-separated (e.g. 214373,214357)">
+  <div class="evrow"><input id="ev-f-srclabel" placeholder="Source label">
+    <input id="ev-f-srcurl" placeholder="Source URL"></div>
+  <button class="primary" onclick="evCreate()">Create event</button></div>`;
+
+let ADMIN_EVENTS = [];
 async function loadQueue(){
   if (!TOKEN){ $('admin-list').innerHTML = '<p class="meta">Enter the admin token to load the queues.</p>'; return; }
   const q = $('admin-queue').value;
   try {
-    if (q === 'feedback'){
+    if (q === 'events'){
+      const d = await (await adminFetch('/api/admin/events')).json();
+      ADMIN_EVENTS = d.results;
+      $('admin-count').textContent = `${d.results.length} event(s)`;
+      $('admin-list').innerHTML = EV_FORM + d.results.map(eventCard).join('');
+    } else if (q === 'feedback'){
       const d = await (await adminFetch('/api/admin/feedback')).json();
       $('admin-count').textContent = `${d.results.length} feedback item(s)`;
       $('admin-list').innerHTML = d.results.map(fbCard).join('') || '<p class="meta">none</p>';

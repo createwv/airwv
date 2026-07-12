@@ -192,6 +192,17 @@ Make the data visible and usable.
       (pollutants, AQI scale, who's at risk, what to do). **About** (`/about`) =
       project/data-source/how-to-help. **Admin** = token-gated console.
       *Still to do: alert signup (no UI yet), an updates/news feed, per-area rollups.*
+- [~] **Events page (curated air/pollution events by region + time)** — **v1 BUILT**
+      (`/events`, `events.html`/`events.js`, `Event` model + `/api/events` +
+      `/api/admin/events`): public list of events; click → detail with description, cited
+      sources, and — for **captured** events — a Plotly overlay of the involved sensors'
+      PM2.5 across the window (before/during/after, event band shaded). Admin console has a
+      create/publish/delete form (queue = "Events"). Seeded (`scripts/seed_events.py`) with
+      four real events: Peoples Cartage fire (Parkersburg, Jul 2026), Canadian wildfire
+      smoke (Jun 2025, captured), WV fall drought wildfires (Nov 2024, captured), and the
+      historic Jun 2023 Canada smoke (documented, pre-sensors → no data). *v2: map of event
+      locations, link events↔sources↔reports, auto-surface candidates from `/api/events`
+      detection, per-event permalink pages (SEO/press).* Original idea below:
 - [ ] **Events page (curated air/pollution events by region + time)** — a page that marks
       notable events with a **region, time window, type, description, and citations**, and —
       when the event falls inside our collection window — overlays the **community-sensor

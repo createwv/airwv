@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
 from airwv.sources.base import Reading
-from airwv.storage.models import Base, Feedback, ReadingRow, Report, Subscription, utcnow
+from airwv.storage.models import Base, Event, Feedback, ReadingRow, Report, Subscription, utcnow
 from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
@@ -272,6 +272,50 @@ class Store:
             session.add(f)
             session.commit()
             return f.id
+
+    # ---- curated events (see docs/ROADMAP Events page) ----
+    def add_event(self, **fields) -> int:
+        with self._session_factory() as session:
+            e = Event(**fields)
+            session.add(e)
+            session.commit()
+            return e.id
+
+    def published_events(self, limit: int = 200) -> list[Event]:
+        """Public events (published), newest first by start time."""
+        with self._session_factory() as session:
+            stmt = (select(Event).where(Event.status == "published")
+                    .order_by(Event.start_ts.desc().nullslast(), Event.id.desc()).limit(limit))
+            return list(session.scalars(stmt))
+
+    def events_for_admin(self, limit: int = 300) -> list[Event]:
+        with self._session_factory() as session:
+            return list(session.scalars(
+                select(Event).order_by(Event.id.desc()).limit(limit)))
+
+    def get_event(self, event_id: int) -> Event | None:
+        with self._session_factory() as session:
+            return session.get(Event, event_id)
+
+    def update_event(self, event_id: int, **fields) -> bool:
+        with self._session_factory() as session:
+            e = session.get(Event, event_id)
+            if not e:
+                return False
+            for k, v in fields.items():
+                if v is not None and hasattr(e, k):
+                    setattr(e, k, v)
+            session.commit()
+            return True
+
+    def delete_event(self, event_id: int) -> bool:
+        with self._session_factory() as session:
+            e = session.get(Event, event_id)
+            if not e:
+                return False
+            session.delete(e)
+            session.commit()
+            return True
 
     def published_reports(self, domain: str | None = None, limit: int = 500) -> list[Report]:
         """Reports visible to the public (published-unverified or confirmed)."""

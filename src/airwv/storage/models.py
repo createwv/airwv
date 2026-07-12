@@ -181,3 +181,29 @@ class Feedback(Base):
     contact: Mapped[str | None] = mapped_column(String(200), nullable=True)  # PRIVATE
     status: Mapped[str] = mapped_column(String(16), default="new", index=True)  # new | triaged | done
     ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)   # PRIVATE
+
+
+class Event(Base):
+    """A curated air/pollution event, marked to a region + time window. Two classes:
+    'captured' (our sensors measured it — has sensor_ids to overlay) and documented/
+    historical (context only, no sensor data). Admin-curated."""
+
+    __tablename__ = "events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    title: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(32), default="other")   # fire | explosion | haze | spill | odor | other
+    region: Mapped[str | None] = mapped_column(String(120), nullable=True)  # place / WV region
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    start_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    end_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(4000), nullable=True)
+
+    captured: Mapped[bool] = mapped_column(default=False)   # do our sensors have data for it?
+    sensor_ids: Mapped[list] = mapped_column(JSON, default=list, nullable=False)   # ["214373", ...]
+    sources: Mapped[list] = mapped_column(JSON, default=list, nullable=False)      # [{"label","url"}, ...]
+    status: Mapped[str] = mapped_column(String(16), default="published", index=True)  # published | draft | archived

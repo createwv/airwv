@@ -67,6 +67,21 @@ class FeedbackStatusIn(BaseModel):
     status: str            # new | triaged | done
 
 
+class EventIn(BaseModel):
+    title: str
+    kind: str = "other"                    # fire | explosion | haze | spill | odor | other
+    region: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    start_ts: str | None = None            # ISO
+    end_ts: str | None = None
+    description: str | None = None
+    captured: bool = False
+    sensor_ids: list[str] = []
+    sources: list = []                     # [{"label","url"}, ...]
+    status: str = "published"              # published | draft | archived
+
+
 def _require_admin(request: Request) -> bool:
     """Gate admin endpoints on AIRWV_ADMIN_TOKEN (X-Admin-Token header). Fails closed:
     if no token is configured, admin is disabled entirely."""
@@ -294,6 +309,20 @@ def create_app(store: Store) -> FastAPI:
     def list_reports(domain: str | None = None):
         return {"results": [_public_report(r) for r in store.published_reports(domain=domain)]}
 
+    def _event_dict(e) -> dict:
+        return {
+            "id": e.id, "title": e.title, "kind": e.kind, "region": e.region,
+            "lat": e.lat, "lon": e.lon,
+            "start_ts": e.start_ts.isoformat() if e.start_ts else None,
+            "end_ts": e.end_ts.isoformat() if e.end_ts else None,
+            "description": e.description, "captured": e.captured,
+            "sensor_ids": e.sensor_ids or [], "sources": e.sources or [], "status": e.status,
+        }
+
+    @app.get("/api/events")   # curated events list (distinct from /api/events/{sensor_id})
+    def list_events():
+        return {"results": [_event_dict(e) for e in store.published_events()]}
+
     @app.post("/api/reports/{report_id}/flag")
     def flag_report(report_id: int):
         n = store.flag_report(report_id)
@@ -361,6 +390,33 @@ def create_app(store: Store) -> FastAPI:
                       ["If you can see this, new report + feedback alerts are wired up."],
                       link_label="Open admin", link_url=notifier.admin_link, username="AirWV")
         return {"sent": True, "slack": bool(notifier.slack_url), "discord": bool(notifier.discord_url)}
+
+    @app.get("/api/admin/events")
+    def admin_events(_: bool = Depends(_require_admin)):
+        return {"results": [_event_dict(e) for e in store.events_for_admin()]}
+
+    @app.post("/api/admin/events")
+    def admin_event_create(body: EventIn, _: bool = Depends(_require_admin)):
+        eid = store.add_event(
+            title=body.title[:200], kind=body.kind, region=(body.region or None),
+            lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
+            description=(body.description or None), captured=body.captured,
+            sensor_ids=[str(s) for s in body.sensor_ids], sources=body.sources, status=body.status)
+        return {"id": eid}
+
+    @app.post("/api/admin/events/{event_id}")
+    def admin_event_update(event_id: int, body: EventIn, action: str | None = None,
+                           _: bool = Depends(_require_admin)):
+        if action == "delete":
+            return {"ok": store.delete_event(event_id)}
+        ok = store.update_event(
+            event_id, title=body.title[:200], kind=body.kind, region=body.region,
+            lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
+            description=body.description, captured=body.captured,
+            sensor_ids=[str(s) for s in body.sensor_ids], sources=body.sources, status=body.status)
+        if not ok:
+            raise HTTPException(status_code=404, detail="no such event")
+        return {"ok": True}
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page(request: Request):
@@ -553,6 +609,11 @@ def create_app(store: Store) -> FastAPI:
     def learn(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="learn.html",
                                           context={"mode": "learn"})
+
+    @app.get("/events", response_class=HTMLResponse)
+    def events_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="events.html",
+                                          context={"mode": "events"})
 
     @app.get("/sources", response_class=HTMLResponse)
     def sources_page(request: Request):
