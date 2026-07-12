@@ -175,13 +175,16 @@ Make the data visible and usable.
       site names** (`data/airnow_monitors.json`); community sensors keep EWV names.
 - [x] **Explicit default time window** — `GET /api/coverage` + a "Showing all data ·
       first → last" line from real min/max timestamps.
-- [~] **Three modes** — BUILT: top mode-nav (Overview · Analysis · Admin) across a
-      shared shell. **Overview** = public landing at `/` (`overview.html` — at-a-glance
-      stat cards + live PM2.5 headline flag + simplified current-conditions map +
-      report/explore/feedback CTAs + recent-community-reports feed). **Analysis** = the
-      full power dashboard, moved to `/analysis` (report/feedback deep-linked via
-      `#report`/`#feedback`). **Admin** = the token-gated console. *Still to do: alert
-      signup (no UI yet), an updates/news feed, per-area rollups in Overview.*
+- [x] **Multi-page site (was "three modes")** — BUILT: pill mode-nav (Home · Analysis
+      · Learn · About · Admin) across a shared shell, with report/feedback modals shared
+      site-wide (`_modals.html` + `static/reporting.js`, page-agnostic via
+      `window.AIRWV_MAP`; opened by `data-open="report|feedback"`).
+      **Home** (`/`) = hub: hero + live air snapshot (stats + PM2.5 headline flag +
+      simplified map) + nav-card grid + recent-reports feed. **Analysis** (`/analysis`) =
+      the full power dashboard. **Learn** (`/learn`) = air-quality + health education
+      (pollutants, AQI scale, who's at risk, what to do). **About** (`/about`) =
+      project/data-source/how-to-help. **Admin** = token-gated console.
+      *Still to do: alert signup (no UI yet), an updates/news feed, per-area rollups.*
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
 - [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
