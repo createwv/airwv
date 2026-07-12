@@ -491,6 +491,13 @@ def _airdata_date(s: str) -> datetime:
     raise ValueError(f"unrecognized AirData date {s!r}")
 
 
+# EPA AirData param -> how to store it. 88101=PM2.5 (µg/m³), 44201=ozone (ppm -> ppb).
+_AIRDATA_PARAMS = {
+    "88101": {"field": "pm2_5", "col": "Arithmetic Mean", "scale": 1.0},
+    "44201": {"field": "ozone", "col": "1st Max Value", "scale": 1000.0},
+}
+
+
 def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88101",
                 store=None, states=None) -> int:
     """Bulk-import EPA AirData **daily** PM2.5 history into storage (source='epa_airdata').
@@ -512,6 +519,9 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
     store = store or Store.from_config(config)
     store.create_schema()
     want = set(states or AIRDATA_STATES)
+    # param -> (Reading field, value column, unit scale). Ozone comes in ppm; ×1000 -> ppb,
+    # and we take the daily MAX (ozone's afternoon peak matters, not the flat daily mean).
+    cfg = _AIRDATA_PARAMS.get(param, {"field": "pm2_5", "col": "Arithmetic Mean", "scale": 1.0})
     total = 0
     for year in range(start_year, end_year + 1):
         url = f"https://aqs.epa.gov/aqsweb/airdata/daily_{param}_{year}.zip"
@@ -522,7 +532,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
         except Exception as exc:
             log.warning("airdata: %s unavailable (%s) — skipping", year, exc)
             continue
-        agg: dict = defaultdict(list)  # (site, date) -> [daily means]
+        agg: dict = defaultdict(list)  # (site, date) -> [values]
         meta: dict = {}                # site -> (lat, lon)
         # some years' zips list a directory entry first — pick the actual CSV
         csv_name = next((n for n in zf.namelist() if n.endswith(".csv")), zf.namelist()[0])
@@ -531,7 +541,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
                 if row.get("State Code") not in want:
                     continue
                 try:
-                    val = float(row["Arithmetic Mean"])
+                    val = float(row.get(cfg["col"]) or row["Arithmetic Mean"]) * cfg["scale"]
                     lat, lon = float(row["Latitude"]), float(row["Longitude"])
                     ts = _airdata_date(row["Date Local"])
                 except (ValueError, KeyError):
@@ -541,7 +551,8 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
                 meta[site] = (lat, lon)
         readings = [
             Reading(source="epa_airdata", sensor_id=site, ts=ts,
-                    pm2_5=round(sum(vals) / len(vals), 1), lat=meta[site][0], lon=meta[site][1])
+                    lat=meta[site][0], lon=meta[site][1],
+                    **{cfg["field"]: round(max(vals) if cfg["field"] == "ozone" else sum(vals) / len(vals), 1)})
             for (site, ts), vals in agg.items()
         ]
         n = store.save_readings(readings)

@@ -58,7 +58,7 @@ async function loadCoverage(){
   if (c.first_ts) $('coverage').textContent =
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
-const layerState = {community:true, reference:true, sources:true, reports:true, regions:{}, cats:{}};
+const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false, regions:{}, cats:{}};
 function drawMap(sensors){
   if (!map){
     map = L.map('map').setView([38.35, -81.6], 8);
@@ -78,8 +78,19 @@ function drawMap(sensors){
 function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
   if (refLayer) refLayer.remove();
+  if (ozoneLayer) ozoneLayer.remove();
   sensorLayer = L.layerGroup();
   refLayer = L.layerGroup();
+  ozoneLayer = L.layerGroup();
+  // ozone monitors (EPA reference) as square markers, colored by ozone AQI band
+  if (layerState.ozone) allSensors.forEach(x => {
+    if (x.latest_ozone == null || x.lat == null) return;
+    L.marker([x.lat, x.lon], {icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
+      html:`<div class="o3mk" style="background:${x.ozone_color||'#9e9e9e'}"></div>`})})
+      .bindPopup(`<b>${x.name}</b><br><i>EPA ozone monitor</i><br>latest O₃: <b>${x.latest_ozone} ppb</b>`
+        + `<br><small>select the Ozone metric, then click to chart</small>`)
+      .on('click', () => toggleChart(x.sensor_id)).addTo(ozoneLayer);
+  });
   allSensors.forEach(x => {
     if (x.lat == null || x.lon == null) return;
     const charted = chartSet.has(x.sensor_id);
@@ -100,8 +111,9 @@ function redrawSensors(){
   });
   sensorLayer.addTo(map);
   refLayer.addTo(map);
+  if (layerState.ozone) ozoneLayer.addTo(map);
 }
-let sensorLayer, refLayer;
+let sensorLayer, refLayer, ozoneLayer;
 // reference monitors are now drawn live in drawMap() (ringed circles, current PM2.5)
 const SRC_ICON = {power:'⚡', chemical:'⚗️', oil_gas:'🛢️', materials:'⛏️', waste:'🗑️', other:'🏭'};
 const SRC_LABEL = {power:'Power plant', chemical:'Chemical', oil_gas:'Oil & gas',
@@ -234,6 +246,7 @@ function buildLayers(){
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(click a sensor to chart it)</span></b>`+
     `<details open><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionBlocks}</div></details>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
+    `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
     `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
@@ -243,6 +256,7 @@ function buildLayers(){
     regions.forEach(r=>layerState.regions[r]=e.target.checked);
     $('layers').querySelectorAll('[data-region]').forEach(cb=>{cb.checked=e.target.checked;cb.indeterminate=false;}); redrawSensors(); };
   $('L-reference').onchange = e=>{ layerState.reference=e.target.checked; redrawSensors(); };
+  $('L-ozone').onchange = e=>{ layerState.ozone=e.target.checked; redrawSensors(); };
   $('L-reports').onchange = e=>{ layerState.reports=e.target.checked; redrawReports(); };
   $('L-sources').onchange = e=>{ layerState.sources=e.target.checked;
     cats.forEach(c=>layerState.cats[c]=e.target.checked);

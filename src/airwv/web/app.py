@@ -153,6 +153,16 @@ def _pm25_color(value: float | None) -> str:
     return "#7e0023"
 
 
+def _ozone_color(value: float | None) -> str:
+    """EPA-style color for an ozone reading (ppb)."""
+    if value is None:
+        return "#9e9e9e"
+    for band in OZONE_BANDS:
+        if band["max"] is None or value <= band["max"]:
+            return band["color"]
+    return "#7e0023"
+
+
 def _index_to_name() -> dict[str, str]:
     """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort."""
     try:
@@ -236,6 +246,7 @@ def create_app(store: Store) -> FastAPI:
         # SQL aggregation instead of loading every row (was O(all rows) per sensor).
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
+        latest_o3 = store.latest_value_per_sensor("ozone")   # ppb — AirNow reference monitors
         # AirNow is the LIVE reference layer; OpenAQ + AirData daily are archive/history.
         ref_ids = set(store.sensor_ids_by_source("airnow"))
         ref_coords = store.coords_from_readings("airnow")
@@ -270,6 +281,8 @@ def create_app(store: Store) -> FastAPI:
                 "latest_pm2_5": None if malfunction else latest_pm,
                 "color": "#9e9e9e" if malfunction else _pm25_color(latest_pm),
                 "flag": "malfunction" if malfunction else None,
+                "latest_ozone": latest_o3.get(sid),
+                "ozone_color": _ozone_color(latest_o3.get(sid)),
             })
         out.sort(key=lambda s: s["name"])
         return out

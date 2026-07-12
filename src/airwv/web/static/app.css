@@ -69,6 +69,7 @@
   .layers .srow:hover { color:var(--brand); background:#f0f4f8; }
   .layers .srow.on { font-weight:700; color:#111; }
   .layers .srow.on::before { content:'●'; color:var(--brand-accent); margin-right:4px; font-size:10px; }
+  .o3mk { width:13px; height:13px; transform:rotate(45deg); border:1.5px solid #333; box-shadow:0 0 2px #0006; }
   button { padding:6px 12px; font-size:13px; cursor:pointer; }
   table { width:calc(100% - 28px); margin:10px 14px 14px; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:6px 10px; border-bottom:1px solid #eee; }
