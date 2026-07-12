@@ -33,6 +33,7 @@ class Reading:
     pm10: float | None = None
     aqi: float | None = None
     voc: float | None = None
+    ozone: float | None = None          # ppb — EPA reference monitors only (AirNow)
     temperature: float | None = None
     humidity: float | None = None
     pressure: float | None = None

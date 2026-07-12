@@ -592,18 +592,28 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         log.warning("airnow: no recent hourly file found (looked back %dh)", max_lookback)
         return 0
 
+    def _num(s):
+        try:
+            v = float(s)
+        except (TypeError, ValueError):
+            return None
+        return None if v <= -999 else v   # AirNow uses -999 for "no data"
+
     readings, monitors = [], {}
     for row in csv.DictReader(io.StringIO(content)):
         aqsid = (row.get("AQSID") or "").strip()
         if aqsid[:2] not in AIRNOW_STATES:
             continue
         try:
-            val = float(row["PM25"])
             lat, lon = float(row["Latitude"]), float(row["Longitude"])
             ts = datetime.strptime(f"{row['ValidDate']} {row['ValidTime']}", "%m/%d/%Y %H:%M")
         except (ValueError, KeyError):
-            continue  # row has no PM2.5 or coords
-        readings.append(Reading(source="airnow", sensor_id=aqsid, ts=ts, pm2_5=val, lat=lat, lon=lon))
+            continue  # no coords / timestamp
+        pm25, ozone = _num(row.get("PM25")), _num(row.get("OZONE"))
+        if pm25 is None and ozone is None:
+            continue  # monitor reports neither pollutant this hour
+        readings.append(Reading(source="airnow", sensor_id=aqsid, ts=ts,
+                                pm2_5=pm25, ozone=ozone, lat=lat, lon=lon))
         monitors[aqsid] = {"name": (row.get("SiteName") or aqsid).strip(),
                            "lat": round(lat, 4), "lon": round(lon, 4),
                            "state": (row.get("StateName") or "").strip()}

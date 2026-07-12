@@ -34,6 +34,7 @@ _READING_FIELDS = (
     "pm10",
     "aqi",
     "voc",
+    "ozone",
     "temperature",
     "humidity",
     "pressure",

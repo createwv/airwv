@@ -97,7 +97,7 @@ def _require_admin(request: Request) -> bool:
     return True
 
 # Fields safe to chart (mirror the Reading schema).
-FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "aqi", "temperature", "humidity", "pressure"]
+FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "ozone", "aqi", "temperature", "humidity", "pressure"]
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -130,6 +130,16 @@ VOC_BANDS = [
     {"max": 200.0, "label": "Slightly elevated", "color": "#ffff00"},
     {"max": 400.0, "label": "Elevated", "color": "#ff7e00"},
     {"max": None, "label": "High", "color": "#ff0000"},
+]
+
+# EPA ozone AQI categories (8-hour, ppb upper bounds; a guide for the hourly AirNow value).
+OZONE_BANDS = [
+    {"max": 54.0, "label": "Good", "color": "#00e400"},
+    {"max": 70.0, "label": "Moderate", "color": "#ffff00"},
+    {"max": 85.0, "label": "Unhealthy for sensitive groups", "color": "#ff7e00"},
+    {"max": 105.0, "label": "Unhealthy", "color": "#ff0000"},
+    {"max": 200.0, "label": "Very unhealthy", "color": "#8f3f97"},
+    {"max": None, "label": "Hazardous", "color": "#7e0023"},
 ]
 
 
@@ -595,7 +605,9 @@ def create_app(store: Store) -> FastAPI:
             "pm2_5": PM25_BANDS,
             "pm10": PM10_BANDS,
             "voc": VOC_BANDS,
+            "ozone": OZONE_BANDS,
             "voc_note": "VOC is a relative gas index (uncalibrated, drifts per sensor) — trends and comparisons at one sensor are meaningful; absolute cross-sensor values are not.",
+            "ozone_note": "Ozone (ppb) comes from EPA AirNow reference monitors only — community sensors don't measure it. Bands are the 8-hour AQI categories as a rough guide for the hourly value.",
         }
 
     @app.get("/api/export/{sensor_id}.csv")

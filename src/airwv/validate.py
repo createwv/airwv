@@ -24,6 +24,7 @@ _RANGES: dict[str, tuple[float, float]] = {
     "pm10": (0.0, 5000.0),
     "aqi": (0.0, 1000.0),
     "voc": (0.0, 60000.0),
+    "ozone": (0.0, 1000.0),  # ppb (AirNow reference)
     "humidity": (0.0, 100.0),
     "pressure": (300.0, 1100.0),  # hPa; wide enough for high-altitude stations
     "temperature": (-60.0, 160.0),  # PurpleAir reports °F

@@ -54,6 +54,7 @@ class ReadingRow(Base):
     pm10: Mapped[float | None] = mapped_column(Float, nullable=True)
     aqi: Mapped[float | None] = mapped_column(Float, nullable=True)
     voc: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ozone: Mapped[float | None] = mapped_column(Float, nullable=True)  # ppb — AirNow reference only
     temperature: Mapped[float | None] = mapped_column(Float, nullable=True)
     humidity: Mapped[float | None] = mapped_column(Float, nullable=True)
     pressure: Mapped[float | None] = mapped_column(Float, nullable=True)
