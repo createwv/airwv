@@ -23,12 +23,36 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import readings_to_csv
+from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+
+
+class ReportIn(BaseModel):
+    domain: str
+    category: str = ""
+    description: str = ""
+    lat: float
+    lon: float
+    observed_at: str | None = None
+    suspected_org: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    website: str = ""      # honeypot — bots fill it, humans never see it
+    elapsed_ms: int = 0    # time on form; near-zero = a bot
+
+
+class FeedbackIn(BaseModel):
+    kind: str = "idea"     # bug | idea | question
+    message: str
+    page: str | None = None
+    contact: str | None = None
+    website: str = ""      # honeypot
 
 # Fields safe to chart (mirror the Reading schema).
 FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "aqi", "temperature", "humidity", "pressure"]
@@ -152,6 +176,7 @@ def create_app(store: Store) -> FastAPI:
     coords = _index_to_coords()
     regions = _index_to_region()
     airnow_names = _airnow_meta()
+    facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
 
     @app.get("/api/sensors")
     def sensors():
@@ -197,6 +222,72 @@ def create_app(store: Store) -> FastAPI:
         return {"count": c["count"],
                 "first_ts": c["first_ts"].isoformat() if c["first_ts"] else None,
                 "last_ts": c["last_ts"].isoformat() if c["last_ts"] else None}
+
+    # -- community reports & site feedback (see docs/COMMUNITY-REPORTING.md) --
+
+    def _public_report(r) -> dict:
+        """Public projection: jittered coords, no private fields, org only if approved."""
+        lat, lon = jitter(r.lat, r.lon, r.id)
+        return {
+            "id": r.id, "created_at": r.created_at.isoformat() if r.created_at else None,
+            "observed_at": r.observed_at.isoformat() if r.observed_at else None,
+            "domain": r.domain, "category": r.category, "description": r.description,
+            "lat": lat, "lon": lon, "area_label": r.area_label, "stage": r.stage,
+            "verified": r.stage == "confirmed", "verified_by": r.verified_by,
+            "org": r.suspected_org if r.org_public else None,
+        }
+
+    @app.post("/api/reports")
+    def create_report(body: ReportIn, request: Request):
+        if body.website.strip():
+            raise HTTPException(status_code=400, detail="rejected")          # honeypot
+        if body.elapsed_ms and body.elapsed_ms < 1500:
+            raise HTTPException(status_code=400, detail="submitted too fast")  # bot
+        if body.domain not in DOMAINS:
+            raise HTTPException(status_code=400, detail=f"unknown domain {body.domain!r}")
+        iph = ip_hash(client_ip(request))
+        if store.count_reports_since(iph, minutes=60) >= 5:
+            raise HTTPException(status_code=429, detail="too many reports — try again later")
+        stage, reason = screen(body.description, body.domain, body.suspected_org, facility_triggers)
+        rid = store.add_report(
+            domain=body.domain, category=body.category[:64], description=(body.description or "")[:2000],
+            lat=body.lat, lon=body.lon, observed_at=_parse_dt(body.observed_at),
+            suspected_org=(body.suspected_org or None), contact_email=(body.contact_email or None),
+            contact_phone=(body.contact_phone or None), ip_hash=iph, stage=stage, screen_reason=reason)
+        return {"id": rid, "stage": stage,
+                "message": ("Thanks — a maintainer will review this shortly."
+                            if stage == "held" else "Thanks — your report is on the map.")}
+
+    @app.get("/api/reports")
+    def list_reports(domain: str | None = None):
+        return {"results": [_public_report(r) for r in store.published_reports(domain=domain)]}
+
+    @app.post("/api/reports/{report_id}/flag")
+    def flag_report(report_id: int):
+        n = store.flag_report(report_id)
+        if n < 0:
+            raise HTTPException(status_code=404, detail="no such report")
+        return {"flags": n}
+
+    @app.post("/api/feedback")
+    def create_feedback(body: FeedbackIn, request: Request):
+        if body.website.strip():
+            raise HTTPException(status_code=400, detail="rejected")          # honeypot
+        if not (body.message or "").strip():
+            raise HTTPException(status_code=400, detail="message required")
+        fid = store.add_feedback(
+            kind=(body.kind if body.kind in ("bug", "idea", "question") else "idea"),
+            message=body.message[:2000], page=(body.page or None), contact=(body.contact or None),
+            ip_hash=ip_hash(client_ip(request)))
+        return {"id": fid, "message": "Thanks for the feedback!"}
+
+    def _parse_dt(s):
+        if not s:
+            return None
+        try:
+            return datetime.fromisoformat(s.replace("Z", "+00:00")).replace(tzinfo=None)
+        except ValueError:
+            return None
 
     def _check_field(field: str):
         if field not in FIELDS:

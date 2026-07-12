@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
 from airwv.sources.base import Reading
-from airwv.storage.models import Base, ReadingRow, Subscription, utcnow
+from airwv.storage.models import Base, Feedback, ReadingRow, Report, Subscription, utcnow
 from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
@@ -256,6 +256,53 @@ class Store:
             if sub is not None:
                 sub.last_notified_at = when
                 session.commit()
+
+    # -- reports & feedback ------------------------------------------------
+
+    def add_report(self, **fields) -> int:
+        with self._session_factory() as session:
+            r = Report(**fields)
+            session.add(r)
+            session.commit()
+            return r.id
+
+    def add_feedback(self, **fields) -> int:
+        with self._session_factory() as session:
+            f = Feedback(**fields)
+            session.add(f)
+            session.commit()
+            return f.id
+
+    def published_reports(self, domain: str | None = None, limit: int = 500) -> list[Report]:
+        """Reports visible to the public (published-unverified or confirmed)."""
+        with self._session_factory() as session:
+            stmt = select(Report).where(Report.stage.in_(("published_unverified", "confirmed")))
+            if domain:
+                stmt = stmt.where(Report.domain == domain)
+            return list(session.scalars(stmt.order_by(Report.created_at.desc()).limit(limit)))
+
+    def flag_report(self, report_id: int, hide_at: int = 3) -> int:
+        """Public flag; auto-hide (→ held) once ``hide_at`` flags accumulate."""
+        with self._session_factory() as session:
+            r = session.get(Report, report_id)
+            if r is None:
+                return -1
+            r.flags_count += 1
+            if r.flags_count >= hide_at and r.stage == "published_unverified":
+                r.stage = "held"
+                r.screen_reason = (r.screen_reason or "") and (r.screen_reason + "; ") or ""
+                r.screen_reason = (r.screen_reason + "flagged").strip("; ")
+            session.commit()
+            return r.flags_count
+
+    def count_reports_since(self, ip_hash: str, minutes: int = 60) -> int:
+        from datetime import datetime, timedelta, timezone
+
+        since = datetime.now(tz=timezone.utc) - timedelta(minutes=minutes)
+        with self._session_factory() as session:
+            return session.scalar(
+                select(func.count()).select_from(Report)
+                .where((Report.ip_hash == ip_hash) & (Report.created_at >= since))) or 0
 
     # -- internals ---------------------------------------------------------
 
