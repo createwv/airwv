@@ -114,6 +114,12 @@ async function loadSources(){
   buildLayers();
   $('srclist').innerHTML = allSources_.filter(s=>s.lat!=null)
     .map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}">`).join('');
+  // deep link from the Sources page: /analysis?src=<facility name>
+  const wantSrc = new URLSearchParams(location.search).get('src');
+  if (wantSrc && allSources_.some(s => s.name === wantSrc)){
+    $('srcpick').value = wantSrc; showProximity(wantSrc);
+    document.querySelector('#proxtable').scrollIntoView({behavior:'smooth', block:'center'});
+  }
 }
 // ---- Source-proximity: pick a polluter, see the sensors around it by distance + bearing ----
 const DIRS = ['N','NE','E','SE','S','SW','W','NW'];

@@ -123,8 +123,8 @@ def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
     # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
     for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
-                         ("/learn", "reporting.js"), ("/about", "reporting.js"),
-                         ("/admin", "admin.js")]:
+                         ("/sources", "sources.js"), ("/learn", "reporting.js"),
+                         ("/about", "reporting.js"), ("/admin", "admin.js")]:
         r = c.get(path)
         assert r.status_code == 200, path
         assert "modenav" in r.text and script in r.text, path

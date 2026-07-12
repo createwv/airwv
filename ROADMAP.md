@@ -217,19 +217,19 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       Now **statewide (all WV) + cross-border** (OH/PA/MD/VA/KY facilities within
       ~20km of the WV line, so Ohio-River emitters count) — 437 facilities. Still to
       add: EIA power plants, WV DEP permits + O&G wells.
-- [ ] **Dedicated "Sources & Facilities" page** — a browse experience for the 437
-      documented sources, separate from the Analysis map. Top = sliding **carousel of
-      cards** (with a site/aerial snapshot per place), filterable by category & region;
-      click a card → **detail view**: the facts we cite (name, type, operator, category,
-      citation), **permit & activity** info, **how to contact / report**, and the
-      **nearby-sensors + "chart nearest" panel reused from the source-proximity feature**
-      so you can read a source through the air data around it. Buildable now on
-      `sources.json` + `/api/sources` + the existing proximity logic; the richer permit/
-      contact fields and imagery depend on the two items below. Naming stays neutral per
-      SOURCE-POLICY (e.g. "Facilities" / "Emission sources", not "polluters").
-      **Imagery:** prefer license-clean satellite/aerial thumbnails (Mapbox Static / ESRI
-      World Imagery / USGS NAIP) — Google Street View needs the Maps API and its ToS
-      restricts caching/storing tiles, so treat it as a later, keyed add-on.
+- [~] **Dedicated "Sources & Facilities" page** — **v1 BUILT** (`/sources`,
+      `sources.html`/`sources.js`): a browse experience separate from the Analysis map —
+      a sliding **carousel of featured facilities** + a search/category-filterable **grid**
+      of all 437; click a card → **detail view** with the facts we cite (name, type,
+      operator, category, citation), a **Street View photo** (front-of-business), the
+      **nearest air sensors** (distance + bearing), a deep link to the Analysis
+      source-proximity view (`/analysis?src=`), and **report-a-concern / Report-to-WV-DEP**
+      actions. Neutral naming per SOURCE-POLICY. **Imagery = Google Street View Static API**
+      (front-of-business, per the request) — needs `AIRWV_GOOGLE_MAPS_KEY` (billing-enabled,
+      referrer-restricted); until set, cards show clean category-tile placeholders. *v2:
+      permit/status/compliance enrichment (EPA ECHO / WV DEP / FracTracker) to fill the
+      "permit & activity" section + active/inactive/pending status; fix categorizer
+      (John Amos coal plant currently mislabeled "materials", should be "power").*
 - [ ] **Facility status / permit layer** — toggle facilities by status:
       **active / inactive / approved / requesting (planning/pending)** — the permit
       lifecycle regulated emitters go through. Permit info as a separate field
