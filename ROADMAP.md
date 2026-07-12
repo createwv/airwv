@@ -192,6 +192,17 @@ Make the data visible and usable.
       (pollutants, AQI scale, who's at risk, what to do). **About** (`/about`) =
       project/data-source/how-to-help. **Admin** = token-gated console.
       *Still to do: alert signup (no UI yet), an updates/news feed, per-area rollups.*
+- [~] **Learn page — education hub** — BUILT & growing: tabbed (Basics · Health & AQI ·
+      The Data · Laws & Permits · Climate), deep-linkable via `#hash`, all cited. Includes
+      pollutant explainers + VOC compound list, EPA AQI scale, a **live "right now in WV"
+      snapshot** (reads `/api/sensors`), community-vs-reference + VOC caveat, **Clean Air Act
+      / Clean Water Act / permits / violations** with a **WV DEP report box** (spill line
+      1-800-642-3074, complaints 1-866-568-6649; verify periodically), a **climate** section
+      (Paris/IPCC targets, co-benefits), and two **inline SVG diagrams** (particle-size vs.
+      hair, valley temperature-inversion). *Still to develop: **ozone** as a real measured
+      pollutant (AirNow carries it — a data/ingest feature, not just copy); a shared/
+      expandable **glossary**; WV-specific **emissions/energy** numbers in Climate; possibly
+      a "where pollution comes from" diagram; periodic re-verify of the DEP contacts.*
 - [~] **Events page (curated air/pollution events by region + time)** — **v1 BUILT**
       (`/events`, `events.html`/`events.js`, `Event` model + `/api/events` +
       `/api/admin/events`): public list of events; click → detail with description, cited

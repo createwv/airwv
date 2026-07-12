@@ -28,6 +28,28 @@
         flat. Smoke can also drift in from far away — regional wildfires have pushed WV into
         "unhealthy" days. Dense, always-on community sensors are exactly what it takes to
         catch these local, hour-by-hour swings that a handful of official monitors can miss.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 560 240" role="img" aria-label="Temperature inversion trapping pollution in a valley">
+          <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cfe0ee"/><stop offset="1" stop-color="#eef4f8"/></linearGradient></defs>
+          <rect width="560" height="240" fill="url(#sky)"/>
+          <circle cx="510" cy="38" r="17" fill="#f7ca50"/>
+          <path d="M0,240 L150,60 L185,115 L205,240 Z" fill="#7d8a6a"/>
+          <path d="M560,240 L410,60 L375,115 L355,240 Z" fill="#7d8a6a"/>
+          <rect y="214" width="560" height="26" fill="#6b5a45"/>
+          <rect x="185" y="128" width="190" height="86" fill="#9aa0a6" opacity="0.5"/>
+          <line x1="160" y1="128" x2="400" y2="128" stroke="#c0392b" stroke-width="2.5" stroke-dasharray="7 4"/>
+          <text x="280" y="120" text-anchor="middle" font-size="12.5" fill="#a5301f" font-weight="700">warm-air &quot;lid&quot; (inversion)</text>
+          <text x="280" y="150" text-anchor="middle" font-size="12" fill="#3a4046">cool air + pollution trapped below</text>
+          <rect x="250" y="180" width="9" height="34" fill="#555"/>
+          <path d="M254,180 C254,160 246,150 250,132 L340,132" fill="none" stroke="#8a8f95" stroke-width="2.5" opacity="0.8"/>
+          <path d="M300,214 v-20 h20 v20" fill="#8a5a3b"/><path d="M297,194 l13,-11 l13,11 Z" fill="#6b4429"/>
+          <path d="M317,190 C317,175 322,168 318,133" fill="none" stroke="#8a8f95" stroke-width="2" opacity="0.7"/>
+        </svg>
+        <div class="cap">On calm nights, warm air settles over cooler valley air and acts as a lid —
+          pollution can't rise past it, so it pools near the ground until the sun or wind breaks the
+          inversion. It's why the same spot can read clean at midday and hazy by dawn.</div>
+      </div>
     </div></div>
 
     <div class="card"><div class="prose">
@@ -50,6 +72,22 @@
             you <i>smell</i>. Our sensors report a single <b>relative gas index</b> — good
             for spotting changes and odor events, <b>not</b> a calibrated measure of any
             specific compound.</p></div>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 560 175" role="img" aria-label="Particle size comparison to a human hair">
+          <circle cx="100" cy="88" r="70" fill="#f0d9b5" stroke="#c9992f" stroke-width="1.5"/>
+          <text x="100" y="172" text-anchor="middle" font-size="12" fill="#555">Human hair ~70 µm</text>
+          <circle cx="300" cy="88" r="10" fill="#8a6d3b"/>
+          <text x="300" y="118" text-anchor="middle" font-size="11.5" fill="#555">PM10 ≤10 µm</text>
+          <circle cx="395" cy="88" r="2.5" fill="#c0392b"/>
+          <line x1="395" y1="83" x2="395" y2="58" stroke="#c0392b" stroke-width="1"/>
+          <text x="395" y="50" text-anchor="middle" font-size="11.5" fill="#c0392b" font-weight="700">PM2.5 ≤2.5 µm</text>
+          <circle cx="470" cy="88" r="1" fill="#7a6fb0"/>
+          <line x1="470" y1="89" x2="470" y2="118" stroke="#7a6fb0" stroke-width="1"/>
+          <text x="470" y="132" text-anchor="middle" font-size="11.5" fill="#7a6fb0">PM1.0 ≤1 µm</text>
+        </svg>
+        <div class="cap">Drawn to scale. PM2.5 is roughly 30× smaller than a human hair — small
+          enough to slip past your body's defenses into the lungs and bloodstream.</div>
       </div>
     </div></div>
 
@@ -223,8 +261,23 @@
         <div><b>NOV</b><p>Notice of Violation — a formal finding that a facility broke a rule or permit.</p></div>
         <div><b>TRI</b><p>Toxics Release Inventory — public data on facilities' reported chemical releases (the basis of our Sources page).</p></div>
       </div>
-      <p>See something that looks wrong? <a href="#" data-open="report">Report a concern →</a>,
-        or file directly with <a href="https://dep.wv.gov/" target="_blank" rel="noopener">WV DEP</a>.</p>
+      <div class="depbox">
+        <b>📞 How to report pollution to WV DEP</b>
+        <ul>
+          <li><b>Spills &amp; environmental emergencies (24/7):</b>
+            <a href="tel:18006423074">1-800-642-3074</a></li>
+          <li><b>Non-emergency complaints:</b>
+            <a href="tel:18665686649">1-866-568-6649</a> (toll-free) or
+            <a href="tel:13049260440">304-926-0440</a></li>
+          <li><b>Online:</b>
+            <a href="https://dep.wv.gov/Contact/Pages/Report-a-Complaint.aspx" target="_blank" rel="noopener">Report a Complaint</a>
+            · <a href="https://dep.wv.gov/WWE/ee/geninfo/Pages/spillnotification.aspx" target="_blank" rel="noopener">Report a Spill</a></li>
+        </ul>
+        <span class="meta">Complaints can be made anonymously. If there's an <b>immediate threat to
+          health or safety, call 911 first.</b> You can also
+          <a href="#" data-open="report">add it to our community map →</a>. (Contacts from WV DEP,
+          verified July 2026 — confirm current details on their site.)</span>
+      </div>
     </div></div>
   </div>
 
