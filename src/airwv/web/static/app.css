@@ -90,3 +90,9 @@
   .rform .hp { position:absolute !important; left:-9999px; }
   .rloc { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .rnote { font-size:12px; color:#7a5b12; background:#fff4d6; padding:7px 9px; border-radius:6px; }
+  /* admin moderation cards */
+  .acard { border:1px solid #e5e5e8; border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+  .acard .tag { background:#eef0f6; color:#446; border-radius:4px; padding:1px 6px; font-size:11px; }
+  .acard .tag.flag { background:#fdecec; color:#a00; }
+  .arow { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .arow button.danger { color:#a00; border-color:#e0b0b0; }

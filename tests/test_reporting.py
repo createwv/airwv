@@ -51,3 +51,23 @@ def test_rate_limit_and_feedback(tmp_path):
     assert c.post("/api/reports", json={"domain": "air", "lat": 38.3, "lon": -81.6}).status_code == 429
     assert c.post("/api/feedback", json={"kind": "bug", "message": "map broken"}).status_code == 200
     assert c.post("/api/feedback", json={"kind": "bug", "message": "x", "website": "bot"}).status_code == 400
+
+
+def test_admin_gated_and_moderation(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = _client(tmp_path)
+    c.post("/api/reports", json={"domain": "violation", "description": "burning", "lat": 38.3, "lon": -81.6})
+    assert c.get("/api/admin/reports?status=held").status_code == 401       # no token
+    hdr = {"X-Admin-Token": "secret"}
+    held = c.get("/api/admin/reports?status=held", headers=hdr).json()["results"]
+    assert len(held) == 1 and held[0]["ip_hash"] is not None                # admin sees private fields
+    rid = held[0]["id"]
+    assert c.post(f"/api/admin/reports/{rid}", json={"action": "publish"}, headers=hdr).status_code == 200
+    assert any(x["id"] == rid for x in c.get("/api/reports").json()["results"])   # now public
+    c.post(f"/api/admin/reports/{rid}", json={"action": "remove"}, headers=hdr)
+    assert not any(x["id"] == rid for x in c.get("/api/reports").json()["results"])  # removed
+
+
+def test_admin_disabled_without_configured_token(tmp_path):
+    c = _client(tmp_path)  # no AIRWV_ADMIN_TOKEN set -> admin fails closed
+    assert c.get("/api/admin/reports", headers={"X-Admin-Token": "anything"}).status_code == 401

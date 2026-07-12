@@ -304,6 +304,60 @@ class Store:
                 select(func.count()).select_from(Report)
                 .where((Report.ip_hash == ip_hash) & (Report.created_at >= since))) or 0
 
+    # -- admin / moderation (token-gated in the web layer) -----------------
+
+    def reports_for_admin(self, status: str = "held", limit: int = 300) -> list[Report]:
+        """Full report records for a moderation queue (includes private fields)."""
+        with self._session_factory() as session:
+            stmt = select(Report)
+            if status == "held":
+                stmt = stmt.where(Report.stage == "held")
+            elif status == "unverified":
+                stmt = stmt.where(Report.stage == "published_unverified")
+            elif status == "flagged":
+                stmt = stmt.where(Report.flags_count > 0)
+            elif status == "confirmed":
+                stmt = stmt.where(Report.stage == "confirmed")
+            else:  # all but removed
+                stmt = stmt.where(Report.stage != "removed")
+            return list(session.scalars(stmt.order_by(Report.created_at.desc()).limit(limit)))
+
+    def moderate_report(self, report_id: int, action: str,
+                        mod_note: str | None = None, verified_by: str | None = None) -> bool:
+        with self._session_factory() as session:
+            r = session.get(Report, report_id)
+            if r is None:
+                return False
+            if action == "confirm":
+                r.stage = "confirmed"
+                r.verified_by = verified_by or "maintainer"
+            elif action in ("publish", "keep"):
+                r.stage = "published_unverified"
+            elif action == "remove":
+                r.stage = "removed"
+            elif action == "approve_org":
+                r.org_public = True
+            if mod_note:
+                r.mod_note = ((r.mod_note + " | ") if r.mod_note else "") + mod_note
+            session.commit()
+            return True
+
+    def feedback_for_admin(self, status: str | None = None, limit: int = 300) -> list[Feedback]:
+        with self._session_factory() as session:
+            stmt = select(Feedback)
+            if status in ("new", "triaged", "done"):
+                stmt = stmt.where(Feedback.status == status)
+            return list(session.scalars(stmt.order_by(Feedback.created_at.desc()).limit(limit)))
+
+    def update_feedback(self, feedback_id: int, status: str) -> bool:
+        with self._session_factory() as session:
+            f = session.get(Feedback, feedback_id)
+            if f is None:
+                return False
+            f.status = status
+            session.commit()
+            return True
+
     # -- internals ---------------------------------------------------------
 
     def _to_row(self, reading: Reading) -> dict:

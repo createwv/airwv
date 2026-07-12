@@ -14,12 +14,13 @@ Endpoints:
 from __future__ import annotations
 
 import os
+import secrets
 import statistics
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -53,6 +54,26 @@ class FeedbackIn(BaseModel):
     page: str | None = None
     contact: str | None = None
     website: str = ""      # honeypot
+
+
+class ModerateIn(BaseModel):
+    action: str            # confirm | publish | keep | remove | approve_org
+    mod_note: str | None = None
+    verified_by: str | None = None
+
+
+class FeedbackStatusIn(BaseModel):
+    status: str            # new | triaged | done
+
+
+def _require_admin(request: Request) -> bool:
+    """Gate admin endpoints on AIRWV_ADMIN_TOKEN (X-Admin-Token header). Fails closed:
+    if no token is configured, admin is disabled entirely."""
+    token = os.environ.get("AIRWV_ADMIN_TOKEN", "").strip()
+    given = request.headers.get("x-admin-token", "")
+    if not token or not secrets.compare_digest(given, token):
+        raise HTTPException(status_code=401, detail="admin token required")
+    return True
 
 # Fields safe to chart (mirror the Reading schema).
 FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "aqi", "temperature", "humidity", "pressure"]
@@ -280,6 +301,46 @@ def create_app(store: Store) -> FastAPI:
             message=body.message[:2000], page=(body.page or None), contact=(body.contact or None),
             ip_hash=ip_hash(client_ip(request)))
         return {"id": fid, "message": "Thanks for the feedback!"}
+
+    # -- admin / moderation (token-gated via AIRWV_ADMIN_TOKEN) -------------
+
+    def _admin_report(r) -> dict:
+        return {
+            "id": r.id, "created_at": r.created_at, "observed_at": r.observed_at,
+            "domain": r.domain, "category": r.category, "description": r.description,
+            "lat": r.lat, "lon": r.lon, "area_label": r.area_label, "stage": r.stage,
+            "screen_reason": r.screen_reason, "flags_count": r.flags_count, "verified_by": r.verified_by,
+            "suspected_org": r.suspected_org, "org_public": r.org_public,
+            "photo_ok": r.photo_ok, "contact_email": r.contact_email, "contact_phone": r.contact_phone,
+            "ip_hash": r.ip_hash, "mod_note": r.mod_note,
+        }
+
+    @app.get("/api/admin/reports")
+    def admin_reports(status: str = "held", _: bool = Depends(_require_admin)):
+        return {"results": [_admin_report(r) for r in store.reports_for_admin(status)]}
+
+    @app.post("/api/admin/reports/{report_id}")
+    def admin_moderate(report_id: int, body: ModerateIn, _: bool = Depends(_require_admin)):
+        if not store.moderate_report(report_id, body.action, mod_note=body.mod_note,
+                                     verified_by=body.verified_by):
+            raise HTTPException(status_code=404, detail="no such report")
+        return {"ok": True}
+
+    @app.get("/api/admin/feedback")
+    def admin_feedback(status: str | None = None, _: bool = Depends(_require_admin)):
+        return {"results": [{"id": f.id, "created_at": f.created_at, "kind": f.kind,
+                             "message": f.message, "page": f.page, "contact": f.contact,
+                             "status": f.status} for f in store.feedback_for_admin(status)]}
+
+    @app.post("/api/admin/feedback/{feedback_id}")
+    def admin_feedback_update(feedback_id: int, body: FeedbackStatusIn, _: bool = Depends(_require_admin)):
+        if not store.update_feedback(feedback_id, body.status):
+            raise HTTPException(status_code=404, detail="no such feedback")
+        return {"ok": True}
+
+    @app.get("/admin", response_class=HTMLResponse)
+    def admin_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="admin.html")
 
     def _parse_dt(s):
         if not s:
