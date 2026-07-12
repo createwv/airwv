@@ -200,9 +200,12 @@ Make the data visible and usable.
       create/publish/delete form (queue = "Events"). Seeded (`scripts/seed_events.py`) with
       four real events: Peoples Cartage fire (Parkersburg, Jul 2026), Canadian wildfire
       smoke (Jun 2025, captured), WV fall drought wildfires (Nov 2024, captured), and the
-      historic Jun 2023 Canada smoke (documented, pre-sensors → no data). *v2: map of event
-      locations, link events↔sources↔reports, auto-surface candidates from `/api/events`
-      detection, per-event permalink pages (SEO/press).* Original idea below:
+      historic Jun 2023 Canada smoke (documented, pre-sensors → no data). Events also carry
+      **origin** (likely/suspected cause), **scope** (Local/Regional/Multi-state/Continental),
+      **regions affected**, and **links to related facilities** (`source_refs` → `/sources`)
+      and **community reports** (`report_ids` → `/analysis`). *v2: map of event locations,
+      auto-surface candidates from `/api/events` detection, per-event permalink pages
+      (SEO/press), backfill more sensors for the captured wildfire windows.* Original idea below:
 - [ ] **Events page (curated air/pollution events by region + time)** — a page that marks
       notable events with a **region, time window, type, description, and citations**, and —
       when the event falls inside our collection window — overlays the **community-sensor
