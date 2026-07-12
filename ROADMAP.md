@@ -286,8 +286,9 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       lifecycle regulated emitters go through. Permit info as a separate field
       (permit id/type/status) from operating status. Sources: WV DEP permit
       database, EPA ECHO (compliance/active), FracTracker (proposed/planned sites).
-- [ ] **Map scale** — statewide = many markers; add clustering / zoom-based
-      thinning so the map stays usable across all of WV.
+- [x] **Map scale** — DONE: Leaflet.markercluster on the dense layers (Air pollution
+      sources ~530, Water sites ~2,000) — zoom-based clusters + spiderfy, so the maps stay
+      usable statewide. (Sensor/reference layers stay unclustered — colors matter there.)
 - [ ] **Linear sources** — commercial rail lines (US DOT/FRA/BTS National Rail
       Network) and major highways / high-traffic roads (WV DOH/DOT AADT traffic
       counts; OpenStreetMap geometry).
