@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="controls" style="gap:10px">
-  <button id="openreport" class="primary">📣 Report a concern</button>
-  <button id="openfeedback">💬 Site feedback</button>
+  <button class="primary" data-open="report">📣 Report a concern</button>
+  <button data-open="feedback">💬 Site feedback</button>
   <span class="meta">See something? Add it to the map. Something broken? Tell us.</span>
 </div>
 <div class="controls">
@@ -56,69 +56,13 @@
     <th>Distance</th><th>Days</th><th>Correlation (r)</th><th>Bias vs. reference</th></tr></thead><tbody></tbody></table>
   <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
 </div>
-<div class="card"><h2>Health guide — what the levels mean <span class="meta" style="font-weight:400">(for the selected metric)</span></h2><div id="guide" class="guide"></div></div>
-<div class="card"><h2>About AirWV</h2>
-  <div class="about">
-    <p><b>Empower WV — community eco monitoring</b> is a community air-quality
-    initiative for West Virginia, powered by the open-source AirWV project. It
-    collects readings from community <a href="https://www2.purpleair.com/"
-    target="_blank" rel="noopener">PurpleAir</a> sensors, stores long-term history,
-    and surfaces trends, anomalies, and alerts. It grew out of the
-    <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
-    Valley Air Quality Monitoring project</a> (Create WV, WVCAG, and partners).</p>
-    <p>Data shown is from community sensors and is provided as-is for awareness, not
-    regulatory use. Source &amp; docs:
-    <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">github.com/createwv/airwv</a>.</p>
-  </div>
+<div class="card"><h2>Health guide — what the levels mean <span class="meta" style="font-weight:400">(for the selected metric)</span></h2><div id="guide" class="guide"></div>
+  <p class="meta" style="padding:0 14px 12px">New to this? <a href="/learn">Learn what these levels mean for your health →</a></p>
 </div>
 
-<div class="modal" id="reportmodal"><div class="modalbox">
-  <h3>📣 Report an environmental concern <button class="x" id="closereport" type="button">×</button></h3>
-  <div class="rform">
-    <label>Type <select id="r-domain">
-      <option value="air">💨 Air — odor, smoke, dust</option>
-      <option value="water">💧 Water — discoloration, odor, foam</option>
-      <option value="soil">🟤 Soil / land — dumping, staining</option>
-      <option value="wildlife">🐾 Wildlife / animals</option>
-      <option value="violation">⚠️ Suspected permit/regulatory violation</option>
-      <option value="other">Other</option>
-    </select></label>
-    <label>What did you notice? <input id="r-category" maxlength="64" placeholder="e.g. chemical odor, black smoke"></label>
-    <label>Details <textarea id="r-desc" rows="3" maxlength="2000" placeholder="What, when, how strong…"></textarea></label>
-    <div class="rloc">
-      <button id="r-setloc" type="button">📍 Set location on map</button>
-      <span id="r-locinfo" class="meta">location not set</span>
-    </div>
-    <details><summary class="meta">Add more (optional)</summary>
-      <div class="rform" style="padding-top:8px">
-        <label>Business/org you suspect <input id="r-org" maxlength="200" placeholder="private — a reviewer decides if it appears"></label>
-        <label>Your email (private, for follow-up) <input id="r-email" type="email" maxlength="200"></label>
-      </div>
-    </details>
-    <input type="text" id="r-website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <div class="rnote">Shown publicly (except your contact). Report what you experienced —
-      don't accuse a specific business; a reviewer handles any named source.</div>
-    <button id="r-submit" class="primary" type="button" disabled>Submit report</button>
-    <div id="r-result" class="meta"></div>
-  </div>
-</div></div>
-
-<div class="modal" id="feedbackmodal"><div class="modalbox">
-  <h3>💬 Site feedback <button class="x" id="closefeedback" type="button">×</button></h3>
-  <div class="rform">
-    <label>Type <select id="f-kind">
-      <option value="bug">🐞 Something's broken</option>
-      <option value="idea">💡 An idea / request</option>
-      <option value="question">❓ A question</option>
-    </select></label>
-    <label>Message <textarea id="f-message" rows="4" maxlength="2000" placeholder="What happened, or what you'd like…"></textarea></label>
-    <label>Email (optional, private) <input id="f-contact" type="email" maxlength="200"></label>
-    <input type="text" id="f-website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <button id="f-submit" class="primary" type="button">Send feedback</button>
-    <div id="f-result" class="meta"></div>
-  </div>
-</div></div>
+{% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
 <script src="/static/app.js"></script>
+<script src="/static/reporting.js"></script>
 {% endblock %}

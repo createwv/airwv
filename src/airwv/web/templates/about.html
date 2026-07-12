@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>About AirWV</h1>
+    <p>Open-source, community-run air-quality monitoring for West Virginia.</p></div>
+
+  <div class="card"><div class="prose">
+    <h3>What this is</h3>
+    <p><b>Empower WV — community eco monitoring</b> collects readings from community
+      <a href="https://www2.purpleair.com/" target="_blank" rel="noopener">PurpleAir</a>
+      sensors across West Virginia, stores long-term history, and surfaces trends,
+      anomalies, and how those sensors compare against government reference monitors.
+      It grew out of the
+      <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
+      Valley Air Quality Monitoring project</a> (Create WV, WVCAG, and partners).</p>
+
+    <h3>Where the data comes from</h3>
+    <ul>
+      <li><b>Community sensors</b> — low-cost PurpleAir monitors run by residents and
+        partner organizations. Great coverage and responsiveness; calibrated against
+        reference monitors before you lean on the numbers.</li>
+      <li><b>EPA reference monitors</b> — regulatory-grade data pulled directly and
+        keyless from <b>EPA AirNow</b> (live) and <b>EPA AirData/AQS</b> (deep history).
+        We use these to validate the community sensors.</li>
+      <li><b>Pollution-source context</b> — permitted facilities from public records
+        (EPA TRI and others), shown factually and cited, never as an accusation.</li>
+    </ul>
+    <p class="meta">Full detail: <a href="https://github.com/createwv/airwv/blob/main/docs/DATA-SOURCES.md"
+      target="_blank" rel="noopener">DATA-SOURCES.md</a>. We reached the reference data
+      through <a href="https://openaq.org" target="_blank" rel="noopener">OpenAQ</a> first —
+      thanks to them and their open tooling.</p>
+
+    <h3>Provisional, not regulatory</h3>
+    <p>Readings are shown as-is for community awareness. Community sensors are not
+      regulatory instruments; treat the data as a helpful signal, not an official
+      determination. For health decisions during smoke or pollution events, also check
+      <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
+
+    <h3>Open source — help out</h3>
+    <p>Everything here is open. Read the code, file an issue, run your own instance, or
+      add a sensor. Repo &amp; docs:
+      <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">github.com/createwv/airwv</a>.</p>
+    <p>Have a question or want to get a sensor into the network?
+      <a href="#" data-open="feedback">Send us a note →</a></p>
+  </div></div>
+
+  <div class="ov-cards" style="margin-top:16px">
+    <a class="navcard" href="/analysis"><span class="ico">📊</span><b>Explore the data</b>
+      <small>Maps, trends, and validation.</small></a>
+    <a class="navcard" href="/learn"><span class="ico">📚</span><b>Learn about air quality</b>
+      <small>Pollutants, the AQI, and health.</small></a>
+    <a class="navcard accent" href="#" data-open="report"><span class="ico">📣</span><b>Report a concern</b>
+      <small>Put it on the map.</small></a>
+  </div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/reporting.js"></script>
+{% endblock %}

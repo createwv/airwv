@@ -18,14 +18,21 @@
   <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
 <nav class="modenav">
-  <a href="/"         class="{{ 'on' if mode == 'overview' }}">Overview</a>
+  <a href="/"         class="{{ 'on' if mode == 'overview' }}">Home</a>
   <a href="/analysis" class="{{ 'on' if mode == 'analysis' }}">Analysis</a>
-  <a href="/admin"    class="{{ 'on' if mode == 'admin' }}">Admin</a>
+  <a href="/learn"    class="{{ 'on' if mode == 'learn' }}">Learn</a>
+  <a href="/about"    class="{{ 'on' if mode == 'about' }}">About</a>
+  <a href="/admin"    class="admin {{ 'on' if mode == 'admin' }}">Admin</a>
 </nav>
-<div class="subbar">West Virginia community air quality · times in US Eastern</div>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
 {% block content %}{% endblock %}
-<footer>AirWV · open-source · <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a></footer>
+<footer>
+  <a href="/">Home</a> · <a href="/analysis">Analysis</a> · <a href="/learn">Learn</a> ·
+  <a href="/about">About</a> · <a href="#" data-open="feedback">Feedback</a> ·
+  <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a>
+  <div class="fnote">AirWV · open-source community air-quality monitoring for West Virginia ·
+    provisional data, not for regulatory use</div>
+</footer>
 {% block scripts %}{% endblock %}
 </body>
 </html>

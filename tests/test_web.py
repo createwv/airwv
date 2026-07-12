@@ -121,11 +121,14 @@ def test_index_page(tmp_path):
 
 def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
-    # Overview at /, dashboard moved to /analysis, admin at /admin — all share the mode nav
-    for path, script in [("/", "overview.js"), ("/analysis", "app.js"), ("/admin", "admin.js")]:
+    # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
+    for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
+                         ("/learn", "reporting.js"), ("/about", "reporting.js"),
+                         ("/admin", "admin.js")]:
         r = c.get(path)
         assert r.status_code == 200, path
         assert "modenav" in r.text and script in r.text, path
-    # active-mode highlight lands on the right tab
-    assert ">Overview</a>" in c.get("/").text
-    assert 'class="on">Analysis' in c.get("/analysis").text
+        assert "reportmodal" in r.text, path        # shared report/feedback modals everywhere
+    assert ">Home</a>" in c.get("/").text
+    assert "Air Quality Index" in c.get("/learn").text
+    assert "Where the data comes from" in c.get("/about").text

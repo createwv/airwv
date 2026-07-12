@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>Understanding your air</h1>
+    <p>A plain-language guide to what we measure, what the colors mean, and how air
+       quality affects your health — with West Virginia in mind.</p></div>
+
+  <div class="card"><div class="prose">
+    <h3>Why air quality matters here</h3>
+    <p>West Virginia's ridges and river valleys trap air. On calm nights, cooler air
+      settles into the valleys and forms a <b>temperature inversion</b> — a lid that
+      holds pollution near the ground until the next day's sun or wind clears it. Add
+      traffic, home heating, and industry along the river corridors, and the same spot
+      can read clean in the afternoon and hazy by dawn. That's exactly the kind of
+      pattern community sensors are good at catching.</p>
+  </div></div>
+
+  <div class="card"><div class="prose">
+    <h3>What we measure</h3>
+    <div class="deflist">
+      <div><b>PM2.5 — fine particles</b>
+        <p>Particles 2.5 micrometers or smaller — about 30× thinner than a hair. They
+          come from anything that burns: vehicles, industry, wood stoves, wildfires.
+          Because they're so small they slip deep into the lungs and into the
+          bloodstream, which is why PM2.5 is the pollutant most tied to health effects.
+          It's the number our map is colored by.</p></div>
+      <div><b>PM10 — coarse particles</b>
+        <p>Bigger particles up to 10 µm: road and construction dust, pollen, mold.
+          Irritating to eyes, nose, and throat, and hard on people with asthma.</p></div>
+      <div><b>PM1.0 — ultrafine</b>
+        <p>The smallest fraction we report — largely combustion-related and useful for
+          spotting fresh smoke or exhaust.</p></div>
+      <div><b>VOCs — volatile organic compounds</b>
+        <p>Gases released by fuels, solvents, and many industrial processes; often
+          what you <i>smell</i>. Some are irritating or harmful, and in sunlight they
+          help form ozone. Our sensors report a <b>relative gas index</b>, not a
+          calibrated concentration — good for spotting changes and odor events, not for
+          an exact number.</p></div>
+    </div>
+  </div></div>
+
+  <div class="card"><div class="prose">
+    <h3>The colors — Air Quality Index (PM2.5)</h3>
+    <p>Every dot on our map is colored by the U.S. EPA's Air Quality Index categories
+      for PM2.5 (µg/m³):</p>
+    <table class="aqi">
+      <tr><td><span class="sw" style="background:#00e400"></span></td><td><b>Good</b></td><td>0–12</td><td>Air is satisfactory; little or no risk.</td></tr>
+      <tr><td><span class="sw" style="background:#ffff00"></span></td><td><b>Moderate</b></td><td>12–35</td><td>Acceptable; unusually sensitive people should watch how they feel.</td></tr>
+      <tr><td><span class="sw" style="background:#ff7e00"></span></td><td><b>Unhealthy for sensitive groups</b></td><td>35–55</td><td>Kids, older adults, and people with heart/lung conditions should ease up on strenuous outdoor activity.</td></tr>
+      <tr><td><span class="sw" style="background:#ff0000"></span></td><td><b>Unhealthy</b></td><td>55–150</td><td>Everyone may feel effects; sensitive groups more so. Limit prolonged exertion outdoors.</td></tr>
+      <tr><td><span class="sw" style="background:#8f3f97"></span></td><td><b>Very unhealthy</b></td><td>150–250</td><td>Health alert — avoid outdoor exertion.</td></tr>
+      <tr><td><span class="sw" style="background:#7e0023"></span></td><td><b>Hazardous</b></td><td>250+</td><td>Emergency conditions; stay indoors with clean air.</td></tr>
+    </table>
+  </div></div>
+
+  <div class="card"><div class="prose">
+    <h3>Who's most at risk</h3>
+    <p>Children, adults over 65, pregnant people, and anyone with asthma, COPD, or heart
+      disease feel air pollution first and hardest. Symptoms can include coughing,
+      throat and eye irritation, shortness of breath, and tightness in the chest.</p>
+    <h3>What you can do</h3>
+    <ul>
+      <li><b>Check before you go.</b> On elevated days, move hard exercise indoors or to
+        cleaner hours (afternoons often clear the overnight valley buildup).</li>
+      <li><b>Clean your indoor air.</b> A HEPA purifier — or a box-fan filter — makes a
+        real difference during smoke or inversion events. Keep windows closed when it's bad.</li>
+      <li><b>Mask up when it's smoky.</b> A well-fitted N95/KN95 filters fine particles;
+        cloth and surgical masks don't.</li>
+      <li><b>Speak up.</b> Smell or see something? <a href="#" data-open="report">Report a
+        concern →</a> to put it on the map, and report pollution or spills to
+        <b>WV DEP</b> (verify the current complaint line at
+        <a href="https://dep.wv.gov/Pages/default.aspx" target="_blank" rel="noopener">dep.wv.gov</a>).</li>
+    </ul>
+  </div></div>
+
+  <div class="card"><div class="prose">
+    <h3>Community sensors vs. reference monitors</h3>
+    <p>Low-cost community sensors give us dense, real-time coverage that the sparse
+      network of regulatory monitors can't. The trade-off is precision: they can read a
+      little high, especially in humidity. So we continuously compare each community
+      sensor against the nearest EPA reference monitor and apply a standard EPA
+      correction — you can see all of that on the
+      <a href="/analysis">Analysis</a> page's validation panel. For official air-quality
+      information, see <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
+  </div></div>
+
+  <div class="ov-cards" style="margin-top:16px">
+    <a class="navcard" href="/analysis"><span class="ico">📊</span><b>See it on the map</b>
+      <small>Live sensors, trends, and validation.</small></a>
+    <a class="navcard accent" href="#" data-open="report"><span class="ico">📣</span><b>Report a concern</b>
+      <small>Air, water, soil, wildlife, or a violation.</small></a>
+    <a class="navcard" href="/about"><span class="ico">ℹ️</span><b>About the project</b>
+      <small>Who we are and where data comes from.</small></a>
+  </div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/reporting.js"></script>
+{% endblock %}

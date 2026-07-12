@@ -544,6 +544,16 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
                                           context={"mode": "analysis"})
 
+    @app.get("/learn", response_class=HTMLResponse)
+    def learn(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="learn.html",
+                                          context={"mode": "learn"})
+
+    @app.get("/about", response_class=HTMLResponse)
+    def about(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="about.html",
+                                          context={"mode": "about"})
+
     static_dir = Path(__file__).parent / "static"
     if static_dir.is_dir():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")

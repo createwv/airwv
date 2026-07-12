@@ -66,7 +66,8 @@ function drawMap(sensors){
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     tile.on('load', () => busy('b-map', false));      // hide spinner once tiles are in
     setTimeout(() => busy('b-map', false), 5000);     // fallback
-    map.on('click', onMapClickForReport);             // place a report pin when in "set location" mode
+    window.AIRWV_MAP = map;                            // reporting.js uses this to drop the location pin
+    window.AIRWV_ON_REPORT = loadReports;             // refresh the report layer after a submission
   }
   redrawSensors();
   const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
@@ -357,8 +358,8 @@ $('field').addEventListener('change', () => { render(); renderGuide(); });
 $('start').addEventListener('change', render);
 $('end').addEventListener('change', render);
 $('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
-// ---- Community reports: 📣 map layer + submit form + site feedback ----
-let reportLayer, allReports = [], placingReport = false, reportLoc = null, reportStart = 0, tmpLocMarker = null;
+// ---- Community reports: 📣 map layer (submit form + feedback live in reporting.js) ----
+let reportLayer, allReports = [];
 const R_ICON = {air:'💨', water:'💧', soil:'🟤', wildlife:'🐾', violation:'⚠️', other:'📣'};
 async function loadReports(){
   try { allReports = (await j('/api/reports')).results || []; } catch(e){ allReports = []; }
@@ -378,69 +379,10 @@ function redrawReports(){
   });
   reportLayer.addTo(map);
 }
-function onMapClickForReport(e){
-  if (!placingReport) return;
-  placingReport = false;
-  reportLoc = e.latlng;
-  $('r-locinfo').textContent = `📍 set: ${reportLoc.lat.toFixed(4)}, ${reportLoc.lng.toFixed(4)} — click "Set location" to move it`;
-  $('r-submit').disabled = false;
-  if (tmpLocMarker) tmpLocMarker.remove();
-  tmpLocMarker = L.marker([reportLoc.lat, reportLoc.lng]).addTo(map);
-  $('reportmodal').classList.add('on');
-}
-function resetReportForm(){
-  ['r-category','r-desc','r-org','r-email'].forEach(id => $(id).value = '');
-  reportLoc = null; $('r-locinfo').textContent = 'location not set';
-  $('r-submit').disabled = true; $('r-result').textContent = '';
-  if (tmpLocMarker) { tmpLocMarker.remove(); tmpLocMarker = null; }
-}
-async function submitReport(){
-  if (!reportLoc) return;
-  $('r-submit').disabled = true;
-  const body = {
-    domain: $('r-domain').value, category: $('r-category').value.trim(),
-    description: $('r-desc').value.trim(), lat: reportLoc.lat, lon: reportLoc.lng,
-    suspected_org: $('r-org').value.trim() || null, contact_email: $('r-email').value.trim() || null,
-    website: $('r-website').value, elapsed_ms: Date.now() - reportStart,
-  };
-  try {
-    const res = await fetch('/api/reports', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-    const d = await res.json();
-    if (res.ok){ $('r-result').textContent = d.message || 'Thanks!'; loadReports();
-      setTimeout(() => { $('reportmodal').classList.remove('on'); resetReportForm(); }, 2200); }
-    else { $('r-result').textContent = (typeof d.detail === 'string' ? d.detail : 'Could not submit.'); $('r-submit').disabled = false; }
-  } catch(e){ $('r-result').textContent = 'Error submitting — try again.'; $('r-submit').disabled = false; }
-}
-async function submitFeedback(){
-  if (!$('f-message').value.trim()) { $('f-result').textContent = 'Please add a message.'; return; }
-  $('f-submit').disabled = true;
-  try {
-    const res = await fetch('/api/feedback', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
-      kind: $('f-kind').value, message: $('f-message').value.trim(), contact: $('f-contact').value.trim() || null,
-      page: location.pathname, website: $('f-website').value })});
-    const d = await res.json();
-    $('f-result').textContent = res.ok ? (d.message || 'Thanks!') : (d.detail || 'Could not send.');
-    if (res.ok) setTimeout(() => { $('feedbackmodal').classList.remove('on'); $('f-message').value=''; $('f-result').textContent=''; $('f-submit').disabled=false; }, 1800);
-    else $('f-submit').disabled = false;
-  } catch(e){ $('f-result').textContent = 'Error — try again.'; $('f-submit').disabled = false; }
-}
-function initReporting(){
-  $('openreport').addEventListener('click', () => { reportStart = Date.now(); $('reportmodal').classList.add('on'); });
-  $('closereport').addEventListener('click', () => $('reportmodal').classList.remove('on'));
-  $('r-setloc').addEventListener('click', () => { placingReport = true; $('r-locinfo').textContent = 'now click the map…'; $('reportmodal').classList.remove('on'); });
-  $('r-submit').addEventListener('click', submitReport);
-  $('openfeedback').addEventListener('click', () => $('feedbackmodal').classList.add('on'));
-  $('closefeedback').addEventListener('click', () => $('feedbackmodal').classList.remove('on'));
-  $('f-submit').addEventListener('click', submitFeedback);
-  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
-  // deep links from the Overview page: /analysis#report and /analysis#feedback
-  if (location.hash === '#report'){ reportStart = Date.now(); $('reportmodal').classList.add('on'); }
-  else if (location.hash === '#feedback'){ $('feedbackmodal').classList.add('on'); }
-}
+// report/feedback modal logic lives in reporting.js (shared with the Overview page)
 // map layer visibility is driven by the layers tree (buildLayers)
 loadGuide().then(loadSensors);
 loadValidation();
 loadCoverage();
 initProximity();
-initReporting();
 $('epacorrect').addEventListener('change', loadValidation);

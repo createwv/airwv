@@ -84,6 +84,8 @@ function drawMap(sensors){
   if (group.length) map.fitBounds(group, {padding: [30, 30], maxZoom: 9});
   $('ov-legend').innerHTML = 'Dots = community sensors · rings = EPA monitors · '
     + 'color = latest PM2.5 (green good → red unhealthy). Click a dot for details.';
+  window.AIRWV_MAP = map;               // reporting.js drops the report pin here
+  window.AIRWV_ON_REPORT = loadReports; // refresh the feed after a submission
 }
 
 async function loadReports(){

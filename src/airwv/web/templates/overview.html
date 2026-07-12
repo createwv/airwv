@@ -2,8 +2,13 @@
 {% block content %}
 <div class="ov-wrap">
 
-  <div id="ov-headline" class="ov-headline">Loading the latest West Virginia air snapshot…</div>
+  <div class="ov-intro">
+    <h1>West Virginia's community air, in the open.</h1>
+    <p>AirWV pairs neighborhood sensors with EPA reference monitors so anyone can see
+       what's in the air — and speak up about it.</p>
+  </div>
 
+  <div id="ov-headline" class="ov-headline">Loading the latest air snapshot…</div>
   <section class="ov-stats" id="ov-stats"><!-- stat cards injected by overview.js --></section>
 
   <div class="card ov-mapcard">
@@ -13,13 +18,23 @@
     <div class="legend" id="ov-legend"></div>
   </div>
 
-  <section class="ov-cta">
-    <a class="ctabtn" href="/analysis#report"><span class="ico">📣</span>
-      <b>Report a concern</b><small>Air, water, soil, wildlife, or a suspected violation</small></a>
-    <a class="ctabtn" href="/analysis"><span class="ico">📊</span>
-      <b>Explore the data</b><small>Sensor maps, trends, and reference-monitor validation</small></a>
-    <a class="ctabtn" href="/analysis#feedback"><span class="ico">💬</span>
-      <b>Send feedback</b><small>A bug, an idea, or a question about the site</small></a>
+  <h2 class="ov-sechead">Explore &amp; get involved</h2>
+  <section class="ov-cards">
+    <a class="navcard" href="/analysis">
+      <span class="ico">📊</span><b>Analysis &amp; maps</b>
+      <small>Sensor maps, trends, pollution sources, and reference-monitor validation.</small></a>
+    <a class="navcard accent" href="#" data-open="report">
+      <span class="ico">📣</span><b>Report a concern</b>
+      <small>Air, water, soil, wildlife, or a suspected violation — put it on the map.</small></a>
+    <a class="navcard" href="/learn">
+      <span class="ico">📚</span><b>Learn about air quality</b>
+      <small>What PM2.5, VOCs, and the AQI mean, and how air affects your health.</small></a>
+    <a class="navcard" href="/about">
+      <span class="ico">ℹ️</span><b>About the project</b>
+      <small>Who's behind AirWV, where the data comes from, and how to help.</small></a>
+    <a class="navcard" href="#" data-open="feedback">
+      <span class="ico">💬</span><b>Send feedback</b>
+      <small>Found a bug, have an idea, or a question about the site? Tell us.</small></a>
   </section>
 
   <div class="card">
@@ -29,15 +44,10 @@
       not findings of fact. Locations are approximate.</p>
   </div>
 
-  <div class="about">
-    <p><b>AirWV</b> is an open-source, community air-quality monitoring project for West
-    Virginia — pairing low-cost community sensors with EPA reference monitors so
-    residents can see what's in their air. Readings are provisional and for community
-    awareness, not regulatory use. Email alerts are coming soon.</p>
-  </div>
-
 </div>
+{% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
 <script src="/static/overview.js"></script>
+<script src="/static/reporting.js"></script>
 {% endblock %}
