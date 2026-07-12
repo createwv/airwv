@@ -96,7 +96,7 @@ EVENTS = [
         ],
     },
     {
-        "title": "Canadian wildfire smoke — June 2023 (before our sensors)",
+        "title": "Canadian wildfire smoke — June 2023",
         "kind": "wildfire", "region": "Eastern U.S. / West Virginia",
         "lat": None, "lon": None,
         "start_ts": _utc("2023-06-06T00:00"), "end_ts": _utc("2023-06-08T00:00"),
@@ -113,6 +113,89 @@ EVENTS = [
         "sources": [
             {"label": "NOAA NESDIS — Wildfire smoke and air quality",
              "url": "https://www.nesdis.noaa.gov/news/wildfire-smoke-and-air-quality"},
+        ],
+    },
+    # ---- historic / documented events (pre-sensor; context, no measurements of our own) ----
+    {
+        "title": "Kanawha Valley “blue haze” episodes",
+        "kind": "haze", "region": "Kanawha Valley (Poca to Belle)",
+        "lat": 38.37, "lon": -81.75,
+        "start_ts": _utc("2008-07-11T00:00"), "end_ts": _utc("2008-07-11T23:59"),
+        "origin": "Debated — fine particles/sulfates pooling under valley inversions; "
+                  "industrial and power-plant emissions implicated",
+        "scope": "Regional", "regions_affected": "The ~35-mile Kanawha River valley from Poca to Belle",
+        "captured": False, "sensor_ids": [],
+        "description": (
+            "For decades a bluish haze has periodically settled over the Kanawha Valley under "
+            "temperature inversions. WV DEP formally investigated notable episodes on Jan 25 and "
+            "July 11, 2008; the July report identified the AEP John Amos power plant as the "
+            "largest nearby source of PM, SO2 and NOx. A long-running illustration of how the "
+            "valley's terrain traps pollution — the same effect our sensors watch for today."),
+        "sources": [
+            {"label": "WV DEP — Blue Haze Incident, July 11 2008",
+             "url": "https://dep.wv.gov/daq/pubs/documents/bluehaze-7-11-08.pdf"},
+            {"label": "WV DEP — Blue Haze Incident, Jan 25 2008",
+             "url": "https://dep.wv.gov/daq/Pubs/Documents/BlueHaze-1-25-08.pdf"},
+        ],
+    },
+    {
+        "title": "Bayer CropScience explosion — Institute",
+        "kind": "explosion", "region": "Institute, WV (Kanawha Valley)",
+        "lat": 38.38, "lon": -81.77,
+        "start_ts": _utc("2008-08-28T00:00"), "end_ts": _utc("2008-08-28T23:59"),
+        "origin": "Runaway chemical reaction in a pesticide waste (methomyl) unit",
+        "scope": "Local", "regions_affected": "Institute and the surrounding Kanawha Valley; "
+                 "a shelter-in-place was ordered",
+        "captured": False, "sensor_ids": [],
+        "description": (
+            "On Aug 28, 2008 a runaway reaction blew apart a pressure vessel at the Bayer "
+            "CropScience plant in Institute, killing two workers. Debris struck a tank holding "
+            "methyl isocyanate (MIC) — the same chemical as the 1984 Bhopal disaster — "
+            "narrowly averting a far larger release. The U.S. Chemical Safety Board found serious "
+            "process-safety failures; Bayer later paid a $5.6M settlement."),
+        "sources": [
+            {"label": "U.S. Chemical Safety Board — Bayer CropScience investigation",
+             "url": "https://www.csb.gov/bayer-cropscience-pesticide-waste-tank-explosion/"},
+        ],
+    },
+    {
+        "title": "Union Carbide toxic gas leak — Institute",
+        "kind": "other", "region": "Institute, WV (Kanawha Valley)",
+        "lat": 38.38, "lon": -81.77,
+        "start_ts": _utc("1985-08-11T00:00"), "end_ts": _utc("1985-08-11T23:59"),
+        "origin": "Leak of aldicarb oxime and other gases from the Union Carbide plant",
+        "scope": "Local", "regions_affected": "Institute; roughly 135 people sought medical treatment",
+        "captured": False, "sensor_ids": [],
+        "description": (
+            "Union Carbide's Institute plant was the only U.S. facility that made methyl "
+            "isocyanate — the sister plant to Bhopal, India. Months after the 1984 Bhopal "
+            "catastrophe, on Aug 11, 1985 a leak of aldicarb oxime drifted over Institute and "
+            "sent about 135 people to hospitals, putting a national spotlight on the safety of "
+            "the valley's chemical plants."),
+        "sources": [
+            {"label": "Washington Post — chemical leaks at the W.Va. Union Carbide plant (1985)",
+             "url": "https://www.washingtonpost.com/archive/politics/1985/02/01/more-chemical-leaks-at-wva-plant-disclosed-by-union-carbide-corp/a5047a4d-363c-4a5b-aeb0-ef7dcf49cc00/"},
+        ],
+    },
+    {
+        "title": "Monsanto 2,4,5-T reactor explosion — Nitro",
+        "kind": "explosion", "region": "Nitro, WV (Kanawha Valley)",
+        "lat": 38.42, "lon": -81.84,
+        "start_ts": _utc("1949-03-08T00:00"), "end_ts": _utc("1949-03-08T23:59"),
+        "origin": "Explosion in a trichlorophenol / 2,4,5-T herbicide unit",
+        "scope": "Local", "regions_affected": "Nitro; ~226 workers developed chloracne; "
+                 "dioxin later found well beyond the plant",
+        "captured": False, "sensor_ids": [],
+        "description": (
+            "On March 8, 1949 an explosion at Monsanto's Nitro plant — while making the "
+            "herbicide 2,4,5-T — sent up a black cloud and coated workers in soot; about 226 "
+            "developed chloracne. The 2,4,5-T was contaminated with dioxin (TCDD), one of the most "
+            "toxic compounds known. Monsanto made 2,4,5-T here (a component of Agent Orange) into "
+            "1969; elevated dioxin has since been found in nearby soil, streams and fish. Nitro "
+            "itself was founded to make WWI explosives."),
+        "sources": [
+            {"label": "Barlett & Steele / Vanity Fair — Monsanto's Nitro history",
+             "url": "http://www.barlettandsteele.com/journalism/vf_monsanto_3"},
         ],
     },
 ]
