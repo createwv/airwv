@@ -43,6 +43,13 @@ SENSOR_FIELDS = [
     "10.0_um_count",
 ]
 
+# Lean real-time set for an ongoing collector: enough to color the map, run the
+# EPA correction (humidity), and flag A/B malfunction — but far fewer API points.
+LIGHT_SENSOR_FIELDS = [
+    "sensor_index", "name", "latitude", "longitude", "last_seen",
+    "pm2.5", "pm2.5_a", "pm2.5_b", "humidity", "confidence",
+]
+
 # Minimal fields for resolving our device names to PurpleAir sensor indices.
 RESOLVE_FIELDS = ["name", "latitude", "longitude"]
 
@@ -170,13 +177,18 @@ class PurpleAirSource(Source):
 
     name = "purpleair"
 
-    def __init__(self, api_key: str, sensor_ids: list[int] | None = None, timeout: float = 30.0):
+    def __init__(self, api_key: str, sensor_ids: list[int] | None = None, timeout: float = 30.0,
+                 light: bool = False):
         if not api_key:
             raise ValueError("PurpleAir API key is required")
         self._api_key = api_key
         # When None, ingestion will supply the statewide WV sensor list.
         self._sensor_ids = sensor_ids or []
         self._timeout = timeout
+        # light=True requests only what keeps the map + validation + correction fresh
+        # (PM2.5 + A/B + humidity + confidence) — far fewer API points per poll, so an
+        # ongoing collector timer stays cheap.
+        self._fields = LIGHT_SENSOR_FIELDS if light else SENSOR_FIELDS
 
     def _headers(self) -> dict[str, str]:
         return {"X-API-Key": self._api_key}
@@ -192,7 +204,7 @@ class PurpleAirSource(Source):
             return []
 
         params = {
-            "fields": ",".join(SENSOR_FIELDS),
+            "fields": ",".join(self._fields),
             "show_only": ",".join(str(s) for s in self._sensor_ids),
         }
         payload = self._get("/sensors", params)

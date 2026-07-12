@@ -6,7 +6,7 @@
 # Adjust WorkingDirectory, User, and the venv path to your install.
 
 [Unit]
-Description=AirWV — collect PurpleAir readings into storage
+Description=AirWV — collect PurpleAir readings (lean fields) into storage
 After=network-online.target
 Wants=network-online.target
 
@@ -15,4 +15,4 @@ Type=oneshot
 User=airwv
 WorkingDirectory=/opt/airwv
 EnvironmentFile=/opt/airwv/.env
-ExecStart=/opt/airwv/.venv/bin/python -m airwv.ingest collect
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.ingest collect --light

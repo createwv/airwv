@@ -8,7 +8,7 @@ Description=Run AirWV collection hourly
 
 [Timer]
 OnBootSec=5min
-OnUnitActiveSec=1h
+OnUnitActiveSec=6h
 Persistent=true
 
 [Install]

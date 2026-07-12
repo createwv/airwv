@@ -128,11 +128,13 @@ def run_collect(
     store=None,
     index_map: dict[str, int] | None = None,
     limit: int | None = None,
+    light: bool = False,
 ) -> int:
     """Pull current readings for resolved sensors and store them. Returns inserted count.
 
     ``limit`` caps how many sensors are polled — useful to conserve API points
-    while testing before running the full fleet.
+    while testing before running the full fleet. ``light`` requests only the lean
+    real-time field set (cheap enough for an ongoing timer).
     """
     index_map = index_map if index_map is not None else load_index_map(config.index_cache_path)
     if not index_map:
@@ -146,7 +148,7 @@ def run_collect(
     if limit is not None:
         indices = indices[:limit]
         log.info("limiting to %d sensor(s) this run (API-point conservation)", len(indices))
-    source = source or PurpleAirSource(config.purpleair_api_key, sensor_ids=indices)
+    source = source or PurpleAirSource(config.purpleair_api_key, sensor_ids=indices, light=light)
     store = store or Store.from_config(config)
     store.create_schema()
 
@@ -996,6 +998,8 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("resolve", help="match device names to PurpleAir sensor indices")
     collect = sub.add_parser("collect", help="collect current readings once (default)")
     collect.add_argument("--limit", type=int, help="cap sensors polled (saves API points)")
+    collect.add_argument("--light", action="store_true",
+                         help="request only lean real-time fields (cheap; for an ongoing timer)")
     collect.add_argument("--org", help="only sensors whose installing org matches (e.g. 'Create WV')")
     collect.add_argument("--sensor", action="append", help="only sensors whose name matches (repeatable)")
     run_cmd = sub.add_parser("run", help="run the scheduler loop (collect + alerts on an interval)")
@@ -1144,7 +1148,8 @@ def main(argv: list[str] | None = None) -> None:
             log.info("scheduler stopped")
     else:
         index_map = _scoped_index_map(config, org=getattr(args, "org", None), names=getattr(args, "sensor", None))
-        run_collect(config, index_map=index_map, limit=getattr(args, "limit", None))
+        run_collect(config, index_map=index_map, limit=getattr(args, "limit", None),
+                    light=getattr(args, "light", False))
 
 
 if __name__ == "__main__":
