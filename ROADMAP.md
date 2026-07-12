@@ -415,6 +415,64 @@ Grow the network and secure the record.
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)
 
+## Phase 7 — Multi-medium: Water, Soil & Field Science 🌊
+
+Broaden from air to **how we affect our whole environment and ourselves** — air,
+water, soil — and how those media connect. Vision: help people know what to be
+aware of, curb, monitor, and protect from. **Medium-aware architecture:** one
+platform, "Air | Water (| Soil)" as lenses that reuse the shared shell / map /
+charts / sources / events / reporting, each with its own data model + standards
+framing (no single cross-medium AQI). Partner: **WV Rivers Coalition** (already a
+Create WV partner — co-supplied some air monitors; want to help them do
+people-direct water education and connect it to air).
+
+### Water v1
+- [ ] **Water data ingestion** — pull WV from the **Water Quality Portal**
+      (waterqualitydata.us — unified USGS NWIS + EPA WQX/STORET + 400 agencies,
+      keyless; discrete samples: pH, DO, turbidity, conductivity, E. coli, nutrients,
+      metals, temp) and **USGS NWIS/Water Data APIs** (real-time gauges: flow, gage
+      height, water temp). WV DEP runs 26 fixed stations (bi-monthly) that also feed WQP.
+- [ ] **Water map + site detail** — a Water view: sampling sites + live gauges; pick a
+      **parameter**, color by *exceeds-standard* (drinking / recreation / aquatic-life)
+      rather than AQI; per-site charts (reuse the time-series machinery).
+- [ ] **Water in Events** — seed the **2014 Freedom Industries MCHM spill (Elk River,
+      Charleston)** — the definitive WV water event — and future spills/advisories.
+- [ ] **Water in Sources** — many facilities hold **NPDES water-discharge permits** as
+      well as air permits; show both on a facility page (one plant, air *and* water).
+
+### Cross-medium education & systemic issues
+- [ ] **Air ↔ water explainer** — where the same pollution shows up in *both* media and
+      where each is exclusive; how they interact (deposition, runoff, shared sources).
+- [ ] **Combined sewer overflows (CSOs)** — education that it's our *systems*, not only
+      individual polluters: aging combined storm+sewage systems dump untreated sewage
+      into rivers (e.g., the **Kanawha**) during rain — possibly the main reason to think
+      twice about swimming. (Verify current CSO facts/permits before publishing.)
+- [ ] **Drinking-water source mapping** — flag **where each community's drinking water
+      comes from** (e.g., **Elk River intake for Charleston**, down to the withdrawal
+      point). Education on source water + a hook for **alerts** (upstream spill → warn
+      downstream intakes). Sources: WV Bureau for Public Health source-water assessments.
+- [ ] **Recreation & fish-consumption guidance** — plain-language "can you swim/boat/eat
+      the fish?" per river, from **WV DHHR/DEP fish-consumption advisories** + the DEP
+      **303(d) impaired-streams / integrated report**; explain **how to read the river
+      maps** (why so many segments look "impaired," what the categories mean).
+
+### Field science — trained-scientist spot checks
+- [ ] **Field-reading intake (verified data, not public reports)** — a way for **trained
+      Create WV / partner scientists** to submit **actual instrument readings** in the
+      field (spot-check VOCs, water conductivity/metals, pH, etc.), with a **photo of the
+      meter**, geolocation, timestamp, parameter/unit, and method. Distinct from the
+      public [[COMMUNITY-REPORTING]] flow: authenticated submitter, treated as trusted
+      data, folded in alongside the continuous sensors so we can **officially flag and
+      track a problem area over time**. Needs: submitter auth/roles, a `field_reading`
+      model (param/value/unit/method/photo/QA-flag), map + trend display, and links to
+      events/sources. Ties into the mobile-friendliness of the reporting UI.
+
+### Soil & beyond (later)
+- [ ] **Soil maps** — contamination / brownfields / heavy-metal data (EPA, state) as a
+      third medium once air + water patterns are proven.
+- [ ] Other exposures worth surfacing over time (radon, noise, PFAS-specific, etc.) —
+      driven by community concern.
+
 ---
 
 ### Guiding principles
