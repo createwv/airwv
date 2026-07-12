@@ -117,3 +117,15 @@ def test_index_page(tmp_path):
     r = _client(tmp_path).get("/")
     assert r.status_code == 200
     assert "AirWV" in r.text
+
+
+def test_mode_pages_render(tmp_path):
+    c = _client(tmp_path)
+    # Overview at /, dashboard moved to /analysis, admin at /admin — all share the mode nav
+    for path, script in [("/", "overview.js"), ("/analysis", "app.js"), ("/admin", "admin.js")]:
+        r = c.get(path)
+        assert r.status_code == 200, path
+        assert "modenav" in r.text and script in r.text, path
+    # active-mode highlight lands on the right tab
+    assert ">Overview</a>" in c.get("/").text
+    assert 'class="on">Analysis' in c.get("/analysis").text

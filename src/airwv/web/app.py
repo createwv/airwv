@@ -359,7 +359,8 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page(request: Request):
-        return TEMPLATES.TemplateResponse(request=request, name="admin.html")
+        return TEMPLATES.TemplateResponse(request=request, name="admin.html",
+                                          context={"mode": "admin"})
 
     def _parse_dt(s):
         if not s:
@@ -535,7 +536,13 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):
-        return TEMPLATES.TemplateResponse(request=request, name="dashboard.html")
+        return TEMPLATES.TemplateResponse(request=request, name="overview.html",
+                                          context={"mode": "overview"})
+
+    @app.get("/analysis", response_class=HTMLResponse)
+    def analysis(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
+                                          context={"mode": "analysis"})
 
     static_dir = Path(__file__).parent / "static"
     if static_dir.is_dir():

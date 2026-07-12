@@ -17,7 +17,12 @@
   <img class="cloud c-white" src="/static/banner-clouds-white.svg" alt="">
   <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
-<div class="subbar">West Virginia community air quality · map colored by latest PM2.5 · times in US Eastern</div>
+<nav class="modenav">
+  <a href="/"         class="{{ 'on' if mode == 'overview' }}">Overview</a>
+  <a href="/analysis" class="{{ 'on' if mode == 'analysis' }}">Analysis</a>
+  <a href="/admin"    class="{{ 'on' if mode == 'admin' }}">Admin</a>
+</nav>
+<div class="subbar">West Virginia community air quality · times in US Eastern</div>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
 {% block content %}{% endblock %}
 <footer>AirWV · open-source · <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a></footer>

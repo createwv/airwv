@@ -433,6 +433,9 @@ function initReporting(){
   $('closefeedback').addEventListener('click', () => $('feedbackmodal').classList.remove('on'));
   $('f-submit').addEventListener('click', submitFeedback);
   document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
+  // deep links from the Overview page: /analysis#report and /analysis#feedback
+  if (location.hash === '#report'){ reportStart = Date.now(); $('reportmodal').classList.add('on'); }
+  else if (location.hash === '#feedback'){ $('feedbackmodal').classList.add('on'); }
 }
 // map layer visibility is driven by the layers tree (buildLayers)
 loadGuide().then(loadSensors);

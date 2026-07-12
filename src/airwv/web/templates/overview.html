@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="ov-wrap">
+
+  <div id="ov-headline" class="ov-headline">Loading the latest West Virginia air snapshot…</div>
+
+  <section class="ov-stats" id="ov-stats"><!-- stat cards injected by overview.js --></section>
+
+  <div class="card ov-mapcard">
+    <h2>Current conditions
+      <a href="/analysis" class="ov-maplink">Open full map & analysis →</a></h2>
+    <div id="ov-map"></div>
+    <div class="legend" id="ov-legend"></div>
+  </div>
+
+  <section class="ov-cta">
+    <a class="ctabtn" href="/analysis#report"><span class="ico">📣</span>
+      <b>Report a concern</b><small>Air, water, soil, wildlife, or a suspected violation</small></a>
+    <a class="ctabtn" href="/analysis"><span class="ico">📊</span>
+      <b>Explore the data</b><small>Sensor maps, trends, and reference-monitor validation</small></a>
+    <a class="ctabtn" href="/analysis#feedback"><span class="ico">💬</span>
+      <b>Send feedback</b><small>A bug, an idea, or a question about the site</small></a>
+  </section>
+
+  <div class="card">
+    <h2>Recent community reports</h2>
+    <div id="ov-reports" class="ov-reports"><p class="meta" style="padding:0 14px 12px">Loading…</p></div>
+    <p class="meta ov-repnote">Community-submitted and unverified until a maintainer reviews them —
+      not findings of fact. Locations are approximate.</p>
+  </div>
+
+  <div class="about">
+    <p><b>AirWV</b> is an open-source, community air-quality monitoring project for West
+    Virginia — pairing low-cost community sensors with EPA reference monitors so
+    residents can see what's in their air. Readings are provisional and for community
+    awareness, not regulatory use. Email alerts are coming soon.</p>
+  </div>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/overview.js"></script>
+{% endblock %}
