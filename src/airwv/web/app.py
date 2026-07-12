@@ -632,6 +632,21 @@ def create_app(store: Store) -> FastAPI:
             headers={"Content-Disposition": f'attachment; filename="airwv_{sensor_id}.csv"'},
         )
 
+    @app.get("/api/water/sites")
+    def water_sites():
+        return {"sites": store.water_sites()}
+
+    @app.get("/api/water/series/{site_id}")
+    def water_series(site_id: str, parameter: str = "ph", days: int = 30):
+        since = datetime.utcnow() - timedelta(days=days)   # stored ts is naive UTC
+        return {"site_id": site_id, "parameter": parameter,
+                "points": store.water_series(site_id, parameter, since=since)}
+
+    @app.get("/water", response_class=HTMLResponse)
+    def water_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="water.html",
+                                          context={"mode": "water"})
+
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",

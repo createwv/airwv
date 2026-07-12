@@ -480,6 +480,66 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
 AIRDATA_STATES = {"54": "WV", "39": "OH", "42": "PA", "24": "MD", "51": "VA", "21": "KY"}
 
 
+# USGS NWIS parameter codes we track -> (our key, unit).
+USGS_WATER_PARAMS = {
+    "00010": ("temperature", "°C"),
+    "00095": ("conductance", "µS/cm"),
+    "00300": ("do", "mg/L"),
+    "00400": ("ph", "pH"),
+    "63680": ("turbidity", "FNU"),
+    "00060": ("discharge", "cfs"),
+    "00065": ("gage_height", "ft"),
+}
+
+
+def run_water(config: Config, store=None, states=("wv",)) -> int:
+    """Pull the latest real-time water readings from **USGS NWIS** (keyless JSON) for WV.
+
+    Stores the most recent value per site·parameter (source='usgs'); running on a timer
+    accumulates a time series, the same live-layer model as AirNow for air. Parameters:
+    temperature, specific conductance, dissolved oxygen, pH, turbidity, discharge, gage height.
+    """
+    import httpx
+
+    store = store or Store.from_config(config)
+    store.create_schema()
+    codes = ",".join(USGS_WATER_PARAMS)
+    rows: list[dict] = []
+    for st in states:
+        url = (f"https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd={st}"
+               f"&parameterCd={codes}&siteStatus=active&period=PT6H")
+        try:
+            data = httpx.get(url, timeout=180).json()
+        except Exception as exc:
+            log.warning("water: %s fetch failed (%s)", st, exc)
+            continue
+        for t in data.get("value", {}).get("timeSeries", []):
+            pm = USGS_WATER_PARAMS.get(t["variable"]["variableCode"][0]["value"])
+            if not pm:
+                continue
+            param, unit = pm
+            si = t["sourceInfo"]
+            gl = si["geoLocation"]["geogLocation"]
+            vals = t["values"][0]["value"] if t.get("values") else []
+            for v in reversed(vals):   # most recent valid point
+                try:
+                    val = float(v["value"])
+                except (ValueError, KeyError, TypeError):
+                    continue
+                if val <= -999998:     # USGS no-data sentinel
+                    continue
+                ts = datetime.fromisoformat(v["dateTime"]).astimezone(timezone.utc).replace(tzinfo=None)
+                rows.append({"source": "usgs", "site_id": si["siteCode"][0]["value"],
+                             "site_name": si["siteName"], "lat": float(gl["latitude"]),
+                             "lon": float(gl["longitude"]), "ts": ts, "parameter": param,
+                             "value": round(val, 3), "unit": unit})
+                break
+    n = store.add_water_readings(rows)
+    log.info("water: stored %d readings across %d site·params (USGS, %s)",
+             n, len(rows), ",".join(states))
+    return n
+
+
 def _airdata_date(s: str) -> datetime:
     """EPA's daily files are inconsistent: most years use YYYY-MM-DD, but 2020-2023
     use M/D/YYYY. Accept both (else the whole year silently parses to zero rows)."""
@@ -1004,6 +1064,7 @@ def main(argv: list[str] | None = None) -> None:
     reference.add_argument("--refresh", action="store_true",
                            help="re-pull windows even if already stored (for ongoing/late data)")
     sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
+    sub.add_parser("water", help="pull latest USGS real-time water readings for WV (keyless)")
     airdata = sub.add_parser("airdata", help="bulk-import EPA AirData daily PM2.5 history (keyless, no quota)")
     airdata.add_argument("--start-year", type=int, default=2016, help="first year (default 2016)")
     airdata.add_argument("--end-year", type=int, default=datetime.now(tz=timezone.utc).year,
@@ -1070,6 +1131,8 @@ def main(argv: list[str] | None = None) -> None:
                       window_days=args.window_days, refresh=args.refresh)
     elif command == "airnow":
         run_airnow(config)
+    elif command == "water":
+        run_water(config)
     elif command == "airdata":
         run_airdata(config, args.start_year, args.end_year, param=args.param)
     elif command == "validate":

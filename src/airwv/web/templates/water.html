@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>West Virginia's water</h1>
+    <p>Real-time conditions from USGS stream gauges across West Virginia. Pick a measure and
+       see where our rivers stand. This is a first look — more sources (Water Quality Portal,
+       WV DEP), history, and health context are coming.</p></div>
+
+  <div class="controls">
+    <label>Measure <select id="w-param"></select></label>
+    <span class="meta" id="w-note"></span>
+  </div>
+  <div class="card"><h2>Water monitoring sites <span class="meta" id="w-count"></span></h2>
+    <div id="w-map"></div>
+    <div class="legend" id="w-legend"></div>
+  </div>
+
+  <div class="card" id="w-detailcard" style="display:none">
+    <h2 id="w-sitename">Site</h2>
+    <div id="w-chart" class="chart"></div>
+    <p class="meta" id="w-detailnote"></p>
+  </div>
+
+  <div class="about"><p class="meta">Source: <a href="https://waterservices.usgs.gov/" target="_blank"
+    rel="noopener">USGS NWIS real-time water services</a> (keyless). Provisional data. Water-quality
+    parameters (pH, dissolved oxygen, conductivity, turbidity) are reported at a subset of gauges;
+    most report streamflow and gage height. Health thresholds shown are general aquatic-life
+    guidance, not drinking-water standards.</p></div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/water.js"></script>
+<script src="/static/reporting.js"></script>
+{% endblock %}

@@ -213,3 +213,28 @@ class Event(Base):
     report_ids: Mapped[list] = mapped_column(JSON, default=list, nullable=False)   # community report ids
     sources: Mapped[list] = mapped_column(JSON, default=list, nullable=False)      # [{"label","url"}, ...] citations
     status: Mapped[str] = mapped_column(String(16), default="published", index=True)  # published | draft | archived
+
+
+class WaterReading(Base):
+    """A water-quality / hydrology reading at a monitoring site. Tall format (one row
+    per site·parameter·time) since water parameters are heterogeneous (pH, DO, conductance,
+    turbidity, temperature, discharge, gage height…) with different units and standards.
+    Sources: USGS NWIS (real-time gauges), later the Water Quality Portal (discrete samples)."""
+
+    __tablename__ = "water_readings"
+    __table_args__ = (
+        UniqueConstraint("source", "site_id", "ts", "parameter", name="uq_water_site_ts_param"),
+        Index("ix_water_site_param", "site_id", "parameter", "ts"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source: Mapped[str] = mapped_column(String(16), index=True)   # usgs | wqp | dep
+    site_id: Mapped[str] = mapped_column(String(64), index=True)
+    site_name: Mapped[str] = mapped_column(String(200))
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    parameter: Mapped[str] = mapped_column(String(32))   # temperature|conductance|do|ph|turbidity|discharge|gage_height
+    value: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(32))
+    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)

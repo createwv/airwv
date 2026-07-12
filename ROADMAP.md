@@ -427,14 +427,19 @@ Create WV partner — co-supplied some air monitors; want to help them do
 people-direct water education and connect it to air).
 
 ### Water v1
-- [ ] **Water data ingestion** — pull WV from the **Water Quality Portal**
+- [~] **Water data ingestion** — v1 BUILT: `ingest water` pulls **USGS NWIS** real-time
+      gauges for WV (keyless) into a tall `water_readings` table (pH, DO, conductance,
+      turbidity, temperature, discharge, gage height; ~176 sites), accumulating via a
+      timer like AirNow. *Still: **Water Quality Portal**
       (waterqualitydata.us — unified USGS NWIS + EPA WQX/STORET + 400 agencies,
       keyless; discrete samples: pH, DO, turbidity, conductivity, E. coli, nutrients,
       metals, temp) and **USGS NWIS/Water Data APIs** (real-time gauges: flow, gage
       height, water temp). WV DEP runs 26 fixed stations (bi-monthly) that also feed WQP.
-- [ ] **Water map + site detail** — a Water view: sampling sites + live gauges; pick a
-      **parameter**, color by *exceeds-standard* (drinking / recreation / aquatic-life)
-      rather than AQI; per-site charts (reuse the time-series machinery).
+- [~] **Water map + site detail** — v1 BUILT: `/water` page + nav + Home card — USGS
+      gauges on a map, colored by the selected measure (aquatic-life bands for pH/DO/
+      conductance/turbidity), click a site to chart recent history (`/api/water/sites`,
+      `/api/water/series`). *Still: a systemd **water timer** for accumulation; drinking-
+      water-standard framing; WQP discrete samples; validation/QA.*
 - [ ] **Water in Events** — seed the **2014 Freedom Industries MCHM spill (Elk River,
       Charleston)** — the definitive WV water event — and future spills/advisories.
 - [ ] **Water in Sources** — many facilities hold **NPDES water-discharge permits** as

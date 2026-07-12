@@ -12,12 +12,21 @@ import logging
 from dataclasses import asdict
 from typing import Iterable
 
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import and_, create_engine, func, insert, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
 from airwv.sources.base import Reading
-from airwv.storage.models import Base, Event, Feedback, ReadingRow, Report, Subscription, utcnow
+from airwv.storage.models import (
+    Base,
+    Event,
+    Feedback,
+    ReadingRow,
+    Report,
+    Subscription,
+    WaterReading,
+    utcnow,
+)
 from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
@@ -466,3 +475,46 @@ class Store:
             if end is not None:
                 stmt = stmt.where(ReadingRow.ts < end)
             return session.scalar(stmt) or 0
+
+    # ---- water (USGS/WQP) — tall water_readings table ----
+    def add_water_readings(self, rows: list[dict]) -> int:
+        """Bulk-insert water readings; idempotent by (source, site_id, ts, parameter)."""
+        if not rows:
+            return 0
+        batch = 500
+        stmt = insert(WaterReading).prefix_with("OR IGNORE")
+        with self._session_factory() as session:
+            for i in range(0, len(rows), batch):
+                session.execute(stmt, rows[i:i + batch])   # executemany, INSERT OR IGNORE
+            session.commit()
+        return len(rows)
+
+    def water_sites(self) -> list[dict]:
+        """Every water site with its most recent value per parameter (for the map)."""
+        with self._session_factory() as session:
+            sub = (select(WaterReading.site_id, WaterReading.parameter,
+                          func.max(WaterReading.ts).label("mts"))
+                   .group_by(WaterReading.site_id, WaterReading.parameter).subquery())
+            q = select(WaterReading).join(
+                sub, and_(WaterReading.site_id == sub.c.site_id,
+                          WaterReading.parameter == sub.c.parameter,
+                          WaterReading.ts == sub.c.mts))
+            sites: dict[str, dict] = {}
+            for w in session.scalars(q):
+                s = sites.setdefault(w.site_id, {
+                    "site_id": w.site_id, "name": w.site_name,
+                    "lat": w.lat, "lon": w.lon, "latest": {}})
+                s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
+                                            "ts": w.ts.isoformat() if w.ts else None}
+            return list(sites.values())
+
+    def water_series(self, site_id: str, parameter: str, since=None) -> list[dict]:
+        with self._session_factory() as session:
+            stmt = (select(WaterReading.ts, WaterReading.value, WaterReading.unit)
+                    .where((WaterReading.site_id == site_id)
+                           & (WaterReading.parameter == parameter)))
+            if since is not None:
+                stmt = stmt.where(WaterReading.ts >= since)
+            stmt = stmt.order_by(WaterReading.ts)
+            return [{"ts": ts.isoformat(), "value": v, "unit": u}
+                    for ts, v, u in session.execute(stmt)]

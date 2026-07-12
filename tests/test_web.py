@@ -123,9 +123,9 @@ def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
     # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
     for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
-                         ("/sources", "sources.js"), ("/events", "events.js"),
-                         ("/learn", "reporting.js"), ("/about", "reporting.js"),
-                         ("/admin", "admin.js")]:
+                         ("/water", "water.js"), ("/sources", "sources.js"),
+                         ("/events", "events.js"), ("/learn", "reporting.js"),
+                         ("/about", "reporting.js"), ("/admin", "admin.js")]:
         r = c.get(path)
         assert r.status_code == 200, path
         assert "modenav" in r.text and script in r.text, path
@@ -149,3 +149,10 @@ def test_events_api_and_admin(tmp_path, monkeypatch):
     eid = pub[0]["id"]
     c.post(f"/api/admin/events/{eid}?action=delete", json={"title": "x"}, headers=hdr)
     assert c.get("/api/events").json()["results"] == []
+
+
+def test_water_api(tmp_path):
+    c = _client(tmp_path)
+    assert c.get("/api/water/sites").json() == {"sites": []}       # empty until ingested
+    assert c.get("/water").status_code == 200
+    assert c.get("/api/water/series/x?parameter=ph").json()["points"] == []
