@@ -438,10 +438,11 @@ people-direct water education and connect it to air).
 - [~] **Water map + site detail** — v1 BUILT: `/water` page + nav + Home card — USGS
       gauges on a map, colored by the selected measure (aquatic-life bands for pH/DO/
       conductance/turbidity), click a site to chart recent history (`/api/water/sites`,
-      `/api/water/series`). *Still: a systemd **water timer** for accumulation; drinking-
+      `/api/water/series`). Hourly **systemd water timer** live (accumulating). *Still: drinking-
       water-standard framing; WQP discrete samples; validation/QA.*
-- [ ] **Water in Events** — seed the **2014 Freedom Industries MCHM spill (Elk River,
-      Charleston)** — the definitive WV water event — and future spills/advisories.
+- [~] **Water in Events** — DONE (first): events now carry a **medium** (air/water) badge;
+      the **2014 Freedom Industries MCHM spill (Elk River, Charleston)** is seeded as the
+      first water event (documented, cited). Future spills/advisories + water-data overlays TBD.
 - [ ] **Water in Sources** — many facilities hold **NPDES water-discharge permits** as
       well as air permits; show both on a facility page (one plant, air *and* water).
 
