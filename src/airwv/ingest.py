@@ -480,6 +480,17 @@ def run_reference(config: Config, days: int = 7, source=None, store=None, now: d
 AIRDATA_STATES = {"54": "WV", "39": "OH", "42": "PA", "24": "MD", "51": "VA", "21": "KY"}
 
 
+def _airdata_date(s: str) -> datetime:
+    """EPA's daily files are inconsistent: most years use YYYY-MM-DD, but 2020-2023
+    use M/D/YYYY. Accept both (else the whole year silently parses to zero rows)."""
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y"):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"unrecognized AirData date {s!r}")
+
+
 def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88101",
                 store=None, states=None) -> int:
     """Bulk-import EPA AirData **daily** PM2.5 history into storage (source='epa_airdata').
@@ -522,7 +533,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
                 try:
                     val = float(row["Arithmetic Mean"])
                     lat, lon = float(row["Latitude"]), float(row["Longitude"])
-                    ts = datetime.strptime(row["Date Local"], "%Y-%m-%d")
+                    ts = _airdata_date(row["Date Local"])
                 except (ValueError, KeyError):
                     continue
                 site = f"{row['State Code']}-{row['County Code']}-{row['Site Num']}"
