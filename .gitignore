@@ -39,3 +39,4 @@ data/*
 .idea/
 .vscode/
 *.swp
+data/field_photos/

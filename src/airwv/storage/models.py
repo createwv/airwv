@@ -239,3 +239,33 @@ class WaterReading(Base):
     value: Mapped[float] = mapped_column(Float)
     unit: Mapped[str] = mapped_column(String(32))
     ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class FieldReading(Base):
+    """A spot-check reading taken in the field by a trained/trusted submitter — an actual
+    instrument measurement (VOC spot check, water conductivity/metals, pH, PM…), optionally
+    with a photo of the meter. Distinct from public Reports (unverified): these are treated
+    as trusted data so a problem area can be officially flagged and tracked over time.
+    Submission is gated on the admin token; see docs/COMMUNITY-REPORTING.md."""
+
+    __tablename__ = "field_readings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    submitter: Mapped[str] = mapped_column(String(120))              # who took it (name/initials/org)
+    medium: Mapped[str] = mapped_column(String(16), default="air")   # air | water | soil | other
+    parameter: Mapped[str] = mapped_column(String(64))              # VOC, conductivity, pH, PM2.5, …
+    value: Mapped[float] = mapped_column(Float)
+    unit: Mapped[str] = mapped_column(String(32), default="")
+    method: Mapped[str | None] = mapped_column(String(200), nullable=True)  # instrument / how measured
+
+    lat: Mapped[float] = mapped_column(Float)
+    lon: Mapped[float] = mapped_column(Float)
+    area_label: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    photo_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+
+    status: Mapped[str] = mapped_column(String(16), default="published", index=True)  # published|draft|archived
+    verified_by: Mapped[str | None] = mapped_column(String(120), nullable=True)

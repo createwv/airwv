@@ -123,7 +123,7 @@ def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
     # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
     for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
-                         ("/water", "water.js"), ("/sources", "sources.js"),
+                         ("/water", "water.js"), ("/field", "field.js"), ("/sources", "sources.js"),
                          ("/events", "events.js"), ("/learn", "reporting.js"),
                          ("/about", "reporting.js"), ("/admin", "admin.js")]:
         r = c.get(path)
@@ -156,3 +156,18 @@ def test_water_api(tmp_path):
     assert c.get("/api/water/sites").json() == {"sites": []}       # empty until ingested
     assert c.get("/water").status_code == 200
     assert c.get("/api/water/series/x?parameter=ph").json()["points"] == []
+
+
+def test_field_readings(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = _client(tmp_path)
+    assert c.get("/field").status_code == 200
+    assert c.get("/api/field-readings").json()["results"] == []
+    body = {"submitter": "J. Doe", "medium": "water", "parameter": "conductivity",
+            "value": 850.0, "unit": "µS/cm", "lat": 38.35, "lon": -81.63}
+    assert c.post("/api/field-readings", json=body).status_code == 401           # gated
+    r = c.post("/api/field-readings", json=body, headers={"X-Admin-Token": "secret"})
+    assert r.status_code == 200
+    pub = c.get("/api/field-readings").json()["results"]
+    assert len(pub) == 1 and pub[0]["parameter"] == "conductivity" and pub[0]["medium"] == "water"
+    assert c.get(f"/api/field-readings/{pub[0]['id']}/photo").status_code == 404  # no photo

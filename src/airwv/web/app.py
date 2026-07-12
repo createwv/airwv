@@ -13,6 +13,7 @@ Endpoints:
 
 from __future__ import annotations
 
+import base64
 import os
 import secrets
 import statistics
@@ -21,7 +22,7 @@ from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -65,6 +66,40 @@ class ModerateIn(BaseModel):
 
 class FeedbackStatusIn(BaseModel):
     status: str            # new | triaged | done
+
+
+class FieldReadingIn(BaseModel):
+    submitter: str
+    medium: str = "air"                    # air | water | soil | other
+    parameter: str                         # VOC, conductivity, pH, PM2.5, …
+    value: float
+    unit: str = ""
+    method: str | None = None              # instrument / how measured
+    lat: float
+    lon: float
+    area_label: str | None = None
+    notes: str | None = None
+    observed_at: str | None = None         # ISO
+    photo: str | None = None               # optional base64 data URL of the meter
+
+
+FIELD_PHOTO_DIR = Path(os.environ.get("AIRWV_FIELD_PHOTOS", "data/field_photos"))
+
+
+def _save_field_photo(fid: int, data_url: str) -> str | None:
+    """Decode a base64 data-URL image (meter photo) and save it as <id>.<ext>. Best-effort."""
+    try:
+        header, b64 = data_url.split(",", 1) if "," in data_url else ("", data_url)
+        raw = base64.b64decode(b64)
+        if not raw or len(raw) > 8 * 1024 * 1024:   # cap 8 MB
+            return None
+        ext = "png" if "image/png" in header else "jpg"
+        FIELD_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+        name = f"{fid}.{ext}"
+        (FIELD_PHOTO_DIR / name).write_bytes(raw)
+        return name
+    except Exception:
+        return None
 
 
 class EventIn(BaseModel):
@@ -647,6 +682,51 @@ def create_app(store: Store) -> FastAPI:
     def water_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="water.html",
                                           context={"mode": "water"})
+
+    # -- field readings (trained-scientist spot checks; submission is admin-gated) --
+    def _field_public(fr) -> dict:
+        return {
+            "id": fr.id, "submitter": fr.submitter, "medium": fr.medium, "parameter": fr.parameter,
+            "value": fr.value, "unit": fr.unit, "method": fr.method,
+            "lat": fr.lat, "lon": fr.lon, "area_label": fr.area_label, "notes": fr.notes,
+            "observed_at": fr.observed_at.isoformat() if fr.observed_at else None,
+            "created_at": fr.created_at.isoformat() if fr.created_at else None,
+            "has_photo": bool(fr.photo_path), "verified_by": fr.verified_by,
+        }
+
+    @app.get("/api/field-readings")
+    def list_field_readings():
+        return {"results": [_field_public(fr) for fr in store.published_field_readings()]}
+
+    @app.post("/api/field-readings")
+    def create_field_reading(body: FieldReadingIn, _: bool = Depends(_require_admin)):
+        fid = store.add_field_reading(
+            submitter=(body.submitter[:120] or "field team"), medium=body.medium,
+            parameter=body.parameter[:64], value=body.value, unit=body.unit[:32],
+            method=(body.method or None), lat=body.lat, lon=body.lon,
+            area_label=(body.area_label or None), notes=(body.notes or None),
+            observed_at=_parse_dt(body.observed_at), verified_by=(body.submitter[:120] or None),
+            status="published")
+        if body.photo:
+            name = _save_field_photo(fid, body.photo)
+            if name:
+                store.set_field_reading(fid, photo_path=name)
+        return {"id": fid}
+
+    @app.get("/api/field-readings/{fid}/photo")
+    def field_photo(fid: int):
+        fr = store.get_field_reading(fid)
+        if not fr or fr.status != "published" or not fr.photo_path:
+            raise HTTPException(status_code=404, detail="no photo")
+        path = FIELD_PHOTO_DIR / fr.photo_path
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="missing file")
+        return FileResponse(path)
+
+    @app.get("/field", response_class=HTMLResponse)
+    def field_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="field.html",
+                                          context={"mode": "field"})
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):

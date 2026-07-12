@@ -21,6 +21,7 @@ from airwv.storage.models import (
     Base,
     Event,
     Feedback,
+    FieldReading,
     ReadingRow,
     Report,
     Subscription,
@@ -518,3 +519,38 @@ class Store:
             stmt = stmt.order_by(WaterReading.ts)
             return [{"ts": ts.isoformat(), "value": v, "unit": u}
                     for ts, v, u in session.execute(stmt)]
+
+    # ---- field readings (trained-scientist spot checks) ----
+    def add_field_reading(self, **fields) -> int:
+        with self._session_factory() as session:
+            fr = FieldReading(**fields)
+            session.add(fr)
+            session.commit()
+            return fr.id
+
+    def published_field_readings(self, limit: int = 500) -> list[FieldReading]:
+        with self._session_factory() as session:
+            return list(session.scalars(
+                select(FieldReading).where(FieldReading.status == "published")
+                .order_by(FieldReading.observed_at.desc().nullslast(), FieldReading.id.desc())
+                .limit(limit)))
+
+    def field_readings_for_admin(self, limit: int = 500) -> list[FieldReading]:
+        with self._session_factory() as session:
+            return list(session.scalars(
+                select(FieldReading).order_by(FieldReading.id.desc()).limit(limit)))
+
+    def get_field_reading(self, fid: int) -> FieldReading | None:
+        with self._session_factory() as session:
+            return session.get(FieldReading, fid)
+
+    def set_field_reading(self, fid: int, **fields) -> bool:
+        with self._session_factory() as session:
+            fr = session.get(FieldReading, fid)
+            if not fr:
+                return False
+            for k, v in fields.items():
+                if hasattr(fr, k):
+                    setattr(fr, k, v)
+            session.commit()
+            return True

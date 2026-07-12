@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>Field readings</h1>
+    <p>For trained Create WV / partner scientists to log an <b>actual instrument spot-check</b> —
+       with a photo of the meter — so a spot can be officially flagged and tracked over time.
+       Trusted data, distinct from public reports. Submitting needs the field token.</p></div>
+
+  <div class="controls" style="gap:12px">
+    <span id="fr-auth" class="meta"></span>
+    <button id="fr-login">Enter / change field token</button>
+  </div>
+
+  <div class="card"><h2>New reading</h2>
+    <div class="rform" style="padding:14px">
+      <label>Your name / initials <input id="fr-submitter" placeholder="e.g. J. Smith (Create WV)"></label>
+      <div class="evrow">
+        <label class="evlbl">Medium <select id="fr-medium">
+          <option value="air">air</option><option value="water">water</option>
+          <option value="soil">soil</option><option value="other">other</option></select></label>
+        <label class="evlbl">Parameter <input id="fr-param" list="fr-params" placeholder="e.g. VOC, conductivity, pH"></label>
+      </div>
+      <datalist id="fr-params">
+        <option>VOC</option><option>PM2.5</option><option>conductivity</option><option>pH</option>
+        <option>dissolved oxygen</option><option>turbidity</option><option>temperature</option>
+        <option>total dissolved solids</option><option>lead</option><option>iron</option><option>nitrate</option>
+      </datalist>
+      <div class="evrow">
+        <label class="evlbl">Value <input id="fr-value" type="number" step="any"></label>
+        <label class="evlbl">Unit <input id="fr-unit" placeholder="ppb, µS/cm, mg/L…"></label>
+      </div>
+      <label>Instrument / method <input id="fr-method" placeholder="e.g. Bosch handheld VOC; YSI ProDSS"></label>
+      <div class="rloc">
+        <button id="fr-geo" type="button">📍 Use my location</button>
+        <button id="fr-pick" type="button">Set on map</button>
+        <span id="fr-locinfo" class="meta">location not set</span>
+      </div>
+      <label>Notes <textarea id="fr-notes" rows="2" placeholder="context, conditions, nearby source…"></textarea></label>
+      <label>Photo of the meter (optional)
+        <input id="fr-photo" type="file" accept="image/*" capture="environment"></label>
+      <button id="fr-submit" class="primary" type="button">Submit reading</button>
+      <div id="fr-result" class="meta"></div>
+    </div>
+  </div>
+
+  <div class="card"><h2>Recent field readings <span class="meta" id="fr-count"></span></h2>
+    <div id="fr-map"></div>
+    <div id="fr-list" class="ov-reports"></div>
+  </div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/field.js"></script>
+<script src="/static/reporting.js"></script>
+{% endblock %}
