@@ -2,112 +2,298 @@
 {% block content %}
 <div class="page">
   <div class="ov-intro"><h1>Understanding your air</h1>
-    <p>A plain-language guide to what we measure, what the colors mean, and how air
-       quality affects your health — with West Virginia in mind.</p></div>
+    <p>A plain-language guide to what we measure, what the colors mean, how air affects
+       your health, and how the laws that govern pollution actually work.</p></div>
 
-  <div class="card"><div class="prose">
-    <h3>Why air quality matters here</h3>
-    <p>West Virginia's ridges and river valleys trap air. On calm nights, cooler air
-      settles into the valleys and forms a <b>temperature inversion</b> — a lid that
-      holds pollution near the ground until the next day's sun or wind mixes it out. Add
-      traffic, wood and coal home heating, and heavy industry along the river corridors —
-      the Kanawha Valley's "Chemical Valley" stretch is a well-known example — and the
-      same spot can read clean at midday and hazy by dawn.</p>
-    <p>Our own sensors show it: along the industrial corridor, fine particles build up
-      overnight (roughly 1.4–2× the daytime level) while an upriver control site stays
-      flat. Smoke can also drift in from far away — regional wildfires have pushed WV into
-      "unhealthy" days. Dense, always-on community sensors are exactly what it takes to
-      catch these local, hour-by-hour swings that a handful of official monitors can miss.</p>
-  </div></div>
+  <div class="ltabs">
+    <button class="ltab on" data-tab="basics">Basics</button>
+    <button class="ltab" data-tab="health">Health &amp; AQI</button>
+    <button class="ltab" data-tab="data">The Data</button>
+    <button class="ltab" data-tab="law">Laws &amp; Permits</button>
+    <button class="ltab" data-tab="climate">Climate</button>
+  </div>
 
-  <div class="card"><div class="prose">
-    <h3>What we measure</h3>
-    <div class="deflist">
-      <div><b>PM2.5 — fine particles</b>
-        <p>Particles 2.5 micrometers or smaller — about 30× thinner than a hair. They
-          come from anything that burns: vehicles, industry, wood stoves, wildfires.
-          Because they're so small they slip deep into the lungs and into the
-          bloodstream, which is why PM2.5 is the pollutant most tied to health effects.
-          It's the number our map is colored by.</p></div>
-      <div><b>PM10 — coarse particles</b>
-        <p>Bigger particles up to 10 µm: road and construction dust, pollen, mold.
-          Irritating to eyes, nose, and throat, and hard on people with asthma.</p></div>
-      <div><b>PM1.0 — ultrafine</b>
-        <p>The smallest fraction we report — largely combustion-related and useful for
-          spotting fresh smoke or exhaust.</p></div>
-      <div><b>VOCs — volatile organic compounds</b>
-        <p>Gases released by fuels, solvents, and many industrial processes; often
-          what you <i>smell</i>. Some are irritating or harmful, and in sunlight they
-          help form ozone. Our sensors report a <b>relative gas index</b>, not a
-          calibrated concentration — good for spotting changes and odor events, not for
-          an exact number.</p></div>
-    </div>
-  </div></div>
+  <!-- ============ BASICS ============ -->
+  <div class="lpanel" id="lp-basics">
+    <div class="card"><div class="prose">
+      <h3>Why air quality matters here</h3>
+      <p>West Virginia's ridges and river valleys trap air. On calm nights, cooler air
+        settles into the valleys and forms a <b>temperature inversion</b> — a lid that
+        holds pollution near the ground until the next day's sun or wind mixes it out. Add
+        traffic, wood and coal home heating, and heavy industry along the river corridors —
+        the Kanawha Valley's "Chemical Valley" stretch is a well-known example — and the
+        same spot can read clean at midday and hazy by dawn.</p>
+      <p>Our own sensors show it: along the industrial corridor, fine particles build up
+        overnight (roughly 1.4–2× the daytime level) while an upriver control site stays
+        flat. Smoke can also drift in from far away — regional wildfires have pushed WV into
+        "unhealthy" days. Dense, always-on community sensors are exactly what it takes to
+        catch these local, hour-by-hour swings that a handful of official monitors can miss.</p>
+    </div></div>
 
-  <div class="card"><div class="prose">
-    <h3>The colors — Air Quality Index (PM2.5)</h3>
-    <p>Every dot on our map is colored by the U.S. EPA's Air Quality Index categories
-      for PM2.5 (µg/m³):</p>
-    <div class="aqibar">
-      <span style="background:#00e400">Good</span>
-      <span style="background:#ffff00;color:#5a5a00">Moderate</span>
-      <span style="background:#ff7e00">Sensitive</span>
-      <span style="background:#ff0000">Unhealthy</span>
-      <span style="background:#8f3f97">Very unhealthy</span>
-      <span style="background:#7e0023">Hazardous</span>
-    </div>
-    <table class="aqi">
-      <tr><td><span class="sw" style="background:#00e400"></span></td><td><b>Good</b></td><td>0–12</td><td>Air is satisfactory; little or no risk.</td></tr>
-      <tr><td><span class="sw" style="background:#ffff00"></span></td><td><b>Moderate</b></td><td>12–35</td><td>Acceptable; unusually sensitive people should watch how they feel.</td></tr>
-      <tr><td><span class="sw" style="background:#ff7e00"></span></td><td><b>Unhealthy for sensitive groups</b></td><td>35–55</td><td>Kids, older adults, and people with heart/lung conditions should ease up on strenuous outdoor activity.</td></tr>
-      <tr><td><span class="sw" style="background:#ff0000"></span></td><td><b>Unhealthy</b></td><td>55–150</td><td>Everyone may feel effects; sensitive groups more so. Limit prolonged exertion outdoors.</td></tr>
-      <tr><td><span class="sw" style="background:#8f3f97"></span></td><td><b>Very unhealthy</b></td><td>150–250</td><td>Health alert — avoid outdoor exertion.</td></tr>
-      <tr><td><span class="sw" style="background:#7e0023"></span></td><td><b>Hazardous</b></td><td>250+</td><td>Emergency conditions; stay indoors with clean air.</td></tr>
-    </table>
-  </div></div>
+    <div class="card"><div class="prose">
+      <h3>What we measure</h3>
+      <div class="deflist">
+        <div><b>PM2.5 — fine particles</b>
+          <p>Particles 2.5 micrometers or smaller — about 30× thinner than a hair. They
+            come from anything that burns: vehicles, industry, wood stoves, wildfires.
+            Because they're so small they slip deep into the lungs and into the bloodstream,
+            which is why PM2.5 is the pollutant most tied to health effects. It's the number
+            our map is colored by.</p></div>
+        <div><b>PM10 — coarse particles</b>
+          <p>Bigger particles up to 10 µm: road and construction dust, pollen, mold.
+            Irritating to eyes, nose, and throat, and hard on people with asthma.</p></div>
+        <div><b>PM1.0 — ultrafine</b>
+          <p>The smallest fraction we report — largely combustion-related and useful for
+            spotting fresh smoke or exhaust.</p></div>
+        <div><b>VOCs — volatile organic compounds</b>
+          <p>Gases released by fuels, solvents, and many industrial processes; often what
+            you <i>smell</i>. Our sensors report a single <b>relative gas index</b> — good
+            for spotting changes and odor events, <b>not</b> a calibrated measure of any
+            specific compound.</p></div>
+      </div>
+    </div></div>
 
-  <div class="card"><div class="prose">
-    <h3>Who's most at risk</h3>
-    <p>Children, adults over 65, pregnant people, and anyone with asthma, COPD, or heart
-      disease feel air pollution first and hardest. Symptoms can include coughing,
-      throat and eye irritation, shortness of breath, and tightness in the chest.</p>
-    <h3>What you can do</h3>
-    <ul>
-      <li><b>Check before you go.</b> On elevated days, move hard exercise indoors or to
-        cleaner hours (afternoons often clear the overnight valley buildup).</li>
-      <li><b>Clean your indoor air.</b> A HEPA purifier — or a box-fan filter — makes a
-        real difference during smoke or inversion events. Keep windows closed when it's bad.</li>
-      <li><b>Mask up when it's smoky.</b> A well-fitted N95/KN95 filters fine particles;
-        cloth and surgical masks don't.</li>
-      <li><b>Speak up.</b> Smell or see something? <a href="#" data-open="report">Report a
-        concern →</a> to put it on the map, and report pollution or spills to
-        <b>WV DEP</b> (verify the current complaint line at
-        <a href="https://dep.wv.gov/Pages/default.aspx" target="_blank" rel="noopener">dep.wv.gov</a>).</li>
-    </ul>
-  </div></div>
+    <div class="card"><div class="prose">
+      <h3>What's actually in "VOCs"</h3>
+      <p>"VOC" is an umbrella for hundreds of carbon-based gases. Our low-cost sensors can't
+        tell them apart — they report one combined index. But the individual compounds behind
+        that number matter a lot for health, and EPA's air-toxics network measures many of
+        them one by one. Common ones in industrial and traffic settings:</p>
+      <ul>
+        <li><b>Benzene</b> — fuels, vehicle exhaust, chemical plants; a <b>known human
+          carcinogen</b> (linked to leukemia).</li>
+        <li><b>Toluene, ethylbenzene, xylenes</b> — with benzene these are the "BTEX" group
+          from fuels and solvents; nervous-system and respiratory irritants.</li>
+        <li><b>Formaldehyde</b> — combustion and building materials; a carcinogen and strong
+          irritant.</li>
+        <li><b>1,3-Butadiene</b> — combustion and synthetic-rubber production; a carcinogen.</li>
+        <li><b>Acrolein</b> — combustion; an intense respiratory irritant even at low levels.</li>
+        <li><b>Methylene chloride, perchloroethylene ("perc")</b> — degreasers and dry-cleaning
+          solvents.</li>
+        <li><b>Styrene</b> — plastics and resins manufacturing.</li>
+      </ul>
+      <p class="meta">Many VOCs also react in sunlight to form <b>ground-level ozone</b>, a
+        separate lung irritant. Our sensor's index can't identify or quantify these compounds —
+        for actual concentrations you'd need EPA/lab air-toxics sampling.</p>
+    </div></div>
+  </div>
 
-  <div class="card"><div class="prose">
-    <h3>Community sensors vs. reference monitors</h3>
-    <p>Low-cost community sensors give us dense, real-time coverage that the sparse
-      network of regulatory monitors can't. The trade-off is precision: they can read a
-      little high, especially in humidity. So we continuously compare each community
-      sensor against the nearest EPA reference monitor and apply a standard EPA
-      correction — you can see all of that on the
-      <a href="/analysis">Analysis</a> page's validation panel. For official air-quality
-      information, see <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
-  </div></div>
+  <!-- ============ HEALTH & AQI ============ -->
+  <div class="lpanel" id="lp-health" hidden>
+    <div class="card"><div class="prose">
+      <h3>The colors — Air Quality Index (PM2.5)</h3>
+      <p>Every dot on our map is colored by the U.S. EPA's Air Quality Index categories
+        for PM2.5 (µg/m³):</p>
+      <div class="aqibar">
+        <span style="background:#00e400">Good</span>
+        <span style="background:#ffff00;color:#5a5a00">Moderate</span>
+        <span style="background:#ff7e00">Sensitive</span>
+        <span style="background:#ff0000">Unhealthy</span>
+        <span style="background:#8f3f97">Very unhealthy</span>
+        <span style="background:#7e0023">Hazardous</span>
+      </div>
+      <table class="aqi">
+        <tr><td><span class="sw" style="background:#00e400"></span></td><td><b>Good</b></td><td>0–12</td><td>Air is satisfactory; little or no risk.</td></tr>
+        <tr><td><span class="sw" style="background:#ffff00"></span></td><td><b>Moderate</b></td><td>12–35</td><td>Acceptable; unusually sensitive people should watch how they feel.</td></tr>
+        <tr><td><span class="sw" style="background:#ff7e00"></span></td><td><b>Unhealthy for sensitive groups</b></td><td>35–55</td><td>Kids, older adults, and people with heart/lung conditions should ease up on strenuous outdoor activity.</td></tr>
+        <tr><td><span class="sw" style="background:#ff0000"></span></td><td><b>Unhealthy</b></td><td>55–150</td><td>Everyone may feel effects; sensitive groups more so. Limit prolonged exertion outdoors.</td></tr>
+        <tr><td><span class="sw" style="background:#8f3f97"></span></td><td><b>Very unhealthy</b></td><td>150–250</td><td>Health alert — avoid outdoor exertion.</td></tr>
+        <tr><td><span class="sw" style="background:#7e0023"></span></td><td><b>Hazardous</b></td><td>250+</td><td>Emergency conditions; stay indoors with clean air.</td></tr>
+      </table>
+    </div></div>
+
+    <div class="card"><div class="prose">
+      <h3>Who's most at risk</h3>
+      <p>Children, adults over 65, pregnant people, and anyone with asthma, COPD, or heart
+        disease feel air pollution first and hardest. Symptoms can include coughing, throat
+        and eye irritation, shortness of breath, and tightness in the chest.</p>
+      <h3>What you can do</h3>
+      <ul>
+        <li><b>Check before you go.</b> On elevated days, move hard exercise indoors or to
+          cleaner hours (afternoons often clear the overnight valley buildup).</li>
+        <li><b>Clean your indoor air.</b> A HEPA purifier — or a box-fan filter — makes a
+          real difference during smoke or inversion events. Keep windows closed when it's bad.</li>
+        <li><b>Mask up when it's smoky.</b> A well-fitted N95/KN95 filters fine particles;
+          cloth and surgical masks don't.</li>
+        <li><b>Speak up.</b> Smell or see something? <a href="#" data-open="report">Report a
+          concern →</a> to put it on the map, and report pollution or spills to <b>WV DEP</b>
+          (see the Laws &amp; Permits tab for how complaints and violations work).</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <!-- ============ THE DATA ============ -->
+  <div class="lpanel" id="lp-data" hidden>
+    <div class="card"><div class="prose">
+      <h3>Community sensors vs. reference monitors</h3>
+      <p>Low-cost community sensors give us dense, real-time coverage that the sparse network
+        of regulatory monitors can't. The trade-off is precision: they can read a little high,
+        especially in humidity. So we continuously compare each community sensor against the
+        nearest EPA reference monitor and apply a standard EPA correction — you can see all of
+        that on the <a href="/analysis">Analysis</a> page's validation panel. For official
+        air-quality information, see
+        <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
+      <h3>A note on VOC readings</h3>
+      <p>Our PM2.5 numbers can be validated and corrected against EPA monitors. <b>VOC cannot.</b>
+        The EPA reference monitors we use measure <b>only PM2.5</b> — no VOC — so there's nothing
+        to calibrate our community VOC against. And the community VOC is a <b>relative index</b>
+        (a single gas-sensor number), not a concentration. Treat VOC as <b>community-only and
+        directional</b>: great for spotting a change or an odor event, not for an exact value or
+        a specific compound.</p>
+    </div></div>
+  </div>
+
+  <!-- ============ LAWS & PERMITS ============ -->
+  <div class="lpanel" id="lp-law" hidden>
+    <div class="card"><div class="prose">
+      <p class="rnote">Plain-language education, <b>not legal advice</b>. Specifics vary — verify
+        with <a href="https://dep.wv.gov/" target="_blank" rel="noopener">WV DEP</a> and
+        <a href="https://www.epa.gov/" target="_blank" rel="noopener">EPA</a>.</p>
+
+      <h3>The Clean Air Act — how air is regulated</h3>
+      <p>The federal <a href="https://www.epa.gov/clean-air-act-overview" target="_blank" rel="noopener">Clean
+        Air Act</a> (1970, major amendments 1977 &amp; 1990) is the backbone of U.S. air
+        regulation. Key pieces:</p>
+      <ul>
+        <li><b>NAAQS</b> — EPA sets national health-based limits (National Ambient Air Quality
+          Standards) for six <b>criteria pollutants</b>:
+          <a href="https://www.epa.gov/criteria-air-pollutants" target="_blank" rel="noopener">PM2.5/PM10,
+          ground-level ozone, carbon monoxide, sulfur dioxide, nitrogen dioxide, and lead</a>.</li>
+        <li><b>Attainment vs. nonattainment</b> — areas that meet a standard are "attainment";
+          those that exceed it are "nonattainment" and must take extra steps to clean up.</li>
+        <li><b>State Implementation Plans (SIPs)</b> — each state (here, WV DEP's Division of Air
+          Quality) writes an EPA-approved plan to meet the standards.</li>
+        <li><b>Air toxics (HAPs)</b> — a separate list of 180+ <b>hazardous air pollutants</b>
+          (benzene, formaldehyde, mercury…) controlled by technology-based standards, apart from
+          the criteria pollutants above.</li>
+      </ul>
+
+      <h3>How permits work</h3>
+      <p>A facility that emits above certain thresholds generally can't build or operate without a
+        <b>permit</b> — a legally binding document that sets its limits and obligations:</p>
+      <ul>
+        <li><b>Construction permits (New Source Review / PSD)</b> — required <i>before</i> building
+          or expanding a major source; force modern pollution controls up front.</li>
+        <li><b>Title V operating permits</b> — the ongoing operating license for major sources.
+          It collects <b>emission limits</b>, required <b>monitoring</b>, <b>recordkeeping</b>,
+          and <b>reporting</b> into one enforceable document.</li>
+        <li><b>Water: NPDES permits</b> — see the Clean Water Act below.</li>
+      </ul>
+      <p>Permits are <b>public records</b>, usually with a public-comment period before they're
+        issued. They're where the abstract law becomes a concrete number a specific plant must
+        stay under.</p>
+
+      <h3>What counts as a violation</h3>
+      <p>A <b>violation</b> is a failure to follow the law or a permit — for example:</p>
+      <ul>
+        <li>emitting or discharging <b>more than a permit limit</b> allows;</li>
+        <li><b>operating without a required permit</b>, or building before getting one;</li>
+        <li>failing to <b>monitor, record, or report</b> as the permit requires;</li>
+        <li>violating a national standard (a NAAQS-related rule or an air-toxics standard).</li>
+      </ul>
+      <p>Violations surface through inspections, a facility's own required reports, or monitoring
+        data. Regulators can respond with a <b>Notice of Violation</b>, a consent order, civil
+        <b>penalties/fines</b>, or — for knowing, serious harm — criminal charges. You can look up
+        a facility's compliance and enforcement history on EPA's
+        <a href="https://echo.epa.gov/" target="_blank" rel="noopener">ECHO</a> database.</p>
+
+      <h3>The Clean Water Act — the water side</h3>
+      <p>The <a href="https://www.epa.gov/laws-regulations/summary-clean-water-act" target="_blank" rel="noopener">Clean
+        Water Act</a> (1972) governs pollutant discharges into rivers, streams, and other "waters
+        of the United States":</p>
+      <ul>
+        <li><b>NPDES permits</b> — anyone discharging pollutants from a "point source" (a pipe,
+          outfall, ditch) into a waterway needs a
+          <a href="https://www.epa.gov/npdes" target="_blank" rel="noopener">National Pollutant
+          Discharge Elimination System</a> permit, which sets <b>effluent limits</b> and monitoring.</li>
+        <li><b>Water quality standards</b> — states set the conditions a given river must meet for
+          its uses (drinking, recreation, aquatic life); WV DEP's Division of Water &amp; Waste
+          Management administers them here.</li>
+        <li>Violations (over-limit discharges, unpermitted discharges, spills) work much like the
+          air side — NOVs, orders, and penalties, tracked in ECHO.</li>
+      </ul>
+
+      <h3>Quick glossary</h3>
+      <div class="deflist">
+        <div><b>Criteria pollutant</b><p>One of the six pollutants with a national health-based limit (NAAQS).</p></div>
+        <div><b>HAP / air toxic</b><p>A hazardous air pollutant (e.g., benzene) on EPA's separate 180+ list.</p></div>
+        <div><b>Point source</b><p>A single identifiable source of pollution — a smokestack or a discharge pipe.</p></div>
+        <div><b>Effluent limit</b><p>The maximum amount of a pollutant a facility may discharge to water.</p></div>
+        <div><b>NOV</b><p>Notice of Violation — a formal finding that a facility broke a rule or permit.</p></div>
+        <div><b>TRI</b><p>Toxics Release Inventory — public data on facilities' reported chemical releases (the basis of our Sources page).</p></div>
+      </div>
+      <p>See something that looks wrong? <a href="#" data-open="report">Report a concern →</a>,
+        or file directly with <a href="https://dep.wv.gov/" target="_blank" rel="noopener">WV DEP</a>.</p>
+    </div></div>
+  </div>
+
+  <!-- ============ CLIMATE ============ -->
+  <div class="lpanel" id="lp-climate" hidden>
+    <div class="card"><div class="prose">
+      <h3>Air quality and climate are the same fire</h3>
+      <p>Most of what harms local air also drives climate change — they come from the same
+        smokestacks and tailpipes. Burning coal, oil, and gas releases <b>fine particles, sulfur
+        dioxide, and nitrogen oxides</b> (the health pollutants we track) <i>and</i>
+        <b>carbon dioxide and methane</b> (the gases that warm the planet). That overlap is good
+        news: cutting fossil-fuel pollution cleans the air you breathe today <b>and</b> slows
+        warming — what scientists call a <b>co-benefit</b>.</p>
+      <h3>The greenhouse basics</h3>
+      <p>Greenhouse gases — chiefly <b>CO₂</b> from burning fossil fuels and <b>methane</b> from
+        gas systems, coal, and agriculture — trap heat in the atmosphere. Human activity has
+        already warmed the planet about <b>1.1–1.2 °C</b> above pre-industrial levels, driving
+        more extreme heat, heavier rainfall and flooding, and longer wildfire seasons — including
+        the Canadian wildfire smoke that reached West Virginia (see our
+        <a href="/events">Events</a> page).</p>
+    </div></div>
+
+    <div class="card"><div class="prose">
+      <h3>The Paris Agreement — the global goal</h3>
+      <p>Under the 2015
+        <a href="https://unfccc.int/process-and-meetings/the-paris-agreement" target="_blank" rel="noopener">Paris
+        Agreement</a>, nearly every country agreed to hold global warming to <b>well below 2 °C</b>
+        above pre-industrial levels and to <b>pursue efforts to limit it to 1.5 °C</b>. Each
+        country sets its own pledge — a <b>Nationally Determined Contribution (NDC)</b> — and many,
+        including the U.S., have set goals of <b>net-zero emissions by around 2050</b>.</p>
+
+      <h3>What scientists say it takes</h3>
+      <p>The <a href="https://www.ipcc.ch/report/ar6/syr/" target="_blank" rel="noopener">IPCC</a>
+        — the UN body that synthesizes the world's climate science — is specific about the
+        1.5 °C path:</p>
+      <ul>
+        <li>Global greenhouse-gas emissions must <b>peak before 2025</b>;</li>
+        <li>fall roughly <b>43% below 2019 levels by 2030</b> (and ~60% by 2035);</li>
+        <li>and reach <b>net-zero CO₂ by the early 2050s</b>.</li>
+      </ul>
+      <p>Getting there means <b>rapid, deep cuts across every sector</b>: phasing down unabated
+        fossil-fuel use, scaling up renewables and efficiency, electrifying transport and
+        buildings, sharply <b>reducing methane leaks</b>, protecting forests, and removing some
+        carbon that's already been emitted. The IPCC's finding is blunt but hopeful — the tools
+        exist and are increasingly affordable; the gap is the <b>pace</b> of action. Current
+        national pledges, if met, still leave the world short of 1.5 °C.</p>
+
+      <h3>What it means for West Virginia</h3>
+      <p>WV's economy has long been tied to coal and, now, natural gas. The energy transition is a
+        real and complicated shift here — but it's also an opportunity: the same changes that cut
+        carbon (cleaner power, less methane leakage, efficiency) directly reduce the PM2.5, SO₂,
+        and VOCs that affect local health. Tracking our own air is one way to make those trade-offs
+        visible and hold the improvements accountable.</p>
+      <p class="meta">Educational summary of mainstream climate science and policy; sources linked
+        above (UNFCCC, IPCC).</p>
+    </div></div>
+  </div>
 
   <div class="ov-cards" style="margin-top:16px">
     <a class="navcard" href="/analysis"><span class="ico">📊</span><b>See it on the map</b>
       <small>Live sensors, trends, and validation.</small></a>
+    <a class="navcard" href="/sources"><span class="ico">🏭</span><b>Sources &amp; facilities</b>
+      <small>Who's permitted to emit, and their records.</small></a>
     <a class="navcard accent" href="#" data-open="report"><span class="ico">📣</span><b>Report a concern</b>
       <small>Air, water, soil, wildlife, or a violation.</small></a>
-    <a class="navcard" href="/about"><span class="ico">ℹ️</span><b>About the project</b>
-      <small>Who we are and where data comes from.</small></a>
   </div>
 </div>
 {% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
+<script src="/static/learn.js"></script>
 <script src="/static/reporting.js"></script>
 {% endblock %}
