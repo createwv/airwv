@@ -4,6 +4,13 @@ import os
 
 import uvicorn
 
+try:  # load a local .env (e.g. AIRWV_ADMIN_TOKEN) when serving; optional in prod
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:  # pragma: no cover
+    pass
+
 from airwv.web.app import app
 
 if __name__ == "__main__":
