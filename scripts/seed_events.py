@@ -126,13 +126,17 @@ EVENTS = [
         "origin": "Debated — fine particles/sulfates pooling under valley inversions; "
                   "industrial and power-plant emissions implicated",
         "scope": "Regional", "regions_affected": "The ~35-mile Kanawha River valley from Poca to Belle",
-        "captured": False, "sensor_ids": [],
+        "captured": True,
+        # EPA regulatory monitors in the Kanawha Valley (daily; 1-in-3-day sampling)
+        "sensor_ids": ["54-039-0010", "54-039-1005"],
         "description": (
             "For decades a bluish haze has periodically settled over the Kanawha Valley under "
             "temperature inversions. WV DEP formally investigated notable episodes on Jan 25 and "
             "July 11, 2008; the July report identified the AEP John Amos power plant as the "
-            "largest nearby source of PM, SO2 and NOx. A long-running illustration of how the "
-            "valley's terrain traps pollution — the same effect our sensors watch for today."),
+            "largest nearby source of PM, SO2 and NOx. EPA's Kanawha Valley PM2.5 monitors "
+            "recorded the July episode at roughly 54 µg/m3 (unhealthy for sensitive groups). A "
+            "long-running illustration of how the valley's terrain traps pollution — the same "
+            "effect our community sensors watch for today."),
         "sources": [
             {"label": "WV DEP — Blue Haze Incident, July 11 2008",
              "url": "https://dep.wv.gov/daq/pubs/documents/bluehaze-7-11-08.pdf"},
