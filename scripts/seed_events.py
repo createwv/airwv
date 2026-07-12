@@ -103,13 +103,15 @@ EVENTS = [
         "origin": "Historic Canadian wildfire season (Quebec & elsewhere)",
         "scope": "Continental",
         "regions_affected": "Eastern U.S. and Canada — among the worst air-quality days in decades",
-        "captured": False, "sensor_ids": [],
+        "captured": True,
+        # EPA regulatory reference monitors (daily) — our community network wasn't online yet
+        "sensor_ids": ["54-003-0003", "54-051-1002", "54-039-0020", "54-011-0007"],
         "description": (
             "The historic June 2023 Canadian wildfire smoke event turned skies orange across "
-            "the eastern U.S. and drove some of the worst air-quality readings in decades, "
-            "including in West Virginia. It predates our community network (our sensors came "
-            "online November 2023), so we have no measurements of our own — included here as "
-            "documented context."),
+            "the eastern U.S. and drove some of the worst air-quality readings in decades. Our "
+            "community sensors weren't online yet (they came online November 2023), but EPA's "
+            "regulatory reference monitors captured it across West Virginia — the chart below is "
+            "their daily PM2.5, with the Eastern Panhandle (Berkeley Co.) peaking near 49 µg/m3."),
         "sources": [
             {"label": "NOAA NESDIS — Wildfire smoke and air quality",
              "url": "https://www.nesdis.noaa.gov/news/wildfire-smoke-and-air-quality"},

@@ -54,8 +54,10 @@ async function drawChart(e) {
         return (!t0 || t >= t0) && t <= t1;
       });
       if (!pts.length) continue;
+      // EPA reference-monitor ids (NN-NNN-NNNN) aren't in /api/sensors — label them
+      const label = NAMES[sid] || (/^\d+-\d+-\d+$/.test(sid) ? `EPA monitor ${sid}` : sid);
       traces.push({
-        x: pts.map(p => p.ts), y: pts.map(p => p.value), name: NAMES[sid] || sid,
+        x: pts.map(p => p.ts), y: pts.map(p => p.value), name: label,
         mode: 'lines', line: {color: COLORS[i % COLORS.length], width: 1.6},
       });
     } catch (err) { /* skip */ }
@@ -73,8 +75,8 @@ async function drawChart(e) {
       font: {size: 11, color: '#a00'}, xanchor: 'left',
     }] : [],
   }, {displayModeBar: false, responsive: true});
-  $('ev-chartnote').textContent = 'Shaded band = the event window. Hourly-median PM2.5. '
-    + 'Community sensors (provisional, uncorrected).';
+  $('ev-chartnote').textContent = 'Shaded band = the event window. PM2.5 (hourly median for '
+    + 'community sensors — provisional/uncorrected; daily mean for EPA reference monitors).';
 }
 
 function factRow(label, val) {
