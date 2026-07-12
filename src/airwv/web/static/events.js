@@ -73,11 +73,25 @@ async function drawChart(e) {
     + 'Community sensors (provisional, uncorrected).';
 }
 
+function factRow(label, val) {
+  return val ? `<div class="ev-fact"><b>${label}</b><span>${esc(val)}</span></div>` : '';
+}
 function openEvent(e) {
   $('ev-title').textContent = `${KIND[e.kind] || '📌'} ${e.title}`;
-  $('ev-metaline').innerHTML = [e.region, dateRange(e),
+  $('ev-metaline').innerHTML = [e.region, dateRange(e), e.scope,
     e.captured ? '📈 sensor data' : 'documented'].filter(Boolean).map(esc).join(' · ');
-  $('ev-desc').textContent = e.description || '';
+  // facts: origin / scope / regions affected
+  const facts = factRow('Likely origin', e.origin) + factRow('Scope', e.scope)
+    + factRow('Regions affected', e.regions_affected);
+  // links to related facilities (Sources page) and community reports
+  const refs = (e.source_refs || []).map(n =>
+    `<a href="/sources#facility=${encodeURIComponent(n)}">🏭 ${esc(n)}</a>`).join(' · ');
+  const reps = (e.report_ids || []).map(id =>
+    `<a href="/analysis">📣 report #${id}</a>`).join(' · ');
+  const links = (refs || reps)
+    ? `<div class="ev-links">${refs}${refs && reps ? ' · ' : ''}${reps}</div>` : '';
+  $('ev-desc').innerHTML = (facts ? `<div class="ev-facts">${facts}</div>` : '')
+    + `<div class="ev-body">${esc(e.description || '')}</div>` + links;
   const srcs = (e.sources || []).filter(s => s && (s.url || s.label));
   $('ev-sources').innerHTML = srcs.length
     ? '<b class="ev-sub">Sources</b><ul>' + srcs.map(s =>

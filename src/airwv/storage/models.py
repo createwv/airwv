@@ -202,8 +202,13 @@ class Event(Base):
     start_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     end_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     description: Mapped[str | None] = mapped_column(String(4000), nullable=True)
+    origin: Mapped[str | None] = mapped_column(String(300), nullable=True)   # likely/suspected/known cause
+    scope: Mapped[str | None] = mapped_column(String(60), nullable=True)     # Local | Regional | Multi-state | Continental
+    regions_affected: Mapped[str | None] = mapped_column(String(500), nullable=True)  # free-text extent
 
     captured: Mapped[bool] = mapped_column(default=False)   # do our sensors have data for it?
     sensor_ids: Mapped[list] = mapped_column(JSON, default=list, nullable=False)   # ["214373", ...]
-    sources: Mapped[list] = mapped_column(JSON, default=list, nullable=False)      # [{"label","url"}, ...]
+    source_refs: Mapped[list] = mapped_column(JSON, default=list, nullable=False)  # facility names (link to /sources)
+    report_ids: Mapped[list] = mapped_column(JSON, default=list, nullable=False)   # community report ids
+    sources: Mapped[list] = mapped_column(JSON, default=list, nullable=False)      # [{"label","url"}, ...] citations
     status: Mapped[str] = mapped_column(String(16), default="published", index=True)  # published | draft | archived

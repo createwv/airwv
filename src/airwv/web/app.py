@@ -76,9 +76,14 @@ class EventIn(BaseModel):
     start_ts: str | None = None            # ISO
     end_ts: str | None = None
     description: str | None = None
+    origin: str | None = None              # likely/suspected/known cause
+    scope: str | None = None               # Local | Regional | Multi-state | Continental
+    regions_affected: str | None = None
     captured: bool = False
     sensor_ids: list[str] = []
-    sources: list = []                     # [{"label","url"}, ...]
+    source_refs: list[str] = []            # facility names (link to /sources)
+    report_ids: list[int] = []
+    sources: list = []                     # [{"label","url"}, ...] citations
     status: str = "published"              # published | draft | archived
 
 
@@ -316,7 +321,9 @@ def create_app(store: Store) -> FastAPI:
             "start_ts": e.start_ts.isoformat() if e.start_ts else None,
             "end_ts": e.end_ts.isoformat() if e.end_ts else None,
             "description": e.description, "captured": e.captured,
-            "sensor_ids": e.sensor_ids or [], "sources": e.sources or [], "status": e.status,
+            "origin": e.origin, "scope": e.scope, "regions_affected": e.regions_affected,
+            "sensor_ids": e.sensor_ids or [], "source_refs": e.source_refs or [],
+            "report_ids": e.report_ids or [], "sources": e.sources or [], "status": e.status,
         }
 
     @app.get("/api/events")   # curated events list (distinct from /api/events/{sensor_id})
@@ -400,8 +407,11 @@ def create_app(store: Store) -> FastAPI:
         eid = store.add_event(
             title=body.title[:200], kind=body.kind, region=(body.region or None),
             lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
-            description=(body.description or None), captured=body.captured,
-            sensor_ids=[str(s) for s in body.sensor_ids], sources=body.sources, status=body.status)
+            description=(body.description or None), origin=(body.origin or None),
+            scope=(body.scope or None), regions_affected=(body.regions_affected or None),
+            captured=body.captured, sensor_ids=[str(s) for s in body.sensor_ids],
+            source_refs=body.source_refs, report_ids=body.report_ids,
+            sources=body.sources, status=body.status)
         return {"id": eid}
 
     @app.post("/api/admin/events/{event_id}")
@@ -412,8 +422,10 @@ def create_app(store: Store) -> FastAPI:
         ok = store.update_event(
             event_id, title=body.title[:200], kind=body.kind, region=body.region,
             lat=body.lat, lon=body.lon, start_ts=_parse_dt(body.start_ts), end_ts=_parse_dt(body.end_ts),
-            description=body.description, captured=body.captured,
-            sensor_ids=[str(s) for s in body.sensor_ids], sources=body.sources, status=body.status)
+            description=body.description, origin=body.origin, scope=body.scope,
+            regions_affected=body.regions_affected, captured=body.captured,
+            sensor_ids=[str(s) for s in body.sensor_ids], source_refs=body.source_refs,
+            report_ids=body.report_ids, sources=body.sources, status=body.status)
         if not ok:
             raise HTTPException(status_code=404, detail="no such event")
         return {"ok": True}

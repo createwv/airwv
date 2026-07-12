@@ -77,11 +77,14 @@ async function evDelete(id){
 }
 async function evCreate(){
   const g = id => $(id).value.trim();
+  const csv = id => g(id).split(',').map(s => s.trim()).filter(Boolean);
   const body = {
     title: g('ev-f-title'), kind: g('ev-f-kind'), region: g('ev-f-region') || null,
     start_ts: g('ev-f-start') || null, end_ts: g('ev-f-end') || null,
-    description: g('ev-f-desc') || null, captured: $('ev-f-captured').checked,
-    sensor_ids: g('ev-f-sensors').split(',').map(s => s.trim()).filter(Boolean),
+    description: g('ev-f-desc') || null, origin: g('ev-f-origin') || null,
+    scope: g('ev-f-scope') || null, regions_affected: g('ev-f-regions') || null,
+    captured: $('ev-f-captured').checked, sensor_ids: csv('ev-f-sensors'),
+    source_refs: csv('ev-f-srcrefs'), report_ids: csv('ev-f-reports').map(Number).filter(Boolean),
     sources: g('ev-f-srcurl') ? [{label: g('ev-f-srclabel') || g('ev-f-srcurl'), url: g('ev-f-srcurl')}] : [],
     status: 'published',
   };
@@ -101,10 +104,17 @@ const EV_FORM = `<div class="acard evform">
   <div class="evrow"><label class="evlbl">Start <input id="ev-f-start" type="date"></label>
     <label class="evlbl">End <input id="ev-f-end" type="date"></label></div>
   <textarea id="ev-f-desc" rows="3" placeholder="Description"></textarea>
+  <input id="ev-f-origin" placeholder="Likely / suspected origin (cause)">
+  <div class="evrow">
+    <select id="ev-f-scope"><option value="">Scope…</option><option>Local</option>
+      <option>Regional</option><option>Multi-state</option><option>Continental</option></select>
+    <input id="ev-f-regions" placeholder="Regions affected (free text)"></div>
   <label class="evchk"><input type="checkbox" id="ev-f-captured"> Our sensors captured this</label>
   <input id="ev-f-sensors" placeholder="Sensor ids, comma-separated (e.g. 214373,214357)">
-  <div class="evrow"><input id="ev-f-srclabel" placeholder="Source label">
-    <input id="ev-f-srcurl" placeholder="Source URL"></div>
+  <input id="ev-f-srcrefs" placeholder="Related facility names (comma-sep, must match Sources)">
+  <input id="ev-f-reports" placeholder="Related report ids (comma-sep)">
+  <div class="evrow"><input id="ev-f-srclabel" placeholder="Citation label">
+    <input id="ev-f-srcurl" placeholder="Citation URL"></div>
   <button class="primary" onclick="evCreate()">Create event</button></div>`;
 
 let ADMIN_EVENTS = [];

@@ -23,6 +23,9 @@ EVENTS = [
         "kind": "fire", "region": "Parkersburg / Mid-Ohio Valley",
         "lat": 39.2546, "lon": -81.5601,
         "start_ts": _utc("2026-07-04T00:00"), "end_ts": _utc("2026-07-05T12:00"),
+        "origin": "Fire at the Peoples Cartage warehouse (Camden Ave)",
+        "scope": "Local", "regions_affected": "Parkersburg and Vienna (Mid-Ohio Valley)",
+        "source_refs": ["Peoples Cartage (Camden Ave warehouse)"],
         "captured": True,
         "sensor_ids": ["214373", "214357", "214355"],  # Parkersburg 1, Parkersburg 4, Vienna 1
         "description": (
@@ -45,6 +48,10 @@ EVENTS = [
         "kind": "wildfire", "region": "Statewide (Kanawha Valley sensors shown)",
         "lat": 38.35, "lon": -81.63,
         "start_ts": _utc("2025-06-03T00:00"), "end_ts": _utc("2025-06-06T00:00"),
+        "origin": "Wildfires across central & western Canada (smoke transported ~1000s of miles)",
+        "scope": "Continental",
+        "regions_affected": ("Much of Canada and the eastern U.S. — the Midwest, Northeast, "
+                             "and Appalachia including WV, VA, KY and TN"),
         "captured": True,
         "sensor_ids": ["197127", "196533", "216019", "216007", "196535", "197121"],
         "description": (
@@ -66,6 +73,10 @@ EVENTS = [
         "kind": "wildfire", "region": "Southern WV / Kanawha Valley",
         "lat": 38.35, "lon": -81.63,
         "start_ts": _utc("2024-11-06T00:00"), "end_ts": _utc("2024-11-09T00:00"),
+        "origin": "Drought-driven forest fires in the southern WV coalfields",
+        "scope": "Regional",
+        "regions_affected": ("Southern WV coalfields (Logan, Mingo, Kanawha, Wayne, Lincoln) "
+                             "and the Kanawha Valley"),
         "captured": True,
         "sensor_ids": ["197127", "197121", "196535", "216019", "215965", "196533"],
         "description": (
@@ -86,6 +97,9 @@ EVENTS = [
         "kind": "wildfire", "region": "Eastern U.S. / West Virginia",
         "lat": None, "lon": None,
         "start_ts": _utc("2023-06-06T00:00"), "end_ts": _utc("2023-06-08T00:00"),
+        "origin": "Historic Canadian wildfire season (Quebec & elsewhere)",
+        "scope": "Continental",
+        "regions_affected": "Eastern U.S. and Canada — among the worst air-quality days in decades",
         "captured": False, "sensor_ids": [],
         "description": (
             "The historic June 2023 Canadian wildfire smoke event turned skies orange across "
@@ -104,16 +118,18 @@ EVENTS = [
 def main() -> None:
     store = Store(os.environ.get("AIRWV_DATABASE_URL", "").strip() or "sqlite:///airwv.sqlite")
     store.create_schema()  # ensure the events table exists
-    existing = {e.title for e in store.events_for_admin()}
-    added = 0
+    existing = {e.title: e.id for e in store.events_for_admin()}
+    added = updated = 0
     for ev in EVENTS:
         if ev["title"] in existing:
-            print(f"skip (exists): {ev['title']}")
-            continue
-        store.add_event(**ev)
-        added += 1
-        print(f"added: {ev['title']}")
-    print(f"done: {added} new event(s)")
+            store.update_event(existing[ev["title"]], **ev)
+            updated += 1
+            print(f"updated: {ev['title']}")
+        else:
+            store.add_event(**ev)
+            added += 1
+            print(f"added: {ev['title']}")
+    print(f"done: {added} added, {updated} updated")
 
 
 if __name__ == "__main__":

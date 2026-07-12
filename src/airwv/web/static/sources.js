@@ -148,6 +148,9 @@ async function init() {
   });
   $('src-q').addEventListener('input', renderGrid);
   $('src-cat').addEventListener('change', renderGrid);
+  // deep link from the Events page: /sources#facility=<name> opens that facility
+  const want = decodeURIComponent((location.hash.match(/facility=([^&]+)/) || [])[1] || '');
+  if (want) { const s = SOURCES.find(x => x.name === want); if (s) openDetail(s); }
   $('sd-close').addEventListener('click', () => $('srcdetail').classList.remove('on'));
   $('srcdetail').addEventListener('click', e => { if (e.target === $('srcdetail')) $('srcdetail').classList.remove('on'); });
   const scroll = dx => $('carousel').scrollBy({left: dx, behavior: 'smooth'});
