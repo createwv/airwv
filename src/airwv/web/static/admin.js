@@ -73,7 +73,14 @@ async function loadQueue(){
     $('admin-list').innerHTML = '<p class="meta">Not authorized — click "Enter / change token".</p>';
   }
 }
+async function notifyTest(){
+  try {
+    const d = await (await adminFetch('/api/admin/notify-test', {method:'POST'})).json();
+    alert(d.sent ? `Sent (slack:${d.slack} discord:${d.discord}) — check your channel.` : d.detail);
+  } catch(e){ alert('Not authorized — enter the admin token first.'); }
+}
 $('admin-login').addEventListener('click', setToken);
 $('admin-refresh').addEventListener('click', loadQueue);
+$('admin-notify-test').addEventListener('click', notifyTest);
 $('admin-queue').addEventListener('change', loadQueue);
 loadQueue();

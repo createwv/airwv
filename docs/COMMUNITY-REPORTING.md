@@ -170,11 +170,39 @@ reports. This is how "it's broken" and "I'd like to do/know X" reach the team.
 
 ## The maintainer pipeline
 
-### Notifications (Slack / Discord / etc.)
-On a new report (especially `held`, `violation`, named-org) or feedback, POST a
-compact summary to an **incoming webhook** (`AIRWV_REPORT_WEBHOOK`) — reuse the
-existing webhook-notifier pattern from alerts. Message: domain/category, area,
-unverified badge, and a link to the admin item. Keep PII out of the ping.
+### Notifications (Slack / Discord) — ✅ built (`src/airwv/notify/chat.py`)
+On a new report or feedback the app fires a compact chat ping via
+`ChatNotifier` (a FastAPI **background task**, so it never blocks or fails the
+user's submission — a broken webhook is swallowed and logged). Slack and Discord
+are both supported via their **incoming-webhook** URLs (no bot/API key); set
+either, both, or neither:
+
+```
+AIRWV_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../xxxx
+AIRWV_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/123.../xxxx
+AIRWV_PUBLIC_URL=https://air.createwv.org   # used for the "Review in admin" link
+```
+
+Message contents: domain emoji + domain/category, a clipped description quote, a
+`🚩 held` / `✅ published` badge, real coordinates (it's a **private maintainer
+channel**, so exact coords are fine and useful), and a link to `/admin`. The
+public map still only ever shows jittered coords and no PII.
+
+**Set up a Discord webhook** (Create WV has Discord today):
+1. In the target channel: **Edit Channel → Integrations → Webhooks → New Webhook**.
+2. Name it (e.g. "AirWV reports"), pick the channel, **Copy Webhook URL**.
+3. Put it in the server `.env` as `AIRWV_DISCORD_WEBHOOK_URL=…` and restart the web
+   service. (See [`../docs/DATA-SOURCES.md`] / deployment notes for restart.)
+
+**Set up a Slack webhook** (when Create WV regains Slack access):
+1. https://api.slack.com/apps → **Create New App → From scratch**, pick the workspace.
+2. **Incoming Webhooks → Activate**, then **Add New Webhook to Workspace**, choose
+   the channel, **Copy** the `https://hooks.slack.com/services/…` URL.
+3. Put it in `.env` as `AIRWV_SLACK_WEBHOOK_URL=…` and restart.
+
+**Verify:** open `/admin`, enter the token, click **Test notifications** — it posts
+a test message to whichever channels are configured (or tells you none are set).
+Endpoint: `POST /api/admin/notify-test` (token-gated).
 
 ### Admin / moderation & verification console (priority)
 Token-gated (`X-Admin-Token` == `AIRWV_ADMIN_TOKEN`; real auth later), a simple
@@ -220,12 +248,12 @@ Admin (token):
 ---
 
 ## Build sequence (toward the admin end)
-1. **Migrations (Alembic)** + tables: `reports`, `readings_community`, `feedback`.
-2. **Notification util** — Slack/Discord webhook (reuse alerts webhook pattern).
-3. **Public intake** — `POST /api/reports` + `/feedback` + pre-screen + rate-limit
+1. ✅ **Migrations (Alembic)** + tables: `reports`, `readings_community`, `feedback`.
+2. ✅ **Notification util** — Slack/Discord webhook (`notify/chat.py` + `/api/admin/notify-test`).
+3. ✅ **Public intake** — `POST /api/reports` + `/feedback` + pre-screen + rate-limit
    + honeypot; `GET /api/reports` (published projection).
-4. **Admin console** — token-gated queues + verify/enrich/approve/remove/respond
-   (the priority) + CLI mirror.
-5. **Map UX** — progressive-disclosure form + 📣 layer with badges + domain filter.
+4. ✅ **Admin console** — token-gated queues + verify/publish/approve-org/remove.
+   (CLI mirror + respond-to-reporter still TODO.)
+5. ✅ **Map UX** — progressive-disclosure form + 📣 layer with badges + domain filter.
 6. **Photo pipeline** (EXIF strip, held-until-approved) + **readings** entry.
 7. v2 — aggregate/heatmap, captcha, maintainer notifications polish, DEP hand-off.

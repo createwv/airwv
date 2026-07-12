@@ -20,7 +20,7 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -28,6 +28,7 @@ from pydantic import BaseModel
 
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import readings_to_csv
+from airwv.notify.chat import chat_notifier_from_env
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
 
@@ -198,6 +199,7 @@ def create_app(store: Store) -> FastAPI:
     regions = _index_to_region()
     airnow_names = _airnow_meta()
     facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
+    notifier = chat_notifier_from_env()   # Slack/Discord webhooks (env); disabled if unset
 
     @app.get("/api/sensors")
     def sensors():
@@ -259,7 +261,7 @@ def create_app(store: Store) -> FastAPI:
         }
 
     @app.post("/api/reports")
-    def create_report(body: ReportIn, request: Request):
+    def create_report(body: ReportIn, request: Request, background: BackgroundTasks):
         if body.website.strip():
             raise HTTPException(status_code=400, detail="rejected")          # honeypot
         if body.elapsed_ms and body.elapsed_ms < 1500:
@@ -275,6 +277,10 @@ def create_app(store: Store) -> FastAPI:
             lat=body.lat, lon=body.lon, observed_at=_parse_dt(body.observed_at),
             suspected_org=(body.suspected_org or None), contact_email=(body.contact_email or None),
             contact_phone=(body.contact_phone or None), ip_hash=iph, stage=stage, screen_reason=reason)
+        if notifier.enabled:   # push to Slack/Discord after the response is sent
+            background.add_task(notifier.notify_report, domain=body.domain,
+                                category=body.category, description=body.description,
+                                stage=stage, lat=body.lat, lon=body.lon)
         return {"id": rid, "stage": stage,
                 "message": ("Thanks — a maintainer will review this shortly."
                             if stage == "held" else "Thanks — your report is on the map.")}
@@ -291,15 +297,18 @@ def create_app(store: Store) -> FastAPI:
         return {"flags": n}
 
     @app.post("/api/feedback")
-    def create_feedback(body: FeedbackIn, request: Request):
+    def create_feedback(body: FeedbackIn, request: Request, background: BackgroundTasks):
         if body.website.strip():
             raise HTTPException(status_code=400, detail="rejected")          # honeypot
         if not (body.message or "").strip():
             raise HTTPException(status_code=400, detail="message required")
+        kind = body.kind if body.kind in ("bug", "idea", "question") else "idea"
         fid = store.add_feedback(
-            kind=(body.kind if body.kind in ("bug", "idea", "question") else "idea"),
-            message=body.message[:2000], page=(body.page or None), contact=(body.contact or None),
-            ip_hash=ip_hash(client_ip(request)))
+            kind=kind, message=body.message[:2000], page=(body.page or None),
+            contact=(body.contact or None), ip_hash=ip_hash(client_ip(request)))
+        if notifier.enabled:
+            background.add_task(notifier.notify_feedback, kind=kind, message=body.message,
+                                page=body.page, contact=body.contact)
         return {"id": fid, "message": "Thanks for the feedback!"}
 
     # -- admin / moderation (token-gated via AIRWV_ADMIN_TOKEN) -------------
@@ -337,6 +346,16 @@ def create_app(store: Store) -> FastAPI:
         if not store.update_feedback(feedback_id, body.status):
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
+
+    @app.post("/api/admin/notify-test")
+    def admin_notify_test(_: bool = Depends(_require_admin)):
+        if not notifier.enabled:
+            return {"sent": False, "detail": "no webhook configured — set "
+                    "AIRWV_SLACK_WEBHOOK_URL and/or AIRWV_DISCORD_WEBHOOK_URL, then restart"}
+        notifier.send("✅ AirWV test notification",
+                      ["If you can see this, new report + feedback alerts are wired up."],
+                      link_label="Open admin", link_url=notifier.admin_link)
+        return {"sent": True, "slack": bool(notifier.slack_url), "discord": bool(notifier.discord_url)}
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page(request: Request):
