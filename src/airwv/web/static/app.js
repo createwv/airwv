@@ -126,7 +126,7 @@ async function loadSources(){
   buildLayers();
   $('srclist').innerHTML = allSources_.filter(s=>s.lat!=null)
     .map(s=>`<option value="${s.name.replace(/"/g,'&quot;')}">`).join('');
-  // deep link from the Sources page: /analysis?src=<facility name>
+  // deep link from the Sources page: /air?src=<facility name>
   const wantSrc = new URLSearchParams(location.search).get('src');
   if (wantSrc && allSources_.some(s => s.name === wantSrc)){
     $('srcpick').value = wantSrc; showProximity(wantSrc);

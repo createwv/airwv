@@ -35,7 +35,7 @@ function renderStats(sensors){
 
   if (!vals.length){
     $('ov-headline').innerHTML = '📡 No current community readings — see the '
-      + '<a href="/analysis">full dashboard</a> for history.';
+      + '<a href="/air">full dashboard</a> for history.';
     $('ov-stats').innerHTML = statCard(community.length, 'community sensors')
       + statCard(refs.length, 'EPA monitors');
     return;
@@ -94,7 +94,7 @@ async function loadReports(){
     const rows = (d.results || []).slice(0, 6);
     if (!rows.length){ $('ov-reports').innerHTML =
       '<p class="meta" style="padding:0 14px 12px">No community reports yet — be the first to '
-      + '<a href="/analysis#report">report a concern</a>.</p>'; return; }
+      + '<a href="/air#report">report a concern</a>.</p>'; return; }
     $('ov-reports').innerHTML = rows.map(r => {
       const emoji = DOMAIN_EMOJI[r.domain] || '📣';
       const badge = r.verified ? '<span class="rbadge ok">verified</span>'
@@ -115,7 +115,7 @@ async function init(){
     drawMap(sensors);
   } catch(e){
     $('ov-headline').innerHTML = 'Could not load current conditions. '
-      + '<a href="/analysis">Open the full dashboard →</a>';
+      + '<a href="/air">Open the full dashboard →</a>';
   }
   loadReports();
 }

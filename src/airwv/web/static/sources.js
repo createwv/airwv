@@ -114,8 +114,8 @@ function openDetail(s) {
     <td>${x.mi.toFixed(1)} mi</td><td>${x.dir}</td></tr>`).join('')
     : '<tr><td class="meta">No sensors located yet.</td></tr>';
   const q = encodeURIComponent(s.name);
-  $('sd-analysis').href = `/analysis?src=${q}`;
-  $('sd-report').href = `/analysis?src=${q}#report`;
+  $('sd-analysis').href = `/air?src=${q}`;
+  $('sd-report').href = `/air?src=${q}#report`;
   $('sd-note').textContent = DISCLAIMER;
   $('srcdetail').classList.add('on');
 }

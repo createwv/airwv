@@ -45,7 +45,7 @@
         <div><b>Right now across West Virginia:</b> typical community reading is
         <b style="color:${b.dark}">${typ.toFixed(1)} µg/m³ — ${b.label}</b>.
         ${good} of ${vals.length} sensors are in the Good range.
-        <a href="/analysis">See the live map →</a></div>`;
+        <a href="/air">See the live map →</a></div>`;
       el.style.borderLeftColor = b.color;
     } catch (e) { document.getElementById('learn-now')?.remove(); }
   }

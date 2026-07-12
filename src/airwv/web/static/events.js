@@ -96,7 +96,7 @@ function openEvent(e) {
   const refs = (e.source_refs || []).map(n =>
     `<a href="/sources#facility=${encodeURIComponent(n)}">🏭 ${esc(n)}</a>`).join(' · ');
   const reps = (e.report_ids || []).map(id =>
-    `<a href="/analysis">📣 report #${id}</a>`).join(' · ');
+    `<a href="/air">📣 report #${id}</a>`).join(' · ');
   const links = (refs || reps)
     ? `<div class="ev-links">${refs}${refs && reps ? ' · ' : ''}${reps}</div>` : '';
   $('ev-desc').innerHTML = (facts ? `<div class="ev-facts">${facts}</div>` : '')

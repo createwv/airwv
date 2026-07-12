@@ -22,7 +22,7 @@ from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -733,10 +733,14 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 
-    @app.get("/analysis", response_class=HTMLResponse)
-    def analysis(request: Request):
+    @app.get("/air", response_class=HTMLResponse)
+    def air(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
-                                          context={"mode": "analysis"})
+                                          context={"mode": "air"})
+
+    @app.get("/analysis")
+    def analysis_redirect():   # kept so old links / bookmarks still work
+        return RedirectResponse("/air", status_code=301)
 
     @app.get("/learn", response_class=HTMLResponse)
     def learn(request: Request):

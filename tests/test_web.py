@@ -121,8 +121,8 @@ def test_index_page(tmp_path):
 
 def test_mode_pages_render(tmp_path):
     c = _client(tmp_path)
-    # Home at /, dashboard at /analysis, plus content pages — all share the mode nav + modals
-    for path, script in [("/", "overview.js"), ("/analysis", "app.js"),
+    # Home at /, dashboard at /air, plus content pages — all share the mode nav + modals
+    for path, script in [("/", "overview.js"), ("/air", "app.js"),
                          ("/water", "water.js"), ("/field", "field.js"), ("/sources", "sources.js"),
                          ("/events", "events.js"), ("/learn", "reporting.js"),
                          ("/about", "reporting.js"), ("/admin", "admin.js")]:
@@ -133,6 +133,7 @@ def test_mode_pages_render(tmp_path):
     assert ">Home</a>" in c.get("/").text
     assert "Air Quality Index" in c.get("/learn").text
     assert "Where the data comes from" in c.get("/about").text
+    assert c.get("/analysis", follow_redirects=False).status_code == 301  # old link redirects to /air
 
 
 def test_events_api_and_admin(tmp_path, monkeypatch):

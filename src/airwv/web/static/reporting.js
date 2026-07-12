@@ -91,7 +91,7 @@
     $('f-submit').addEventListener('click', submitFeedback);
     document.querySelectorAll('.modal').forEach(m =>
       m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
-    // deep links, e.g. /analysis#report and /analysis#feedback
+    // deep links, e.g. /air#report and /air#feedback
     if (location.hash === '#report') openReport();
     else if (location.hash === '#feedback') openFeedback();
   }
