@@ -223,6 +223,10 @@ def create_app(store: Store) -> FastAPI:
                 lat, lon = coords.get(sid, (None, None))
                 name = names.get(sid, sid)
             latest_pm = latest.get(sid)
+            # Display-time sanity: a sustained reading this high is a stuck/broken sensor
+            # (real ambient PM2.5 doesn't sit above ~1000). Don't paint a false "hazardous"
+            # value — grey it and flag it instead of hiding the sensor.
+            malfunction = latest_pm is not None and latest_pm > 1000
             out.append({
                 "sensor_id": sid,
                 "name": name,
@@ -233,8 +237,9 @@ def create_app(store: Store) -> FastAPI:
                 "last_ts": cov["last_ts"].isoformat() if cov["last_ts"] else None,
                 "lat": lat,
                 "lon": lon,
-                "latest_pm2_5": latest_pm,
-                "color": _pm25_color(latest_pm),
+                "latest_pm2_5": None if malfunction else latest_pm,
+                "color": "#9e9e9e" if malfunction else _pm25_color(latest_pm),
+                "flag": "malfunction" if malfunction else None,
             })
         out.sort(key=lambda s: s["name"])
         return out

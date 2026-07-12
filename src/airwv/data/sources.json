@@ -4370,6 +4370,16 @@
       "lon": -82.2822,
       "citation": "EPA TRI (facility 41539BRKPL991LO)",
       "category": "materials"
+    },
+    {
+      "name": "Peoples Cartage (Camden Ave warehouse)",
+      "type": "Hazardous-waste storage / cartage \u2014 site of July 4\u20135, 2026 fire",
+      "operator": "Peoples Cartage Inc",
+      "state": "WV",
+      "lat": 39.2546,
+      "lon": -81.5601,
+      "citation": "WVDEP hazardous-waste violations 2025; July 2026 fire (news reports). Location approximate (Camden Ave campus).",
+      "category": "waste"
     }
   ]
 }

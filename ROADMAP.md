@@ -192,6 +192,23 @@ Make the data visible and usable.
       (pollutants, AQI scale, who's at risk, what to do). **About** (`/about`) =
       project/data-source/how-to-help. **Admin** = token-gated console.
       *Still to do: alert signup (no UI yet), an updates/news feed, per-area rollups.*
+- [ ] **Events page (curated air/pollution events by region + time)** — a page that marks
+      notable events with a **region, time window, type, description, and citations**, and —
+      when the event falls inside our collection window — overlays the **community-sensor
+      data around it** (before/during/after time series, the sensors involved, peak levels).
+      Two classes: **(a) live-captured** events our sensors actually measured — e.g. the
+      **Peoples Cartage fire, Parkersburg, Jul 4–5 2026** (10-min PM2.5 showed a clean
+      plume: sharp 05:50 onset, ~70–84 µg/m³ peaks propagating S→N Pkbg1→Pkbg4→Vienna1,
+      cleared by 08:00); **(b) historical/documented** events that predate or lack sensor
+      coverage — Kanawha Valley "blue haze", the Nitro plant explosion, etc. — shown as
+      documented context (cited), clearly labeled "no sensor data" where we have none.
+      Connects to: the existing algorithmic `/api/events` episodic detection (auto-surface
+      candidates → a maintainer curates them), the reporting pipeline (a confirmed report
+      can become an event), the Sources page (link an event to a facility), and wind data
+      (downwind attribution, as done for the Parkersburg fire). Data model: an `events`
+      table (region, start/end, kind, title, description, lat/lon or bbox, sources[],
+      sensor_ids[], status), admin-curated. Turns "something happened here" into a durable,
+      browsable, evidence-backed record — a strong community & press asset.
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
 - [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
