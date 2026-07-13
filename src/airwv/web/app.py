@@ -1027,6 +1027,31 @@ def create_app(store: Store) -> FastAPI:
                 "source": data.get("source"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/well-backlog")
+    def well_backlog():
+        """The orphan-well plugging backlog by county (from our abandoned-well data).
+        Rate/funding context is documented in the UI, not derived here."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"orphans_total": 0, "orphans_near_homes": 0, "counties": []}
+        roll: dict = defaultdict(lambda: {"orphans": 0, "orphans_near_homes": 0})
+        for w in data.get("wells", []):
+            if not w.get("orphan"):
+                continue
+            c = w.get("county") or "Unknown"
+            roll[c]["orphans"] += 1
+            if w.get("near_homes"):
+                roll[c]["orphans_near_homes"] += 1
+        counties = sorted(({"county": k, **v} for k, v in roll.items()),
+                          key=lambda r: -r["orphans"])
+        return {"orphans_total": data.get("orphans", 0),
+                "orphans_near_homes": data.get("orphans_near_homes", 0),
+                "counties": counties, "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/sdwa")
     def sdwa(health_only: bool = False, community_only: bool = False, county: str | None = None):
         """WV public drinking-water systems + SDWA violation status, with a county

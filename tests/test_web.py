@@ -284,6 +284,16 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_well_backlog_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/well-backlog").json()
+    assert {"orphans_total", "orphans_near_homes", "counties"} <= set(r)
+    if r["counties"]:
+        assert r["counties"] == sorted(r["counties"], key=lambda x: -x["orphans"])  # sorted desc
+        assert sum(x["orphans"] for x in r["counties"]) <= r["orphans_total"] + 0  # county sum ≤ total
+        assert all(x["orphans_near_homes"] <= x["orphans"] for x in r["counties"])
+
+
 def test_wells_near_sensors_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/wells-near-sensors").json()
