@@ -31,6 +31,10 @@ Repo hygiene and a clean open-source starting point.
       source" recipe); a public **`/data`** catalog page (`/api/data-catalog`, live
       freshness/counts, 14/15 keyless); every data file carries a uniform
       `source`/`fetched_at`/`disclaimer` block; footer "Data sources" link sitewide.
+      **Air reference is now EPA end-to-end** — replaced 1.45M re-served-OpenAQ rows with
+      direct EPA (AirData 2007–2025 finalized + AirNow 2026, backfilled via
+      `ingest airnow --backfill-days N`); OpenAQ retained only as a documented light-query/
+      non-US fallback. Every reference row is traceable to `airnow`/`epa_airdata`.
 - [x] License (MIT), Contributing guide, Code of Conduct
 - [x] Python project scaffold, `.gitignore`, `.env.example`
 - [x] CI: lint + tests on push/PR (ruff + pytest, Python 3.11/3.12)
