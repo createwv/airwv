@@ -159,6 +159,27 @@ def test_water_api(tmp_path):
     assert c.get("/api/water/series/x?parameter=ph").json()["points"] == []
 
 
+def test_water_near(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'web.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    store.add_water_readings([
+        {"source": "wqp", "site_id": "S1", "site_name": "Buffalo Creek", "lat": 37.80, "lon": -81.90,
+         "ts": t0, "parameter": "iron", "value": 2.4, "unit": "mg/L"},
+        {"source": "wqp", "site_id": "S1", "site_name": "Buffalo Creek", "lat": 37.80, "lon": -81.90,
+         "ts": t0, "parameter": "conductance", "value": 900.0, "unit": "uS/cm"},
+        {"source": "wqp", "site_id": "S2", "site_name": "Far Away", "lat": 39.50, "lon": -80.00,
+         "ts": t0, "parameter": "iron", "value": 0.1, "unit": "mg/L"},
+    ])
+    c = TestClient(create_app(store))
+    near = c.get("/api/water/near?lat=37.805&lon=-81.905&km=8").json()["sites"]
+    assert len(near) == 1 and near[0]["site_id"] == "S1"           # only the close one
+    assert near[0]["latest"]["iron"]["value"] == 2.4 and "mi" in near[0]
+    # a point ~3 mi from S1: inside an 8 km radius, outside a 1 km radius
+    assert c.get("/api/water/near?lat=37.757&lon=-81.90&km=8").json()["sites"]
+    assert c.get("/api/water/near?lat=37.757&lon=-81.90&km=1").json()["sites"] == []
+
+
 def test_field_readings(tmp_path, monkeypatch):
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
     c = _client(tmp_path)

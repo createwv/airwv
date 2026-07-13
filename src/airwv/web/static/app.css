@@ -318,3 +318,8 @@
   table.fac-table tr:hover td { background:#fafbfc; }
   .fac-badge { display:inline-block; color:#fff; font-size:12px; font-weight:600; padding:2px 8px; border-radius:20px; white-space:nowrap; }
   .prog-chip { display:inline-block; font-size:11px; color:#445; background:#eef1f4; border-radius:20px; padding:1px 7px; white-space:nowrap; }
+
+  /* Measured-water chips in the coal discharge popup (Water page) */
+  .cn-wqbox { margin-top:5px; border-top:1px solid #eee; padding-top:5px; }
+  .wq-chip { display:inline-block; font-size:11px; border:1px solid #ccc; border-left-width:3px;
+             border-radius:4px; padding:0 5px; margin:1px 2px 1px 0; background:#fff; }

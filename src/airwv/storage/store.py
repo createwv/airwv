@@ -32,6 +32,15 @@ from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
 
+
+def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    import math
+    dp, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
+    h = (math.sin(dp / 2) ** 2
+         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dl / 2) ** 2)
+    return 2 * 3959 * math.asin(math.sqrt(h))
+
+
 # Columns that come straight from a Reading (everything except bookkeeping).
 _READING_FIELDS = (
     "source",
@@ -555,6 +564,42 @@ class Store:
                 s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
                                             "ts": w.ts.isoformat() if w.ts else None}
             return list(sites.values())
+
+    def water_near(self, lat: float, lon: float, km: float = 5.0,
+                   limit: int = 6) -> list[dict]:
+        """Water sample sites within ``km`` of a point, each with its latest value
+        per parameter, nearest first. A cheap bounding-box query then a haversine
+        filter (used to attach measured water to a coal discharger / facility)."""
+        import math
+
+        dlat = km / 111.0
+        dlon = km / (111.0 * max(math.cos(math.radians(lat)), 0.01))
+        with self._session_factory() as session:
+            sub = (select(WaterReading.site_id, WaterReading.parameter,
+                          func.max(WaterReading.ts).label("mts"))
+                   .where(WaterReading.lat.between(lat - dlat, lat + dlat),
+                          WaterReading.lon.between(lon - dlon, lon + dlon))
+                   .group_by(WaterReading.site_id, WaterReading.parameter).subquery())
+            q = select(WaterReading).join(
+                sub, and_(WaterReading.site_id == sub.c.site_id,
+                          WaterReading.parameter == sub.c.parameter,
+                          WaterReading.ts == sub.c.mts))
+            sites: dict[str, dict] = {}
+            for w in session.scalars(q):
+                if w.lat is None or w.lon is None:
+                    continue
+                s = sites.setdefault(w.site_id, {
+                    "site_id": w.site_id, "name": w.site_name,
+                    "lat": w.lat, "lon": w.lon, "latest": {}})
+                s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
+                                            "ts": w.ts.isoformat() if w.ts else None}
+        out = []
+        for s in sites.values():
+            d = _haversine_mi(lat, lon, s["lat"], s["lon"])
+            if d <= km * 0.621371:
+                out.append({**s, "mi": round(d, 1)})
+        out.sort(key=lambda s: s["mi"])
+        return out[:limit]
 
     def water_series(self, site_id: str, parameter: str, since=None) -> list[dict]:
         with self._session_factory() as session:

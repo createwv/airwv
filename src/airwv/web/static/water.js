@@ -36,6 +36,25 @@ const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'sulfate', 'nitrate',
 let SITES = [], map, layer, current = 'ph', userMarker;
 let coalLayer, COAL = null;
 
+// Measured water near a coal discharger — lazily loaded into its popup, so
+// "listed impaired for iron" becomes "and here's the measured iron nearby".
+const WQ_KEYS = ['iron', 'aluminum', 'manganese', 'sulfate', 'ph', 'conductance'];
+function renderNearWater(sites) {
+  const withVals = sites.filter(s => WQ_KEYS.some(k => s.latest[k]));
+  if (!withVals.length) return '<small class="meta">No nearby mine-related water samples on record.</small>';
+  let html = '<div class="cn-wqbox"><small><b>💧 Measured water nearby</b></small>';
+  withVals.slice(0, 2).forEach(s => {
+    const chips = WQ_KEYS.filter(k => s.latest[k]).map(k => {
+      const l = s.latest[k], m = WATER_PARAMS[k];
+      const col = m ? m.color(l.value) : '#333';
+      const unit = m && m.unit ? m.unit : (l.unit || '');
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${unit ? ' ' + unit : ''}</b> ${m ? m.label : k}</span>`;
+    }).join(' ');
+    if (chips) html += `<div style="margin:3px 0"><small>${esc(s.name)} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
+  });
+  return html + '</div>';
+}
+
 // WV DEP coal-mine NPDES discharge permits — mining ↔ water overlay.
 async function toggleCoal(on) {
   if (!on) { if (coalLayer) { coalLayer.remove(); coalLayer = null; } return; }
@@ -63,6 +82,7 @@ async function toggleCoal(on) {
         + ` into <b>${p.stream_count}</b> stream${p.stream_count === 1 ? '' : 's'}`
         + impaired
         + (streams ? `<br><small>Receiving:<br>· ${streams}${p.stream_count > 5 ? '<br>· …' : ''}</small>` : '')
+        + `<div class="cn-wq" data-pending data-lat="${p.lat}" data-lon="${p.lon}"></div>`
         + `<br><a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">EPA ECHO effluent charts →</a>`)
       .addTo(coalLayer);
   });
@@ -163,6 +183,18 @@ async function init() {
   $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
   $('w-nearme').addEventListener('click', nearMe);
   $('w-coal').addEventListener('change', e => toggleCoal(e.target.checked));
+  // lazily fill a coal popup's "measured water nearby" box the first time it opens
+  map.on('popupopen', async e => {
+    const box = e.popup.getElement().querySelector('.cn-wq[data-pending]');
+    if (!box) return;
+    box.removeAttribute('data-pending');
+    box.innerHTML = '<small class="meta">loading nearby measurements…</small>';
+    try {
+      const sites = (await (await fetch(`/api/water/near?lat=${box.dataset.lat}&lon=${box.dataset.lon}&km=8&limit=4`)).json()).sites || [];
+      box.innerHTML = renderNearWater(sites);
+      e.popup.update();
+    } catch (_) { box.innerHTML = '<small class="meta">measured water unavailable</small>'; }
+  });
   draw();
 }
 init();

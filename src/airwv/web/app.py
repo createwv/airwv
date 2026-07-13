@@ -1025,6 +1025,12 @@ def create_app(store: Store) -> FastAPI:
     def water_sites():
         return {"sites": store.water_sites()}
 
+    @app.get("/api/water/near")
+    def water_near(lat: float, lon: float, km: float = 5.0, limit: int = 6):
+        """Water sample sites near a point with their latest measured values —
+        used to attach measured water quality to a coal discharger / facility."""
+        return {"sites": store.water_near(lat, lon, km=min(km, 25), limit=min(limit, 20))}
+
     @app.get("/api/water/series/{site_id}")
     def water_series(site_id: str, parameter: str = "ph", days: int = 30):
         since = datetime.utcnow() - timedelta(days=days)   # stored ts is naive UTC
