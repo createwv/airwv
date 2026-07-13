@@ -286,11 +286,17 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       permit/status/compliance enrichment (EPA ECHO / WV DEP / FracTracker) to fill the
       "permit & activity" section + active/inactive/pending status; fix categorizer
       (John Amos coal plant currently mislabeled "materials", should be "power").*
-- [ ] **Facility status / permit layer** — toggle facilities by status:
-      **active / inactive / approved / requesting (planning/pending)** — the permit
-      lifecycle regulated emitters go through. Permit info as a separate field
-      (permit id/type/status) from operating status. Sources: WV DEP permit
-      database, EPA ECHO (compliance/active), FracTracker (proposed/planned sites).
+- [~] **Facility status / permit layer** — v1 BUILT: a **Compliance & permits**
+      section on `/sources` lists WV's **major** regulated facilities from **EPA ECHO**
+      (`scripts/fetch_facility_status.py` → `echo_facilities.json`, served by
+      `/api/facilities`). Filter by **status** (significant violation / in violation /
+      no violation) and **program** (air/water/waste/drinking-water/toxics), with
+      summary counts, colored status badges, and per-facility ECHO Detailed Facility
+      Report links (250 facilities; 41 in significant violation). *Refresh periodically
+      (compliance changes slowly): re-run the script + redeploy — a monthly timer could
+      automate it.* **Still open:** the full permit lifecycle (active / approved /
+      **requesting** planning-pending) from **WV DEP** + **FracTracker** (proposed/planned
+      sites); overlay status coloring on the dashboard sources map layer.
 - [x] **Map scale** — DONE: Leaflet.markercluster on the dense layers (Air pollution
       sources ~530, Water sites ~2,000) — zoom-based clusters + spiderfy, so the maps stay
       usable statewide. (Sensor/reference layers stay unclustered — colors matter there.)
