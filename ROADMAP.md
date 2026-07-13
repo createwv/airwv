@@ -172,7 +172,13 @@ Make the data visible and usable.
       570px; current `clamp(165px,20vw,230px)` approximates it continuously.
 - [x] **Master map-layer toggles** — community sensors / 🏭 sources / 📍 monitors
       each toggle on/off (sensors now toggle as one layer like the others).
-- [ ] Per-area rollups + trend charts on the dashboard
+- [x] **Per-area rollups + trend charts** — "How's your area doing?" card on the Air
+      dashboard groups community sensors by WV region (worst air first): current
+      median, sensors reporting, highest sensor, and a trend arrow (rising/falling %,
+      ⚠ worsening). Click an area to chart its daily-median trend. Endpoints
+      `/api/areas` + `/api/areas/series` (SQL-aggregated, cached); driven by the main
+      metric picker (PM/VOC/temp/humidity — ozone is reference-only). *Trends fill in
+      per region as the collector backfills the 43 snapshot-only sensors.*
 - [x] **Deployed publicly at air.createwv.org** — live on papa-greatness (Hetzner),
       NPM/Docker reverse proxy + Cloudflare DNS, systemd services/timers (see
       deployment notes). *(Embeddable partner widgets still to build.)*
