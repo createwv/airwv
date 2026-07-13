@@ -698,6 +698,51 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
     return total
 
 
+def run_airnow_hourly(config: Config, year: int, store=None, workers: int = 10) -> int:
+    """Pull EVERY hourly AirNow file for a year (up to 24×365) — full-resolution
+    preliminary reference, so the QA audit compares a *true daily mean* (not a single
+    sampled hour) against finalized AirData. Threaded fetch; single-writer save."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    import httpx
+
+    store = store or Store.from_config(config)
+    store.create_schema()
+    start = datetime(year, 1, 1, 0, tzinfo=timezone.utc)
+    end = min(datetime(year, 12, 31, 23, tzinfo=timezone.utc), datetime.now(tz=timezone.utc))
+    hours, t = [], start
+    while t <= end:
+        hours.append(t)
+        t += timedelta(hours=1)
+    client = httpx.Client(timeout=60, follow_redirects=True)
+
+    def fetch(ts):
+        try:
+            r = client.get(_airnow_url(ts))
+            if r.status_code == 200 and len(r.content) > 1000:
+                return _parse_airnow(r.text)
+        except Exception:
+            pass
+        return ([], {})
+
+    total, monitors_all, batch = 0, {}, []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for i, (readings, monitors) in enumerate(pool.map(fetch, hours), 1):
+            batch.extend(readings)
+            monitors_all.update(monitors)
+            if len(batch) >= 20000:
+                total += store.save_readings(batch)
+                batch = []
+            if i % 1000 == 0:
+                log.info("airnow hourly %d: %d/%d files, %d readings", year, i, len(hours), total)
+    if batch:
+        total += store.save_readings(batch)
+    client.close()
+    _airnow_save_monitors(config, monitors_all)
+    log.info("airnow hourly %d: %d readings from %d files", year, total, len(hours))
+    return total
+
+
 def run_qa_check(config: Config, store=None, year: int | None = None, field: str = "pm2_5") -> dict:
     """Audit preliminary AirNow against finalized AirData for the same monitor+day —
     how much QA changed, and what it dropped. Prints a report; returns the stats."""
@@ -1075,6 +1120,8 @@ def main(argv: list[str] | None = None) -> None:
     p_airnow = sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
     p_airnow.add_argument("--backfill-days", type=int, default=0,
                           help="backfill this many past days (one file/day) — direct EPA history")
+    p_airnow.add_argument("--hourly-year", type=int, default=0,
+                          help="pull EVERY hourly file for a year (full-resolution, for the QA audit)")
     p_qa = sub.add_parser("qa-check", help="audit preliminary AirNow vs finalized AirData (what QA changed)")
     p_qa.add_argument("--year", type=int, help="limit to one finalized year (default: all overlap)")
     p_qa.add_argument("--field", default="pm2_5", choices=["pm2_5", "ozone"])
@@ -1136,7 +1183,9 @@ def main(argv: list[str] | None = None) -> None:
     elif command == "alerts":
         run_alerts(config, send=args.send)
     elif command == "airnow":
-        if getattr(args, "backfill_days", 0):
+        if getattr(args, "hourly_year", 0):
+            run_airnow_hourly(config, year=args.hourly_year)
+        elif getattr(args, "backfill_days", 0):
             run_airnow_backfill(config, days=args.backfill_days)
         else:
             run_airnow(config)
