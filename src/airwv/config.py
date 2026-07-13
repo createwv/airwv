@@ -32,8 +32,10 @@ class Config:
     database_url: str
     poll_interval_seconds: int
     index_cache_path: Path
-    openaq_api_key: str = ""  # optional — reference-monitor data
-    openaq_daily_cap: int = 1000  # HARD cap on OpenAQ requests/day — never exceed the free quota
+    # OpenAQ is no longer a data source — air reference is EPA end-to-end (see
+    # docs/DATA-SOURCES.md). The key is kept only for optional light, real-time queries
+    # within OpenAQ's authorized limits (non-US / redundancy); we never bulk-download.
+    openaq_api_key: str = ""
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -61,5 +63,4 @@ class Config:
             poll_interval_seconds=poll_interval,
             index_cache_path=Path(index_cache),
             openaq_api_key=os.environ.get("OPENAQ_API_KEY", "").strip(),
-            openaq_daily_cap=int(os.environ.get("OPENAQ_DAILY_CAP", "1000")),
         )

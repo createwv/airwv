@@ -414,70 +414,6 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
     return alerts
 
 
-def run_reference(config: Config, days: int = 7, source=None, store=None, now: datetime | None = None,
-                  start: datetime | None = None, end: datetime | None = None,
-                  window_days: int = 30, refresh: bool = False) -> int:
-    """Pull WV reference-monitor PM2.5 from OpenAQ into storage (source='openaq').
-
-    Enables validating community sensors against regulatory-grade data. Needs
-    OPENAQ_API_KEY (free at explore.openaq.org). Pass --start/--end (ISO dates) to
-    pull a historical window; otherwise the last N days.
-
-    Deep history is fetched in ``window_days`` chunks (one OpenAQ call maxes at 1000
-    points ≈ 40 days of hourly data). Backfill is **gap-aware** — a window that
-    already has stored data is skipped, so re-runs resume cheaply — unless
-    ``refresh`` is set (the ongoing collector uses it to re-pull recent days and
-    catch late-arriving measurements; save_readings upserts, so no duplicates).
-    """
-    if source is None and not config.openaq_api_key:
-        log.warning("OPENAQ_API_KEY not set — get a free key at https://explore.openaq.org/register")
-        return 0
-
-    from airwv.sources.openaq import OpenAQAuthError, OpenAQBudgetExceeded, OpenAQSource
-
-    source = source or OpenAQSource(
-        config.openaq_api_key, daily_cap=config.openaq_daily_cap,
-        usage_path=config.index_cache_path.parent / "openaq_usage.json")
-    store = store or Store.from_config(config)
-    store.create_schema()
-    now = now or datetime.now(tz=timezone.utc)
-    end = end or now
-    start = start or (end - timedelta(days=days))
-    step = timedelta(days=max(1, window_days))
-
-    total, n_loc, stopped = 0, 0, None
-    try:
-        locations = source.fetch_locations(WV_NW_LAT, WV_NW_LNG, WV_SE_LAT, WV_SE_LNG)
-        n_loc = len(locations)
-        for loc in locations:
-            lat, lon = loc.get("lat"), loc.get("lon")
-            for sensor_id in loc.get("pm25_sensor_ids", []):
-                w_start = start
-                while w_start < end:
-                    w_end = min(w_start + step, end)
-                    if not refresh and store.count_readings(str(sensor_id), w_start, w_end) > 0:
-                        w_start = w_end
-                        continue  # gap-aware: window already stored
-                    try:
-                        total += store.save_readings(source.fetch_measurements(
-                            sensor_id, w_start, w_end, lat=lat, lon=lon))
-                    except (OpenAQBudgetExceeded, OpenAQAuthError):
-                        raise  # stop the whole run — don't keep hammering
-                    except Exception as exc:  # one bad window shouldn't abort the pull
-                        log.warning("openaq fetch failed for sensor %s %s..%s: %s",
-                                    sensor_id, w_start.date(), w_end.date(), exc)
-                    w_start = w_end
-    except OpenAQBudgetExceeded as exc:
-        stopped = "budget"
-        log.warning("openaq: %s (resumes next run — gap-aware, no re-pull of stored windows)", exc)
-    except OpenAQAuthError as exc:
-        stopped = "auth"
-        log.error("openaq STOPPED — %s. Fix the key/account before re-running; not retrying.", exc)
-    log.info("openaq reference: %d readings from %d monitor location(s), %s..%s%s",
-             total, n_loc, start.date(), end.date(), "  [stopped early: " + stopped + "]" if stopped else "")
-    return total
-
-
 # EPA AirData state FIPS codes: WV + the states it borders.
 AIRDATA_STATES = {"54": "WV", "39": "OH", "42": "PA", "24": "MD", "51": "VA", "21": "KY"}
 
@@ -566,8 +502,8 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
 
     EPA publishes pre-generated annual files (``daily_{param}_{year}.zip``) — keyless,
     no rate limit, no quota. This is the right tool for the deep historical record
-    (param 88101 = PM2.5 FRM/FEM); OpenAQ stays for recent/live hourly data. WV +
-    bordering states; one daily-mean reading per monitor per day (upserted).
+    (param 88101 = PM2.5 FRM/FEM); AirNow covers the current year (its finalized annual
+    file lags ~a year). WV + bordering states; one daily-mean reading per monitor per day.
     """
     import csv
     import io
@@ -690,8 +626,8 @@ def _airnow_save_monitors(config: Config, monitors: dict) -> int:
 def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
     """Pull the latest hourly PM2.5/ozone from EPA **AirNow**'s public hourly file.
 
-    AirNow is EPA's real-time program — the same source OpenAQ uses for US live
-    data — but we go direct: the ``HourlyAQObs`` file is **keyless, with no rate
+    AirNow is EPA's real-time program (the same feed aggregators re-serve for US
+    live data) — we go direct: the ``HourlyAQObs`` file is **keyless, with no rate
     limit or quota**, and one download has every monitor for that hour. We keep
     WV + bordering states and store them as source='airnow' (the live reference
     layer). Also accumulates monitor names/coords in ``data/airnow_monitors.json``.
@@ -726,8 +662,8 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
     """Backfill AirNow reference for a past window — one file per day (at ``hour`` UTC).
 
     AirNow retains its hourly ``HourlyAQObs`` files, so this pulls **direct EPA** data
-    for a historical range. We use it to replace re-served-via-OpenAQ US data with the
-    primary AirNow feed, so the reference layer is EPA end-to-end and fully above-board.
+    for a historical range — this is how we cover the current year (EPA's finalized
+    AirData annual file lags ~a year), keeping the reference layer EPA end-to-end.
     """
     import httpx
 
@@ -756,12 +692,12 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
                  store=None, coords: dict | None = None, correct: bool = False,
                  window_days: int = 1200) -> list[dict]:
-    """Validate community sensors against the nearest OpenAQ reference monitor.
+    """Validate community sensors against the nearest EPA reference monitor.
 
     For each community (PurpleAir) sensor, find the closest regulatory monitor and
     correlate their daily-median PM2.5 over the overlapping days: Pearson r + mean
     bias (sensor − reference). High r + small bias = the community network tracks
-    reference-grade data. Read-only. Requires prior `ingest reference` data.
+    reference-grade data. Read-only. Requires prior `ingest airnow` / `airdata` data.
 
     ``coords`` (sensor_id → (lat, lon)) may be passed directly (the web app already
     has it); otherwise it is loaded from the resolved public-sensor listing.
@@ -770,8 +706,8 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
 
     store = store or Store.from_config(config)
     community = store.sensor_ids_by_source("purpleair")
-    # ALL reference sources: AirNow (live), OpenAQ (stored recent), EPA AirData (deep
-    # certified daily history). Daily values are aggregated in SQL, so we can validate
+    # EPA reference sources: AirNow (live, current year) + EPA AirData (deep certified
+    # daily history). Daily values are aggregated in SQL, so we can validate
     # over years — including against the AirData record — without loading raw rows.
     ref_coords: dict[str, tuple] = {}
     for src in ("airnow", "epa_airdata"):   # EPA reference: live AirNow + finalized AirData
@@ -1102,14 +1038,6 @@ def main(argv: list[str] | None = None) -> None:
     subscribe.add_argument("--quiet-end", type=int, help="quiet hours end (local hour 0-23)")
     alerts = sub.add_parser("alerts", help="evaluate subscriptions (dry run unless --send)")
     alerts.add_argument("--send", action="store_true", help="actually deliver notifications")
-    reference = sub.add_parser("reference", help="pull EPA/OpenAQ reference monitors (needs OPENAQ_API_KEY)")
-    reference.add_argument("--days", type=int, default=7, help="how many days back to pull (default 7)")
-    reference.add_argument("--start", help="ISO start date for a historical window (e.g. 2016-01-01)")
-    reference.add_argument("--end", help="ISO end date (default now)")
-    reference.add_argument("--window-days", type=int, default=30,
-                           help="chunk size for deep backfills (default 30; keep <40 for hourly data)")
-    reference.add_argument("--refresh", action="store_true",
-                           help="re-pull windows even if already stored (for ongoing/late data)")
     p_airnow = sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
     p_airnow.add_argument("--backfill-days", type=int, default=0,
                           help="backfill this many past days (one file/day) — direct EPA history")
@@ -1170,14 +1098,6 @@ def main(argv: list[str] | None = None) -> None:
                       quiet_start=args.quiet_start, quiet_end=args.quiet_end)
     elif command == "alerts":
         run_alerts(config, send=args.send)
-    elif command == "reference":
-        def _parse_dt(s):
-            if not s:
-                return None
-            dt = datetime.fromisoformat(s)
-            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
-        run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end),
-                      window_days=args.window_days, refresh=args.refresh)
     elif command == "airnow":
         if getattr(args, "backfill_days", 0):
             run_airnow_backfill(config, days=args.backfill_days)

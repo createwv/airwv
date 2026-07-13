@@ -466,18 +466,20 @@ Grow the network and secure the record.
       (see [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md)): **`ingest airnow`** pulls
       AirNow's hourly file for the **live layer** (110 WV+border monitors, real site
       names), **`ingest airdata`** bulk-imports AQS daily files for **history**
-      (232K+ readings, 2007–2024). We reached these via **OpenAQ** (credited) then
-      went direct to avoid its quota/ToS. The OpenAQ client (`ingest reference`)
-      remains as an optional, quota-safe fallback (hard daily cap + circuit breaker).
+      (2007–2025). The current year is covered by AirNow's retained hourly files
+      (`ingest airnow --backfill-days N`), since AirData finalizes ~a year late. We found
+      these EPA feeds *via* OpenAQ (credited in DATA-SOURCES.md) but store **no OpenAQ
+      data** — reference is EPA end-to-end. The OpenAQ client was removed; only the key
+      is kept for optional light, non-US queries within their limits.
 - [x] **Sensor-vs-reference validation** (`ingest validate`) — pairs each
       community sensor with its nearest reference monitor, correlates daily-median
       PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
       and it auto-flagged the known-bad sensor (196533: r<0, bias +1589 µg/m³).
-- [x] Historical reference pull (`reference --start/--end`) to match sensor windows.
+- [x] Historical reference — EPA AirData bulk history + AirNow window-backfill for the current year.
 - [x] **Validation panel on the dashboard** — the `validate` table live at
       `/api/validate`, color-coded r + bias, with a malfunction flag on absurd bias.
 - [x] Plot live reference monitors on the map — AirNow monitors as ringed circles,
-      colored by current PM2.5, real site names (OpenAQ + AirData daily are archive,
+      colored by current PM2.5, real site names (AirData daily is archive/history,
       excluded from the live map).
 - [~] **EPA PurpleAir bias correction** — DONE: `correction.py` (Barkjohn 2021,
       `0.524·PA_cf1 − 0.0862·RH + 5.75`), `validate --correct` + dashboard toggle;

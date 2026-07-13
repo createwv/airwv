@@ -129,23 +129,22 @@ at <https://aqs.epa.gov/aqsweb/airdata/>. Fully QA'd regulatory data back to the
 2000s. `ingest airdata --start-year 2007`. (Some years use `M/D/YYYY` dates — the
 parser handles both.)
 
-> **On OpenAQ — credit where it's due.** We first found reference data through
-> **[OpenAQ](https://openaq.org)**, an excellent open aggregator, and poking their API
-> is how we learned that US real-time data is tagged `provider="AirNow"` — i.e. they
-> **re-serve EPA's own AirNow feed**. That pointed us straight to the primary EPA
-> sources we now use directly. **Our air reference is EPA end-to-end** — AirNow (live)
-> + AirData (finalized history) — so we don't store or re-publish OpenAQ data; every
-> reference row is tagged `source='airnow'` or `'epa_airdata'`, traceable to EPA.
-> OpenAQ's API is designed for **light, real-time querying** (with attribution — not
-> bulk extraction), and it stays genuinely useful for what EPA's US-only feeds can't
-> cover: **non-US / global comparisons, networks outside the US regulatory set, and
-> redundancy** — which is exactly where we'd reach for it, within their terms.
+> **On OpenAQ — credit for the path, not a dependency.** The open
+> **[OpenAQ](https://openaq.org)** project is how we learned to reach EPA's *own* air
+> data: poking their API showed US real-time data is tagged `provider="AirNow"` — i.e.
+> they re-serve EPA's AirNow feed — which pointed us at the primary EPA sources we now
+> use directly. **Our air reference is EPA end-to-end and stores no OpenAQ data:** every
+> reference row is `source='airnow'` or `'epa_airdata'`, traceable to EPA.
 >
-> *Why this matters for the current year:* EPA finalizes its **AirData** annual files
-> with a lag (the 2026 file lands in ~2027), so for the **current year** the
-> authoritative EPA source is **AirNow**, whose hourly files are retained — we
-> backfill directly from them (`ingest airnow --backfill-days N`) rather than lean on
-> an aggregator for recent data.
+> *The current-year wrinkle (worth understanding):* EPA's **finalized** history (the
+> AirData annual files) isn't published *retroactively* for the current year — the 2026
+> file lands ~2027. OpenAQ's platform **does** retain current-year observations in
+> queryable form, but their terms authorize **light, real-time querying within limits
+> (~60/min, ~2,000/hr, with attribution) — not bulk download.** So we don't pull history
+> from them; instead we cover the current year with EPA's own **AirNow**, whose hourly
+> files are *retained* and keyless (`ingest airnow --backfill-days N`). OpenAQ stays
+> worth keeping in mind for what EPA's US-only feeds can't do — non-US / global data,
+> networks outside the US regulatory set, redundancy — used the way they intend.
 
 ---
 

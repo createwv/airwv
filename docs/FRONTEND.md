@@ -81,8 +81,8 @@ Toggle a whole group at the parent, or individuals underneath.
 ## Labeling
 
 - **Name the EPA monitors.** Today they render as "monitor #24589". Store the
-  monitor's real **AirNow site name** (we already get it from OpenAQ `locations`,
-  just not persisted) and display that; **fall back to `EPA #<id>`**. Same for the
+  monitor's real **AirNow site name** (the `airnow` ingest already accumulates these in
+  `data/airnow_monitors.json`) and display that; **fall back to `EPA #<id>`**. Same for the
   static EPA AirData layer (those already have site names + county).
 - Community sensors keep their friendly EWV names.
 - Sources show name + type + `state` (already done) + soon `category`.

@@ -238,8 +238,8 @@ class Store:
     def coords_from_readings(self, source: str) -> dict[str, tuple]:
         """One (lat, lon) per sensor for a source, from stored readings.
 
-        Used for reference monitors (OpenAQ), whose coords live on the readings
-        rather than in the community listing.
+        Used for reference monitors (EPA AirNow / AirData), whose coords live on the
+        readings rather than in the community listing.
         """
         out: dict[str, tuple] = {}
         with self._session_factory() as session:
