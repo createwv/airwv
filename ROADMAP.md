@@ -1,22 +1,31 @@
 # AirWV Roadmap
 
-AirWV has grown from an air-monitoring MVP into a **multi-medium community
-environmental platform for West Virginia** — air + water today, soil later —
-**live at air.createwv.org**. Phases 0–3 (ingestion, storage, data quality,
-trends) and the public site are largely built; recent work added the **Water**
-lens (live USGS gauges + Water Quality Portal samples), cross-medium **Events**,
-**NPDES** dischargers on Sources, **field-science** spot-check intake, **ozone**
-(history + map), and map clustering.
+AirWV started as an air-sensor MVP and has (deliberately) grown into a **community
+environmental watchdog for West Virginia** — **live at air.createwv.org**. Air is one
+lens; the mission is broader: **what we breathe, drink, eat, and what our ecosystem
+experiences.** The goals are to **inform** the public, **break down transparency** where
+government, law, and enforcement fall short, **triage** serious issues, **track trends**
+so people can push for better policy and action, and **serve as an alert system when
+official systems fail** (or help them do their job). Community science, civil
+watchdogging, and resident reporting/inspection are first-class — not add-ons.
 
-Phases are directional, not date-bound; items move as the sensor network and
-partnerships (WVCAG, Create WV, **WV Rivers Coalition**) evolve. Status key:
-**✅ done · ◐ partial (built, has follow-ups) · ⬜ open**. A few items are
-*blocked on an input* — API points, SMTP/Twilio creds, or a dataset — not code
-(called out where they appear).
+What's built: ingestion/storage/quality/trends; the public site; the **Water** lens
+(USGS gauges + Water Quality Portal); cross-medium **Events** + reported **spills**
+(NRC); a full **accountability layer** on Sources/maps (EPA ECHO compliance, WV DEP
+oil-&-gas / mining / coal-NPDES permits, abandoned/orphan wells); **SDWA** drinking-water
+violations; the **"What's near me?"** reverse guide; **alerts sign-up**; and an
+EPA-end-to-end air reference (AirNow + AirData, preliminary + finalized, QA-audited).
 
-**Nearest-term / staged:** the community-air **collector** is verified and staged
-on the server (enable when points are topped up); **alerts sign-up** and the
-**drinking-water intake map** are the next big threads.
+Phases are directional, not date-bound. Status key: **✅ done · ◐ partial (built, has
+follow-ups) · ⬜ open**. Some items are *blocked on an input* (API points, SMTP/Twilio
+creds, a dataset) — not code. Partnerships: WVCAG, Create WV, WV Rivers Coalition,
+municipalities + other WV Environmental Council member orgs, volunteers.
+
+**The next big theme is legibility (Phase 8):** the data + connections are powerful, but
+the presentation has outrun them. Make the experience **reading-first** (what's in the
+air/water *now*), demote accountability/context to one action away, and **help people make
+the connections** we already hold. Plus the committed **PostgreSQL + TimescaleDB** storage
+upgrade (Phase 5) so we can keep high-resolution, event-preserving history at scale.
 
 ---
 
@@ -499,6 +508,20 @@ Grow the network and secure the record.
       PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
       and it auto-flagged the known-bad sensor (196533: r<0, bias +1589 µg/m³).
 - [x] Historical reference — EPA AirData bulk history + AirNow window-backfill for the current year.
+- [x] **Full preliminary record + QA audit + dual-collection** — AirNow's dated hourly files
+      are retained ~7yr, so we backfilled the **whole preliminary record** (~448k rows, 2019→2026)
+      alongside finalized `epa_airdata` (2007–2025) and **keep both** (tagged by `source`).
+      `ingest qa-check [--year N]` audits preliminary vs finalized (reconciles AQSID↔dashed id).
+      **2025 full-hourly audit: r=0.95, mean bias ≈0, 92% within 2 µg/m³** — QA barely changes the
+      values; the apparent "drops" are monitor-set differences (AirNow all-monitors vs AQS 88101),
+      not scrubbing, and the few large revisions are legitimate corrections (both directions),
+      visible per monitor-day because we kept both. Parser fix: older AirNow files use a 2-digit
+      year. Ongoing: hourly live (`airwv-airnow.timer`) + **nightly gap-fill** (`airwv-airnow-backfill.timer`,
+      staged); **yearly** AirData finalize pull. *Next: `ingest airnow --hourly-year N` for finer
+      years; make validation/display prefer `epa_airdata` where it overlaps `airnow`.*
+- [x] **Data-integrity principle** — keep the **raw** high-resolution readings; roll up for display
+      but **surface peak/max, not just median**, so zooming to hourly/daily never hides a spike.
+      (Enabled at scale by the committed Postgres+TimescaleDB upgrade — Phase 5.)
 - [x] **Validation panel on the dashboard** — the `validate` table live at
       `/api/validate`, color-coded r + bias, with a malfunction flag on absurd bias.
 - [x] Plot live reference monitors on the map — AirNow monitors as ringed circles,
@@ -642,6 +665,108 @@ people-direct water education and connect it to air).
       third medium once air + water patterns are proven.
 - [ ] Other exposures worth surfacing over time (radon, noise, PFAS-specific, etc.) —
       driven by community concern.
+
+## Phase 8 — Legibility & the public experience 👁️
+
+*From the founder's whole-product review (2026-07-13). The data + connections are powerful,
+but the presentation has outrun them. Theme: **reading-first, context on demand, help people
+make the connections we already hold** — and keep the accountability/legal framing distinct
+from readings (a violation is a legal state, not a measurement). Air-experience direction and
+the events/spills split are **decided** (see below).*
+
+### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
+Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
+(composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.
+- [ ] **Trust/clarity fixes (do-now).** Rewrite the legend to say plainly *colors = each
+      sensor's **most recent** PM2.5 (as of {max last_ts})* + a live "as of" line; move the
+      compliance/permit legend text off the PM2.5 legend. Fix **blank date pickers**: show "no
+      data for this sensor in these dates" instead of a silent empty chart; clamp inputs' min/max
+      to `/api/coverage`.
+- [ ] **Bound the map to WV + fix the "Russia" blip (do-now).** A bad-coordinate AirNow monitor
+      plots off-map (no lat/lon check in `/api/sensors`). Add a **WV+border bounding-box filter**
+      on reference/all coords; make Home + Air maps bound to WV on load.
+- [ ] **Demote context layers.** Collapse ECHO / DEP permits / mining / abandoned wells (and
+      likely 🏭 sources) into one closed **"🔎 Context layers (advanced)"** group in `buildLayers()`.
+      Default map = sensors + reference only.
+- [ ] **Reorder cards reading-first.** map → area rollups → time-series → time-of-day → health;
+      accountability cards (wells-VOC, plugging backlog, source-proximity, validation) behind an
+      "Explore the data / make connections" expander or relocated to `/sources`.
+- [ ] **Contextual drill-in (core new value).** Sensor popup → **"What's near this reading? →"**
+      → `/api/near`, rendered via a **shared renderer extracted from `near_me.js`** (one renderer
+      for `/air` + `/nearby`). Elevated (red/purple) readings get a "⚠ elevated — see what's
+      nearby" prompt. The founder's "from the sensor's perspective, say what's nearby."
+- [ ] **Promote `/nearby` to the nav**; teach `near_me.js` to accept `?lat=&lon=` + auto-load; the
+      `/air` drill-in can deep-link to it. Redirect the existing `📍 Near me` button to `/api/near`
+      (removes the duplicated inline haversine).
+
+### Reporting redesign
+- [ ] **Location by address / map-coordinate / region + radius** (not individual sensor pick).
+- [ ] **Remove "Business/org you suspect"** → generic qualitative report (Type · What you
+      noticed · Details · Location).
+- [ ] **Advanced toggle:** optional structured **data rows** (pick a unit/parameter — e.g.
+      conductivity, VOC — enter a value; add more rows) + **photo validation** (photo of the
+      meter/scene, proves the numbers) + geolocation. Reuse `FieldReadingIn.photo` + base64 save.
+- [ ] Follow-up: optional name / email / phone.
+
+### Alerts redesign
+- [ ] **Multi-select what to be alerted on** (PM2.5, VOC, ozone, water, spills near me, …) and
+      **location by address / region / radius** — not individual sensors. Builds on the existing
+      subscription model + `/alerts`.
+
+### About — rewrite (multi-medium origin + partners)
+- [ ] Empower WV grew from KV Air Quality Monitoring **but converged with pre-existing community
+      watchdogging** — residents testing on their own, helping neighbors talk to DEP/EPA; **Create
+      WV helps unify** these efforts. Partners: WVCAG, WV Rivers, municipalities + other WV
+      Environmental Council member orgs, volunteers. **Broaden beyond air** — air is one tool/symptom;
+      we watch air, water, food, ecosystem; break down transparency where enforcement fails; triage
+      + track trends → policy/action.
+
+### Learn — additions
+- [ ] **Raw natural gas is odorless** — flag prominently in the gas-wells/H2S content: that's
+      *why* it's dangerous (you may not smell it) and *why air monitors matter* (VOC picks it up).
+- [ ] **Exact VOC compound list** the PurpleAir aggregate responds to (research + add, or state
+      honestly what's knowable about the relative gas index).
+- [ ] **Hair-width inclusivity** — note human-hair thickness varies by phenotype so the PM2.5-size
+      analogy stays inclusive.
+- [ ] **Laws** — expand: dangerous-chemical/toxin regulation, effects on environment/soil/property,
+      remedies/recourse.
+- [ ] **Climate** — a trend pulled from *our own* data (EPA ozone trend / WV temperature), not just
+      external framing.
+
+### Events → split off `/spills` (decided)
+- [ ] Keep `/events` for curated, narrated events. Move the **NRC reported-spills** feed to its own
+      **`/spills`** page/tab with a clear explainer: what the NRC is, that these are *initial,
+      unverified* reports, why they can look minor, and where they come from.
+
+### Sources — improvements
+- [ ] **Dedupe** (e.g. 3 "Amos" entries — John Amos / AEP Amos / Appalachian Power NPDES). Merge by
+      name + proximity into one facility carrying multiple records/permits; add a general dedup pass.
+- [ ] **Retain former company names** with the safest legal framing ("formerly …" / "successor to …")
+      so Chemours↔DuPont, Nitro/Monsanto history isn't lost, while accepting they're legally distinct.
+- [ ] **Front-of-business photos** (the deferred Street View / photo work — see [[streetview-setup]]).
+- [ ] **Connect violations to source cards** — name/proximity-match ECHO facilities to curated
+      sources so a **"significant violation" red badge** shows on the company card, not only as a
+      separate map layer.
+
+### Water — legibility
+- [ ] State the **time window plainly** (it's "latest sample per site" — say so), clearer legend, WV
+      bounds; **link the "history & health context coming" placeholder** to the now-built Learn Water
+      tab; apply the same reading-first framing as Air.
+
+### Ambient awareness (experiment)
+- [ ] **"Haze when the air is bad."** Tint the UI with a grey haze overlay that correlates to
+      conditions (local if possible, else a WV-level signal) — ties the feel of the site to the
+      actual state. Experimental delight/awareness.
+
+## Documentation & open-source education (ongoing)
+
+*The founder's "afterwards": make sure the project teaches how it works and how to pull each data
+source — clean, open-source-friendly, legible to data scientists, tech folks, and environmentalists.*
+- [x] **DATA-SOURCES field guide** + public **`/data`** catalog + uniform per-file provenance (done).
+- [ ] **Documentation-quality pass** — audit all docs + in-app education for accuracy, completeness,
+      and approachability across audiences; keep the "add a source" recipe current; standardize the
+      remaining older fetch-script docstrings; ensure every component (ingestion, storage, analysis,
+      each layer) is explained end-to-end.
 
 ---
 
