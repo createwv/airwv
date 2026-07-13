@@ -26,6 +26,11 @@ Repo hygiene and a clean open-source starting point.
 
 - [x] Git repository under the `createwv` org
 - [x] README, roadmap, architecture doc
+- [x] **Data-provenance as education** — `docs/DATA-SOURCES.md` rewritten into a field
+      guide to ~15 public sources (5 reusable access patterns + gotchas + an "add a
+      source" recipe); a public **`/data`** catalog page (`/api/data-catalog`, live
+      freshness/counts, 14/15 keyless); every data file carries a uniform
+      `source`/`fetched_at`/`disclaimer` block; footer "Data sources" link sitewide.
 - [x] License (MIT), Contributing guide, Code of Conduct
 - [x] Python project scaffold, `.gitignore`, `.env.example`
 - [x] CI: lint + tests on push/PR (ruff + pytest, Python 3.11/3.12)
