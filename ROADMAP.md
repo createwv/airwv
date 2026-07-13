@@ -322,8 +322,13 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       on toggle (15k clustered; orphans red, operator-abandoned brown; orphan/operator
       sub-filters; popups link the DEP record + note H2S/gas-near-homes risk). The **Rutledge**
       event is seeded on the Events page (H2S + raw gas near Crouch Hollow; sourced WCHS/WSAZ/
-      LPM). *Next: tie H2S/gas to the community-VOC story + [[health]]; surface the plugging
-      backlog (~1–2/yr); a near-homes proximity flag; per-well leak/monitoring data if any.*
+      LPM). **Near-homes flag DONE:** `scripts/enrich_wells_proximity.py` grids **Microsoft's
+      open US Building Footprints** (~1.05M WV buildings) and tags each well with
+      `nearest_building_m` + `near_homes` (<200 m) → **6,053 abandoned wells near a building,
+      2,122 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
+      ones fade, "🏠 Near homes only" sub-filter, distance in the popup. *Next: tie H2S/gas to
+      the community-VOC story + [[health]]; surface the plugging backlog (~1–2/yr); a
+      "report a well near me" hook; per-well leak/monitoring data if any becomes public.*
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
