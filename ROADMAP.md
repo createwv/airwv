@@ -315,16 +315,15 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       (🛢️ O&G permit pipeline) and a filterable **section on Sources** (by stage + county,
       with operator/formation/Marcellus + DEP record links). 651 permits (124 requested).
       *Refresh: re-run the script + redeploy.*
-- [ ] **Orphaned & abandoned gas wells (the Rutledge story)** ⭐ — a **founding** issue for
-      Create WV: leaking abandoned/orphan wells in the **Rutledge** neighborhood of Charleston
-      (near **Crouch Hollow**) venting **hydrogen sulfide (H2S)** + raw natural gas into homes,
-      residents reporting rashes/respiratory illness — part of WV's **~6,000** abandoned wells,
-      with the state able to plug only ~1–2/yr. Data is already in reach: the WV DEP `oil_gas`
-      layer we use carries **'Abandoned Well' (15,459), 'Plugged' (49,732), 'Never Drilled'**
-      statuses + an **orphan-well** program dataset. Build: an **abandoned/orphan-well map
-      layer** (status-colored, near-homes emphasis), tie H2S to the community-VOC story and to
-      **[[health]]**, seed **Rutledge as a curated Event**, and surface the orphan-well plugging
-      backlog. Partners/coverage: WSAZ investigations, WV Watch, LPM. *(See origin memory.)*
+- [~] **Orphaned & abandoned gas wells (the Rutledge story)** ⭐ — a **founding** issue for
+      Create WV. v1 BUILT: `scripts/fetch_abandoned_wells.py` → `abandoned_wells.json` /
+      `/api/abandoned-wells` — **15,455** abandoned wells statewide, **4,721 orphans** (no
+      operator = the state's to plug). Air-dashboard **"🛢️ Abandoned wells"** layer, lazy-loaded
+      on toggle (15k clustered; orphans red, operator-abandoned brown; orphan/operator
+      sub-filters; popups link the DEP record + note H2S/gas-near-homes risk). The **Rutledge**
+      event is seeded on the Events page (H2S + raw gas near Crouch Hollow; sourced WCHS/WSAZ/
+      LPM). *Next: tie H2S/gas to the community-VOC story + [[health]]; surface the plugging
+      backlog (~1–2/yr); a near-homes proximity flag; per-well leak/monitoring data if any.*
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
