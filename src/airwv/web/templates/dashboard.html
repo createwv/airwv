@@ -40,6 +40,16 @@
   <div id="area-chart" class="chart" style="display:none"></div>
   <div class="meta" id="area-chartnote" style="padding:0 14px 12px"></div>
 </div>
+<div class="card"><h2>🛢️ Abandoned wells near our VOC sensors <span class="meta" id="wv-note"></span></h2>
+  <p class="meta" style="padding:0 14px 6px">Abandoned &amp; orphaned gas wells can vent natural gas and
+    hydrogen sulfide (H2S). Our community sensors' <b>VOC</b> reading is a <b>relative gas-response index</b>
+    (it responds to hydrocarbons and H2S, but it is <b>not</b> an H2S monitor). This lines up each sensor's
+    VOC with the abandoned wells around it — context and a place to look, <b>not</b> proof any well caused a
+    reading. Sorted by nearby wells.</p>
+  <table id="wv-table"><thead><tr><th>Sensor</th><th>Area</th><th>VOC (relative)</th>
+    <th>Wells ≤2&nbsp;km (orphans)</th><th>Wells ≤5&nbsp;km</th></tr></thead>
+    <tbody id="wv-body"><tr><td colspan="5" style="color:#999">Loading…</td></tr></tbody></table>
+</div>
 <div class="card"><h2>Around a pollution source — nearest sensors by distance &amp; direction</h2>
   <div style="padding:10px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
     <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
@@ -79,5 +89,6 @@
 {% block scripts %}
 <script src="/static/app.js?v={{ asset_v }}"></script>
 <script src="/static/areas.js?v={{ asset_v }}"></script>
+<script src="/static/wellsvoc.js?v={{ asset_v }}"></script>
 <script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

@@ -284,6 +284,18 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_wells_near_sensors_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/wells-near-sensors").json()
+    assert {"sensors", "median_voc", "well_total"} <= set(r)
+    for s in r["sensors"]:
+        assert {"sensor_id", "name", "voc", "wells_2km", "orphans_2km", "wells_5km"} <= set(s)
+        assert s["orphans_2km"] <= s["wells_2km"] <= s["wells_5km"]
+    # dashboard wires the VOC↔wells card in
+    page = c.get("/air").text
+    assert "Abandoned wells near our VOC sensors" in page and "wellsvoc.js" in page
+
+
 def test_abandoned_wells_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/abandoned-wells").json()

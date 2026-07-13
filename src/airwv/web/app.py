@@ -364,6 +364,60 @@ def create_app(store: Store) -> FastAPI:
         out.sort(key=lambda s: s["name"])
         return out
 
+    _wellsvoc_cache: dict = {}
+
+    @app.get("/api/wells-near-sensors")
+    def wells_near_sensors():
+        """For each community sensor: its latest VOC and how many abandoned/orphan wells
+        sit nearby — the "do VOC sensors near abandoned wells read higher?" context.
+        Aggregates 15k wells × ~50 sensors, so cached briefly."""
+        import math
+        import time as _t
+
+        hit = _wellsvoc_cache.get("v")
+        if hit and _t.time() - hit[0] < 1800:
+            return hit[1]
+
+        def _mi(la1, lo1, la2, lo2):
+            dp, dl = math.radians(la2 - la1), math.radians(lo2 - lo1)
+            h = (math.sin(dp / 2) ** 2 + math.cos(math.radians(la1))
+                 * math.cos(math.radians(la2)) * math.sin(dl / 2) ** 2)
+            return 2 * 3959 * math.asin(math.sqrt(h))
+
+        try:
+            import json
+
+            wpath = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
+            wells = json.loads(wpath.read_text(encoding="utf-8")).get("wells", [])
+        except Exception:
+            wells = []
+        latest_voc = store.latest_value_per_sensor("voc")
+        rows = []
+        for sid, region in regions.items():
+            lat, lon = coords.get(sid, (None, None))
+            if lat is None or lon is None:
+                continue
+            w2 = w5 = o2 = 0
+            for w in wells:
+                d = _mi(lat, lon, w["lat"], w["lon"])
+                if d <= 1.24:                       # ~2 km
+                    w2 += 1
+                    o2 += 1 if w.get("orphan") else 0
+                if d <= 3.11:                       # ~5 km
+                    w5 += 1
+            rows.append({"sensor_id": sid, "name": names.get(sid, sid), "region": region,
+                         "voc": latest_voc.get(sid), "wells_2km": w2, "orphans_2km": o2,
+                         "wells_5km": w5, "lat": lat, "lon": lon})
+        vocs = [r["voc"] for r in rows if r["voc"] is not None]
+        median_voc = round(statistics.median(vocs), 1) if vocs else None
+        for r in rows:
+            r["voc_elevated"] = r["voc"] is not None and median_voc is not None and r["voc"] > median_voc
+        rows.sort(key=lambda r: (-r["wells_2km"], -(r["voc"] or 0)))
+        payload = {"sensors": rows, "median_voc": median_voc,
+                   "well_total": len(wells)}
+        _wellsvoc_cache["v"] = (_t.time(), payload)
+        return payload
+
     @app.get("/api/coverage")
     def coverage():
         c = store.coverage_overall()
