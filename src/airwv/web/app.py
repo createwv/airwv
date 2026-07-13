@@ -867,6 +867,31 @@ def create_app(store: Store) -> FastAPI:
                 "source": data.get("source"), "scope": data.get("scope"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/dep-permits")
+    def dep_permits(stage: str | None = None, county: str | None = None):
+        """WV DEP oil & gas permit pipeline (requested / approved / under construction).
+        Optional filters: stage=requested|approved|construction, county=<name>."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "dep_permits.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"permits": [], "summary": {}, "source": "", "fetched_at": None}
+        permits = data.get("permits", [])
+        summary = {"total": len(permits),
+                   "requested": sum(p["stage"] == "requested" for p in permits),
+                   "approved": sum(p["stage"] == "approved" for p in permits),
+                   "construction": sum(p["stage"] == "construction" for p in permits)}
+        if stage:
+            permits = [p for p in permits if p["stage"] == stage]
+        if county:
+            permits = [p for p in permits if (p.get("county") or "").lower() == county.lower()]
+        return {"permits": permits, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "partner_note": data.get("partner_note"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/wind-roses")
     def wind_roses():
         try:

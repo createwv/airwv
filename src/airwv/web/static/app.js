@@ -59,7 +59,9 @@ async function loadCoverage(){
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
 const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
-  echo:false, regions:{}, cats:{}, echoStatus:{significant_violation:true, violation:true, compliant:false}};
+  echo:false, dep:false, regions:{}, cats:{},
+  echoStatus:{significant_violation:true, violation:true, compliant:false},
+  depStage:{requested:true, construction:true, approved:true}};
 // ⭐ My Sensors — a personal follow-list persisted in the browser (accounts later)
 let mySensors = new Set(JSON.parse(localStorage.getItem('airwv_my_sensors') || '[]'));
 function toggleFollow(sid){
@@ -84,6 +86,7 @@ function drawMap(sensors){
   loadSources();
   loadReports();
   loadFacilities();
+  loadDepPermits();
 }
 function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
@@ -247,6 +250,35 @@ function redrawEcho(){
   });
   echoLayer.addTo(map);
 }
+// ---- WV DEP oil & gas permit pipeline (forward-looking lifecycle) ----
+const DEP_COLOR = {requested:'#8e44ad', approved:'#2c7fb8', construction:'#e07b00', other:'#8a94a0'};
+const DEP_LABEL = {requested:'Requested (pending)', approved:'Approved (permit issued)',
+  construction:'Under construction', other:'Other'};
+let depLayer, allPermits_ = [], depMeta = {};
+async function loadDepPermits(){
+  try { const d = await j('/api/dep-permits'); allPermits_ = d.permits || []; depMeta = d; }
+  catch(e){ allPermits_ = []; }
+  redrawDep(); buildLayers();
+}
+function redrawDep(){
+  if (depLayer) depLayer.remove();
+  depLayer = L.layerGroup();
+  if (layerState.dep) allPermits_.forEach(p => {
+    if (p.lat == null || p.lon == null) return;
+    if (layerState.depStage[p.stage] === false) return;
+    const col = DEP_COLOR[p.stage] || DEP_COLOR.other;
+    const when = p.issue_date || p.received_date;
+    L.circleMarker([p.lat, p.lon], {radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+      .bindPopup(`<b>${p.operator||'Operator unknown'}</b>`+
+        `<br><span style="color:${col};font-weight:600">🛢️ ${DEP_LABEL[p.stage]||''}</span>`+
+        `<br><small>${[p.county && p.county+' Co.', p.well_type].filter(Boolean).join(' · ')}</small>`+
+        (p.formation?`<br><small>${p.formation}${p.marcellus?' · Marcellus':''}</small>`:'')+
+        (when?`<br><small>${p.issue_date?'permit issued':'application'} ${when}</small>`:'')+
+        (p.link?`<br><a href="${p.link}" target="_blank" rel="noopener">WV DEP record →</a>`:''))
+      .addTo(depLayer);
+  });
+  depLayer.addTo(map);
+}
 function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
   sourceLayer = L.markerClusterGroup
@@ -299,6 +331,12 @@ function buildLayers(){
   const dot = s => `<span style="color:${ECHO_COLOR[s]}">●</span>`;
   const echoRows = eStatuses.map(s=>row('echo',s,layerState.echoStatus[s]!==false,`${dot(s)} ${ECHO_LABEL[s]}`,eCounts[s])).join('');
   const echoTotal = allFacilities_.length;
+  // 🛢️ WV DEP oil & gas permit pipeline, colored by lifecycle stage
+  const dCounts = groupCount(allPermits_,'stage');
+  const dStages = ['requested','construction','approved'].filter(s=>dCounts[s]);
+  const ddot = s => `<span style="color:${DEP_COLOR[s]}">●</span>`;
+  const depRows = dStages.map(s=>row('dep',s,layerState.depStage[s]!==false,`${ddot(s)} ${DEP_LABEL[s]}`,dCounts[s])).join('');
+  const depTotal = allPermits_.length;
   $('layers').innerHTML =
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(★ to follow · click to chart)</span></b>`+
     myBlock+
@@ -307,7 +345,8 @@ function buildLayers(){
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
     `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`+
-    (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'');
+    (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'')+
+    (depTotal?`<details><summary><input type="checkbox" id="L-dep" ${layerState.dep?'checked':''}> 🛢️ O&amp;G permit pipeline (WV DEP) <span class="cnt">${depTotal}</span></summary><div class="children">${depRows}</div></details>`:'');
   // checkboxes in a <summary> shouldn't toggle its open/close
   $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
   // updates happen in place (no rebuild) so open groups stay open
@@ -333,6 +372,13 @@ function buildLayers(){
     layerState.echoStatus[e.target.dataset.echo]=e.target.checked;
     layerState.echo=eStatuses.some(s=>layerState.echoStatus[s]);   // master = any status on
     redrawEcho(); syncEcho(eStatuses); });
+  if($('L-dep')) $('L-dep').onchange = e=>{ layerState.dep=e.target.checked;
+    dStages.forEach(s=>layerState.depStage[s]=e.target.checked);
+    $('layers').querySelectorAll('[data-dep]').forEach(cb=>cb.checked=e.target.checked); redrawDep(); };
+  $('layers').querySelectorAll('[data-dep]').forEach(cb=> cb.onchange=e=>{
+    layerState.depStage[e.target.dataset.dep]=e.target.checked;
+    layerState.dep=dStages.some(s=>layerState.depStage[s]);
+    redrawDep(); syncDep(dStages); });
   $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
@@ -346,6 +392,10 @@ function syncParents(regions,cats){
 function syncEcho(eStatuses){
   const on=eStatuses.filter(s=>layerState.echoStatus[s]).length, cb=$('L-echo');
   if(cb){ cb.checked=on>0; cb.indeterminate=on>0 && on<eStatuses.length; }
+}
+function syncDep(dStages){
+  const on=dStages.filter(s=>layerState.depStage[s]).length, cb=$('L-dep');
+  if(cb){ cb.checked=on>0; cb.indeterminate=on>0 && on<dStages.length; }
 }
 
 async function loadValidation(){

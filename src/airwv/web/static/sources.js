@@ -30,6 +30,14 @@ const FAC_STATUS = {
 const PROG = {air: '🌫️ Air', water: '💧 Water', waste: '♻️ Waste',
   'drinking-water': '🚰 Drinking water', 'toxics-release': '☢️ Toxics'};
 
+let PERMITS = [], DEP_META = {};
+const DEP_STAGE = {
+  requested:    {label: 'Requested', color: '#8e44ad', icon: '🟣'},
+  approved:     {label: 'Approved',  color: '#2c7fb8', icon: '🔵'},
+  construction: {label: 'Under construction', color: '#e07b00', icon: '🟠'},
+  other:        {label: 'Other',     color: '#8a94a0', icon: '·'},
+};
+
 // ---- geo helpers (mirror of app.js proximity math) ----
 const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 function haversineMi(la1, lo1, la2, lo2) {
@@ -136,6 +144,43 @@ function renderFacSummary() {
   $('fac-disc').textContent = FAC_META.disclaimer || '';
 }
 
+function renderPermits() {
+  const st = $('dep-stage').value, co = $('dep-county').value;
+  const rows = PERMITS.filter(p => (!st || p.stage === st) && (!co || p.county === co));
+  $('dep-count').textContent = `${rows.length} of ${PERMITS.length} permits`;
+  $('dep-body').innerHTML = rows.map(p => {
+    const s = DEP_STAGE[p.stage] || DEP_STAGE.other;
+    const when = p.issue_date || p.received_date;
+    const whenLbl = p.issue_date ? 'issued' : p.received_date ? 'applied' : '';
+    const form = p.formation ? `${esc(p.formation)}${p.marcellus ? ' · Marcellus' : ''}` : (p.marcellus ? 'Marcellus' : '');
+    return `<tr>
+      <td><b>${esc(p.operator || 'Operator unknown')}</b>${p.well_type ? `<div class="meta">${esc(p.well_type)}</div>` : ''}</td>
+      <td class="meta">${esc(p.county || '')}</td>
+      <td class="meta">${form || '—'}</td>
+      <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
+      <td class="meta">${when ? `${esc(when)}${whenLbl ? ` <span style="opacity:.7">(${whenLbl})</span>` : ''}` : '—'}</td>
+      <td>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">DEP →</a>` : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="meta" style="padding:14px">No permits match.</td></tr>';
+}
+
+function renderPermitSummary() {
+  const s = DEP_META.summary || {};
+  const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
+    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+  $('dep-summary').innerHTML =
+    box(s.total, 'permits in the pipeline', '#5a6472')
+    + box(s.requested, 'requested (pending)', '#8e44ad')
+    + box(s.approved, 'approved / issued', '#2c7fb8')
+    + box(s.construction, 'under construction', '#e07b00');
+  $('dep-src').textContent = DEP_META.fetched_at ? `· WV DEP, as of ${DEP_META.fetched_at}` : '';
+  $('dep-disc').textContent = DEP_META.disclaimer || '';
+  // county filter options
+  const counties = [...new Set(PERMITS.map(p => p.county).filter(Boolean))].sort();
+  $('dep-county').innerHTML = '<option value="">All counties</option>'
+    + counties.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+}
+
 function nearbySensors(s) {
   return SENSORS.filter(x => x.lat != null)
     .map(x => ({...x, mi: haversineMi(s.lat, s.lon, x.lat, x.lon), dir: bearing8(s.lat, s.lon, x.lat, x.lon)}))
@@ -178,24 +223,31 @@ async function init() {
   $('src-cat').innerHTML = '<option value="">All categories</option>'
     + CAT_ORDER.map(k => `<option value="${k}">${CAT[k].icon} ${CAT[k].label}</option>`).join('');
   try {
-    const [sd, sensors, fac] = await Promise.all([
+    const [sd, sensors, fac, dep] = await Promise.all([
       fetch('/api/sources').then(r => r.json()),
       fetch('/api/sensors').then(r => r.json()),
       fetch('/api/facilities').then(r => r.json()),
+      fetch('/api/dep-permits').then(r => r.json()),
     ]);
     SOURCES = (sd.sources || []).filter(s => s.lat != null);
     DISCLAIMER = sd.disclaimer || '';
     SENSORS = sensors || [];
     FACILITIES = fac.facilities || [];
     FAC_META = fac;
+    PERMITS = dep.permits || [];
+    DEP_META = dep;
   } catch (e) { $('src-grid').innerHTML = '<p class="meta" style="padding:14px">Could not load facilities.</p>'; return; }
   $('src-disc').textContent = DISCLAIMER;
   renderCarousel();
   renderGrid();
   renderFacSummary();
   renderFacilities();
+  renderPermitSummary();
+  renderPermits();
   $('fac-status').addEventListener('change', renderFacilities);
   $('fac-program').addEventListener('change', renderFacilities);
+  $('dep-stage').addEventListener('change', renderPermits);
+  $('dep-county').addEventListener('change', renderPermits);
   if (!SV_KEY) {
     $('src-count').insertAdjacentHTML('afterend',
       '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');
