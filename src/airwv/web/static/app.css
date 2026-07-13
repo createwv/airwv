@@ -298,3 +298,12 @@
   .evform .evrow { display:flex; gap:8px; } .evform .evrow > * { flex:1; }
   .evform .evlbl { display:flex; flex-direction:column; font-size:11px; color:#667; gap:2px; }
   .evform .evchk { font-size:13px; color:#444; display:flex; align-items:center; gap:6px; }
+
+  /* Alert sign-up */
+  .lvl { display:flex; align-items:flex-start; gap:9px; padding:8px 4px; cursor:pointer; border-radius:6px; }
+  .lvl:hover { background:#f5f7f9; }
+  .lvl input { margin-top:3px; }
+  .lvl span { display:flex; flex-direction:column; gap:1px; font-size:14px; color:#222; }
+  .lvl small { color:#667; font-size:12px; }
+  .lvl .sw { display:inline-block; width:12px; height:12px; border-radius:3px; border:1px solid #0002; margin-right:5px; vertical-align:middle; }
+  #alertform input[type=email], #alertform select { border:1px solid #cfd6dc; border-radius:7px; font-size:15px; }

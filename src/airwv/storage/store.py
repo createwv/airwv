@@ -268,6 +268,53 @@ class Store:
                 sub.last_notified_at = when
                 session.commit()
 
+    def find_subscription(self, *, target: str, field: str, sensor_id: str | None):
+        """Existing sub for this email+trigger, if any (to avoid duplicates)."""
+        with self._session_factory() as session:
+            stmt = select(Subscription).where(
+                Subscription.target == target,
+                Subscription.field == field,
+                Subscription.sensor_id.is_(sensor_id) if sensor_id is None
+                else Subscription.sensor_id == sensor_id,
+            )
+            return session.scalars(stmt).first()
+
+    def subscription_by_token(self, token: str):
+        with self._session_factory() as session:
+            return session.scalars(
+                select(Subscription).where(Subscription.token == token)
+            ).first()
+
+    def confirm_subscription(self, token: str, when) -> Subscription | None:
+        """Activate a pending sign-up. Returns the subscription (already
+        confirmed ones are returned unchanged so the link is idempotent)."""
+        with self._session_factory() as session:
+            sub = session.scalars(
+                select(Subscription).where(Subscription.token == token)
+            ).first()
+            if sub is None:
+                return None
+            if sub.confirmed_at is None:
+                sub.confirmed_at = when
+            sub.active = True
+            session.commit()
+            session.refresh(sub)
+            session.expunge(sub)
+            return sub
+
+    def deactivate_subscription(self, token: str) -> Subscription | None:
+        with self._session_factory() as session:
+            sub = session.scalars(
+                select(Subscription).where(Subscription.token == token)
+            ).first()
+            if sub is None:
+                return None
+            sub.active = False
+            session.commit()
+            session.refresh(sub)
+            session.expunge(sub)
+            return sub
+
     # -- reports & feedback ------------------------------------------------
 
     def add_report(self, **fields) -> int:

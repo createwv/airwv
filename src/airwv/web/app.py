@@ -14,11 +14,13 @@ Endpoints:
 from __future__ import annotations
 
 import base64
+import html
 import os
+import re
 import secrets
 import statistics
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
@@ -30,6 +32,7 @@ from pydantic import BaseModel
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import readings_to_csv
 from airwv.notify.chat import chat_notifier_from_env
+from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
 
@@ -135,6 +138,26 @@ class EventIn(BaseModel):
     report_ids: list[int] = []
     sources: list = []                     # [{"label","url"}, ...] citations
     status: str = "published"              # published | draft | archived
+
+
+class AlertSignupIn(BaseModel):
+    email: str
+    sensor_id: str | None = None           # None / "" = any WV sensor
+    level: str = "unhealthy"               # sensitive | unhealthy | veryunhealthy
+    label: str | None = None               # human area name for the confirmation copy
+    website: str = ""                      # honeypot
+    elapsed_ms: int | None = None          # too-fast-submit guard
+
+
+# Plain-language alert levels → (PM2.5 µg/m³ trigger, label). Aligned with the
+# dashboard legend bands so the map colors and the alert wording agree.
+ALERT_LEVELS = {
+    "sensitive":     (35.0, "Unhealthy for sensitive groups"),
+    "unhealthy":     (55.0, "Unhealthy for everyone"),
+    "veryunhealthy": (150.0, "Very unhealthy / hazardous"),
+}
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def _require_admin(request: Request) -> bool:
@@ -425,6 +448,112 @@ def create_app(store: Store) -> FastAPI:
                                 page=body.page, contact=body.contact)
         return {"id": fid, "message": "Thanks for the feedback!"}
 
+    # -- alert sign-up (public, double opt-in) -----------------------------
+
+    def _base_url(request: Request) -> str:
+        # Behind the proxy request.base_url can be http://; prefer an explicit
+        # public base when set so confirm/unsubscribe links use https + host.
+        return os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/") \
+            or str(request.base_url).rstrip("/")
+
+    _signup_hits: dict[str, list[float]] = {}
+
+    def _signup_rate_ok(iph: str) -> bool:
+        import time as _t
+        now = _t.time()
+        hits = [t for t in _signup_hits.get(iph, []) if now - t < 3600]
+        hits.append(now)
+        _signup_hits[iph] = hits
+        return len(hits) <= 5
+
+    @app.post("/api/alerts/subscribe")
+    def alerts_subscribe(body: AlertSignupIn, request: Request, background: BackgroundTasks):
+        if body.website.strip():
+            raise HTTPException(status_code=400, detail="rejected")            # honeypot
+        if body.elapsed_ms is not None and body.elapsed_ms < 1200:
+            raise HTTPException(status_code=400, detail="submitted too fast")  # bot
+        email = (body.email or "").strip().lower()
+        if not _EMAIL_RE.match(email) or len(email) > 254:
+            raise HTTPException(status_code=400, detail="please enter a valid email address")
+        if body.level not in ALERT_LEVELS:
+            raise HTTPException(status_code=400, detail="unknown alert level")
+        if not _signup_rate_ok(ip_hash(client_ip(request))):
+            raise HTTPException(status_code=429, detail="too many sign-ups — try again later")
+
+        threshold, level_label = ALERT_LEVELS[body.level]
+        sensor_id = (body.sensor_id or "").strip() or None
+        area = (body.label or "").strip()[:120] or (names.get(sensor_id) if sensor_id else "any WV sensor")
+
+        existing = store.find_subscription(target=email, field="pm2_5", sensor_id=sensor_id)
+        if existing is not None:
+            # Idempotent: refresh the level, re-arm confirmation if still pending.
+            token = existing.token or secrets.token_urlsafe(24)
+            confirmed = existing.confirmed_at is not None
+        else:
+            token = secrets.token_urlsafe(24)
+            confirmed = False
+            store.add_subscription(
+                channel="email", target=email, kind="threshold",
+                sensor_id=sensor_id, field="pm2_5", threshold=threshold,
+                active=False, label=area, token=token,
+            )
+
+        base = _base_url(request)
+        confirm_url = f"{base}/alerts/confirm?token={token}"
+        unsub_url = f"{base}/alerts/unsubscribe?token={token}"
+        sent = False
+        if not confirmed and email_enabled():
+            body_txt = (
+                f"Thanks for signing up for AirWV air-quality alerts.\n\n"
+                f"You asked to be emailed when PM2.5 near {area} reaches "
+                f"“{level_label}” ({threshold:g} µg/m³).\n\n"
+                f"Please confirm this address to turn the alerts on:\n{confirm_url}\n\n"
+                f"If you didn't request this, ignore this email — nothing happens "
+                f"until you confirm.\n\nUnsubscribe any time: {unsub_url}\n"
+            )
+            background.add_task(send_email, email,
+                                "Confirm your AirWV air-quality alerts", body_txt)
+            sent = True
+
+        if confirmed:
+            msg = "You're already subscribed and confirmed — we updated your alert level."
+        elif sent:
+            msg = "Almost there — check your email for a confirmation link to turn on alerts."
+        else:
+            # SMTP not live yet: we captured the sign-up as a waitlist entry.
+            msg = ("You're on the list. Email alert delivery is still being finished — "
+                   "we'll send a confirmation link the moment it goes live.")
+        return {"ok": True, "confirmed": confirmed, "email_sent": sent,
+                "level": level_label, "area": area, "message": msg}
+
+    def _alert_result_page(request: Request, title: str, body_html: str):
+        return TEMPLATES.TemplateResponse(
+            request=request, name="alerts_result.html",
+            context={"mode": "alerts", "title": title, "body_html": body_html})
+
+    @app.get("/alerts/confirm", response_class=HTMLResponse)
+    def alerts_confirm(request: Request, token: str = ""):
+        sub = store.confirm_subscription(token, datetime.now(tz=timezone.utc)) if token else None
+        if sub is None:
+            return _alert_result_page(request, "Link not found",
+                "<p>That confirmation link is invalid or expired. "
+                "<a href='/alerts'>Sign up again →</a></p>")
+        area = sub.label or "your area"
+        return _alert_result_page(request, "You're all set ✅",
+            f"<p>Alerts are on. We'll email <b>{html.escape(sub.target)}</b> when PM2.5 near "
+            f"<b>{html.escape(area)}</b> crosses your threshold — with quiet hours and rate limits "
+            f"so you're never spammed.</p><p><a href='/air'>See the live map →</a></p>")
+
+    @app.get("/alerts/unsubscribe", response_class=HTMLResponse)
+    def alerts_unsubscribe(request: Request, token: str = ""):
+        sub = store.deactivate_subscription(token) if token else None
+        if sub is None:
+            return _alert_result_page(request, "Link not found",
+                "<p>We couldn't find that subscription — it may already be off.</p>")
+        return _alert_result_page(request, "Unsubscribed",
+            f"<p>Done — <b>{html.escape(sub.target)}</b> will no longer receive these alerts. "
+            f"Changed your mind? <a href='/alerts'>Sign up again →</a></p>")
+
     # -- admin / moderation (token-gated via AIRWV_ADMIN_TOKEN) -------------
 
     def _admin_report(r) -> dict:
@@ -460,6 +589,19 @@ def create_app(store: Store) -> FastAPI:
         if not store.update_feedback(feedback_id, body.status):
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
+
+    @app.get("/api/admin/subscriptions")
+    def admin_subscriptions(_: bool = Depends(_require_admin)):
+        """Alert sign-ups — including the pending/unconfirmed waitlist."""
+        subs = store.list_subscriptions(active_only=False)
+        return {"email_delivery": email_enabled(),
+                "results": [{"id": s.id, "email": s.target, "channel": s.channel,
+                             "sensor_id": s.sensor_id, "area": s.label,
+                             "field": s.field, "threshold": s.threshold,
+                             "active": s.active,
+                             "confirmed": s.confirmed_at is not None,
+                             "created_at": s.created_at.isoformat() if s.created_at else None}
+                            for s in subs]}
 
     @app.post("/api/admin/notify-test")
     def admin_notify_test(_: bool = Depends(_require_admin)):
@@ -772,6 +914,11 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="sources.html",
                                           context={"mode": "sources",
                                                    "sv_key": os.environ.get("AIRWV_GOOGLE_MAPS_KEY", "")})
+
+    @app.get("/alerts", response_class=HTMLResponse)
+    def alerts_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="alerts.html",
+                                          context={"mode": "alerts"})
 
     @app.get("/about", response_class=HTMLResponse)
     def about(request: Request):

@@ -55,13 +55,33 @@ class EmailNotifier(Notifier):
         )
 
     def send(self, alert) -> None:
+        self.send_plain(alert.target, alert_subject(alert), alert_body(alert))
+
+    def send_plain(self, to: str, subject: str, body: str) -> None:
+        """Send an arbitrary message (used for sign-up confirm/welcome emails)."""
         msg = EmailMessage()
-        msg["Subject"] = alert_subject(alert)
+        msg["Subject"] = subject
         msg["From"] = self.sender
-        msg["To"] = alert.target
-        msg.set_content(alert_body(alert))
+        msg["To"] = to
+        msg.set_content(body)
         with smtplib.SMTP(self.host, self.port) as smtp:
             if self.use_tls:
                 smtp.starttls()
             smtp.login(self.user, self.password)
             smtp.send_message(msg)
+
+
+def email_enabled() -> bool:
+    """True when SMTP creds are present, so confirmation emails can be sent."""
+    return all(os.environ.get(k, "").strip()
+               for k in ("AIRWV_SMTP_HOST", "AIRWV_SMTP_USER", "AIRWV_SMTP_PASSWORD"))
+
+
+def send_email(to: str, subject: str, body: str) -> bool:
+    """Best-effort one-off email. Returns False (no raise) when SMTP is not
+    configured or delivery fails, so callers can fall back to a waitlist."""
+    try:
+        EmailNotifier.from_env().send_plain(to, subject, body)
+        return True
+    except Exception:
+        return False

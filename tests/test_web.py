@@ -172,3 +172,40 @@ def test_field_readings(tmp_path, monkeypatch):
     pub = c.get("/api/field-readings").json()["results"]
     assert len(pub) == 1 and pub[0]["parameter"] == "conductivity" and pub[0]["medium"] == "water"
     assert c.get(f"/api/field-readings/{pub[0]['id']}/photo").status_code == 404  # no photo
+
+
+def test_alert_signup_flow(tmp_path, monkeypatch):
+    monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = _client(tmp_path)
+    assert c.get("/alerts").status_code == 200
+    assert "/alerts" in c.get("/air").text                      # nav link present
+
+    # valid sign-up → stored as pending (inactive, unconfirmed) with a token
+    r = c.post("/api/alerts/subscribe",
+               json={"email": "Jane@Example.com", "level": "sensitive", "elapsed_ms": 5000})
+    assert r.status_code == 200 and r.json()["email_sent"] is False
+    admin = c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()
+    assert admin["email_delivery"] is False and len(admin["results"]) == 1
+    sub = admin["results"][0]
+    assert sub["email"] == "jane@example.com" and sub["active"] is False and sub["threshold"] == 35.0
+
+    # abuse guards
+    assert c.post("/api/alerts/subscribe", json={"email": "nope", "elapsed_ms": 5000}).status_code == 400
+    assert c.post("/api/alerts/subscribe",
+                  json={"email": "a@b.co", "website": "x", "elapsed_ms": 5000}).status_code == 400
+    assert c.post("/api/alerts/subscribe",
+                  json={"email": "a@b.co", "elapsed_ms": 100}).status_code == 400
+
+    # duplicate email+trigger doesn't create a second row
+    c.post("/api/alerts/subscribe", json={"email": "jane@example.com", "level": "sensitive", "elapsed_ms": 5000})
+    assert len(c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"]) == 1
+
+    # confirm activates, unsubscribe deactivates (via the token)
+    from airwv.storage import Store
+    tok = Store(f"sqlite:///{tmp_path / 'web.sqlite'}").list_subscriptions(active_only=False)[0].token
+    assert "all set" in c.get(f"/alerts/confirm?token={tok}").text.lower()
+    assert c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"][0]["active"]
+    c.get(f"/alerts/unsubscribe?token={tok}")
+    assert not c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"][0]["active"]
+    assert "not found" in c.get("/alerts/confirm?token=bogus").text.lower()

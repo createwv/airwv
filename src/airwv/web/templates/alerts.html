@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>Get air-quality alerts</h1>
+    <p>Tell us where you are and how bad the air has to get — we'll email you when a
+       nearby sensor crosses that line. No account, unsubscribe in one click, and we
+       rate-limit + honor overnight quiet hours so you're never spammed.</p></div>
+
+  <div class="card" style="max-width:640px">
+    <form id="alertform" style="padding:16px 18px; display:flex; flex-direction:column; gap:14px">
+      <label>Email
+        <input type="email" id="a-email" required placeholder="you@example.com"
+               autocomplete="email" style="width:100%; padding:8px 10px; margin-top:4px">
+      </label>
+
+      <label>Where <select id="a-sensor" style="width:100%; padding:8px 10px; margin-top:4px">
+        <option value="">Any sensor in West Virginia</option>
+      </select></label>
+
+      <fieldset style="border:1px solid #e0e0e0; border-radius:8px; padding:10px 12px">
+        <legend style="font-size:13px; color:#555; padding:0 6px">Alert me when the air reaches</legend>
+        <label class="lvl"><input type="radio" name="level" value="sensitive">
+          <span><span class="sw" style="background:#ff7e00"></span> Unhealthy for sensitive groups
+          <small>PM2.5 ≥ 35 — kids, older adults, heart/lung conditions</small></span></label>
+        <label class="lvl"><input type="radio" name="level" value="unhealthy" checked>
+          <span><span class="sw" style="background:#ff0000"></span> Unhealthy for everyone
+          <small>PM2.5 ≥ 55 — general public should limit exposure</small></span></label>
+        <label class="lvl"><input type="radio" name="level" value="veryunhealthy">
+          <span><span class="sw" style="background:#8f3f97"></span> Very unhealthy / hazardous
+          <small>PM2.5 ≥ 150 — emergency-level pollution only</small></span></label>
+      </fieldset>
+
+      <input type="text" id="a-website" name="website" tabindex="-1" autocomplete="off"
+             style="position:absolute; left:-9999px" aria-hidden="true">
+      <button class="primary" type="submit" id="a-submit">🔔 Sign me up</button>
+      <p class="meta" id="a-note"></p>
+    </form>
+  </div>
+
+  <div class="about"><p class="meta">Alerts watch <b>PM2.5</b> (fine-particle pollution) — the
+    pollutant with the clearest health link and the best sensor coverage. We're finishing
+    the email-delivery piece; sign-ups made now are held and confirmed the moment it goes
+    live. Want Slack/Discord or a webhook for your org instead? <a href="/about">Get in touch</a>.</p></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/alerts.js?v={{ asset_v }}"></script>
+{% endblock %}

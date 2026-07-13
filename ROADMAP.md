@@ -142,7 +142,14 @@ Get warnings to the people who need them.
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)
-- [ ] Subscription management UI — opt-in, confirm, unsubscribe (CLI-only for now)
+- [x] **Public alert sign-up UI** — `/alerts` page + nav/home cards: pick an area
+      (any WV sensor or a named one) and a plain-language level (unhealthy for
+      sensitive groups / everyone / hazardous → PM2.5 35/55/150). Double opt-in
+      with confirm + one-click unsubscribe links (`/alerts/confirm`,
+      `/alerts/unsubscribe`), honeypot + too-fast + per-IP + dedupe guards, and an
+      admin waitlist view (`/api/admin/subscriptions`). **Delivery is SMTP-gated:**
+      with creds set it emails the confirmation immediately; until then sign-ups are
+      held as a waitlist and confirmed the moment SMTP goes live. *(SMS still open.)*
 
 ## Phase 5 — Public API & Dashboard 🎯
 
@@ -182,7 +189,7 @@ Make the data visible and usable.
 - [x] **Hierarchical layers tree** — collapsible tree (▸ closed by default, parent +
       leaf checkboxes, tri-state). Community Sensors **sub-grouped by WV region**,
       EPA/Reference Monitors, and Pollution Sources with **per-category** toggles.
-- [ ] **⭐ My Sensors (follow list)** — let users star sensors they care about;
+- [x] **⭐ My Sensors (follow list)** — DONE (localStorage) + **📍 Near me** (Air & Water maps: geolocate, zoom, list nearest). *Account-based follow-list later.* — let users star sensors they care about;
       persists (localStorage now, account-based later) as a pinned top group.
 - [x] **Pollution-source categories** — `category` on all 437 sources (power /
       chemical / oil-gas / materials / waste), distinct map icons + per-category

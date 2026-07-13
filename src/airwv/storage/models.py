@@ -101,6 +101,13 @@ class Subscription(Base):
     quiet_start: Mapped[int | None] = mapped_column(Integer, nullable=True)  # local hour
     quiet_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
+    # Public sign-up flow (double opt-in). A subscription starts inactive with a
+    # random token; clicking the confirm link activates it, the unsubscribe link
+    # deactivates it. CLI-created subscriptions leave these null and stay active.
+    label: Mapped[str | None] = mapped_column(String(120), nullable=True)  # e.g. "Glasgow area"
+    token: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
