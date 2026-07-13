@@ -28,6 +28,12 @@
     <span style="color:#e0d000">●</span> &lt;35 <span style="color:#ff7e00">●</span> &lt;55
     <span style="color:#ff0000">●</span> &lt;150 <span style="color:#8f3f97">●</span> higher · ◎ ringed = reference monitor · click a community marker to chart it</div>
 </div>
+<div class="card"><h2>How's your area doing? <span class="meta" id="areas-note">community sensors grouped by region · worst air first</span></h2>
+  <table id="areastbl"><thead><tr><th>Area</th><th>Now</th><th>Sensors</th><th>Trend</th><th>Highest sensor</th></tr></thead>
+    <tbody id="areasbody"><tr><td colspan="5" style="color:#999">Loading…</td></tr></tbody></table>
+  <div id="area-chart" class="chart" style="display:none"></div>
+  <div class="meta" id="area-chartnote" style="padding:0 14px 12px"></div>
+</div>
 <div class="card"><h2>Around a pollution source — nearest sensors by distance &amp; direction</h2>
   <div style="padding:10px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
     <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
@@ -66,5 +72,6 @@
 {% endblock %}
 {% block scripts %}
 <script src="/static/app.js?v={{ asset_v }}"></script>
+<script src="/static/areas.js?v={{ asset_v }}"></script>
 <script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

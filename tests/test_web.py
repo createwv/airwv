@@ -174,6 +174,25 @@ def test_field_readings(tmp_path, monkeypatch):
     assert c.get(f"/api/field-readings/{pub[0]['id']}/photo").status_code == 404  # no photo
 
 
+def test_area_rollups(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/areas?field=pm2_5")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["field"] == "pm2_5" and isinstance(body["areas"], list)
+    for a in body["areas"]:                        # shape of each rollup row
+        assert {"region", "sensor_count", "reporting", "value", "trend"} <= set(a)
+        assert {"direction", "pct_change", "watch"} <= set(a["trend"])
+    # ozone is reference-only → not a valid area field
+    assert c.get("/api/areas?field=ozone").status_code == 400
+    # per-area series returns a (possibly empty) daily-median list + trend
+    s = c.get("/api/areas/series?region=Kanawha Valley&field=pm2_5").json()
+    assert s["field"] == "pm2_5" and isinstance(s["points"], list) and "trend" in s
+    # dashboard wires the widget in
+    page = c.get("/air").text
+    assert "areas.js" in page and "How's your area doing?" in page
+
+
 def test_alert_signup_flow(tmp_path, monkeypatch):
     monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")

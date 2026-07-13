@@ -172,6 +172,10 @@ def _require_admin(request: Request) -> bool:
 # Fields safe to chart (mirror the Reading schema).
 FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "ozone", "aqi", "temperature", "humidity", "pressure"]
 
+# Fields community sensors measure — the ones that make sense to roll up by area
+# (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
+AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+
 
 def _parse_date(value: str | None) -> date | None:
     return datetime.strptime(value, "%Y-%m-%d").date() if value else None
@@ -726,6 +730,94 @@ def create_app(store: Store) -> FastAPI:
             "sensor_id": sensor_id, "field": field, "direction": t.direction,
             "pct_change": t.pct_change, "slope_per_30d": t.slope_per_30d,
             "first": t.first, "last": t.last, "r": t.r, "watch": is_worsening(t),
+        }
+
+    # -- per-area rollups (community sensors grouped by WV region) ----------
+
+    _areas_cache: dict = {}
+
+    def _region_groups() -> dict[str, list[str]]:
+        groups: dict[str, list[str]] = defaultdict(list)
+        for sid, region in regions.items():
+            groups[region or "Other"].append(sid)
+        return groups
+
+    def _area_daily(sids, field: str, since):
+        """Pooled daily series across a region's sensors → sorted [(date, median, n)].
+        Uses SQL daily averages per sensor (cheap over years), then takes the median
+        across the sensors reporting each day so one noisy unit can't swing the area."""
+        pool: dict = defaultdict(list)
+        for sid in sids:
+            for day, val in store.daily_avg(sid, field=field, since=since).items():
+                pool[day].append(val)
+        return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
+
+    def _area_trend(daily, field: str):
+        """Canonical linear_trend over the pooled daily medians (one point per day)."""
+        from types import SimpleNamespace
+
+        from airwv.analysis import linear_trend
+        rows = [SimpleNamespace(**{"ts": datetime.combine(d, time.min), field: m})
+                for d, m, _ in daily]
+        return linear_trend(rows, field=field, min_days=14)
+
+    @app.get("/api/areas")
+    def areas(field: str = "pm2_5", days: int = 180):
+        """Current rollup + trend per WV region, over community sensors. Aggregates
+        history, so cached briefly."""
+        from airwv.analysis import is_worsening
+
+        if field not in AREA_FIELDS:
+            raise HTTPException(status_code=400,
+                                detail=f"per-area rollups cover {sorted(AREA_FIELDS)} "
+                                       f"(ozone is reference-only)")
+        key = (field, days)
+        import time as _t
+        hit = _areas_cache.get(key)
+        if hit and _t.time() - hit[0] < 300:
+            return hit[1]
+
+        latest = store.latest_value_per_sensor(field)
+        since = datetime.utcnow() - timedelta(days=days)
+        is_pm = field.startswith("pm")
+        out = []
+        for region, sids in _region_groups().items():
+            cur = [(sid, latest[sid]) for sid in sids
+                   if sid in latest and not (is_pm and latest[sid] > 1000)]
+            daily = _area_daily(sids, field, since)
+            t = _area_trend(daily, field)
+            value = round(statistics.median([v for _, v in cur]), 1) if cur else None
+            worst = max(cur, key=lambda p: p[1]) if cur else None
+            out.append({
+                "region": region,
+                "sensor_count": len(sids),
+                "reporting": len(cur),
+                "value": value,
+                "color": _pm25_color(value) if (is_pm and value is not None) else "#9aa0a6",
+                "max_value": round(worst[1], 1) if worst else None,
+                "max_sensor": names.get(worst[0], worst[0]) if worst else None,
+                "trend": {"direction": t.direction, "pct_change": t.pct_change,
+                          "r": t.r, "n_days": t.n_days, "watch": is_worsening(t)},
+            })
+        # worst air first (None values sink to the bottom)
+        out.sort(key=lambda a: (a["value"] is None, -(a["value"] or 0)))
+        payload = {"field": field, "areas": out}
+        _areas_cache[key] = (_t.time(), payload)
+        return payload
+
+    @app.get("/api/areas/series")
+    def area_series(region: str, field: str = "pm2_5", days: int = 180):
+        if field not in AREA_FIELDS:
+            raise HTTPException(status_code=400, detail="unsupported field for area series")
+        sids = _region_groups().get(region, [])
+        since = datetime.utcnow() - timedelta(days=days)
+        daily = _area_daily(sids, field, since) if sids else []
+        t = _area_trend(daily, field)
+        return {
+            "region": region, "field": field, "sensor_count": len(sids),
+            "points": [{"date": d.isoformat(), "value": m, "n": n} for d, m, n in daily],
+            "trend": {"direction": t.direction, "pct_change": t.pct_change,
+                      "r": t.r, "n_days": t.n_days, "first": t.first, "last": t.last},
         }
 
     @app.get("/api/diurnal/{sensor_id}")
