@@ -284,6 +284,21 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_sdwa_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/sdwa").json()
+    assert {"systems", "community", "health_violation", "population_affected"} <= set(r["summary"])
+    if r["systems"]:                               # data file present in the repo
+        assert isinstance(r["counties"], list)
+        s = r["systems"][0]
+        assert {"pws_id", "name", "county", "population", "health_violation", "community", "lat"} <= set(s)
+        both = c.get("/api/sdwa?health_only=true&community_only=true").json()["systems"]
+        assert all(x["health_violation"] and x["community"] for x in both)
+    # water page wires the drinking-water map + table in
+    page = c.get("/water").text
+    assert "sdwa-map" in page and "Drinking-water systems" in page
+
+
 def test_nrc_spills_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/nrc-spills").json()

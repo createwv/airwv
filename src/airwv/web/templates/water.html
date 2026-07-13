@@ -24,6 +24,28 @@
     <p class="meta" id="w-detailnote"></p>
   </div>
 
+  <h2 class="ov-sechead" style="margin-top:26px">🚰 Drinking-water systems &amp; violations <span class="meta" id="sdwa-src"></span></h2>
+  <p class="meta" style="margin:-6px 0 10px">This is the crisis behind the headlines — WV has the nation's
+     worst rate of health-based drinking-water violations, concentrated in the southern coalfields. Every
+     public water system and whether it has a <b>Safe Drinking Water Act</b> violation, from
+     <a href="https://echo.epa.gov" target="_blank" rel="noopener">EPA ECHO / SDWIS</a>. Bubbles are sized by
+     the number of systems in violation per county (placed at the county center).</p>
+  <div id="sdwa-summary" class="fac-summary"></div>
+  <div class="controls" style="gap:12px">
+    <label><input type="checkbox" id="sdwa-health" checked> ⚠️ Health-based violations only</label>
+    <label><input type="checkbox" id="sdwa-community" checked> 🏘️ Community systems only</label>
+    <label>County <select id="sdwa-county"><option value="">All counties</option></select></label>
+    <span class="meta" id="sdwa-count"></span>
+  </div>
+  <div class="card"><div id="sdwa-map" style="height:380px"></div>
+    <div class="legend">Bubble size = systems with a health-based violation · <span style="color:#c0392b">●</span> darker = higher share · click a county to filter</div>
+  </div>
+  <div class="card" style="padding:0"><table id="sdwa-table" class="fac-table">
+    <thead><tr><th>System</th><th>County</th><th>Serves</th><th>Source</th><th>Violation</th><th>Record</th></tr></thead>
+    <tbody id="sdwa-body"><tr><td colspan="6" class="meta" style="padding:14px">Loading…</td></tr></tbody>
+  </table></div>
+  <p class="meta" id="sdwa-disc" style="margin-top:8px"></p>
+
   <div class="about"><p class="meta">Sources: <a href="https://waterservices.usgs.gov/" target="_blank"
     rel="noopener">USGS NWIS</a> real-time gauges (flow, gage height, and some pH / oxygen /
     conductivity / turbidity) and the <a href="https://www.waterqualitydata.us/" target="_blank"

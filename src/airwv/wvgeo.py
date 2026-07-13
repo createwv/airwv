@@ -45,7 +45,13 @@ WV_COUNTY_CENTROID = {
 }
 
 
-def county_centroid(name: str | None) -> tuple[float, float] | None:
+def canon_county(name: str | None) -> str | None:
+    """Canonical WV county name — fixes casing (str.title() breaks 'McDowell')."""
     if not name:
         return None
-    return WV_COUNTY_CENTROID.get(name.strip().title())
+    n = name.strip().title()
+    return "McDowell" if n == "Mcdowell" else n
+
+
+def county_centroid(name: str | None) -> tuple[float, float] | None:
+    return WV_COUNTY_CENTROID.get(canon_county(name))

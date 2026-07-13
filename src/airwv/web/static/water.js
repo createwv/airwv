@@ -171,6 +171,76 @@ async function showSite(s) {
   $('w-sitename').scrollIntoView({behavior: 'smooth', block: 'nearest'});
 }
 
+// ---- 🚰 SDWA drinking-water systems + violations ----
+let SDWA = null, sdwaMap, sdwaLayer, SDWA_META = {};
+async function loadSdwa() {
+  try { SDWA = await (await fetch('/api/sdwa')).json(); }
+  catch (e) { $('sdwa-body').innerHTML = '<tr><td colspan="6" class="meta" style="padding:14px">Could not load drinking-water data.</td></tr>'; return; }
+  SDWA_META = SDWA;
+  const s = SDWA.summary || {};
+  const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${col}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+  $('sdwa-summary').innerHTML =
+    box(s.systems, 'active water systems', '#5a6472')
+    + box(s.community, 'community (serve homes)', '#2c7fb8')
+    + box(s.health_violation, 'with a health-based violation', '#c0392b')
+    + box(s.population_affected, 'people served by those systems', '#c0392b');
+  $('sdwa-src').textContent = SDWA.fetched_at ? `· EPA SDWIS, as of ${SDWA.fetched_at}` : '';
+  $('sdwa-disc').textContent = SDWA.disclaimer || '';
+  const counties = (SDWA.counties || []).map(c => c.county).sort();
+  $('sdwa-county').innerHTML = '<option value="">All counties</option>' + counties.map(c => `<option>${esc(c)}</option>`).join('');
+  drawSdwaMap();
+  renderSdwa();
+  ['sdwa-health', 'sdwa-community', 'sdwa-county'].forEach(id => $(id).addEventListener('change', renderSdwa));
+  setTimeout(() => sdwaMap && sdwaMap.invalidateSize(), 200);
+}
+function drawSdwaMap() {
+  if (!sdwaMap) {
+    sdwaMap = L.map('sdwa-map').setView([38.6, -80.6], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(sdwaMap);
+  }
+  if (sdwaLayer) sdwaLayer.remove();
+  sdwaLayer = L.layerGroup();
+  const maxH = Math.max(1, ...(SDWA.counties || []).map(c => c.health));
+  (SDWA.counties || []).forEach(c => {
+    if (c.lat == null || !c.health) return;
+    const rate = c.systems ? c.health / c.systems : 0;
+    const col = rate >= 0.4 ? '#7e0023' : rate >= 0.25 ? '#c0392b' : rate >= 0.12 ? '#e07b00' : '#e0a030';
+    L.circleMarker([c.lat, c.lon], {radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
+      .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${col}">${c.health}</b> of ${c.systems} systems with a health-based violation`
+        + `<br><small>${c.serious} serious violator(s) · ${Number(c.pop_affected).toLocaleString()} people served</small>`
+        + `<br><small><a href="#" data-cofilter="${esc(c.county)}">show these systems ↓</a></small>`)
+      .addTo(sdwaLayer);
+  });
+  sdwaLayer.addTo(sdwaMap);
+  sdwaMap.on('popupopen', e => {
+    const a = e.popup.getElement().querySelector('[data-cofilter]');
+    if (a) a.addEventListener('click', ev => { ev.preventDefault();
+      $('sdwa-county').value = a.dataset.cofilter; $('sdwa-health').checked = false; renderSdwa(); });
+  });
+}
+function renderSdwa() {
+  const health = $('sdwa-health').checked, comm = $('sdwa-community').checked, co = $('sdwa-county').value;
+  const list = (SDWA.systems || []).filter(s =>
+    (!health || s.health_violation) && (!comm || s.community) && (!co || s.county === co));
+  $('sdwa-count').textContent = `${list.length} systems`;
+  $('sdwa-body').innerHTML = list.slice(0, 60).map(s => {
+    const badges = [
+      s.health_violation ? '<span class="fac-badge" style="background:#c0392b">health-based</span>' : '',
+      s.serious_violator ? '<span class="fac-badge" style="background:#7e0023">serious violator</span>' : '',
+      s.lead_copper_violation ? '<span class="prog-chip" style="background:#f6d7d2;color:#a5301f">lead/copper</span>' : '',
+    ].filter(Boolean).join(' ') || '<span class="meta">no current violation</span>';
+    return `<tr>
+      <td><b>${esc(s.name || s.pws_id)}</b>${s.community ? '' : `<div class="meta">${esc(s.type || '')}</div>`}</td>
+      <td class="meta">${esc(s.county || '')}</td>
+      <td class="meta">${Number(s.population || 0).toLocaleString()}</td>
+      <td class="meta">${esc(s.source || '')}</td>
+      <td>${badges}</td>
+      <td>${s.dfr_url ? `<a href="${esc(s.dfr_url)}" target="_blank" rel="noopener">ECHO →</a>` : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="meta" style="padding:14px">No systems match.</td></tr>';
+  if (list.length > 60) $('sdwa-count').textContent += ' (showing 60 — filter by county)';
+}
+
 async function init() {
   map = L.map('w-map').setView([38.9, -80.5], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
@@ -186,6 +256,7 @@ async function init() {
   $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
   $('w-nearme').addEventListener('click', nearMe);
   $('w-coal').addEventListener('change', e => toggleCoal(e.target.checked));
+  loadSdwa();
   // lazily fill a coal popup's "measured water nearby" box the first time it opens
   map.on('popupopen', async e => {
     const box = e.popup.getElement().querySelector('.cn-wq[data-pending]');

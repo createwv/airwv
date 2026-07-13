@@ -948,6 +948,49 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/sdwa")
+    def sdwa(health_only: bool = False, community_only: bool = False, county: str | None = None):
+        """WV public drinking-water systems + SDWA violation status, with a county
+        rollup for the map. Filters: health_only, community_only, county."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "sdwa_systems.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"systems": [], "counties": [], "summary": {}, "source": "", "fetched_at": None}
+        systems = data.get("systems", [])
+        summary = {
+            "systems": len(systems),
+            "community": sum(1 for s in systems if s.get("community")),
+            "health_violation": sum(1 for s in systems if s.get("health_violation")),
+            "population_affected": sum(s.get("population", 0) for s in systems if s.get("health_violation")),
+        }
+        # county rollup (always over the full set, for the map + ranking)
+        roll: dict = {}
+        for s in systems:
+            c = s.get("county")
+            if not c:
+                continue
+            r = roll.setdefault(c, {"county": c, "lat": s.get("lat"), "lon": s.get("lon"),
+                                    "systems": 0, "health": 0, "serious": 0, "pop_affected": 0})
+            r["systems"] += 1
+            if s.get("health_violation"):
+                r["health"] += 1
+                r["pop_affected"] += s.get("population", 0)
+            if s.get("serious_violator"):
+                r["serious"] += 1
+        counties = sorted(roll.values(), key=lambda r: -r["health"])
+        if health_only:
+            systems = [s for s in systems if s.get("health_violation")]
+        if community_only:
+            systems = [s for s in systems if s.get("community")]
+        if county:
+            systems = [s for s in systems if (s.get("county") or "").lower() == county.lower()]
+        return {"systems": systems, "counties": counties, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/nrc-spills")
     def nrc_spills(reached_water: bool = False, year: int | None = None):
         """WV spill/release reports from the National Response Center. Optional
