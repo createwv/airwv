@@ -284,6 +284,22 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_nrc_spills_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/nrc-spills").json()
+    assert {"total", "reached_water"} <= set(r["summary"])
+    if r["spills"]:                                # data file present in the repo
+        s = r["spills"][0]
+        assert {"report_id", "date", "county", "materials", "reached_water", "lat", "lon", "geo"} <= set(s)
+        water = c.get("/api/nrc-spills?reached_water=true").json()["spills"]
+        assert all(x["reached_water"] for x in water)
+        yr = c.get("/api/nrc-spills?year=2026").json()["spills"]
+        assert all((x["date"] or "").startswith("2026") for x in yr)
+    # events page wires the spills map + list in
+    page = c.get("/events").text
+    assert "spill-map" in page and "Recently reported spills" in page
+
+
 def test_alert_signup_flow(tmp_path, monkeypatch):
     monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")

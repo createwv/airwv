@@ -1,0 +1,5359 @@
+{
+ "source": "National Response Center (US Coast Guard) \u2014 reported oil/chemical releases",
+ "scope": "WV reports for calendar years [2025, 2026]",
+ "disclaimer": "These are INITIAL reports to the NRC \u2014 unverified, as-reported, and not a determination of impact. The NRC is a call center, not a response agency. Most reports lack precise coordinates; those are placed at the county centroid (marked approximate).",
+ "fetched_at": "2026-07-13",
+ "spills": [
+  {
+   "report_id": 1465725,
+   "date": "2026-06-20",
+   "city": null,
+   "county": "Wetzel",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Fishing Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE IN FISHING CREEK, WHICH IS A TRIBUTARY OF THE OHIO RIVER. SHEEN WAS DESCRIBED AS 500 FT X 50 FT (CREEK WIDTH). NO COLOR INFORMATION WAS PROVIDED. CALLER REPORTED THAT THE LOCAL FIRE DEPARTMENT ON SCENE ESTIMATES THE VOLUME OF MATERIAL SPILLED AS ROUGHLY 20 GALLONS AND POSSIBLY EITHER DIESEL OR CRUDE OIL.",
+   "lat": 39.63694,
+   "lon": -80.86222,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1465380,
+   "date": "2026-06-16",
+   "city": null,
+   "county": "Wayne",
+   "type": "Vessel",
+   "cause": "Equipment Failure",
+   "company": "Marathon Petroleum Company",
+   "materials": [
+    {
+     "name": "Other Oil (Oily Water)",
+     "amount": 1.0,
+     "unit": "teaspoon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Big Sandy River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A BARGE BURPED OUT APPROX 1 TEASPOON OF OILY WATER INTO THE BIG SANDY RIVER. RELEASE SECURED AND ABSORBENT PADS DEPLOYED FOR CLEAN UP. CALLER HAD NO FURTHER INFORMATION.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1465258,
+   "date": "2026-06-14",
+   "city": "Martinsburg",
+   "county": "Berkeley",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Capital Cement Company",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES AN UNKNOWN CHEMICAL PRODUCT IS BLANKETING THE CARS AND WINDOWS IN THE AREA. THE CALLER STATES THIS PRODUCT DRIES LIKE CEMENT AND IS VERY DIFFICULT TO REMOVE. THIS OCCUR AT LEAST ONE A MONTH.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1465178,
+   "date": "2026-06-13",
+   "city": "Huntington",
+   "county": "Cabell",
+   "type": "Vessel",
+   "cause": "Equipment Failure",
+   "company": null,
+   "materials": [
+    {
+     "name": "Gasoline: Automotive (Unleaded)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "POTENTIAL DISCHARGE OF GASOLINE FROM A VESSEL THAT CAUGHT ON FIRE BECAUSE THE CARBURETOR BACK-FIRED.",
+   "lat": 38.42,
+   "lon": -82.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1465129,
+   "date": "2026-06-12",
+   "city": "Ronceverte",
+   "county": "Greenbrier",
+   "type": "Fixed",
+   "cause": "Natural Phenomenon",
+   "company": null,
+   "materials": [
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 65.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Retention Pond",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A STORM KNOCKED OVER A TREE THAT FELL INTO A POWER POLE. THIS RESULTED IN THE RELEASE OF ABOUT 60-65 GALLONS OF TRANSFORMER OIL INTO A RETENTION POND. IT IS UNKNOWN IF THE OIL HAD ANY PCB CONTENT.",
+   "lat": 37.93,
+   "lon": -80.45,
+   "geo": "county"
+  },
+  {
+   "report_id": 1464902,
+   "date": "2026-06-10",
+   "city": "Deep Water",
+   "county": "Fayette",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "DESCRIPTION OF INCIDENT (IF NO TRAIN IS INVOLVED, INDICATE HERE): TRAIN VS VEHICLE COLLISION - PROPERTY DAMAGE AT NON CROSSING",
+   "lat": 38.12639,
+   "lon": -81.26111,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1464714,
+   "date": "2026-06-09",
+   "city": "Princeton",
+   "county": "Mercer",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING THE BURNING OF UNKNOWN MATERIAL AT A SCRAP YARD. CALLER STATED THE BURNING IS DONE DAILY, CREATING A NOXIOUS ODOR THROUGH OUT THE AREA. CALLER REPORTED THEY CANNOT LEAVE THE HOUSE UNTIL LATE MORNING/AFTERNOON DUE TO ODOR.",
+   "lat": 37.4,
+   "lon": -81.1,
+   "geo": "county"
+  },
+  {
+   "report_id": 1464808,
+   "date": "2026-06-09",
+   "city": "Martinsburg",
+   "county": "Berkeley",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Quikrete",
+   "materials": [
+    {
+     "name": "Cement Dust",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Opequon Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A CEMENT FACTORY IS RELEASING CEMENT DUST EVERY NIGHT INTO THE AIR. CALLER STATED THAT THE MATERIAL IMPACTS RESIDENTIAL AREAS AND THE OPEQUON CREEK. THE SPECIFIC CAUSE OF THE RELEASE IS UNKNOWN.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1464319,
+   "date": "2026-06-04",
+   "city": "Keyser",
+   "county": "Mineral",
+   "type": "Mobile",
+   "cause": "Operator Error",
+   "company": "City Of Keyser Street Department",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 70.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A ROAD MAINTENANCE TRUCK STRUCK A TELEPHONE POLE. THIS RESULTED IN THE RELEASE OF 70 GALLONS OF DIESEL FUEL ONTO THE ROADWAY. NO WATERWAYS OR STORM DRAINS WERE AFFECTED.",
+   "lat": 39.42,
+   "lon": -78.94,
+   "geo": "county"
+  },
+  {
+   "report_id": 1464167,
+   "date": "2026-06-03",
+   "city": "Institute",
+   "county": "Kanawha",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": "Trimac Transportation",
+   "materials": [
+    {
+     "name": "Diphenylmethane Diisocyanate - Methylene Diphenyl Diisocyanate Un3082",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "UN3082 (METHYLENE DIPHENYL DIISOCYANATE) RELEASED FROM A 7,000 GALLON TANKER TRUCK DUE TO A SINGLE VEHICLE ACCIDENT (ROLLOVER).",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1463937,
+   "date": "2026-06-01",
+   "city": "Beckley",
+   "county": "Raleigh",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Pooreboys Unlimted",
+   "materials": [
+    {
+     "name": "Vehicle Emissions",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING SUSPECTED RESPONSIBLE PARTY IS REMOVING DEF SYSTEMS FROM DIESEL ENGINES CAUSING A RELEASE OF EMISSIONS INTO THE ATMOSPHERE. CALLER STATED THIS HAS BEEN PRACTICED FOR THE PAST THREE YEARS.",
+   "lat": 37.77,
+   "lon": -81.22,
+   "geo": "county"
+  },
+  {
+   "report_id": 1463505,
+   "date": "2026-05-27",
+   "city": "Mount Storm",
+   "county": "Grant",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": "Dominion Energy",
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Mount Storm Lake",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE ON MOUNT STORM LAKE. THE SHEEN WAS DESCRIBED AS 50 FT X 100 FT AND RAINBOW IN COLOR.",
+   "lat": 39.1,
+   "lon": -79.15,
+   "geo": "county"
+  },
+  {
+   "report_id": 1463547,
+   "date": "2026-05-27",
+   "city": "Inez",
+   "county": "Wayne",
+   "type": "Pipeline",
+   "cause": "Equipment Failure",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES LESS THAN 30 MCF OF NATURAL GAS WAS RELEASED INTO THE ATMOSPHERE FROM A LOW PRESSURE GATHERING R LINE. DAMAGE AMOUNT IS EXPECTED TO BE OVER $150,000. CALLER STATES IT IS A PINHOLE LEAK AND IS VERY MINIMAL AND THEY ARE WORKING ON SECURING THE RELEASE.",
+   "lat": 38.00889,
+   "lon": -82.39944,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1463572,
+   "date": "2026-05-27",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Storage Tank",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// POTENTIAL RELEASE /// THE CALLER REPORTED THAT A 55 GALLON DRUM WAS FOUND HANGING IN A TREE AT THE INCIDENT LOCATION. THE BOTTOM OF THE DRUM APPEARS TO BE BULGING. NO MATERIALS HAVE BEEN REPORTEDLY RELEASED AS OF YET, BUT THERE IS A POTENTIAL FOR A RELEASE OF UNKNOWN MATERIALS THAT ARE INSIDE.",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1463634,
+   "date": "2026-05-27",
+   "city": "Dunlow",
+   "county": "Wayne",
+   "type": "Pipeline",
+   "cause": "Equipment Failure",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 300.0,
+     "unit": "mcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "///THIS IS A 48 HR PHMSA UPDATE TO NRC REPORT 1463547/// UPDATE: CALLER REPORTED THAT THE NEAREST CITY WAS UPDATED FROM INEZ TO DUNLOW. DAMAGE COST HAS BEEN UPDATED TO $10,000 AND THEY WILL NOT BE SUBMITTING A 30 DAY REPORT. THE LEAK HAS BEEN REPAIRED AND THE PIPELINE IS IN SERVICE. THE AMOUNT OF MATERIAL RELEASED WAS APPROXIMATELY 300 MCF. THE ORIGINAL REPORTED INFORMATION IS AS FOLLOWS: CALLER STATES LESS THAN 30 MCF OF NATURAL GAS WAS RELEASED INTO THE ATMOSPHERE FROM A LOW PRESSURE GATHERING",
+   "lat": 38.00889,
+   "lon": -82.39944,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1463317,
+   "date": "2026-05-24",
+   "city": "Beckley",
+   "county": "Raleigh",
+   "type": "Railroad",
+   "cause": "Derailment",
+   "company": null,
+   "materials": [
+    {
+     "name": "No Chris Code - Coal",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "TRAIN DERAILMENT DUE TO A BRIDGE COLLAPSE. UNKNOWN IF ANYTHING IN THE WATER. STILL WAITING FOR AN ENVIRONMENTAL TEAM TO GET ON SITE ON 05/24/2026 AT 1715 HOURS, DISPATCHER 907, RALEIGH COUNTY 911, REPORTED A CITIZEN REPORTED TWO LOADED COAL CARS ON THEIR SIDE AT MP CAQ 2.59 ON THE NEW RIVER SUBDIVISION. THIS WAS LOCATED AT 896 FITZPATRICK ROAD, BECKLEY, WV. THEY ALSO ADVISED THERE WAS DAMAGE TO A NEARBY BRIDGE. THEY ADVISED THERE WAS NO TRAIN WITH THE DERAILED CARS. FH TRAIN DISPATCHER WAS NOTIF",
+   "lat": 37.74278,
+   "lon": -81.19694,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1462943,
+   "date": "2026-05-20",
+   "city": "Sheppardstown",
+   "county": "Jefferson",
+   "type": "Storage Tank",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Fuel: No. 2",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER RECEIVED A REPORT OF A HOME HEATING OIL DISCHARGE FROM A FUEL TANK DUE TO AN UNKNOWN CAUSE AT THIS TIME.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462747,
+   "date": "2026-05-18",
+   "city": "Proctor",
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Operator Error",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, INTO THE ATMOSPHERE, FROM A 3\" STEEL DISTRIBUTION PIPELINE. THE CALLER STATES THAT THE PIPELINE WAS STRUCK BY A RIDE-ON LAWN MOWER. CALLER STATES THE GAS IGNITED, BURNT THE MOWER AND THE DRIVER SUSTAINED BURN INJURIES. IT IS UNKNOWN IF THE DRIVER WENT TO THE HOSPITAL FOR INJURIES SUSTAINED.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462949,
+   "date": "2026-05-18",
+   "city": "Proctor",
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A PHMSA 48-HOUR UPDATE TO NRC REPORT 1462747 /// THE UPDATE IS AS FOLLOWS: THE CALLER STATED THAT THE FIRE DEPARTMENT AT THE LOCATION WAS NOTIFIED ABOUT THE INCIDENT AT 1400 HOURS. THE OPERATOR OF THE MOWER WAS THE HOMEOWNER AT THE RESIDENCE. THE PIPELINE WAS A (2) INCH DISTRIBUTION LINE. THE OPERATOR OF THE MOWER WAS TRANSPORTED TO THE HOSPITAL WITH UNSPECIFIED INJURIES. THE FIRE WAS EXTINGUISHED. THE CAUSE OF THE INCIDENT IS BEING CHANGED FROM OPERATOR ERROR TO OTHER. THE CHANGE CO",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462316,
+   "date": "2026-05-13",
+   "city": "Walker",
+   "county": "Wood",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ditchline",
+   "water_supply_contaminated": false,
+   "description": "UNKNOWN OIL DISCHARGED FROM A SEMI-TRUCK THAT WAS INVOLVED IN A MULTIPLE VEHICLE ACCIDENT.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462320,
+   "date": "2026-05-13",
+   "city": "Walker",
+   "county": "Wood",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 100.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ditchline",
+   "water_supply_contaminated": false,
+   "description": "// UPDATE TO NRC REPORT 1462316 // UPDATE IS AS FOLLOWS: - APPROX. 100 GALLONS OF THE UNKNOWN OIL WAS RELEASED. ORIGINAL REPORT: UNKNOWN OIL DISCHARGED FROM A SEMI-TRUCK THAT WAS INVOLVED IN A MULTIPLE VEHICLE ACCIDENT.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462400,
+   "date": "2026-05-13",
+   "city": null,
+   "county": "Kanawha",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A TRAIN WAS BEING PULLED INTO THE YARD WHEN, POTENTIALLY, THE MOTOR SPLIT THE SWITCH CAUSING THE DERAILMENT OF 3 LOCOMOTIVES. (1 KANAWHA/2 NORFOLK SOUTHERN) FURTHER INVESTIGATION IS UNDERWAY. DAMAGES MAY EXCEED $150000 NO ACTUAL/POTENTIAL RELEASE OF MATERIAL, INJURIES/FATALITIES, OR PASSENGER TRAIN DELAYS WERE REPORTED.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1462795,
+   "date": "2026-05-13",
+   "city": "Chester",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material (Caustic)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Drainage Ditch",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING AN UNKNOWN AMOUNT OF CAUSTICS (PH BETWEEN 13 AND 14) DUMPED ON THE SIDE OF THE ROAD. THE EXACT CHEMICAL IS UNKNOWN, BUT BELIEVED TO BE LIME. THE SOURCE OF THE CHEMICAL IS UNKNOWN. CALLER STATES THE AMOUNT OF THE CHEMICAL IS ESTIMATED TO BE 50-100 GALLONS. CALLER STATES SOME OF THE PRODUCT IS IN A DRAINAGE DITCH.",
+   "lat": 40.61417,
+   "lon": -80.55417,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1461592,
+   "date": "2026-05-05",
+   "city": "Caldwell",
+   "county": "Greenbrier",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "M & A Premium Logistics Llc",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 500.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Howards Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN UNKNOWN AMOUNT OF DIESEL WAS RELEASED FROM IBF TOTES THAT WERE BEING TRANSPORTED IN A TRACTOR TRAILER. THE TOTES (UP TO 4) CAME OFF OF THE TRAILER CAUSING THE RELEASE. THE TRAILER BECAME DISCONNECTED WITH THE TRUCK. CALLER IS ESTIMATING 500 GALLONS WAS RELEASED TO THE ROAD MEDIAN. THE DIESEL HAS MADE IT INTO HOWARDS CREEK WHICH GOES TO THE GREENBIER RIVER BUT THE RIVER HAS NOT BEEN IMPACTED YET. WV DEP IS ENROUTE WITH BIGGER BOOMS.",
+   "lat": 37.93,
+   "lon": -80.45,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461627,
+   "date": "2026-05-05",
+   "city": "Caldwell",
+   "county": "Greenbrier",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "M & A Premium Logistics",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 2000.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Howard Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT WHILE THE OPERATOR OF A TRACTOR TRAILER TRUCK WAS HAULING 19 TOTES OF DIESEL FUEL, 2000 GALLONS SPILLED TO THE GROUND, WITH AN UNKNOWN AMOUNT REACHING HOWARD CREEK. ALTHOUGH THE CAUSE OF THE SPILL IS UNKNOWN, THE CALLER STATES IT WAS POSSIBLY DUE TO A MECHANICAL ISSUE OPPOSED TO A TRAFFIC ACCIDENT. TOTE CAPACITY, AMOUNT AND CURRENT STATE OF TOTES IS UNKNOWN AT THIS TIME.",
+   "lat": 37.93,
+   "lon": -80.45,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461496,
+   "date": "2026-05-04",
+   "city": "Mannington",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Eqt",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Pyles Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING AN EXCAVATOR ROLLED OVER INTO A STREAM DUE TO A FOUNDATION GIVING AWAY RESULTING IN THE DISCHARGE OF UNKNOWN AMOUNTS OF DIESEL AND POTENTIALLY ENGINE OIL. THE PYLES FORK WAS IMPACTED WHICH OUTFALLS TO BUFFALO CREEK. NO INJURIES/FATALITIES WERE REPORTED.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461529,
+   "date": "2026-05-04",
+   "city": "Weston",
+   "county": "Lewis",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "The Oil Spot, Inc.",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Drainage Ditch",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A DUMPING OF MOTOR OIL, ONTO THE GROUND AND INTO DRAINAGE DITCH, FROM AN AUTO SHOP. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 38.99,
+   "lon": -80.5,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461448,
+   "date": "2026-05-03",
+   "city": "Point Pleasant",
+   "county": "Mason",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "No Chris Code - Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Unknown Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE IS SEWAGE RUNNING INTO A CREEK AT THE INCIDENT LOCATION BUT THE SOURCE WHERE THE SEWAGE IS COMING FROM IS UNKNOWN. THIS HAS BEEN ONGOING FOR A COUPLE OF DAYS. CALLER STATES THE CREEK FEEDS INTO KANAWHA RIVER. CALLER ALSO STATES THERE IS AN APARTMENT COMPLEX NEARBY AND THERE COULD BE A BROKEN SEWER LINE SOMEWHERE.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461329,
+   "date": "2026-05-01",
+   "city": "Charleston",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Mercury",
+     "amount": 0.3,
+     "unit": "cup(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THE DISCOVERY OF ABOUT (1/3) OF A CUP OF MERCURY THAT HAD SPILLED FROM AN UNKNOWN SOURCE IN AN ALLEY AT THE INCIDENT LOCATION. NO WATERWAYS OR STORM DRAINS HAVE BEEN AFFECTED.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1461233,
+   "date": "2026-04-30",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "Trident Freight Solutions",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT WHILE CONDUCTING MOBILE / TANK TRANSFERS ON SITE, THE SRP OCCASIONALLY SPILLS UNKNOWN CHEMICALS/PETRO CHEMICALS ONTO THE GROUND; CALLER STATES THAT THE SPILLS ARE NOT INTENTIONAL BUT INSTEAD OF CONDUCTING PROPER CLEAN UP, THE CREWS COVER THE SPILLS WITH GRAVEL WITHOUT REMEDIATING THE SOIL FIRST. THESE MATERIALS MAY BE LEACHING INTO THE MONONGAHELA RIVER. CALLER IS UNAWARE HOW LONG THIS HAS BEEN OCCURRING BUT THAT THE CURRENT OPERATOR(S) HAVE BEEN ON THE SITE FOR APPROX 5 YEARS",
+   "lat": 39.61194,
+   "lon": -79.97556,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1460983,
+   "date": "2026-04-28",
+   "city": null,
+   "county": "Mcdowell",
+   "type": "Railroad Non-Release",
+   "cause": "Other",
+   "company": "Norfolk Southern",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A TWO VEHICLE COLLISION, RESULTING IN TWO RAIL EMPLOYEES AND ONE CONTRACTOR BEING INJURED, AND BEING SENT TO THE HOSPITAL. NO TRAINS WERE INVOLVED IN THIS INCIDENT. THIS DID NOT OCCUR ON RAILROAD PROPERTY.",
+   "lat": 37.42556,
+   "lon": -81.51222,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1460410,
+   "date": "2026-04-22",
+   "city": "Institute",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Hydrogen Sulfide",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "HYDROGEN SULFIDE RELEASED FROM AN UNKNOWN SOURCE INSIDE A CHEMICAL FACILITY DUE TO AN UNKNOWN CAUSE AT THIS TIME (CALLER STATES IT MAY HAVE HAD SOMETHING TO DO WITH A MIXING OF MATERIALS). CALLER WAS NOTIFIED OF THE INCIDENT AT 0932. THERE HAVE BEEN EMPLOYEE INJURIES AND FATALITIES AND AN EVACUATION OF THE FACILITY.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1460495,
+   "date": "2026-04-22",
+   "city": "Nitro",
+   "county": "Kanawha",
+   "type": "Storage Tank",
+   "cause": "Unknown",
+   "company": "Catalyst Refiners",
+   "materials": [
+    {
+     "name": "Nitric Acid",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Hydrogen Sulfide",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING THE RELEASE OF HYDROGEN SULFIDE GAS AND NITRIC ACID. THE NITRIC ACID REACTED IN A TANK WITH A COMPOUND KNOWN AS M2000A WHICH RESULTED IN THE RELEASE OF HYDROGEN SULFIDE GAS. THE PRECISE AMOUNTS RELEASED AND CAUSE OF THE INCIDENT ARE UNDER INVESTIGATION. THE FACILITY WAS EVACUATED OF EMPLOYEES. A SHELTER IN PLACE WAS ISSUED FOR CITIZENS WHICH WAS LIFTED AT 1430 22APR2026. (7) EMPLOYEES WERE ADMITTED TO THE HOSPITAL. (6) WERE RELEASED AFTER DECONTAMINATION; (1) HAS REMAINED WITH S",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1459930,
+   "date": "2026-04-16",
+   "city": "Mount Storm",
+   "county": "Grant",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Clearway Energy",
+   "materials": [
+    {
+     "name": "Fiberglass",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT WIND TURBINES ARE BEING DISMANTLED NEAR THE INCIDENT LOCATION. THEY REPORTED THAT UNKNOWN OILS AND FIBERGLASS ARE BEING LEFT ON THE GROUND. THIS HAS BEEN ONGOING FOR SEVERAL MONTHS.",
+   "lat": 39.1,
+   "lon": -79.15,
+   "geo": "county"
+  },
+  {
+   "report_id": 1459954,
+   "date": "2026-04-16",
+   "city": "Maxwelton",
+   "county": "Greenbrier",
+   "type": "Storage Tank",
+   "cause": "Equipment Failure",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 490.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A SPILL OF DIESEL FUEL FROM A 500 GALLON STORAGE TANK THAT FELL TO THE GROUND FROM A PALLET THAT WAS BEING MOVED. THE CONDITION OF THE PALLET THE TANK WAS STORED ON WAS FAULTY WHICH CAUSED THE SPILL. CALLER STATED THE DIESEL FUEL SPILLED ONTO A GRAVEL PARKING LOT AND A SHEEP PASTURE. CALLER STATED THERE IS A POND ON A DOWN HILL SLOPE FROM THE SPILL. CALLER STATED THE SPILL COULD REACHED THE WATER IF IT RAINS.",
+   "lat": 37.93,
+   "lon": -80.45,
+   "geo": "county"
+  },
+  {
+   "report_id": 1459565,
+   "date": "2026-04-13",
+   "city": "Ona",
+   "county": "Cabell",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Salt Rock Sewer",
+   "materials": [
+    {
+     "name": "Raw Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ravine",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES RAW SEWAGE IS RELEASING FROM A SEWER LINE AND COMING OUT OF A MANHOLE COVER THEN GOING INTO A RAVINE WHICH LEADS TO MUD RIVER. THIS HAS BEEN GOING ON SINCE FRIDAY. CALLER STATES HE HAS TRIED CONTACTING THE EMERGENCY SERVICE NUMBER FOR SRP BUT NO ONE IS ANSWERING THE PHONE. CALLER STATES THERE IS A PUMP STATION NEARBY BUT IT IS NOT RUNNING.",
+   "lat": 38.42,
+   "lon": -82.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1459370,
+   "date": "2026-04-09",
+   "city": "Sistersville",
+   "county": "Tyler",
+   "type": "Vessel",
+   "cause": "Vessel Sinking",
+   "company": "City Of Sistersville",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF MOTOR OIL, INTO THE OHIO RIVER, FROM A FERRY THAT SANK. THE CALLER STATES THE CAUSE OF THE VESSEL SINKING IS UNKNOWN AT THIS TIME.",
+   "lat": 39.47,
+   "lon": -80.89,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458990,
+   "date": "2026-04-04",
+   "city": "Cross Lanes",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Appalachian Power",
+   "materials": [
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A TRUCK HIT A TELEPHONE POLE WITH 3 TRANSFORMERS ON IT. AN UNKNOWN AMOUNT OF TRANSFORMER OIL RELEASED AND SOME OF THE MATERIAL IS LEAKING OIL INTO A DRAIN. ITS IS UNKNOWN IF THE OIL CONTAINS ANY PCBS,",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458735,
+   "date": "2026-04-01",
+   "city": "Keyser",
+   "county": "Mineral",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Possibly Patterson Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE IS AN UNKNOWN SHEEN IN A CREEK THAT RUNS THROUGH THEIR PROPERTY. THE EXACT SOURCE OF THE SHEEN IS UNKNOWN AT THIS TIME.",
+   "lat": 39.42,
+   "lon": -78.94,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458857,
+   "date": "2026-04-01",
+   "city": "Chester",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A WHITE POWDER WAS DISCOVERED ALONG A 50 FOOT SECTION BY THE SIDE OF THE ROADWAY. THE SUBSTANCE IS UNKNOWN BUT WAS TESTED AND HAS A PH OF APPROXIMATELY 13. NO INJURIES HAVE BEEN REPORTED. THE ROAD HAS NOT BEEN CLOSED BUT CONES MAY BE PLACED ON THE ROADWAY. THE SOURCE OF THE POWDER IS UNKNOWN. MATERIAL IS NEAR A DITCH THAT LEADS TO THE OHIO RIVER BUT IT HAS NOT YET BEEN IMPACTED.",
+   "lat": 40.52,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458629,
+   "date": "2026-03-31",
+   "city": "Follansbee",
+   "county": "Brooke",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A FOUL ODOR EMANATING FROM THE VICINITY OF THE INCIDENT LOCATION. CALLER STATED THE ODOR HAS BEEN INTERMITTENTLY PRESENT FOR MONTHS. WHEN THE ODOR IS PRESENT IS SEEMS TO LAST ALL DAY. IT WAS NOTED THE ODOR IS SIMILAR TO 'GRINDING METAL/ MIXED WITH AN ELECTRICAL FIRE'.",
+   "lat": 40.27,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458559,
+   "date": "2026-03-30",
+   "city": "Perker",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Soil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Construction Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Unnamed Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A THE DUMPING OF CONSTRUCTION MATERIAL (I.E BRICKS AND CONCRETE) AS WELL AS SOIL INTO A NEARBY CREEK.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1458053,
+   "date": "2026-03-24",
+   "city": "Newell",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material - Hazardous Odor (Almost Like Paint Thinner)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE ARE CONTRACTORS RE-DOING A SEWER LINE AT THE INCIDENT LOCATION AND THE CALLER STATES WHATEVER CHEMICAL OR PAINT SUBSTANCE THEY ARE APPLYING TO THE LINE, IS CAUSING A VERY STRONG HAZARDOUS ODOR IN THE AREA. CALLER STATES THE ODOR IS CAUSING SEVERAL HEALTH ISSUES.",
+   "lat": 40.52,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1457818,
+   "date": "2026-03-21",
+   "city": "Harpers Ferry",
+   "county": "Jefferson",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT DIESEL FUEL WAS FOUND ON THE ROADWAY. THE SOURCE OF THE DIESEL IS UNKNOWN. A STORM DRAIN WAS ALSO AFFECTED.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1457686,
+   "date": "2026-03-19",
+   "city": "Benwood",
+   "county": "Marshall",
+   "type": "Vessel",
+   "cause": "Unknown",
+   "company": "Belmont County Coal Resources Inc",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING THE DISCHARGE OF AN UNKNOWN AMOUNT OF DIESEL FUEL FROM 'M/V DAVID J PODURGIL' INTO THE OHIO RIVER. PRECISE CAUSE AND AMOUNT ARE UNDER INVESTIGATION.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1457703,
+   "date": "2026-03-19",
+   "city": "Salem",
+   "county": "Harrison",
+   "type": "Mobile",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Sand",
+     "amount": 80000.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    },
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain(S)",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED A VEHICULAR ACCIDENT INVOLVING A SEMI TRUCK AND A PASSENGER CAR ON A HIGHWAY THAT OCCURRED FOR UNKNOWN REASONS AT THE INCIDENT LOCATION. THE CALLER STATED THIS ACCIDENT RESULTED IN THE SEMI TRUCK FLIPPING ON ITS SIDE AND DISCHARGING AN UNKNOWN AMOUNT OF DIESEL FUEL AND AN UNKNOWN AMOUNT OF AN UNKNOWN OIL ONTO THE GROUND AND INTO A STORM DRAIN(S). -ONE PERSON WAS TRANSPORTED TO A HOSPITAL. -THE SEMI TRUCK WAS HAULING APPROXIMATELY 80000 POUNDS OF SAND THAT ALSO RELEASED ONTO T",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456824,
+   "date": "2026-03-10",
+   "city": "Glen Dale",
+   "county": "Marshall",
+   "type": "Storage Tank",
+   "cause": "Operator Error",
+   "company": "Fitzmark",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 150.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES APPROX. 150 GALLONS OF 10W30 ENGINE OIL WAS RELEASED ONTO THE CONCRETE, STORM DRAIN AND THEN INTO THE OHIO RIVER FROM A TOTE. IT IS ESTIMATED APPROX. 20 GALLONS OF THAT MADE IT INTO THE STORM DRAIN. THE TOTE WAS NOT SECURED IN THE BACK OF TRACTOR TRAILER. WHEN BACKING UP, THE BRAKES WERE APPLIED WHICH CAUSED THE TOTE TO FALL OUT.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456845,
+   "date": "2026-03-10",
+   "city": "Proctor",
+   "county": "Wetzel",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES SHE DISCOVERED AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE IN THE OHIO RIVER AT HER HOME ADDRESS. THERE ARE DEAD FISH IN THE AREA. THERE IS A STRONG FUEL ODOR IN THE AIR.",
+   "lat": 39.6,
+   "lon": -80.64,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456747,
+   "date": "2026-03-09",
+   "city": "Huntington",
+   "county": "Cabell",
+   "type": "Railroad",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Ethylene Glycol",
+     "amount": 200.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "RELEASE OF ETHYLENE GLYCOL FROM ENGINE.",
+   "lat": 38.41778,
+   "lon": -82.43083,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1456665,
+   "date": "2026-03-08",
+   "city": "Proctor",
+   "county": "Marshall",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Westlake Chemical",
+   "materials": [
+    {
+     "name": "Chlorine",
+     "amount": 10.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED A RELEASE OF APPROXIMATELY 10 POUNDS OF CHLORINE FROM A FLOW TRANSMITTER ON A SULPHUR CHLORIDE CONDENSER AT A PRIVATE INDUSTRIAL FACILITY THAT WENT INTO THE AIR AT THE INCIDENT LOCATION. THE CAUSE OF THE RELEASE IS DUE TO AN INSTRUMENT FAILING. -NO INJURIES OR FATALITIES.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456546,
+   "date": "2026-03-06",
+   "city": "Fairmont",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Various Unknown Materials",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Unknown Waterway",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATED THAT VARIOUS MATERIALS TO INCLUDE A WASHER MACHINE HAVE BEEN DUMPED AT THE LOCATION. A SHEEN OF WHITE SOAPY WATER HAS BEEN DISCOVERED AT THE LOCATION.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456430,
+   "date": "2026-03-05",
+   "city": "Moundsville",
+   "county": "Marshall",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING AN UNKNOWN SHEEN FROM UNKNOWN SOURCE IN THE OHIO RIVER. SHEEN IS SPORADIC AND COVERING A DISTANCE OF 3 MILES LONG TO 20 FT WIDE MOVING NORTH WITH BLACK BLOBS. CALLER HAD NO FURTHER INFORMATION.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1456484,
+   "date": "2026-03-05",
+   "city": "Pennsboro",
+   "county": "Ritchie",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil: Crude & Water Mix",
+     "amount": 2.0,
+     "unit": "barrel(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Davis Run",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED A RELEASE OF OIL: CRUDE & WATER MIX, ONTO THE GROUND AND INTO DAVIS RUN, FROM A GATHERING PIPELINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN. CALLER STATES THEY BELIEVE THE INCIDENT OCCURRED DUE TO FRACKING IN THE AREA.",
+   "lat": 39.21028,
+   "lon": -80.9675,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1455771,
+   "date": "2026-02-25",
+   "city": "Kearneysville",
+   "county": "Jefferson",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT HIS NEIGHBOR HAD AN OIL SPILL OR IS DUMPING OIL ONTO THE GROUND AND IT IS RUNNING ONTO THE SOIL AND PROPERTY OF THE CALLERS. THE SUSPECTED RESPONSIBLE PARTY HAS TRACTORS THAT HE WORKS ON, ON SITE. CALLER STATES THERE IS SO MUCH THAT IT IS PUDDLED AND SOAKED INTO GROUND.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1455682,
+   "date": "2026-02-23",
+   "city": "Mannington",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Dt Midstream",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, TO ATMOSPHERE, FROM A RELIEF VALVE OF THE COMPRESSOR STATION. THE CALLER STATES THAT THE CAUSE OF RELEASE IS UNKNOWN. CALLER STATES THAT MANNINGTON FIRE DEPARTMENT IS ON SCENE.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1455810,
+   "date": "2026-02-23",
+   "city": "Mannington",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Dt Midstream",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "14555682 /// THE UPDATE IS AS FOLLOWS: THE CALLER STATED THAT THE AMOUNT OF MATERIAL THAT RELEASED DID NOT MEET THE REPORTABLE QUANTITY. /// ORIGINAL REPORT BELOW /// THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, TO ATMOSPHERE, FROM A RELIEF VALVE OF THE COMPRESSOR STATION. THE CALLER STATES THAT THE CAUSE OF RELEASE IS UNKNOWN. CALLER STATES THAT MANNINGTON FIRE DEPARTMENT IS ON SCENE.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1455348,
+   "date": "2026-02-19",
+   "city": "Hancock",
+   "county": "Morgan",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "FREIGHT TRAIN COLLIDED WITH A PASSENGER TRUCK AT A CROSSING. NO INJURIES.",
+   "lat": 39.57889,
+   "lon": -78.39944,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1455430,
+   "date": "2026-02-18",
+   "city": "Vienna",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Mercury",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "///POTENTIAL RELEASE/// CALLER REPORTED THAT AN INDIVIDUAL IS CLAIMING TO BE SELLING MERCURY ON FACEBOOK MARKETPLACE. THE CALLER DOES NOT KNOW IF ANY OF THE MATERIAL HAS BEEN RELEASED OR SOLD BUT STATED THAT THE INDIVIDUAL CLAIMED TO HAVE FILTERED IT WITH COTTON BALLS.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454996,
+   "date": "2026-02-15",
+   "city": "Salt Rock",
+   "county": "Cabell",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "No Chris Code - Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Guyandotte River",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE IS AN ACTIVE RELEASE OF SEWAGE FROM AN ABANDONED SEWAGE POND DUE TO AN UNKNOWN CAUSE AT THIS TIME. THIS HAS BEEN AN ONGOING ISSUE.",
+   "lat": 38.42,
+   "lon": -82.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454609,
+   "date": "2026-02-10",
+   "city": "Apple Grove",
+   "county": "Mason",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Apg Polytech",
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 1.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "LESS THAN 1 GALLON OF HYDRAULIC FLUID DISCHARGED FROM A CATCH CONTAINER AT THE PLANT DUE TO A POWER FAILURE.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454610,
+   "date": "2026-02-10",
+   "city": "Spencer",
+   "county": "Roane",
+   "type": "Pipeline",
+   "cause": "Dumping",
+   "company": "Delta Helix Gas",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Local Stream, Well Water",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT: -SEVERAL 2\" EXPOSED PIPELINES ARE CRACKED AND ACTIVELY LEAKING NATURAL GAS FROM A NATURAL GAS WELL; OCCASIONALLY SRP WILL APPLY INEFFICIENT CLAMPS. - SRP PURPOSEFULLY AND FREQUENTLY BLEED OUT THE SYSTEM'S CONDENSATION TO ATMOSPHERE AND ONTO THE GROUND A WITHOUT ANY FILTRATION, CAUSING A STRONG ODOR IN THE ATMOSPHERE, HEART PALPITATIONS, HEADACHES AND UPPER RESPIRATORY ISSUES RESULTING IN ONE HOSPITALIZATION. - THE FD WAS UNABLE TO REMAIN ON SCENE AND THE FAMILY HAD TO EVACUAT",
+   "lat": 38.72,
+   "lon": -81.35,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454423,
+   "date": "2026-02-08",
+   "city": "St. Marys",
+   "county": "Pleasants",
+   "type": "Vessel",
+   "cause": "Vessel Sinking",
+   "company": null,
+   "materials": [
+    {
+     "name": "Scrap Metal",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "****THIS IS A POTENTIAL RELEASE REPORT**** THE CALLER STATES THEIR BARGE SANK ON THE OHIO RIVER, DUE TO FROZEN CONDITIONS. THE CALLER STATES THERE IS NO FUEL ON BOARD, ONLY SCRAP METAL. NO POLLUTION OBSERVED.",
+   "lat": 39.37,
+   "lon": -81.16,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454015,
+   "date": "2026-02-03",
+   "city": "Williamstown",
+   "county": "Wood",
+   "type": "Vessel",
+   "cause": "Equipment Failure",
+   "company": "Amherst Madison",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN UNKNOWN AMOUNT OF DIESEL HAS RELEASED INTO THE OHIO RIVER FROM A TOW BOAT. A PIN HOLE LEAK ON THE OUTSIDE WALL OF A FUEL TANK CAUSED THE RELEASE.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454077,
+   "date": "2026-02-03",
+   "city": "Camp Creek",
+   "county": "Mercer",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Gasoline: Automotive (Unleaded)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Drinking Water",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES THE WELL WATER SMELLS OF \"GASOLINE\". THE CALLER STATES THIS HAS BEEN GOING ON FOR SEVERAL YEARS.",
+   "lat": 37.4,
+   "lon": -81.1,
+   "geo": "county"
+  },
+  {
+   "report_id": 1454267,
+   "date": "2026-02-03",
+   "city": "New Cumberland",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Messer Llc",
+   "materials": [
+    {
+     "name": "Other Oil - Dte Light Compressor Oil",
+     "amount": 50.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Outfall",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED A RELEASE OF DTE LIGHT COMPRESSOR OIL, INTO THE PLANT'S COOLING WATER SYSTEM, INTO THE LOWER SUMP AND INTO THE OUTFALL, FROM CP55 COMPRESSOR. THE CALLER STATES THE CAUSE OF THE RELEASE WAS DUE TO A PLUGGED OIL FILTER.",
+   "lat": 40.52,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453861,
+   "date": "2026-02-01",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Mobile",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES UNKNOWN OIL IS LEAKING FROM A HEAVY DUTY PASSENGER TRUCK (CHEVY) AND THIS HAS BEEN ONGOING FOR THREE MONTHS. CALLER ALSO STATES THE SMELL FROM THE OIL IS AFFECTING THE NEIGHBORS AND SHE HAS HAD TO GO TO THE HOSPITAL BECAUSE OF THE SMELL AFFECTING HER HEALTH.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453747,
+   "date": "2026-01-30",
+   "city": "Clear Fork",
+   "county": "Wyoming",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Appalachian Power",
+   "materials": [
+    {
+     "name": "Oil, Misc: Transformer Non-Pcb",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Reedy Branch Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT THE CALLER REPORTED THAT A TRANSFORMER FAILED DUE TO UNKNOWN REASONS. THIS RESULTED IN THE RELEASE OF AN UNKNOWN AMOUNT OF NON-PCB TRANSFORMER OIL INTO THE REEDY BRANCH CREEK.",
+   "lat": 37.61,
+   "lon": -81.55,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453413,
+   "date": "2026-01-26",
+   "city": "Clendenin",
+   "county": "Kanawha",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A RELEASE OF NATURAL GAS FROM AN EIGHT INCH STEEL TRANSMISSION PIPELINE DUE TO UNKNOWN CAUSES.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453545,
+   "date": "2026-01-26",
+   "city": "Clendenin",
+   "county": "Kanawha",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "//////THIS IS A 48-HOUR PHMSA UPDATE FOR NRC REPORT NUMBER 1453413.//////// UPDATED INFO: - CALLER STATES EVERYTHING IS THE SAME FROM THE ORIGINAL REPORT (THERE ARE NO CHANGES). ORIGINAL REPORT: CALLER IS REPORTING A RELEASE OF NATURAL GAS FROM AN EIGHT INCH STEEL TRANSMISSION PIPELINE DUE TO UNKNOWN CAUSES.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453556,
+   "date": "2026-01-26",
+   "city": "Clendenin",
+   "county": "Kanawha",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "////48 HOUR PHMSA UPDATE TO INCIDENT REPORT NUMBER 1453413./// //THE REPORTING PARTY STATED THERE ARE NO UPDATES TO THIS REPORT.// PREVIOUS DESCRIPTION OF INCIDENT CALLER IS REPORTING A RELEASE OF NATURAL GAS FROM AN EIGHT INCH STEEL TRANSMISSION PIPELINE DUE TO UNKNOWN CAUSES.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1453402,
+   "date": "2026-01-25",
+   "city": "Leet",
+   "county": "Lincoln",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Diversified Gas",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A RELEASE OF AN UNKNOWN AMOUNT OF NATURAL GAS FROM A PIPELINE FOR AN UNKNOWN REASON. THE RELEASE HAS BEEN SECURED. CAUSE IS UNDER INVESTIGATION. THERE WAS A FIRE, THAT HAS BEEN EXTINGUISHED.",
+   "lat": 38.06,
+   "lon": -82.07556,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1453530,
+   "date": "2026-01-25",
+   "city": "Leet",
+   "county": "Lincoln",
+   "type": "Pipeline",
+   "cause": "Natural Phenomenon",
+   "company": "Diversified Gas",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 900.0,
+     "unit": "mcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS AN UPDATE TO REPORT 1453402 /// UPDATE AS FOLLOWS: THE TYPE OF PIPELINE INVOLVED WAS A TYPE C PIPELINE. THE AMOUNT OF NATURAL GAS RELEASED WAS DETERMINED TO BE 900 MCF. THE CAUSE OF THE RELEASE WAS DETERMINED TO BE DUE TO THE ICE STORM THAT HIT THE AREA. ORIGINAL REPORT AS FOLLOWS: CALLER REPORTING A RELEASE OF AN UNKNOWN AMOUNT OF NATURAL GAS FROM A PIPELINE FOR AN UNKNOWN REASON. THE RELEASE HAS BEEN SECURED. CAUSE IS UNDER INVESTIGATION. THERE WAS A FIRE, THAT HAS BEEN EXTINGUISHE",
+   "lat": 38.06,
+   "lon": -82.07556,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1453212,
+   "date": "2026-01-22",
+   "city": null,
+   "county": "Monongalia",
+   "type": "Mobile",
+   "cause": "Unknown",
+   "company": "Merchant Distributors Inc",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 100.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain>Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING AN ACCIDENT INVOLVING TWO TRACTOR TRAILERS, LEADING TO ONE OF THEIR FUEL TANKS TO BE DAMAGED AND RELEASE AN ESTIMATED 75-100 GALLONS OF DIESEL FUEL ONTO THE ROAD. AN UNKNOWN AMOUNT OF THE FUEL WENT INTO A STORM DRAIN WHICH LEADS TO A NEARBY CREEK. THE CAUSE OF THE ACCIDENT IS UNKNOWN.",
+   "lat": 39.53167,
+   "lon": -79.99778,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1453169,
+   "date": "2026-01-21",
+   "city": null,
+   "county": "Wayne",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED A FREIGHT TRAIN STRUCK A PERSON AT A GRADE CROSSING ON A MAIN LINE TRACK THAT RESULTED IN ONE FATALITY AT THE INCIDENT LOCATION. THE REASON THE PERSON WAS ON THE TRACK IS UNKNOWN.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1452827,
+   "date": "2026-01-15",
+   "city": null,
+   "county": "Wetzel",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Eastern Gas Transmission & Storage",
+   "materials": [
+    {
+     "name": "Natural Gas Liquid (Ngl)",
+     "amount": 0.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "South Fork Fishing Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT AN UNPLANNED PROCESS SHUTDOWN AT A NATURAL GAS REFINERY CAUSED A RELEASE OF AN ESTIMATED (0.0014) GALLONS OF NATURAL GAS LIQUID INTO THE SOUTH FORK FISHING CREEK.",
+   "lat": 39.55083,
+   "lon": -80.67667,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1452598,
+   "date": "2026-01-12",
+   "city": "Oak Hill",
+   "county": "Fayette",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Mercury",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT AN ANTIQUE BLOOD PRESSURE CUFF DROPPED AND BROKE, SPILLING AN UNKNOWN AMOUNT OF MERCURY TO WOODEN FLOORS, WITH SOME SEEPING INTO THE FLOOR CRACKS, AN AIR VENT AND DUCT WORK WHICH IS CURRENTLY CIRCULATING THROUGHOUT THE HOME.",
+   "lat": 38.03,
+   "lon": -81.08,
+   "geo": "county"
+  },
+  {
+   "report_id": 1452624,
+   "date": "2026-01-12",
+   "city": "Slaem",
+   "county": "Doddridge",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": "Antero Midstream",
+   "materials": [
+    {
+     "name": "Produced Water",
+     "amount": 85.59,
+     "unit": "barrel(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Riggins Run",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATED THAT A WATER TRUCK ROLLED OVER DUE TO UNKNOWN CAUSES. BECAUSE OF THIS INCIDENT (85.59) BARRELS OF PRODUCED WATER RELEASED ONTO THE GROUND AND INTO RIGGINS RUN. THE DRIVER RECEIVED UNSPECIFIED INJURIES AND WAS TRANSPORTED TO A NEARBY HOSPITAL FOR TREATMENT.",
+   "lat": 38.38611,
+   "lon": -80.67778,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1452446,
+   "date": "2026-01-09",
+   "city": "Charleston",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Downtown Ford",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED AS A RESULT OF AN ATTEMPT TO OPEN A SAFE AT THE INCIDENT LOCATION, THERE WAS A SUSPECTED ERUPTION AND RELEASE OF WHAT IS BELIEVED TO BE AN UNKNOWN 'DECOMMISSIONED' CHEMICAL. CALLER STATED THEY WERE INFORMED BY HOSPITAL STAFF THE CHEMICAL HAS BEEN DECOMMISSIONED SINCE WWI CALLER NOTED 6 KNOWN INJURIES AND/OR HOSPITALIZATIONS OCCURRED AS A RESULT OF THE INCIDENT. CALLER IS CONCERNED ABOUT EXTENT OF REMEDIATION BEING CONDUCTED BY BUSINESS.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1452258,
+   "date": "2026-01-08",
+   "city": "Westover",
+   "county": "Monongalia",
+   "type": "Fixed",
+   "cause": "Natural Phenomenon",
+   "company": "Snyder And Sons",
+   "materials": [
+    {
+     "name": "Drilling Water Mixed With Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Sewer Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A DRILLING OPERATION AT THE WESTOVER BRIDGE ALONG THE MONONGAHELA RIVER HAD DRILLING WATER AND UNKNOWN OIL IN SOME PITS/PONDS, WHICH OVERFLOWED DUE TO RAIN. THE MATERIAL IS FLOWING ALONG THE STREET AND GOING INTO A SEWER DRAIN, WHICH LEADS TO THE SEWER TREATMENT PLANT. CALLER DID NOT SEE ANY DIRECT IMPACT TO THE RIVER.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1452073,
+   "date": "2026-01-05",
+   "city": "Fayetteville",
+   "county": "Fayette",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A DECEASED BODY WAS FOUND ON RAILROAD TRACKS. IT WAS DISCOVERED THAT THE UNKNOWN INDIVIDUAL HAD JUMPED FROM A BRIDGE ONTO THE TRACKS. NO TRAINS WERE INVOLVED.",
+   "lat": 38.03,
+   "lon": -81.08,
+   "geo": "county"
+  },
+  {
+   "report_id": 1451755,
+   "date": "2025-12-31",
+   "city": "Benwood",
+   "county": "Marshall",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "Aes Drilling Fluids",
+   "materials": [
+    {
+     "name": "Drilling Brine (With Zinc Salts)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drains",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF AN UNKNOWN MATERIAL, ONTO THE GROUND, INTO 3 STORM DRAIN AND INTO THE OHIO RIVER, FROM A TRACTOR TRAILER TRUCK AND FLAT BED TRAILER CARRYING MULTIPLE 500 GALLON TOTES. THE CALLER STATES THE VEHICLES SLID ON ICE, COMING OFF THE EXIT, AND ROLLED OVER INTO A DITCH. THE CALLER STATES THAT THERE ARE NO INJURIES OR FATALITIES AT THIS TIME. CALLER STATES LOCAL FIRE AND HAZMAT TEAMS ARE ON SCENE.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1452537,
+   "date": "2025-12-29",
+   "city": "Huntington",
+   "county": "Wayne",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Spring Valley Public Service Dist",
+   "materials": [
+    {
+     "name": "Raw Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A NEW INCIDENT, RELATED TO NRC REPORT # 1438919 /// CALLER IS REPORTING A RELEASE OF RAW SEWAGE COMING UP FROM THE GROUND ONTO THE ROAD AND GOING INTO A STORM DRAIN. THE CAUSE OF RELEASE IS DUE TO A RUPTURED LINE. THIS OCCURED IN AUGUST 2025, HAS REOCURRED, HAS BEEN GOING ON FOR SEVERAL WEEKS AND IS STILL OCCURRING TODAY. /// THIS IS A NEW INCIDENT, RELATED TO NRC REPORT # 1438919 ///",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1450957,
+   "date": "2025-12-19",
+   "city": "Huntington",
+   "county": "Cabell",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A PERSON WAS SITTING ON THE TRACKS AND HAD THEIR FOOT STRUCK BY AN ONCOMING TRAIN.",
+   "lat": 38.42,
+   "lon": -82.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1449477,
+   "date": "2025-12-03",
+   "city": "West Union",
+   "county": "Doddridge",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Mplx",
+   "materials": [
+    {
+     "name": "Methane",
+     "amount": 14269.6,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A RELEASE OF (14269.6) POUNDS OF METHANE GAS FROM A PRESSURE DIFFERENTIAL INDICATOR PIPING CONNECTION TO THE ATMOSPHERE. THE CAUSE IS DUE TO A PIPING BREAKING WHILE IN VIBRATORY SERVICE.",
+   "lat": 39.27,
+   "lon": -80.7,
+   "geo": "county"
+  },
+  {
+   "report_id": 1448720,
+   "date": "2025-11-24",
+   "city": "Winfield",
+   "county": "Putnam",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "American Eletric Power",
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 5.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Kanawha River",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A DISCHARGE OF NO MORE THAN (5) GALLONS OF HYDRAULIC OIL FROM A HYDRAULIC HOSE ON A FACILITY CRANE, TO THE DOCK AND INTO THE KANAWHA RIVER. THE CAUSE IS UNDER INVESTIGATION.",
+   "lat": 38.51,
+   "lon": -81.9,
+   "geo": "county"
+  },
+  {
+   "report_id": 1447511,
+   "date": "2025-11-09",
+   "city": null,
+   "county": "Marshall",
+   "type": "Vessel",
+   "cause": "Other",
+   "company": "Acnr Towing",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING SRP AND CREW WWERE CHECKING PUMPS ON BARGES. WHILE STEPPING BACK ON TO THE VESSEL FROM CHECKING A PUMP, THE SRP SLIPPED AND FELL. THIS DID RESULT IN (1) INJURY AND (1) HOSPILTILIZATION. NO POTENTIAL/RELEASE OF MATERIALS OCCURRED.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1447093,
+   "date": "2025-11-05",
+   "city": "Chesapeake",
+   "county": "Kanawha",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES A FREIGHT TRAIN STRUCK A TRESPASSER ON THE MAIN LINE. THE TRESPASSER SUSTAINED INJURIES. THE INCIDENT DID OCCUR ON A PASSENGER SERVICE LINE, HOWEVER NO DELAYS.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1445519,
+   "date": "2025-10-15",
+   "city": "Keyser",
+   "county": "Mineral",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Keyser Water Department",
+   "materials": [
+    {
+     "name": "Potassium Permanganate",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Sodium Hypochlorite",
+     "amount": 5.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT 3-5 GALLONS SODIUM HYPOCHLORITE SPILLED AT A WATER TREATMENT FACILITY INTO A ROOM WITH NO DRAINAGE, HOWEVER WHEN THEY WENT TO CLEAN IT, IT WENT INTO A DRAIN WHICH HAD RESIDUE OF POTASSIUM PERMANGANATE. THE REACTION CAUSED BUBBLING AND BLACK FOAM. 1 PERSON REPORTED HAVING AN ITCHY THROAT. THE BUILDING WAS EVACUATED OF 3 EMPLOYEES. IT IS UNKNOWN TO THE CALLER IF THE RELEASE HAS BEEN SECURED",
+   "lat": 39.42,
+   "lon": -78.94,
+   "geo": "county"
+  },
+  {
+   "report_id": 1445490,
+   "date": "2025-10-12",
+   "city": null,
+   "county": "Jefferson",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": "Csx Railroad",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A FREIGHT TRAIN HAD A DERAILMENT OF 11 CARS, NO MATERIALS RELEASED, NO INJURIES OR FATALITIES. THE CAUSE OF THE DERAILMENT IS UNKNOWN AT THIS TIME. THE COST IN DAMAGES IS $455,600.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1445085,
+   "date": "2025-10-09",
+   "city": "Point Pleasant",
+   "county": "Mason",
+   "type": "Vessel",
+   "cause": "Unknown",
+   "company": "Campbell Transportation Company, Inc.",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Kanawha River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF MOTOR OIL ONTO THE DECK AND INTO THE KANAWHA RIVER FROM A TUG BOAT. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1445094,
+   "date": "2025-10-09",
+   "city": null,
+   "county": "Kanawha",
+   "type": "Railroad",
+   "cause": "Derailment",
+   "company": null,
+   "materials": [
+    {
+     "name": "Raw Coal",
+     "amount": 400.0,
+     "unit": "ton(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A DERAILMENT OF (12) CARS DUE TO A BROKEN RAIL. (8) CARS REMAINED UPRIGHT AND (4) FELL TO THEIR SIDE. THIS RESULTED IN THE RELEASE OF (400) TONS OF COAL TO THE BALLAST AND THE GROUND. THERE WAS NO IMPACT TO WATERWAYS. NO PASSENGER TRAIN DELAYS OR INJURIES TO REPORT.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444811,
+   "date": "2025-10-07",
+   "city": "Wheeling",
+   "county": "Brooke",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Vehicle Fluids",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Gasoline: Automotive (Unleaded)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Ethylene Glycol",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// POTENTIAL RELEASE /// CALLER STATED AN INDIVIDUAL HAS APPROX 10 VEHICLES ON THEIR PROPERTY THAT ARE NOT RUNNING AND MAY BE LEAKING FUEL ONTO THE GROUND. THERE IS ALSO A BUILD UP OF TRASH BEHIND THE HOME AS WELL. THIS HAS BEEN GOING ON FOR ABOUT FIVE YEARS NOW.",
+   "lat": 40.27,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444784,
+   "date": "2025-10-06",
+   "city": "Rivesville",
+   "county": "Marion",
+   "type": "Mobile",
+   "cause": "Dumping",
+   "company": "Farm Service",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Paw Paw Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN INDUSTRIAL TRUCK WAS SEEN DUMPING AN UNKNOWN MATERIAL INTO A CREEK AT THE INCIDENT LOCATION. LIMITED INFORMATION WAS GIVEN.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444633,
+   "date": "2025-10-04",
+   "city": "Chapmanville",
+   "county": "Logan",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING MULTIPLE NATURAL GAS LEAKS NEAR HIS HOUSE. CALLER REPORTS A PLASTIC GAS LINE IS LEAKING. CALLER STATES WHEN THEY OPEN THEIR DOOR TO GO OUTSIDE THE SMELL IS OVERWHELMING. CALLER STATES FEELING SICK, BUT NO GAS COMPANY OR FIRE DEPARTMENT WILL FIX THE LINE.",
+   "lat": 37.83,
+   "lon": -81.93,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444095,
+   "date": "2025-09-29",
+   "city": "Buckhannon",
+   "county": "Upshur",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Water Supply",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE IS AN UNKNOWN SUBSTANCE THAT IS MAKING IT INTO HER HOME THAT IS MAKING HER SICK WITH MULTIPLE SYMPTOMS. THE CALLER STATES THERE IS A CHEMICAL ODOR IN THE AIR BOTH INSIDE AND OUTSIDE. THE CALLER SUSPECTS THAT THE ISSUE HAS SOMETHING TO DO WITH WATER.",
+   "lat": 38.89,
+   "lon": -80.23,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444211,
+   "date": "2025-09-29",
+   "city": "Parkersburg",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Unnamed Stream",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING SEVERAL LARGE PUDDLES OF UNKNOWN MATERIAL ON THE GROUND AND GOING INTO AN UNNAMED STREAM. THE MATERIAL SMELLS LIKE FORMALDEHYDE. THIS IS LOCATED AT SOME TYPE OF DUMPING SITE.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1443838,
+   "date": "2025-09-26",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "American Electric Power",
+   "materials": [
+    {
+     "name": "Oil, Misc: Mineral",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED A SEMI-TRUCK STRUCK A POLE THAT WAS HOLDING THREE TRANSFORMERS. THIS RESULTED IN A SPILL OF AN UNKNOWN AMOUNT OF MINERAL OIL ASSUMED TO CONTAIN PCB'S. CALLER STATED THE SPILL REACHED A STORM DRAIN THAT GOES TO THE OHIO RIVER..",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1450169,
+   "date": "2025-09-26",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "American Electric Power",
+   "materials": [
+    {
+     "name": "Oil, Misc: Mineral",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Catch Basin",
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS AN UPDATE TO REPORT #1443838 /// UPDATED INFORMATION IS AS FOLLOWS: -THEY CONFIRMED NO PCB'S WERE RELEASED. -NO MINERAL OIL ENTERED INTO THE STORM DRAIN OR ANY OTHER WATERWAY. THE MATERIAL WAS CONTAINED INSIDE THE CATCH BASIN. ORIGINAL REPORT: CALLER STATED A SEMI-TRUCK STRUCK A POLE THAT WAS HOLDING THREE TRANSFORMERS. THIS RESULTED IN A SPILL OF AN UNKNOWN AMOUNT OF MINERAL OIL ASSUMED TO CONTAIN PCB'S. CALLER STATED THE SPILL REACHED A STORM DRAIN THAT GOES TO THE OHIO RIVER.",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1443653,
+   "date": "2025-09-24",
+   "city": "Blaine",
+   "county": "Mineral",
+   "type": "Pipeline",
+   "cause": "Equipment Failure",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A PIPELINE IN THE RIVER THAT IS EXPOSED AND RELEASING NATURAL GAS.",
+   "lat": 39.42,
+   "lon": -78.94,
+   "geo": "county"
+  },
+  {
+   "report_id": 1442591,
+   "date": "2025-09-12",
+   "city": null,
+   "county": "Grant",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, INTO THE ATMOSPHERE, FROM A TRANSMISSION PIPELINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 39.28444,
+   "lon": -79.34667,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1442688,
+   "date": "2025-09-12",
+   "city": null,
+   "county": "Grant",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "*** THIS IS A 48 HR PHMSA UPDATE TO NRC REPORT 1442591 *** UPDATE IS AS FOLLOWS: - CALLER SPECIFIED WEATHER CONDITION: WIND BLOWING FROM THE EAST TO THE WEST - NO FURTHER UPDATE TO PROVIDE; CAUSE AND AMOUNT RELEASED REMAIN UNKNOWN. ORIGINAL REPORT BELOW: THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, INTO THE ATMOSPHERE, FROM A TRANSMISSION PIPELINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 39.28444,
+   "lon": -79.34667,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1442229,
+   "date": "2025-09-09",
+   "city": null,
+   "county": "Kanawha",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT A TRAIN STRUCK A PEDESTRIAN THAT WAS TRESPASSING ON RAILROAD TRACKS CAUSING ONE FATALITY.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1442256,
+   "date": "2025-09-09",
+   "city": "Triadelphia",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Management Waste Solutions",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING, WHAT THEY BELIEVE TO BE, A RELEASE OF NATURAL GAS AND A SEWAGE ODOR IN THE AIR FROM A NEARBY FACILITY. THE CAUSE OF RELEASE IS UNKNOWN. CALLER FIRST CAME ACROSS THIS ODOR APPROX. 4 MONTHS AGO AFTER A FLOOD, AND SMELL IS STILL IN THE AIR TODAY.",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1441629,
+   "date": "2025-09-03",
+   "city": "Gallipolis Ferry",
+   "county": "Mason",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Icl-Ip America",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A CHEMICAL ODOR IN THE AIR FROM A CHEMICAL FACILITY THAT IS LOCATED ACROSS THE OHIO RIVER IN WEST VIRGINIA.. CALLER STATED PEOPLE IN THE AREA ARE STARTING TO GET SICK FROM THE MATERIAL. THIS WAS FIRST REPORTED ON 13-AUG AT 0030 IN THE MORNING AND IS STILL GOING ON TODAY. THE ODOR IS WORSE IN THE EARLY MORNING HOURS. CALLER STATED THERE WAS A RELEASE OF MATERIAL AT THE FACILITY ON15AUG25.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1441661,
+   "date": "2025-09-03",
+   "city": "Hurricane",
+   "county": "Putnam",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "GRADE CROSSING ACCIDENT INVOLVING A FREIGHT TRAIN AND FEDEX DELIVERY TRUCK. THERE WAS NO MATERIAL RELEASE AND THERE IS NO POTENTIAL FOR A RELEASE. UNKNOWN DAMAGE AMOUNT.",
+   "lat": 38.51,
+   "lon": -81.9,
+   "geo": "county"
+  },
+  {
+   "report_id": 1442093,
+   "date": "2025-09-01",
+   "city": "Elizabeth",
+   "county": "Wirt",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE ARE PIPELINES STICKING OUT OF THE GROUND ON HER PROPERTY THAT IS RELEASING NATURAL GAS INTO THE ATMOSPHERE. THIS HAS BEEN GOING ON FOR APPROX. 1 WEEK. THE MAN WHO OWNED THE MINERAL RIGHTS FOR THE PROPERTY HAS SINCE PASSED AWAY AND THE RESPONSIBLE PARTY IS UNKNOWN.",
+   "lat": 39.02,
+   "lon": -81.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1455143,
+   "date": "2025-09-01",
+   "city": "Follansbee",
+   "county": "Brooke",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material (Strong Toxic Odor)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THERE IS A VERY INTENSE CHEMICAL ODOR IN THE VICINITY OF THE INCIDENT LOCATION THAT IS COMING FROM AN UNKNOWN SOURCE. CALLER STATES THE DEPT OF ENVIRONMENTAL PROTECTION (DEP) HAS BEEN NOTIFIED OF THE ISSUE AS WELL AND THERE MAY BE AN INVESTIGATION TO DETERMINE THE SOURCE. THIS HAS BEEN ONGOING SINCE SEP-2025. THE ODOR SMELLS LIKE A BURNING PLASTIC SMELL OR STRONG CHEMICAL SMELL THAT GETS STUCK IN YOUR THROAT.",
+   "lat": 40.27,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1443496,
+   "date": "2025-08-31",
+   "city": "Paw Paw",
+   "county": "Hampshire",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Pride And Property Llc",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ground Water",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A RELEASE OF MULTIPLE UNKNOWN MATERIALS INTO THE AIR/ATMOSPHERE DUE TO DEMO/REHAB BEING DONE ON A RESIDENTIAL PROPERTY. CALLER STATED WORKERS ROUTINELY WEAR PPE DOING WORK AND CALLER IS CONCERNED ABOUT IMPACT TO NEARBY CITIZENS. CALLER IS ALSO CONCERNED ABOUT THE SEPTIC SYSTEM AND GROUND WATER CONTAMINATION FROM POLLUTANTS.",
+   "lat": 39.32,
+   "lon": -78.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1441186,
+   "date": "2025-08-29",
+   "city": null,
+   "county": "Berkeley",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A PASSENGER WAS STRUCK BY A HIGH RAIL VEHICLE AT A CROSSING. NO TRAINS INVOLVED. NO INJURIES, FATALITIES, OR DELAYS REPORTED. DAMAGES ARE UNKNOWN. VEHICLE HAS BEEN REMOVED FROM TRACKS AND TRACK IS IN SERVICE. CALLER HAD NO FURTHER INFORMATION.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1441032,
+   "date": "2025-08-24",
+   "city": "Augusta",
+   "county": "Hampshire",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Road Side Culvert",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THAT AN INDIVIDUAL IS DUMPING OIL ONTO THEIR GRAVEL DRIVEWAY AS WELL AS THE GRAVEL ROAD TO SUPPOSEDLY CUT DOWN ON THE DUST COMING OFF THE ROAD. WHEN IT RAINS, THE OIL RUNS DOWN HILL IN A CULVERT AND INTO THE NORTH RIVER. CALLER IS CONCERNED THAT THIS MAY IMPACT THE DRINKING WATER IN THE AREA AS WELL AND THAT THIS IS NOT THE FIRST TIME THIS INDIVIDUAL HAS DUMPED THE OIL. IT HAS HAPPENED ON SEVERAL OCCASIONS.",
+   "lat": 39.32,
+   "lon": -78.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440701,
+   "date": "2025-08-23",
+   "city": "Sutton",
+   "county": "Braxton",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED A SEWAGE SPILL ON THE PARKING LOT. THE CALLER BELIEVES AN RV DUMPED THEIR SEWAGE, HOWEVER THEY DID NOT WITNESS THIS.",
+   "lat": 38.7,
+   "lon": -80.72,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440635,
+   "date": "2025-08-22",
+   "city": "Letart",
+   "county": "Mason",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE ON THE OHIO RIVER.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440371,
+   "date": "2025-08-20",
+   "city": "Gallipolis Ferry",
+   "county": "Mason",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A STRONG CHEMICAL ODOR IN THE AIR FROM AN UNKNOWN SOURCE. CALLER STATED THEY ARE IN BETWEEN TWO POWER PLANTS (8 MILES RADIUS). THIS HAS BEEN OCCURRING FOR THE PAST 2-3 DAYS. YOU CAN SMELL THE ODOR AS FAR AS GALLIPOLIS, OH.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440572,
+   "date": "2025-08-20",
+   "city": "Bluefield",
+   "county": "Mercer",
+   "type": "Railroad",
+   "cause": "Equipment Failure",
+   "company": "Norfolk Southern",
+   "materials": [
+    {
+     "name": "Molten Sulfur Un 2448",
+     "amount": 1.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT AN FRA INSPECTOR FOUND A RAILCAR ON A FREIGHT TRAIN WHICH HAD RELEASED SOME MOLTEN SULFUR (UN 2448) DUE TO A FAULTY GASKET. NO PRODUCT REACHED THE GROUND; IT DRIED ON THE SIDES OF THE CAR. 1 GALLON OF MATERIAL RELEASED. NO INJURIES REPORTED.",
+   "lat": 37.4,
+   "lon": -81.1,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440120,
+   "date": "2025-08-17",
+   "city": "Summit Point",
+   "county": "Jefferson",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES A FREIGHT TRAIN DERAILED (3) CARS ON THE MAIN LINE. (2) CARS ARE LEANING ON THE SIDE, AND (1) IS OVERTURNED ON THE GROUND. NO RELEASE OF MATERIALS. THE INCIDENT DOES NOT IMPEDE PASSENGER SERVICE. THE DAMAGES AMOUNT IS UNKNOWN.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440011,
+   "date": "2025-08-16",
+   "city": "Belle",
+   "county": "Kanawha",
+   "type": "Storage Tank",
+   "cause": "Equipment Failure",
+   "company": "Arclin Amines",
+   "materials": [
+    {
+     "name": "Ammonia, Anhydrous",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "ANHYDROUS AMMONIA RELEASED FROM A RELIEF VALVE ON TOP OF A STORAGE TANK DUE TO AN EQUIPMENT FAILURE.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440028,
+   "date": "2025-08-16",
+   "city": "Belle",
+   "county": "Kanawha",
+   "type": "Storage Tank",
+   "cause": "Equipment Failure",
+   "company": "Arclin Amines",
+   "materials": [
+    {
+     "name": "Ammonia, Anhydrous",
+     "amount": 450.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// UPDATE TO NRC REPORT #1440011 /// UPDATE IS AS FOLLOWS: THE AMOUNT RELEASED IS 450 POUNDS, THE RELEASE HAS BEEN SECURED. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ANHYDROUS AMMONIA RELEASED FROM A RELIEF VALVE ON TOP OF A STORAGE TANK DUE TO AN EQUIPMENT FAILURE.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440186,
+   "date": "2025-08-16",
+   "city": "Belle",
+   "county": "Kanawha",
+   "type": "Storage Tank",
+   "cause": "Equipment Failure",
+   "company": "Arclin Amines",
+   "materials": [
+    {
+     "name": "Ammonia, Anhydrous",
+     "amount": 66.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "*** THIS IS A 48 HR PHMSA UPDATE TO NRC REPORT 1440028*** UPDATE IS AS FOLLOWS: - AMOUNT RELEASED HAS BEEN UPDATED FROM 450 POUNDS TO 66 POUNDS RELEASED ORIGINAL REPORT BELOW: /// UPDATE TO NRC REPORT #1440011 /// UPDATE IS AS FOLLOWS: THE AMOUNT RELEASED IS 450 POUNDS, THE RELEASE HAS BEEN SECURED. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ANHYDROUS AMMONIA RELEASED FROM A RELIEF VALVE ON TOP OF A STORAGE TANK DUE TO AN EQUIPMENT FAILURE.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1439859,
+   "date": "2025-08-14",
+   "city": "Whitehall",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Equipment Failure",
+   "company": "Whitehall Public Service Disctrict",
+   "materials": [
+    {
+     "name": "Sewage",
+     "amount": 3.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING RELEASE OF APPROXIMATELY (3) GALLONS OF SEWAGE FROM A WELL ONTO LAND/SOIL. THIS IS DUE TO MECHANICAL FAILURE. THERE WAS A FAULTY SENSOR THAT DID NOT APPROPRIATELY TRIGGER A PUMP.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1439486,
+   "date": "2025-08-11",
+   "city": "Kenova",
+   "county": "Wayne",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED A COUPLE OF HOMELESS PEOPLE STARTED A FIRE NEAR THEIR KENOVA LOADED FLEET. THERE WAS NO RELEASE OF MATERIALS REPORTED.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1439461,
+   "date": "2025-08-10",
+   "city": "Ravenswood",
+   "county": "Jackson",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Turkey Run Lake",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING GREEN FILM ON THE TURKEY RUN LAKE. THE SOURCE OF THE MATERIAL IS UNKNOWN AND THE MATERIAL HAS A STRONG CHEMICAL ODOR. CALLER STATED THE MATERIAL IS DESCRIBED AS A NEON GREEN LOOKING CRUSTY MATERIAL.",
+   "lat": 38.83,
+   "lon": -81.67,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438919,
+   "date": "2025-08-05",
+   "city": "Huntington",
+   "county": "Wayne",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Springvalley Public Service Dist",
+   "materials": [
+    {
+     "name": "Raw Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A RELEASE OF RAW SEWAGE COMING UP FROM THE GROUND AND PULLING ON THE ROAD AND GOING INTO A STORM DRAIN. THE CAUSE OF RELEASE IS POSSIBLY DUE TO A RUPTURED LINE. THIS HAS BEEN GOING ON FOR WELL OVER A MONTH AND IS STILL OCCURRING TODAY.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438995,
+   "date": "2025-08-05",
+   "city": "Moorefield",
+   "county": "Hardy",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Pilgrims Corp.",
+   "materials": [
+    {
+     "name": "Ammonia, Anhydrous",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THAT BETWEEN PRODUCTION AND SANITATION SHIFTS, THE INCOMING CREW SMELLED AMMONIA AND NOTIFIED SAFETY & MAINTENANCE WHO DISCOVERED A RELEASE OF 5 PPM OF AMMONIA RELEASING INTO THE AIR. CAUSE DETERMINED TO BE DUE TO THE SANITATION CREW USING HOT WATER ON THE BRINE MIX CHILLER, CAUSING PRESSURE TO BUILD BEHIND THE SRV WHICH RELEASED AN UNKNOWN AMOUNT OF AMMONIA TO THE ATMOSPHERE. CALLER BELIEVES TOTAL AMOUNT TO BE UNDER THE RQ OF 100 POUNDS.",
+   "lat": 39.0,
+   "lon": -78.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438750,
+   "date": "2025-08-03",
+   "city": "Gallipolis Ferry",
+   "county": "Mason",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Crab Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A COPPER COLORED SUBSTANCE ON CRAB CREEK FROM AN UNKNOWN SOURCE. THE MATERIAL IS APPROX .5 MILE LONG.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438709,
+   "date": "2025-08-02",
+   "city": "St Albans",
+   "county": "Kanawha",
+   "type": "Railroad",
+   "cause": "Derailment",
+   "company": "Csx Railroad",
+   "materials": [
+    {
+     "name": "Coal",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A 12 CAR FREIGHT TRAIN DERAILMENT WITH A POTENTIAL SPILL OF COAL ON THE MAIN LINE. CALLER STATED SO FAR THERE ARE 12 CARS DERAILED AND THERE COULD BE MORE REPORTED LATER. CALLER STATED THIS INCIDENT IS ON A PASSENGER TRAIN LINE. CALLER STATED IT IS UNKNOWN IF THERE ARE ANY DELAYS.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1441232,
+   "date": "2025-08-01",
+   "city": "Gallipolis Ferry",
+   "county": "Mason",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Icl-Ip America Inc",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF AN UNKNOWN CHEMICAL INTO THE ATMOSPHERE FROM THE FACILITY. CALLER STATES THE RELEASE IS CAUSING INHALATION HAZARDS.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438237,
+   "date": "2025-07-29",
+   "city": "Ceredo",
+   "county": "Wayne",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A BODY DISCOVERED WHILE GOING THROUGH THE YARD. THE INDIVIDUAL WAS STRUCK BY A TRAIN BUT IT IS UNKNOWN WHICH TRAIN IT WAS. PERSON WAS TAKEN TO THE HOSPITAL.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438090,
+   "date": "2025-07-26",
+   "city": "West Union",
+   "county": "Doddridge",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Alexander Productions",
+   "materials": [
+    {
+     "name": "Oil: Crude",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN UNKNOWN AMOUNT (SEVERAL HUNDRED GALLONS) OF CRUDE OIL WAS RELEASED ONTO THE SOIL FROM A PIPELINE ON A WELLHEAD. CALLER STATES IF IT RAINS, IT COULD MAKE IT INTO RIGGINS RUN THAT GOES INTO MCELROY CREEK. A BROKEN PIPE ON THE WELLHEAD CAUSED THE RELEASE.",
+   "lat": 39.27,
+   "lon": -80.7,
+   "geo": "county"
+  },
+  {
+   "report_id": 1440902,
+   "date": "2025-07-26",
+   "city": "Marlinton",
+   "county": "Pocahontas",
+   "type": "Aircraft",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTING A HELICOPTER SPRAYING AN UNKNOWN CHEMICAL NEARBY AND INTO A CREEK. CALLER STATES THE CREEK IS THE WATER SOURCE FOR THE CITY OF MARLINTON AND THE RELEASE HAS KILLED ALL VEGETATION IN THE VICINITY.",
+   "lat": 38.33,
+   "lon": -80.0,
+   "geo": "county"
+  },
+  {
+   "report_id": 1437901,
+   "date": "2025-07-25",
+   "city": null,
+   "county": "Wood",
+   "type": "Railroad",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Butyraldehyde",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A TRAIN CREW REPORTED THAT A RESIDUE TANK CAR WAS VENTING AN UNKNOWN AMOUNT OF BUTYRALDEHYDE OUT OF THE TOP VALVE DUE TO AN UNKNOWN CAUSE. THIS WAS A SINGLE RAIL CAR, STATIONARY, AND NOT ATTACHED TO A TRAIN AT THE TIME OF INCIDENT.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1437921,
+   "date": "2025-07-25",
+   "city": null,
+   "county": "Wood",
+   "type": "Railroad Non-Release",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "///////THIS IS AN UPDATE FOR NRC REPORT NUMBER 1437901./////// UPDATED INFO: - CALLER STATES THERE WAS NO RELEASE IN THIS INCIDENT. THERE IS ALSO NO POTENTIAL FOR A RELEASE. - IT WAS NOT VENTING OUT OF THE TOP VALVE (IT WAS A HOSE AIR LINE). ORIGINAL REPORT: CALLER REPORTED THAT A TRAIN CREW REPORTED THAT A RESIDUE TANK CAR WAS VENTING AN UNKNOWN AMOUNT OF BUTYRALDEHYDE OUT OF THE TOP VALVE DUE TO AN UNKNOWN CAUSE. THIS WAS A SINGLE RAIL CAR, STATIONARY, AND NOT ATTACHED TO A TRAIN AT THE TIME O",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1437703,
+   "date": "2025-07-23",
+   "city": "Mannington",
+   "county": "Marion",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 2.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    },
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Buffalo Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT LESS THAN 2 GALLONS OF TRANSFORMER OIL LEAKED INTO BUFFALO CREEK. IT IS UNKNOWN TO THE CALLER IF IT CONTAINED ANY PCB. CALLER REPORTED THAT THEY WERE TOLD IT MAY POSSIBLY HAVE BEEN DUE TO AN AUTO ACCIDENT, BUT THE CALLER WAS UNABLE TO DETERMINE IF THIS HAPPENED OR IF IT IS THE CAUSE.",
+   "lat": 39.51,
+   "lon": -80.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1437250,
+   "date": "2025-07-18",
+   "city": "Wellsburg",
+   "county": "Brooke",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "DIESEL FUEL DISCHARGED FROM A TRACTOR TRAILER TRUCK THAT RAN OFF THE ROAD INTO THE OHIO RIVER. CALLER STATES THE CAUSE OF THE ACCIDENT IS POSSIBLY DUE TO AN OVERSIZED LOAD ON THE TRUCK AS IT WAS COMING DOWN A HILL AND THERE COULD HAVE BEEN A BRAKE FAILURE (WEIGHT OF THE TRUCK WAS 193,000 POUNDS). CALLER IS REQUESTING TO STOP ANY BARGE TRAFFIC AND THERE IS STILL A VICTIM IN THE TRUCK. CREWS ARE CURRENTLY WORKING IN THE WATER NOW.",
+   "lat": 40.27,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1437267,
+   "date": "2025-07-17",
+   "city": null,
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Williams Companies",
+   "materials": [
+    {
+     "name": "Condensate",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED A CONDENSATE LEAK ON A 4-INCH CONDENSATE LINE. THE CAUSE IS UNKNOWN AT THIS TIME. THE DAMAGES WILL EXCEED THE RQ OF $50,000.00. 7/18/2025 @ 1014 HOURS DETERMINED THE EXCEEDANCE OF RQ.",
+   "lat": 39.87389,
+   "lon": -80.69306,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1437318,
+   "date": "2025-07-17",
+   "city": null,
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Williams Companies",
+   "materials": [
+    {
+     "name": "Condensate",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "****THIS 48-HOUR PHMSA UPDATE TO NRC REPORT #1437267**** UPDATE IS AS FOLLOWS: - THE CALLER STATES THEY DUG THE AREA THAT CONTAINS THE LEAK, WITH NEAGTIVE FINDINGS. REMEDIATION WILL RESUME ON (7/21/2025). ORIGINAL REPORT THE CALLER DISCOVERED A CONDENSATE LEAK ON A 4-INCH CONDENSATE LINE. THE CAUSE IS UNKNOWN AT THIS TIME. THE DAMAGES WILL EXCEED THE RQ OF $50,000.00. 7/18/2025 @ 1014 HOURS DETERMINED THE EXCEEDANCE OF RQ.",
+   "lat": 39.87333,
+   "lon": -80.69306,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1437966,
+   "date": "2025-07-17",
+   "city": null,
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Williams Companies",
+   "materials": [
+    {
+     "name": "Condensate",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// UPDATE TO NRC REPORT #1437318 /// UPDATE IS AS FOLLOWS: CALLER STATES THE PIPELINE IS NON JURISDICTIONAL, NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ****THIS 48-HOUR PHMSA UPDATE TO NRC REPORT #1437267**** UPDATE IS AS FOLLOWS: - THE CALLER STATES THEY DUG THE AREA THAT CONTAINS THE LEAK, WITH NEGATIVE FINDINGS. REMEDIATION WILL RESUME ON (7/21/2025). ORIGINAL REPORT THE CALLER DISCOVERED A CONDENSATE LEAK ON A 4-INCH CONDENSATE LINE. THE CAUSE IS UNKNOWN AT THIS TIME. THE DAMAGES W",
+   "lat": 39.87333,
+   "lon": -80.69306,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1436736,
+   "date": "2025-07-12",
+   "city": "Blacksville",
+   "county": "Monongalia",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Dt Midstream",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 7.4,
+     "unit": "mmcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES 7.4 MMCF OF NATURAL GAS RELEASED INTO THE ATMOSPHERE FROM A RELIEF VALVE AT A DEHYDRATION FACILITY. THE CAUSE OF THE RELEASE IS UNDER INVESTIGATION.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1436930,
+   "date": "2025-07-12",
+   "city": "Blacksville",
+   "county": "Monongalia",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Dt Midstream",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 7.4,
+     "unit": "mmcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 // UPDATE IS AS FOLLOWS: - NO UPDATES TO REPORT. ORIGINAL REPORT: CALLER STATES 7.4 MMCF OF NATURAL GAS RELEASED INTO THE ATMOSPHERE FROM A RELIEF VALVE AT A DEHYDRATION FACILITY. THE CAUSE OF THE RELEASE IS UNDER INVESTIGATION.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1436571,
+   "date": "2025-07-10",
+   "city": "Harpers Ferry",
+   "county": "Jefferson",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Shenandoah River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING CONSTRUCTION SITE IS NOT PROPERLY DISPOSING OF WASTE AND DUMPING WASTE INTO THE SHENANDOAH RIVER. CALLER HAS MEDIA OF DUMPING. CALLER HAD NO FURTHER INFORMATION.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1436394,
+   "date": "2025-07-08",
+   "city": null,
+   "county": "Nicholas",
+   "type": "Mobile",
+   "cause": "Equipment Failure",
+   "company": "Thrasher Group",
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 1.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "North Fork River",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT AN EXCAVATOR IN A DRY WORK CELL HAD A HYDRAULIC LINE BUST, DISCHARGING LESS THAN A GALLON OF MATERIAL. THE MATERIAL GOT INTO A ROCK THAT WAS BEING HAMMERED, AND SOME OF THE MATERIAL WENT INTO THE WATER THROUGH THE COMPOST SOCK. CALLER REPORTED THAT NO MATERIAL WAS VISIBLE 50 FEET DOWNSTREAM ON THE NORTH FORK RIVER FROM THE INCIDENT.",
+   "lat": 38.23944,
+   "lon": -80.52861,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1436576,
+   "date": "2025-07-06",
+   "city": "Waverly",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Natural Phenomenon",
+   "company": "First Energy Corp",
+   "materials": [
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 2.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    },
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 212.0,
+     "unit": "part(s) per million",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT A STORM CAUSED A POLE MOUNTED TRANSFORMER TO RELEASE 2 GALLONS OF TRANSFORMER OIL ONTO SOIL. CALLER REPORTED THAT THE MATERIAL HAD 212 PPM OF PCB.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1436012,
+   "date": "2025-07-04",
+   "city": "Fayetteville",
+   "county": "Fayette",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED A PASSENGER TRAIN STRUCK A PERSON ON A MAIN LINE TRACK THAT RESULTED IN ONE FATALITY AT THE INCIDENT LOCATION. THE REASON THE PERSON WAS ON THE TRACK IS UNKNOWN.",
+   "lat": 38.03,
+   "lon": -81.08,
+   "geo": "county"
+  },
+  {
+   "report_id": 1435595,
+   "date": "2025-06-30",
+   "city": "Blue Field",
+   "county": "Mercer",
+   "type": "Railroad",
+   "cause": "Equipment Failure",
+   "company": "Norfolk Southern",
+   "materials": [
+    {
+     "name": "Oil, Misc: Lubricating",
+     "amount": 50.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES 50 GALLONS OF LUBE OIL WAS RELEASED ONTO THE TRACK BALLAST FROM A LOCOMOTIVE. THE LOCOMOTIVE EXPERIENCED AN OIL LEAK THAT FILLED UP THE SUMP AND THEN OUT OF THE SUMP. AN EQUIPMENT FAILURE CAUSED THE RELEASE.",
+   "lat": 37.4,
+   "lon": -81.1,
+   "geo": "county"
+  },
+  {
+   "report_id": 1435697,
+   "date": "2025-06-30",
+   "city": "Clendenin",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Operator Error",
+   "company": "Tc Energy",
+   "materials": [
+    {
+     "name": "Pipeline Sludge Containing Hydrocarbons",
+     "amount": 1.0,
+     "unit": "quart(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Dry Stream",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED APPROX. 1 QUART OF PIPELINE SLUDGE THAT CONTAINS HYDROCARBONS RELEASED INTO A STREAM THAT WAS DRY. THE RELEASE WAS DUE TO A CONSTRUCTION ERROR (OPERATOR) WHILE REMOVING A DRIP TANK THAT COLLECTS FLUIDS.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434511,
+   "date": "2025-06-19",
+   "city": "Bruceton Mills",
+   "county": "Preston",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED AN UNKNOWN OIL WAS DISCOVERED ON THEIR PROPERTY FROM AN UNKNOWN SOURCE.",
+   "lat": 39.47,
+   "lon": -79.67,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434399,
+   "date": "2025-06-17",
+   "city": "Charleston",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Millenium Medical Center",
+   "materials": [
+    {
+     "name": "No Chris Code - Used Needles And Swabs With Blood (Bio-Hazard)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES A MEDICAL CENTER IS DUMPING THEIR USED NEEDLES AND SWABS WITH BLOOD ON THEM INTO A REGULAR TRASH CAN, INSTEAD OF A HAZARDOUS WASTE CONTAINER, AND THE REGULAR TRASH IS JUST BEING SENT TO A LANDFILL. CALLER STATES THIS HAS BEEN ONGOING FOR THREE YEARS.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434418,
+   "date": "2025-06-17",
+   "city": "Clarksburg",
+   "county": "Harrison",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 3.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT AN AUTOMOBILE STRUCK A POWER POLE, CAUSING DAMAGE TO A TRANSFORMER. THIS RESULTED IN THE RELEASE OF (3) GALLONS OF NON-PCB TRANSFORMER OIL ONTO ASPHALT. A NEARBY STORM DRAIN WAS ALSO AFFECTED.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434233,
+   "date": "2025-06-16",
+   "city": "Falling Waters",
+   "county": "Berkeley",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Refrigerant Gases",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED INDIVIDUAL IS WORKING ON REFRIGERATORS AND AIR CONDITIONERS AND CUTTING THE LINES. THIS IS CAUSING A RELEASE OF FREON INTO THE AIR WITHOUT VACUUMING IT. THIS INFORMATION WAS RECEIVED VIA THIRD PARTY.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434301,
+   "date": "2025-06-16",
+   "city": "Miami",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "No Chris Code - Sewage",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "SEWAGE IS RELEASING ONTO THE GROUND FROM THE BATHROOM OF A MOBILE HOME AND THIS HAS BEEN ONGOING FOR A YEAR.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434194,
+   "date": "2025-06-15",
+   "city": "Clifton",
+   "county": "Mason",
+   "type": "Railroad",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Hydrochloric Acid",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A TANKER CAR RELEASE FROM A SINGLE EMPTY HYDROCHLORIC ACID TANK CAR (GATX61265). NO INJURIES OR FATALITIES REPORTED. THIS INCIDENT IS NOT ON A PASSENGER TRAIN LINE.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434603,
+   "date": "2025-06-15",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Fixed",
+   "cause": "Natural Phenomenon",
+   "company": "First Energy Corp",
+   "materials": [
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 12.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    },
+    {
+     "name": "Polychlorinated Biphenyls",
+     "amount": 120.0,
+     "unit": "part(s) per million",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF PCB TRANSFORMER OIL, ONTO THE GROUND, FROM A SINGLE POLE TOP TRANSFORMER. THE CALLER STATES THAT THE CAUSE OF THE INCIDENT WAS DUE TO THE UTILITY POLE FALLING DURING A HEAVY RAIN EVENT.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433951,
+   "date": "2025-06-13",
+   "city": "Proctor",
+   "county": "Marshall",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Westlake",
+   "materials": [
+    {
+     "name": "Chlorine",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A CHLORINE SMELL FOR THE LAST FEW MONTHS FROM A CHEMICAL PLANT. CALLER ALSO SAID IT CAUSES SKIN TINGLING AND EYE BURNING WHEN IT IS HAPPENING AND THEY HAD SEEN DEAD BIRDS ON 6/9. CALLER REPORTED THE SMELL IS PRESENT AGAIN THIS MORNING.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1444077,
+   "date": "2025-06-13",
+   "city": "Proctor",
+   "county": "Marshall",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Westlake",
+   "materials": [
+    {
+     "name": "Chlorine",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "****THIS IS AN UPDATE TO NRC REPORT #1433951**** UPDATE IS AS FOLLOWS: - THE CALLER STATES THE SMELL IS GETTING INCREASING WORSE, AND OCCURS MOSTLY AT NIGHT. ORIGINAL REPORT CALLER REPORTED A CHLORINE SMELL FOR THE LAST FEW MONTHS FROM A CHEMICAL PLANT. CALLER ALSO SAID IT CAUSES SKIN TINGLING AND EYE BURNING WHEN IT IS HAPPENING AND THEY HAD SEEN DEAD BIRDS ON 6/9. CALLER REPORTED THE SMELL IS PRESENT AGAIN THIS MORNING.",
+   "lat": 39.86,
+   "lon": -80.66,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433755,
+   "date": "2025-06-11",
+   "city": "Elk Garden",
+   "county": "Mineral",
+   "type": "Storage Tank",
+   "cause": "Operator Error",
+   "company": "Us Army Corp Of Engineers",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 1.0,
+     "unit": "quart(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Jennings Randolph Lake",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED 1 QUART OF DIESEL FUEL BURPED OUT OF A GENERATOR'S HOLDING TANK INTO JENNINGS RANDOLPH LAKE. THE RELEASE WAS DUE TO AN OVERFILL BY A CONTRACTOR.",
+   "lat": 39.42,
+   "lon": -78.94,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433697,
+   "date": "2025-06-10",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Marathon Gas Station",
+   "materials": [
+    {
+     "name": "Gasoline: Automotive (Unleaded)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES THEY RECEIVED A REPORT OF AN ACTIVE DISCHARGE OF GASOLINE FROM A GAS STATION NEAR THE 'LONG RUN' AND 'WHEELING CREEK'. THE AMOUNT IS UNKNOWN AND IT IS UNKNOWN WHETHER THE DISCHARGE HAS REACHED A STORM DRAIN OR EITHER WATERWAYS.",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433512,
+   "date": "2025-06-08",
+   "city": null,
+   "county": "Lewis",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES A TREE FELL ON AN UNDERGROUND NATURAL GAS STORAGE WELL (4 INCH LEAD) PIPELINE, CAUSING IT TO BECOME DAMAGED. THE INCIDENT RESULTED IN AN ATMOSPHERIC RELEASE OF NATURAL GAS. AT 1915: CONFIRMED IT WAS THEIR ASSET.",
+   "lat": 39.12167,
+   "lon": -80.52417,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1433620,
+   "date": "2025-06-08",
+   "city": null,
+   "county": "Lewis",
+   "type": "Pipeline",
+   "cause": "Natural Phenomenon",
+   "company": "Eastern Transmission & Storage",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 35000.0,
+     "unit": "mcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A 48HR PHMSA UPDATE TO REPORT # 1433512 /// UPDATED INFORMATION IS AS FOLLOWS: -THE CAUSE HAS BEEN CHANGED TO NATURAL PHENOMENON. -THE TIME OF DISCOVERY HAS CHANGED TO 1800. -THE LOCATION IS MARE RUN RD. -ESTIMATED QUANTITY RELEASED IS MCF 35000. -1904 IT WAS CONFIRMED THEY WERE THE RESPONSIBLE PARTY. -THE SUSPECTED RESPONSIBLE PARTY HAS BEEN UPDATED. -PIPELINE IS NOT COVERED. -NO ENVIRONMENTAL IMPACT. -ESTIMATED RELEASE DURATION IS 70 MINS. -1855 IS THE TIME OF THE ISOLATION OF PIPE",
+   "lat": 39.12167,
+   "lon": -80.52417,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1433233,
+   "date": "2025-06-05",
+   "city": "Bridgeport",
+   "county": "Harrison",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ann Run",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED AN UNKNOWN SHEEN INCIDENT IN ANN RUN BEHIND THE RESIDENCE. THE SOURCE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433264,
+   "date": "2025-06-05",
+   "city": "Bridgeport",
+   "county": "Harrison",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Misc: Mineral (Non-Pcb)",
+     "amount": 30.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Simpson Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED A TRUCK SNAGGED THE TELEPHONE WIRES RESULTING IN A POLE MOUNTED TRANSFORMER COMING DOWN. CALLER STATED 30 GALLONS OF NON PCB MINERAL OIL SPILLED ONTO THE GROUND. CALLER STATED 8-10 GALLONS OF THE SPILL REACHED THE SIMPSON CREEK.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1434549,
+   "date": "2025-06-05",
+   "city": null,
+   "county": "Taylor",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": "Csx Railroad",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A DERAILMENT OF 5 CARS THAT OCCURRED WHILE MAKING A SHOVE MOVEMENT. THE PRECISE CAUSE OF THE DERAILMENT IS UNKNOWN AT THE TIME. THERE IS NO ACTUAL OR POTENTIAL RELEASE OF MATERIAL.",
+   "lat": 39.33,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433050,
+   "date": "2025-06-04",
+   "city": null,
+   "county": "Wayne",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Big Sandy River",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES DISCOVERING AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE BEHIND THE BARGE DOCK. THE SHEEN IS RAINBOW IN COLOR AND IS 30FT X 10FT. THE AREA WHERE THE SHEEN IS, TENDS TO COLLECT GARBAGE AND IS OUT OF THE CURRENT. WHERE THE SHEEN IS, IS IN A TIGHT SPOT AND NO REMEDIAL ACTIONS CAN BE TAKEN.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433109,
+   "date": "2025-06-04",
+   "city": "Parkersburg",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "People'S Cartage",
+   "materials": [
+    {
+     "name": "Calcium Hypochlorite",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED AN UNKNOWN AMOUNT OF CALCIUM HYPOCHLORITE RELEASED INTO THE AIR ATMOSPHERE DUE TO A FIRE IGNITING IN A STORAGE BUILDING. IT IS ESTIMATED LESS THAN (15) LBS RELEASED INTO THE AIR/ATMOSPHERE. THE CAUSE OF THE FIRE IS BELIEVED TO BE ATTRIBUTED TO A CHEMICAL REACTION OCCURRING IN THE 'FLOOR SWEEP' BUCKETS. IT IS UNKNOWN WHAT CONTAMINANT IN THE 'FLOOR SWEEP' WOULD HAVE CAUSED THE CHEMICAL REACTION. INVESTIGATION IS ONGOING.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1433191,
+   "date": "2025-06-04",
+   "city": "Bridgeport",
+   "county": "Taylor",
+   "type": "Mobile",
+   "cause": "Equipment Failure",
+   "company": null,
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 5.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ditch",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING STATE ROAD DEPARTMENT WAS DOING MAINTENANCE WORK OFF ROAD AND HYDRAULIC LINE ON TRACTOR BROKE RESULTING IN A RELEASE OF APPROX. HYDRAULIC OIL INTO NEARBY DITCH. ABSORBENT PADS AND POWDER DEPLOYED ON MATERIAL. CALLER'S DOG BATHED IN OIL. DOG IS OKAY.",
+   "lat": 39.33,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1432606,
+   "date": "2025-05-30",
+   "city": "Vienna",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Operator Error",
+   "company": "Wendys",
+   "materials": [
+    {
+     "name": "Acrylic Paint",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A RELEASE OF AN UNKNOWN AMOUNT OF ACRYLIC PAINT FROM THE SRP'S BUILDING. CALLER STATED THE SRP APPLIED THE PAINT TO THEIR ROOF, HOWEVER THE PRODUCT IS BEING WASHED FROM THE ROOF INTO A STORM DRAIN WHICH LEADS TO THE OHIO RIVER.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1432456,
+   "date": "2025-05-28",
+   "city": "Paden City",
+   "county": "Wetzel",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THE DISCOVERY OF HYDRAULIC OIL THAT HAD BEEN SPILLED OR RELEASED ONTO SOIL IN PADEN CITY PARK. IT IS UNKNOWN WHERE THE OIL CAME FROM.",
+   "lat": 39.6,
+   "lon": -80.64,
+   "geo": "county"
+  },
+  {
+   "report_id": 1432301,
+   "date": "2025-05-27",
+   "city": "Beckley",
+   "county": "Raleigh",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "R&L Carriers",
+   "materials": [
+    {
+     "name": "Red Flammable Paint",
+     "amount": 3.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF RED FLAMMABLE PAINT, ONTO THE GROUND AND INTO A SINGLE STORM DRAIN, FROM 5 FIVE GALLON PALES DURING OFFLOADING FROM A TRACTOR TRAILER. THE CALLER STATES THAT THE CAUSE OF THE RELEASE WAS DUE TO THE PALLET SHIFTING ON THE LIFT GATE OF THE TRUCK, DROPPING THE PALES ONTO THE GROUND.",
+   "lat": 37.77,
+   "lon": -81.22,
+   "geo": "county"
+  },
+  {
+   "report_id": 1432203,
+   "date": "2025-05-26",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER DISCOVERED A STRONG STENCH OF \"ROTTEN EGGS/SEWAGE\" AS HE APPROACHED CRAMMEYS RUN. THE CALLER STATES THE STENCH CARRIED ABOUT 200 YARDS.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1431929,
+   "date": "2025-05-23",
+   "city": "Bridgeport",
+   "county": "Harrison",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Thomas Fork",
+   "water_supply_contaminated": false,
+   "description": "UNKNOWN SHEEN SIGHTING. EXACT SOURCE OF THE SHEEN IS UNKNOWN AT THIS TIME. CALLER STATES THE SHEEN LENGTH IS CONTINUOUS.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1431906,
+   "date": "2025-05-22",
+   "city": "French Creek",
+   "county": "Upshur",
+   "type": "Fixed",
+   "cause": "Natural Phenomenon",
+   "company": null,
+   "materials": [
+    {
+     "name": "Polychlorinated Biphenyls (Unknown If Present)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Oil, Misc: Transformer",
+     "amount": 5.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "French Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THAT DUE TO STORM DAMAGE A TRANSFORMER FELL AND BROKE OPEN. THIS CAUSED A DISCHARGE OF TRANSFORMER OIL ONTO THE GROUND AND INTO A STORM DRAIN AND INTO A CREEK. CALLER STATES THAT THE PCB CONTENT IS UNKNOWN AT THIS TIME, BUT THEY ARE TREATING IT LIKE PCBS ARE PRESENT.",
+   "lat": 38.89,
+   "lon": -80.23,
+   "geo": "county"
+  },
+  {
+   "report_id": 1432032,
+   "date": "2025-05-22",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED A STRONG ODOR OF ROTTEN EGGS FROM AN UNDERGROUND MINE NEAR THE INCIDENT LOCATION. THE CAUSE OF THE RELEASE IS DUE TO THE MINE COLLAPSING FOR UNKNOWN REASONS. LIMITED INFORMATION WAS PROVIDED. -THE CALLER STATED HE/SHE HAS BEEN HOSPITALIZED DUE TO THE EFFECTS OF THE RELEASE OF THE UNKNOWN MATERIAL.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1431792,
+   "date": "2025-05-21",
+   "city": "Washington",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Celanese",
+   "materials": [
+    {
+     "name": "Dowtherm (A)",
+     "amount": 3773.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A RELEASE OF APPROXIMATELY 3773 POUNDS OF DOWTHERM A FROM A VAPORIZER UNIT. CALLER STATED A PROCESS UPSET OCCURRED DUE TO UNKNOWN CAUSES RESULTING IN A SAFETY RELIEF VALVE ACTIVATING ON THE VAPORIZER UNIT.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1431688,
+   "date": "2025-05-20",
+   "city": "Meadow Bridge",
+   "county": "Summers",
+   "type": "Railroad",
+   "cause": "Derailment",
+   "company": "Csx Railroad",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Hydraulic Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Ethylene Glycol",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Herbicide",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Meadow Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATED THAT A HIGH RAIL VEHICLE OVERTURNED AND IS RELEASING AN UNKNOWN AMOUNTS OF HERBICIDE, DIESEL, ANTIFREEZE, AND HYDRAULIC FLUID. THE MATERIAL IS BEING RELEASED INTO MEADOW CREEK. THE CAUSE OF THE RELEASE IS UNKNOWN AND UNDER INVESTIGATION. CURRENTLY IT IS UNKNOWN IF ANY ROADWAYS OR TRACKS WERE CLOSED. THE WATERWAY AFFECTED FLOWS INTO A NATIONAL PARK. ALTHOUGH THE AMOUNT OF MATERIAL THAT RELEASED IS UNKNOWN THE CALLER HEARD HUNDREDS OF GALLONS MAY HAVE RELEASED.",
+   "lat": 37.65,
+   "lon": -80.85,
+   "geo": "county"
+  },
+  {
+   "report_id": 1430988,
+   "date": "2025-05-13",
+   "city": "Pursglove",
+   "county": "Monongalia",
+   "type": "Mobile",
+   "cause": "Other",
+   "company": "H &  I Express Inc",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 100.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Wades Run Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATED THAT A TRACTOR TRAILER TRUCK RELEASED (100) GALLONS OF DIESEL FROM ITS SADDLE TANK DUE TO HITTING A CONCRETE WALL AND ANOTHER VEHICLE. THE MATERIAL RELEASED ONTO THE ROADWAY, SOIL, AND WADES RUN CREEK. THE AMOUNT OF MATERIAL THAT RELEASED INTO THE CREEK IS UNKNOWN TO THE CALLER.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1430333,
+   "date": "2025-05-06",
+   "city": "Huntington",
+   "county": "Cabell",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES A TRESPASSING VEHICLE WAS STRUCK BY A FREIGHT TRAIN AT THE INCIDENT LOCATION. NO INJURIES OR FATALITIES REPORTED. THIS INCIDENT OCCURRED ON A PASSENGER TRAIN ROUTE WITH NO PASSENGER TRAIN DELAYS.",
+   "lat": 38.42,
+   "lon": -82.24,
+   "geo": "county"
+  },
+  {
+   "report_id": 1429878,
+   "date": "2025-04-30",
+   "city": "Davin",
+   "county": "Logan",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Huff Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THERE IS A UNKNOWN WELL NEAR THE BANK OF A CREEK AND DUE TO RAIN THE SIDE OF THE BANK HAS WASHED OUT AND THE WELL IS NOW IN THE CREEK. THIS IS ALSO DISCHARGING AN UNKNOWN OIL INTO THE WATER DUE TO UNKNOWN CAUSES. CALLER STATES THERE IS A GAS ODOR IN THE AIR AS WELL.",
+   "lat": 37.83,
+   "lon": -81.93,
+   "geo": "county"
+  },
+  {
+   "report_id": 1428947,
+   "date": "2025-04-19",
+   "city": "Newell",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Other",
+   "company": "Ergon West Virginia Inc",
+   "materials": [
+    {
+     "name": "Dirty Water Mixed With An Unknown Oil",
+     "amount": 25.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THAT WHILE STEAMING OUT THEIR EMERGENCY FLARE, THERE WAS A RELEASE OF DIRTY WATER MIXED WITH AN UNKNOWN OIL ONTO THE THE GROUND AND INTO THE WATER.",
+   "lat": 40.52,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1428583,
+   "date": "2025-04-14",
+   "city": "Morgantown",
+   "county": "Monongalia",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Sunoco",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 2.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Monongahela River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF DIESEL, MONONGAHELA RIVER, FROM A DOCK UNLOADING LINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
+   "lat": 39.63,
+   "lon": -80.05,
+   "geo": "county"
+  },
+  {
+   "report_id": 1428321,
+   "date": "2025-04-11",
+   "city": "Ravenswood",
+   "county": "Jackson",
+   "type": "Vessel",
+   "cause": "Operator Error",
+   "company": "Marathon Petroleum Company",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 400.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THEY WERE CONDUCTING AN INTERNAL FUEL TRANSFER ON A BARGE AND WHILE THAT TRANSFER WAS ONGOING THE CREW WAS DISTRACTED BY ANOTHER INCIDENT WITH THE ENGINE ON THE BARGE. CALLER STATES THAT DUE TO THE CREW GETTING DISTRACTED THE FUEL TRANSFER WAS LEFT RUNNING AND CAUSED A DISCHARGE OF DIESEL FUEL INTO THE WATER OUT OF A VENT.",
+   "lat": 38.83,
+   "lon": -81.67,
+   "geo": "county"
+  },
+  {
+   "report_id": 1427974,
+   "date": "2025-04-04",
+   "city": "Logan",
+   "county": "Logan",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING A SPILL OF OIL FROM THE (SRP) SUSPECTED RESPONSIBLE PARTY'S PROPERTY. CALLER STATED SRP HAS BEEN STORING USED MOTOR OIL FROM THEIR TRACTOR TRAILER TRUCK IN A KIDDY POOL ON THE PROPERTY. CALLER STATED THE AREA RECENTLY FLOODED AND OIL HAS SPILLED ALL OVER NEIGHBORING PROPERTIES; YARDS AND FIELDS ARE COVERED IN THE MOTOR OIL AND WILDLIFE SEEMS TO HAVE BEEN EFFECTED. NO REMEDIATION HAS TAKEN PLACE THUS FAR.",
+   "lat": 37.83,
+   "lon": -81.93,
+   "geo": "county"
+  },
+  {
+   "report_id": 1427065,
+   "date": "2025-03-28",
+   "city": "Inwood",
+   "county": "Berkeley",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Dk Coating",
+   "materials": [
+    {
+     "name": "Dichloromethane",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Ps1L Chemical",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A LOCAL POWDER AND PAINTING BUSINESS IS DUMPING PS1L, A CHEMICAL THAT CONTAINS DICHLOROMETHANE, INTO A STORM DRAIN ON THE PREMISES. THIS HAS BEEN ONGOING FOR 8 TO 10 YEARS.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1427127,
+   "date": "2025-03-28",
+   "city": "Cairo",
+   "county": "Ritchie",
+   "type": "Storage Tank",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Unnamed Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A TANK ON A FARM IS DISCHARGING AN UNKNOWN OIL ONTO THE SOIL AND REACHING A NEARBY CREEK. IT IS UNKNOWN WHAT CAUSED THE RELEASE.",
+   "lat": 39.17,
+   "lon": -81.06,
+   "geo": "county"
+  },
+  {
+   "report_id": 1426803,
+   "date": "2025-03-25",
+   "city": "Ceredo",
+   "county": "Wayne",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE ON THE OHIO RIVER. THE SHEEN IS LOCATED BETWEEN 2 BARGES AT THE CEREDO DOCK. THERE WAS A RECENT RAIN EVENT IN THE AREA THAT MAY HAVE CAUSED THE SHEEN, BUT THIS HAS NOT BEEN CONFIRMED.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1427113,
+   "date": "2025-03-25",
+   "city": "Oak Hill",
+   "county": "Fayette",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": null,
+   "materials": [
+    {
+     "name": "Vehicle Fluids",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF VEHICLE FLUIDS ONTO THE GROUND FROM A VEHICLE IN THE JUNK YARD. THE CALLER STATES THAT THE SRP IS USING THE AREA AS A JUNK YARD AND IS RELEASING FLUIDS FROM ABOUT 55 VEHICLES ON THE PROPERTY.",
+   "lat": 38.03,
+   "lon": -81.08,
+   "geo": "county"
+  },
+  {
+   "report_id": 1426367,
+   "date": "2025-03-20",
+   "city": "Green Spring",
+   "county": "Hampshire",
+   "type": "Railroad",
+   "cause": "Equipment Failure",
+   "company": "Csx Railroad",
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 1.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A HOSE BUSTED ON A WORK TRUCK AND SPILLED LESS THAN A GALLON OF HYDRAULIC OIL TO BALLAST AND THE RIGHT-OF-WAY NEAR A RAILROAD GRADE CROSSING. NO TRAINS WERE INVOLVED WITH THE INCIDENT AND THERE ARE NO EXPECTED DELAYS TO RAIL SERVICES.",
+   "lat": 39.32,
+   "lon": -78.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1426311,
+   "date": "2025-03-19",
+   "city": "Page",
+   "county": "Fayette",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": "Kanawha River Railroad",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTS (05) LOCOMOTIVES AND (15) FREIGHT CARS HAVE DERAILED. NO RELEASE OR POTENTIAL RELEASE OF MATERIALS. NO INJURIES AND OR FATALITIES REPORTED. THE CAUSE OF THE DERAILMENT IS CURRENTLY UNKNOWN.",
+   "lat": 38.03,
+   "lon": -81.08,
+   "geo": "county"
+  },
+  {
+   "report_id": 1426026,
+   "date": "2025-03-16",
+   "city": "Parkersburg",
+   "county": "Wood",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "People'S Tartage",
+   "materials": [
+    {
+     "name": "Calcium Hypochlorite",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// POTENTIAL RELEASE /// THE CALLER STATED THAT A MANUFACTURING FACILITY EXPERIENCED A FIRE DUE TO UNKNOWN CAUSES. BECAUSE OF THIS INCIDENT THERE IS A POTENTIAL THAT AN UNKNOWN AMOUNT OF CALCIUM HYPOCHLORITE MAY HAVE RELEASED. ACCORDING TO THE CALLER THERE WAS (100) POUNDS OF MATERIAL IN THE BUILDING DURING THE EVENT. AN INVESTIGATION IS BEING CONDUCTED TO DETERMINE IF ANY MATERIAL WAS RELEASED.",
+   "lat": 39.2,
+   "lon": -81.52,
+   "geo": "county"
+  },
+  {
+   "report_id": 1425658,
+   "date": "2025-03-12",
+   "city": "Belle",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Over Pressuring",
+   "company": "Arclin Amines",
+   "materials": [
+    {
+     "name": "Dimethylformamide",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN UNKNOWN AMOUNT OF DIMETHYLFORMAMIDE (CAS: 68-12-2) WAS RELEASED ONTO GRAVEL FROM THE DMF DISCHARGE LINE THAT GOES TO THE LOAD HEADER. THE LINE WAS CLOSED OFF ON BOTH ENDS AND DUE TO HIGHER OUTDOOR TEMPERATURES, THE PRESSURE ROSE WHICH CAUSED THE RELEASE.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1425774,
+   "date": "2025-03-12",
+   "city": "Belle",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Over Pressuring",
+   "company": "Arclin Amines",
+   "materials": [
+    {
+     "name": "Dimethylformamide",
+     "amount": 1355.0,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS AN UPDATE TO NRC REPORT 1425658 /// /// THE UPDATE IS AS FOLLOWS /// THE CALLER UPDATED THE RELEASE AMOUNT TO (1,355) POUNDS OF DIMETHYLFORMAMIDE. /// ORIGINAL REPORT BELOW /// CALLER STATES AN UNKNOWN AMOUNT OF DIMETHYLFORMAMIDE (CAS: 68-12-2) WAS RELEASED ONTO GRAVEL FROM THE DMF DISCHARGE LINE THAT GOES TO THE LOAD HEADER. THE LINE WAS CLOSED OFF ON BOTH ENDS AND DUE TO HIGHER OUTDOOR TEMPERATURES, THE PRESSURE ROSE WHICH CAUSED THE RELEASE.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1425433,
+   "date": "2025-03-10",
+   "city": "Charlestown",
+   "county": "Jefferson",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "Tevis Energy",
+   "materials": [
+    {
+     "name": "Oil, Fuel: No. 2",
+     "amount": 1500.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "1,000 - 1,500 GALLONS OF HEATING OIL DISCHARGED FROM A TANKER TRUCK DUE TO A SINGLE VEHICLE ACCIDENT.",
+   "lat": 39.3,
+   "lon": -77.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1425424,
+   "date": "2025-03-09",
+   "city": "Alum Bridge",
+   "county": "Lewis",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE ON A CREEK THAT LEADS TO STRAIGHT RUN.",
+   "lat": 38.99,
+   "lon": -80.5,
+   "geo": "county"
+  },
+  {
+   "report_id": 1424988,
+   "date": "2025-03-03",
+   "city": "Williamson",
+   "county": "Mingo",
+   "type": "Railroad",
+   "cause": "Flood",
+   "company": null,
+   "materials": [
+    {
+     "name": "Propane",
+     "amount": 10.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "LIQUID PROPANE RELEASED FROM A PROPANE TANK NEXT TO RAILROAD TRACKS DUE TO HEAVY FLOOD ACTIVITY CAUSING THE TANK TO FLIP UPSIDE DOWN. THERE WAS NO TRAIN INVOLVED WITH THIS INCIDENT.",
+   "lat": 37.72,
+   "lon": -82.13,
+   "geo": "county"
+  },
+  {
+   "report_id": 1424858,
+   "date": "2025-03-02",
+   "city": "Delbarton",
+   "county": "Mingo",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Tc Energy",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF NATURAL GAS INTO THE ATMOSPHERE FROM A 16\" SERVICE PIPELINE. THE CALLER STATES THAT THE CAUSE OF THE INCIDENT IS UNKNOWN AT THIS TIME. CALLER HAS MINIMAL INFORMATION ABOUT THIS INCIDENT.",
+   "lat": 37.72,
+   "lon": -82.13,
+   "geo": "county"
+  },
+  {
+   "report_id": 1425033,
+   "date": "2025-03-02",
+   "city": null,
+   "county": "Logan",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Tc Energy",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 6.3,
+     "unit": "mmcf",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A PHMSA 48-HOUR UPDATE TO NRC REPORT 1424858 /// THE UPDATE IS AS FOLLOWS: THE CALLER STATED THAT (6.3) MMCF OF NATURAL GAS RELEASED DURING THIS INCIDENT. THE CALLER WAS ALSO ABLE TO PROVIDE UPDATED LOCATION INFORMATION. /// ORIGINAL REPORT BELOW /// THE CALLER IS REPORTING A RELEASE OF NATURAL GAS INTO THE ATMOSPHERE FROM A 16\" SERVICE PIPELINE. THE CALLER STATES THAT THE CAUSE OF THE INCIDENT IS UNKNOWN AT THIS TIME. CALLER HAS MINIMAL INFORMATION ABOUT THIS INCIDENT. _____________",
+   "lat": 37.70667,
+   "lon": -82.05778,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1424799,
+   "date": "2025-03-01",
+   "city": "Talcott",
+   "county": "Summers",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A FREIGHT TRAIN STRUCK AN ATV, RESULTING IN (2) INJURIES. NO MATERIALS WERE RELEASED AND NO DERAILMENTS WERE REPORTED. THIS DID NOT OCCUR AT A GRADE CROSSING. THE INDIVIDUALS WERE NOT HOSPITALIZED.",
+   "lat": 37.65,
+   "lon": -80.85,
+   "geo": "county"
+  },
+  {
+   "report_id": 1424743,
+   "date": "2025-02-28",
+   "city": "Glen Easton",
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Eqt Corporation",
+   "materials": [
+    {
+     "name": "Natural Gas (Condensate)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Whetstone Creek",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A CUSTOMER HAD COMPLAINED ABOUT A GAS SMELL. AFTER INVESTIGATING AT THE REPORTED AREA, A SHEEN WAS FOUND ON THE WATERS OF WHETSTONE CREEK. IT WAS DISCOVERED THAT A GATHERING PIPELINE HAD A LEAK DUE TO UNKNOWN REASONS. THIS RESULTED IN A RELEASE OF NATURAL GAS CONDENSATE ONTO THE SURROUNDING SOIL AND WHETSTONE CREEK.",
+   "lat": 39.78444,
+   "lon": -80.74806,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1424842,
+   "date": "2025-02-28",
+   "city": "Moundsville",
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Eqt Corporation",
+   "materials": [
+    {
+     "name": "Liquefied Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// 48HR PHMSA UPDATE TO INCIDENT REPORT # 1424743 /// THE UPDATE IS AS FOLLOWS: - THE CALLER STATES THE NAME AND TYPE OF THE PIPELINE IS WVXLRC025 4\" TYPE R GATHERING PIPELINE. - THE CALLER STATES THAT (LNG) LIQUEFIED NATURAL GAS AND (ONG) NATURAL GAS WAS RELEASED. - THE CALLER STATES THAT HEAVY EQUIPMENT IS EN ROUTE FOR EXCAVATION AND EXPOSURE OF THE PIPELINE. - THE CALLER STATES THAT AIR MONITORING IS OCCURRING BY HAZMAT CREW ONSITE. ORIGINAL DESCRIPTION IS AS FOLLOWS: THE CALLER REPORTED THA",
+   "lat": 39.78444,
+   "lon": -80.74806,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1424854,
+   "date": "2025-02-28",
+   "city": "Moundsville",
+   "county": "Marshall",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Eqt Corporation",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Natural Gas Condensate",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Whetstone Creek",
+   "water_supply_contaminated": false,
+   "description": "/// 02MAR25 UPDATE TO NRC REPORT NUMBER 1424842 /// UPDATED INFORMATION IS AS FOLLOWS: - THE RELEASED MATERIAL WAS NATURAL GAS CONDENSATE AND NATURAL GAS. LIQUIFIED NATURAL GAS WAS NEVER RELEASED. IT IS NOT AN LNG LINE. ORIGINAL 48-HOUR PHMSA UPDATE: /// 02MAR25 48HR PHMSA UPDATE TO INCIDENT REPORT # 1424743 /// THE UPDATE IS AS FOLLOWS: - THE CALLER STATES THE NAME AND TYPE OF THE PIPELINE IS WVXLRC025 4\" TYPE R GATHERING PIPELINE. - THE CALLER STATES THAT (LNG) LIQUEFIED NATURAL GAS AND (ONG) ",
+   "lat": 39.78444,
+   "lon": -80.74806,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1424132,
+   "date": "2025-02-22",
+   "city": null,
+   "county": "Wayne",
+   "type": "Unknown Sheen",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED AN UNKNOWN SHEEN FROM AN UNKNOWN SOURCE IN THE OHIO RIVER AT THE INCIDENT LOCATION. THE CALLER STATED THE SHEEN WAS COMING FROM UP RIVER (HEADED SOUTH) AND WAS 175FT WIDE. THE VESSEL WHO SPOTTED THE SHEEN STATED THE SHEEN WAS DRIFTING BY THEIR VESSEL FOR APPROXIMATELY 25 MINUTES.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423931,
+   "date": "2025-02-19",
+   "city": "Steele",
+   "county": "Wood",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER REPORTED THAT A RELIEF VALVE AT A COMPRESSOR STATION WAS TRIGGERED DUE TO UNKNOWN REASONS. THIS RESULTED IN A RELEASE OF MORE THAN (3,000) MCF INTO THE ATMOSPHERE. THE ACTUAL AMOUNT RELEASED IS UNKNOWN AT THIS TIME.",
+   "lat": 39.06861,
+   "lon": -81.55167,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1423945,
+   "date": "2025-02-19",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Mobile",
+   "cause": "Transport Accident",
+   "company": "United Dairy Inc",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES WHILE MAKING A DELIVERY, A PIECE OF CONCRETE STRUCK THE SADDLE TANK, PUNCTURING IT. THE INCIDENT CAUSED DIESEL FUEL TO RELEASE TO THE GROUND, NO WATERWAYS IMPACTED.",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1424067,
+   "date": "2025-02-19",
+   "city": "Rockport",
+   "county": "Wood",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "///THIS IS A 48 HR PHMSA UPDATE TO NRC REPORT 1423931/// THE UPDATED INFO IS AS FOLLOWS: THE CLOSEST CITY HAS BEEN UPDATED FROM STEELE TO ROCKPORT. THE LOCATION IS THE ROCKPORT COMPRESSOR STATION. THE ORIGINAL REPORTED INFO IS AS FOLLOWS: THE CALLER REPORTED THAT A RELIEF VALVE AT A COMPRESSOR STATION WAS TRIGGERED DUE TO UNKNOWN REASONS. THIS RESULTED IN A RELEASE OF MORE THAN (3,000) MCF INTO THE ATMOSPHERE. THE ACTUAL AMOUNT RELEASED IS UNKNOWN AT THIS TIME.",
+   "lat": 39.06861,
+   "lon": -81.55167,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1423721,
+   "date": "2025-02-17",
+   "city": "South Charleston",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Innovative Water Care",
+   "materials": [
+    {
+     "name": "Chlorine",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// POTENTIAL RELEASE /// CALLER REPORTED A POTENTIAL RELEASE OF AN UNKNOWN AMOUNT OF CHLORINE GAS FROM A CHLORINE SCRUBBER. EXACT CAUSE OF RELEASE IS UNKNOWN.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423739,
+   "date": "2025-02-17",
+   "city": "South Charleston",
+   "county": "Kanawha",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Innovative Water Care",
+   "materials": [
+    {
+     "name": "Chlorine",
+     "amount": 8.66,
+     "unit": "pound(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS AN UPDATE TO NRC REPORT # 1423721 /// UPDATE IS AS FOLLOWS: -INCIDENT IS GOING FROM POTENTIAL TO AN ACTUAL RELEASE -AMOUNT OF CHLORINE RELEASED IS 8.66 POUNDS WHICH IS BELOW THE RQ FOR CHLORINE INITIAL REPORT: /// POTENTIAL RELEASE /// CALLER REPORTED A POTENTIAL RELEASE OF AN UNKNOWN AMOUNT OF CHLORINE GAS FROM A CHLORINE SCRUBBER. EXACT CAUSE OF RELEASE IS UNKNOWN.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423540,
+   "date": "2025-02-14",
+   "city": null,
+   "county": "Mason",
+   "type": "Vessel",
+   "cause": "Equipment Failure",
+   "company": "Marquette Transportation",
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 0.5,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT .5 GALLON OF DIESEL DISCHARGED INTO THE OHIO RIVER FROM A FRACTURE IN AN OVERBOARD PIPE ON A TUG.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423113,
+   "date": "2025-02-09",
+   "city": "Franklin",
+   "county": "Pendleton",
+   "type": "Fixed",
+   "cause": "Operator Error",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil, Fuel: No. 1-D",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A SPILL OF DIESEL FUEL ONTO THE GROUND AT A PRIVATE RESIDENCE.",
+   "lat": 38.68,
+   "lon": -79.35,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423058,
+   "date": "2025-02-04",
+   "city": "Huntington",
+   "county": "Wayne",
+   "type": "Mobile",
+   "cause": "Equipment Failure",
+   "company": "Fed Ex",
+   "materials": [
+    {
+     "name": "Oil, Misc: Motor",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED THAT ON 2/4, A DELIVERY TRUCK RELEASED AN UNKNOWN AMOUNT OF MOTOR OIL ONTO ASPHALT DUE TO EQUIPMENT FAILURE. THE MATERIAL RELEASED ON THE FAR END OF THE ROAD AND THEN THE TRUCK WAS DRIVEN TO THE INTERSECTION OF SPRING VALLEY RD WHERE MORE MATERIAL RELEASED. THERE IS A STORM DRAIN AT THE BOTTOM OF THE HILL. CALLER DOES NOT KNOW IF THIS WAS IMPACTED BY THE INCIDENT.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1422446,
+   "date": "2025-01-31",
+   "city": "Crum",
+   "county": "Wayne",
+   "type": "Railroad Non-Release",
+   "cause": "Derailment",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATES A FREIGHT TRAIN DERAILED (18) CARS ON THE MAIN LINE, DUE TO A ROCK SLIDE. SOME CARS ARE ON THEIR SIDE, OTHERS UPRIGHT, BUT RELEASE OF MATERIALS. THE INCIDENT DOES NOT IMPEDE PASSENGER SERVICE. THE DAMAGE AMOUNT IS UNKNOWN.",
+   "lat": 38.15,
+   "lon": -82.42,
+   "geo": "county"
+  },
+  {
+   "report_id": 1422116,
+   "date": "2025-01-27",
+   "city": "Mannington Township",
+   "county": "Marion",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Eqt Corporation",
+   "materials": [
+    {
+     "name": "Drilling Brine (With Zinc Salts)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Oil: Crude",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Starkey Run",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES AN UNKNOWN OF PRODUCED WATER (MIXTURE OF FRESHWATER AND SALTWATER) WAS RELEASED SUBSURFACE FROM AN UNDERGROUND DISTRIBUTION LINE. THE CAUSE OF THE RELEASE IS UNKNOWN. THE LINE WILL HAVE TO BE EXCAVATED TO INVESTIGATE. THERE WAS A VERY SLIGHT SHEEN IN STARKEY RUN FROM CRUDE OIL AS WELL. CALLER STATES THERE WAS A SIGNIFICANT FISH KILL FROM THE SALTWATER.",
+   "lat": 39.55889,
+   "lon": 80.46389,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1421949,
+   "date": "2025-01-26",
+   "city": "Clarksburg",
+   "county": "Harrison",
+   "type": "Pipeline",
+   "cause": "Explosion",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THIS IS A POTENTIAL RELEASE... CALLER IS REPORTING THERE WAS A HOUSE THAT EXPLODED DUE TO UNKNOWN CAUSES AT THIS TIME. THIS HAD THE POTENTIAL TO RELEASE NATURAL GAS INTO THE AIR.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1422142,
+   "date": "2025-01-26",
+   "city": "Clarksburg",
+   "county": "Harrison",
+   "type": "Pipeline",
+   "cause": "Explosion",
+   "company": null,
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// 48HR UPDATE TO NRC REPORT #1421949 /// UPDATE IS AS FOLLOWS: CALLER STATES THIS WAS A D.O.T REGULATED LINE, THE PIPELINE WAS BELOW GROUND, THERE WAS A FIRE INVOLVED AND THE FIRE WAS EXTINGUISHED, ONE FATALITY INVOLVED AND THE DAMAGES COST AMOUNT IS UNKNOWN. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: THIS IS A POTENTIAL RELEASE... CALLER IS REPORTING THERE WAS A HOUSE THAT EXPLODED DUE TO UNKNOWN CAUSES AT THIS TIME. THIS HAD THE POTENTIAL TO RELEASE NATURAL GAS INTO THE AIR.",
+   "lat": 39.28,
+   "lon": -80.38,
+   "geo": "county"
+  },
+  {
+   "report_id": 1421553,
+   "date": "2025-01-21",
+   "city": "Winfield",
+   "county": "Putnam",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "American Eletric Power",
+   "materials": [
+    {
+     "name": "Hydraulic Oil",
+     "amount": 2.0,
+     "unit": "gallon(s)",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Kanawha River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF HYDRAULIC OIL INTO THE KANAWHA RIVER FROM A CRANE. THE CAUSE OF THE RELEASE WAS DUE TO UNKNOWN REASONS AT THIS TIME.",
+   "lat": 38.51,
+   "lon": -81.9,
+   "geo": "county"
+  },
+  {
+   "report_id": 1421563,
+   "date": "2025-01-21",
+   "city": "Henderson",
+   "county": "Mason",
+   "type": "Vessel",
+   "cause": "Unknown",
+   "company": "Amherst Madison",
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Kanawha River",
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A DISCHARGE OF AN UNKNOWN OIL FROM THE MV KEITH A BLOUNT. CALLER STATED A SHEEN WAS SEEN COMING FROM THE BOW OF THE VESSEL, HOWEVER THE EXACT SOURCE ON THE VESSEL IS UNKNOWN.",
+   "lat": 38.76,
+   "lon": -82.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1421440,
+   "date": "2025-01-19",
+   "city": "Baker",
+   "county": "Hardy",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Hardy Storage Co.",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THEY HAD A NATURAL GAS RELEASE FROM AN ESD BLOW OFF VALVE. THIS CAUSED A RELEASE OF NATURAL GAS INTO THE AIR. THE CAUSE IS UNKNOWN AND UNDER INVESTIGATION.",
+   "lat": 39.0,
+   "lon": -78.87,
+   "geo": "county"
+  },
+  {
+   "report_id": 1421519,
+   "date": "2025-01-19",
+   "city": "Baker",
+   "county": "Hardy",
+   "type": "Pipeline",
+   "cause": "Unknown",
+   "company": "Hardy Storage Co.",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A 48HR PHMSA UPDATE TO NRC REPORT # 1421440 /// UPDATED INFO IS AS FOLLOWS: - INCIDENT OCCURRED AT THE HARDY STORAGE COMPRESSOR STATION INITIAL REPORT: CALLER IS REPORTING THEY HAD A NATURAL GAS RELEASE FROM AN ESD BLOW OFF VALVE. THIS CAUSED A RELEASE OF NATURAL GAS INTO THE AIR. THE CAUSE IS UNKNOWN AND UNDER INVESTIGATION.",
+   "lat": 39.04,
+   "lon": -78.82139,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1421520,
+   "date": "2025-01-19",
+   "city": "Mathias",
+   "county": "Hardy",
+   "type": "Pipeline",
+   "cause": "Equipment Failure",
+   "company": "Columbia Gas Transmission",
+   "materials": [
+    {
+     "name": "Natural Gas",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "/// THIS IS A 48HR PHMSA UPDATE TO NRC REPORT # 1421435 /// UPDATED INFO IS AS FOLLOWS: - THE RELEASE OCCURRED AT THE LOST RIVER COMPRESSOR STATION - CITY, COUNTY AND STATE SHOULD BEEN MATHIAS, WEST VIRGINIA, HARDY COUNTY (26812) INITIAL REPORT: THE CALLER STATED THAT THEY RECEIVED A REPORT OF NATURAL GAS RELEASING AT A COMPRESSOR STATION. A TECHNICIAN WAS SENT OUT AND CONFIRMED NATURAL GAS WAS RELEASING FROM A BLOW OFF VALVE THAT OPENED INVOLUNTARILY. THE AMOUNT OF MATERIAL THAT RELEASED IS UNK",
+   "lat": 38.87722,
+   "lon": -78.86111,
+   "geo": "exact"
+  },
+  {
+   "report_id": 1420999,
+   "date": "2025-01-13",
+   "city": "Inwood",
+   "county": "Berkeley",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Dk Coatings",
+   "materials": [
+    {
+     "name": "Chloride Methane",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Storm Drain",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER STATED THAT A COMPANY IS DUMPING CHLORIDE METHANE INTO A STORM DRAIN IN UNKNOWN AMOUNTS. ACCORDING TO THE CALLER THEY HAVE BEEN DOING THIS FOR (8) YEARS.",
+   "lat": 39.45,
+   "lon": -78.02,
+   "geo": "county"
+  },
+  {
+   "report_id": 1420754,
+   "date": "2025-01-09",
+   "city": "Silvester",
+   "county": "Boone",
+   "type": "Railroad",
+   "cause": "Equipment Failure",
+   "company": null,
+   "materials": [
+    {
+     "name": "Oil: Diesel",
+     "amount": 100.0,
+     "unit": "gallon(s)",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTED A RELEASE OF DIESEL FUEL ONTO THE BALLAST FROM A SINGLE LOCOMOTIVE. THE CAUSE OF THE INCIDENT WAS DUE TO ENGINE FAILURE IN THE LOCOMOTIVE.",
+   "lat": 38.02,
+   "lon": -81.72,
+   "geo": "county"
+  },
+  {
+   "report_id": 1420769,
+   "date": "2025-01-09",
+   "city": "St.  Albans",
+   "county": "Kanawha",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": "Csx Railroad",
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER STATED A FREIGHT TRAIN STRUCK A TRESPASSER THAT WAS LAYING ON THE TRACKS. THIS INCIDENT RESULTED IN A FATAL INJURY.",
+   "lat": 38.32,
+   "lon": -81.53,
+   "geo": "county"
+  },
+  {
+   "report_id": 1420643,
+   "date": "2025-01-08",
+   "city": "Hurricane",
+   "county": "Putnam",
+   "type": "Railroad Non-Release",
+   "cause": "Trespasser",
+   "company": null,
+   "materials": [],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER IS REPORTING THAT A FREIGHT TRAIN STRUCK AN UNOCCUPIED VEHICLE AT A GRADE CROSSING. NO INJURIES OR FATALITIES REPORTED.",
+   "lat": 38.51,
+   "lon": -81.9,
+   "geo": "county"
+  },
+  {
+   "report_id": 1422902,
+   "date": "2024-12-23",
+   "city": "Pineville",
+   "county": "Wyoming",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": null,
+   "materials": [
+    {
+     "name": "Unknown Material (Gas)",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF UNKNOWN HAZARDOUS GASES INTO THE ATMOSPHERE FROM AN UNKNOWN SOURCE IN THE CALLERS RESIDENCE. THE CALLER STATES THAT THE DEPARTMENT OF ENVIRONMENTAL PROTECTION DID AIR QUALITY TESTS AND DETECTED THE GASES. THE CALLER BELIEVES THE GAS MAY BE COMING FROM THE MINES, OR FROM THE ROAD THAT IS BEING BUILT IN THE AREA. THE CALLER ALSO STATES THAT THE GAS SMELLS OF ROTTEN EGGS.",
+   "lat": 37.61,
+   "lon": -81.55,
+   "geo": "county"
+  },
+  {
+   "report_id": 1422911,
+   "date": "2024-12-05",
+   "city": "Weirton",
+   "county": "Hancock",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Weirton Waste Water Plant",
+   "materials": [
+    {
+     "name": "Water Treatment Sludge",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Ohio River",
+   "water_supply_contaminated": false,
+   "description": "THE CALLER IS REPORTING A RELEASE OF WATER TREATMENT SLUDGE INTO THE OHIO RIVER. THE CALLER STATES THAT MANAGEMENT AT THE WATER TREATMENT FACILITY AUTHORIZES DUMPING OF THE WATER TREATMENT SLUDGE WHENEVER THE TANK IS GOING TO OVERFLOW. THE CALLER STATES THAT THIS PRACTICE HAS BEEN ONGOING FOR A FEW YEARS.",
+   "lat": 40.52,
+   "lon": -80.57,
+   "geo": "county"
+  },
+  {
+   "report_id": 1423738,
+   "date": "2024-11-23",
+   "city": "Wheeling",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Unknown",
+   "company": "Grove Terrace Motel",
+   "materials": [
+    {
+     "name": "Unknown Material",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    },
+    {
+     "name": "Round Up Herbicide",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": false
+    }
+   ],
+   "reached_water": false,
+   "body_of_water": null,
+   "water_supply_contaminated": false,
+   "description": "CALLER REPORTED A RELEASE OF AN UNKNOWN AMOUNT OF ROUND UP HERBICIDE OR POSSIBLY OTHER UNKNOWN MATERIAL. CALLER STATED THAT RESIDENTS AT THE INCIDENT LOCATION ARE EXPERIENCING RASHES, ITCHING, NUMBNESS, NAUSEA, AND HALLUCINATING. CALLER STATED THEY BELIEVE IT IS DUE TO THE HERBICIDE BEING SPRAYED EXCESSIVELY, OR POTENTIALLY A RELEASE OF ANOTHER UNKNOWN MATERIAL. CALLER STATED AT LEAST 4 INDIVIDUALS HAVE GONE TO THE HOSPITAL WITH SYMPTOMS. CALLER STATED THEY BELIEVE THERE IS NO VEGETATION OR WILD",
+   "lat": 40.1,
+   "lon": -80.62,
+   "geo": "county"
+  },
+  {
+   "report_id": 1438501,
+   "date": "2024-07-24",
+   "city": "Triadelphia",
+   "county": "Ohio",
+   "type": "Fixed",
+   "cause": "Dumping",
+   "company": "Middle Creek Garage",
+   "materials": [
+    {
+     "name": "Unknown Oil",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    },
+    {
+     "name": "Ethylene Glycol",
+     "amount": 0.0,
+     "unit": "unknown amount",
+     "reached_water": true
+    }
+   ],
+   "reached_water": true,
+   "body_of_water": "Little Wheeling Creek",
+   "water_supply_contaminated": false,
+   "description": "CALLER STATES: 14JUN25: A NATIONAL FLOOD OCCURRED WASHING MULTIPLE VEHICLES OUT OF A NEARBY JUNKYARD INTO THE NEIGHBORHOOD RESULTING IN VARIOUS DISCHARGES OF OIL PRODUCTS; EMERGENCY RESPONDERS RELOCATED AFFECTED VEHICLES BACK TO THE ORIGINAL JUNKYARD LOT 24JUL: SRP BEGAN PHYSICALLY FLIPPING CARS OVER ON SIDES/UPSIDEDOWN TO PURPOSEFULLY DRAIN THE VEHICLES OF OIL PRODUCTS/ ANTIFREEZE, ONTO THE PROPERTY SOIL, VEGETATION, AND GRAVEL. SRP THEN COMPACTS AND PILES THE REMAINING SCRAP. AN UNKNOWN AMOUNT",
+   "lat": 40.05167,
+   "lon": -80.63194,
+   "geo": "exact"
+  }
+ ]
+}

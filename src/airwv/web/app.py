@@ -948,6 +948,28 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/nrc-spills")
+    def nrc_spills(reached_water: bool = False, year: int | None = None):
+        """WV spill/release reports from the National Response Center. Optional
+        filters: reached_water=true (only water-reaching), year=YYYY."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "nrc_spills.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"spills": [], "summary": {}, "source": "", "fetched_at": None}
+        spills = data.get("spills", [])
+        summary = {"total": len(spills),
+                   "reached_water": sum(1 for s in spills if s.get("reached_water"))}
+        if reached_water:
+            spills = [s for s in spills if s.get("reached_water")]
+        if year:
+            spills = [s for s in spills if (s.get("date") or "").startswith(str(year))]
+        return {"spills": spills, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/wind-roses")
     def wind_roses():
         try:

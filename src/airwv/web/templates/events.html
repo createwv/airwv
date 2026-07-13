@@ -1,13 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="page">
-  <div class="ov-intro"><h1>Air quality events</h1>
-    <p>Notable pollution and air-quality events across West Virginia. Where our community
-       sensors were online, we overlay what they measured — before, during, and after.</p></div>
+  <div class="ov-intro"><h1>Events &amp; reported spills</h1>
+    <p>Notable pollution events across West Virginia — plus every oil &amp; chemical release
+       reported to the federal spill hotline. For curated events where our community sensors
+       were online, we overlay what they measured — before, during, and after.</p></div>
 
   <section class="ev-list" id="ev-list">
     <p class="meta" style="padding:14px">Loading events…</p>
   </section>
+
+  <h2 class="ov-sechead" style="margin-top:26px">🛢️ Recently reported spills <span class="meta" id="spill-src"></span></h2>
+  <p class="meta" style="margin:-6px 0 10px">Every oil &amp; chemical release reported in WV to the
+     <a href="https://nrc.uscg.mil/" target="_blank" rel="noopener">National Response Center</a> (the federal
+     spill hotline). These are <b>initial, unverified</b> reports — the public record that "something was
+     reported here," even when a state agency's follow-up sampling never becomes public. Most lack precise
+     coordinates and are placed at their county center.</p>
+  <div class="controls" style="gap:12px">
+    <label><input type="checkbox" id="spill-water"> 💧 Reached water only</label>
+    <label>Year <select id="spill-year"><option value="">All years</option></select></label>
+    <span class="meta" id="spill-count"></span>
+  </div>
+  <div class="card"><div id="spill-map" style="height:400px"></div>
+    <div class="legend"><span style="color:#2c7fb8">●</span> reached water
+      <span style="color:#8a94a0">●</span> land/air · hollow = approximate (county) location · click a dot for detail</div>
+  </div>
+  <section class="ev-list" id="spill-list"></section>
+  <p class="meta" id="spill-disc" style="margin-top:8px"></p>
 </div>
 
 <div class="modal" id="ev-detail"><div class="modalbox evbox">
