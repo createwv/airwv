@@ -59,7 +59,7 @@ async function loadCoverage(){
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
 const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
-  echo:false, dep:false, mine:false, wells:false, wellOrphan:true, wellOperator:true,
+  echo:false, dep:false, mine:false, wells:false, wellOrphan:true, wellOperator:true, wellNearOnly:false,
   regions:{}, cats:{},
   echoStatus:{significant_violation:true, violation:true, compliant:false},
   depStage:{requested:true, construction:true, approved:true},
@@ -374,13 +374,20 @@ function redrawWells(){
   if (layerState.wells) allWells_.forEach(w => {
     if (w.lat == null || w.lon == null) return;
     if (w.orphan ? layerState.wellOrphan===false : layerState.wellOperator===false) return;
+    if (layerState.wellNearOnly && !w.near_homes) return;
     const col = w.orphan ? '#c0392b' : '#7a6a55';
+    const near = w.near_homes;
     const rec = `http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47${(w.id||'').replace('-','')}`;
-    L.circleMarker([w.lat, w.lon], {radius:4, color:'#333', weight:0.5, fillColor:col, fillOpacity:0.8})
+    // near-homes wells pop (bigger, opaque, dark ring); remote ones fade back
+    const prox = w.near_homes ? `🏠 <b>within ${w.nearest_building_m} m of a building</b>`
+      : (w.nearest_building_m != null ? `~${w.nearest_building_m} m to nearest building` : 'remote (no building within ~1 km)');
+    L.circleMarker([w.lat, w.lon], {radius: near?6:3.5, color: near?'#400':'#333',
+      weight: near?1.2:0.5, fillColor:col, fillOpacity: near?0.95:0.55})
       .bindPopup(`<b>Abandoned gas well</b> <small>${w.id||''}</small>`+
         `<br><span style="color:${col};font-weight:600">${w.orphan?'🚱 Orphan — no known operator (state to plug)':'⚠️ Abandoned'}</span>`+
         (w.operator?`<br><small>${w.operator}</small>`:'')+
         (w.county?`<br><small>${w.county} County</small>`:'')+
+        `<br><small>${prox}</small>`+
         `<br><small>Leaking wells can vent natural gas / H2S near homes.</small>`+
         `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`)
       .addTo(wellLayer);
@@ -453,9 +460,11 @@ function buildLayers(){
   const mineTotal = allMines_.length;
   // 🛢️ abandoned/orphan wells — lazy; sub-rows appear once loaded
   const wellsTotal = wellMeta.count || 0, orphanN = wellMeta.orphans || 0;
+  const nearN = wellMeta.near_homes || 0;
   const wellSubs = wellsLoaded
     ? row('well','orphan',layerState.wellOrphan!==false,'<span style="color:#c0392b">●</span> Orphan (no operator)',orphanN)
       + row('well','operator',layerState.wellOperator!==false,'<span style="color:#7a6a55">●</span> Has operator',wellsTotal-orphanN)
+      + `<label style="border-top:1px solid #eee;margin-top:2px;padding-top:3px"><input type="checkbox" id="L-wellnear" ${layerState.wellNearOnly?'checked':''}> 🏠 Near homes only <span class="cnt">${nearN}</span></label>`
     : '<label class="meta" style="padding:3px 6px">switch on to load ~15k wells…</label>';
   $('layers').innerHTML =
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(★ to follow · click to chart)</span></b>`+
@@ -513,6 +522,7 @@ function buildLayers(){
     else redrawWells(); };
   $('layers').querySelectorAll('[data-well]').forEach(cb=> cb.onchange=e=>{
     layerState[e.target.dataset.well==='orphan'?'wellOrphan':'wellOperator']=e.target.checked; redrawWells(); });
+  if($('L-wellnear')) $('L-wellnear').onchange = e=>{ layerState.wellNearOnly=e.target.checked; redrawWells(); };
   $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);

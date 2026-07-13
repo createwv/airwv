@@ -293,6 +293,10 @@ def test_abandoned_wells_endpoint(tmp_path):
         assert {"id", "lat", "lon", "orphan"} <= set(w)
         orph = c.get("/api/abandoned-wells?orphan_only=true").json()["wells"]
         assert all(x["orphan"] for x in orph) and len(orph) <= r["count"]
+        # near-homes proximity flag
+        assert {"near_homes", "orphans_near_homes"} <= set(r)
+        nh = c.get("/api/abandoned-wells?near_homes=true").json()["wells"]
+        assert all(x["near_homes"] for x in nh) and all("nearest_building_m" in x for x in nh)
 
 
 def test_sdwa_endpoint(tmp_path):

@@ -949,9 +949,10 @@ def create_app(store: Store) -> FastAPI:
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
     @app.get("/api/abandoned-wells")
-    def abandoned_wells(orphan_only: bool = False):
+    def abandoned_wells(orphan_only: bool = False, near_homes: bool = False):
         """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
-        known operator (the state's to plug). Large — loaded lazily by the map layer."""
+        known operator; near_homes keeps those within ~200 m of a building. Large —
+        loaded lazily by the map layer."""
         try:
             import json
 
@@ -962,8 +963,14 @@ def create_app(store: Store) -> FastAPI:
         wells = data.get("wells", [])
         if orphan_only:
             wells = [w for w in wells if w.get("orphan")]
+        if near_homes:
+            wells = [w for w in wells if w.get("near_homes")]
         return {"wells": wells, "count": data.get("count", len(wells)),
-                "orphans": data.get("orphans", 0), "source": data.get("source"),
+                "orphans": data.get("orphans", 0),
+                "near_homes": data.get("near_homes", 0),
+                "orphans_near_homes": data.get("orphans_near_homes", 0),
+                "near_homes_m": data.get("near_homes_m", 200),
+                "source": data.get("source"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
     @app.get("/api/sdwa")
