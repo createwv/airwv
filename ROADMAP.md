@@ -487,8 +487,13 @@ people-direct water education and connect it to air).
       outlets), aggregated by permit (1,434) → each coal operator maps to the streams it
       discharges into, with an EPA ECHO **effluent-charts** link. `/api/coal-npdes`. Shown
       as a **map overlay on the Water page** ("⛏️ Coal discharge", clustered, sized by
-      outlet count) and a **Sources section** ("💧 Coal & water"). *Next: join to WQP
-      sample sites on the same stream; flag streams on the 303(d) impaired list.*
+      outlet count) and a **Sources section** ("💧 Coal & water"). **303(d) join DONE:**
+      each permit's outlet bbox is spatially joined (server-side ArcGIS envelope query,
+      no shapely) to WV's 2016 **Clean Water Act 303(d)** impaired-streams layer →
+      **1,298 of 1,434 (91%)** sit on an impaired stream, signature acid-mine-drainage
+      causes (iron/selenium/pH/aluminum). Impaired dischargers render **crimson** on the
+      Water map + get cause chips + an "impaired only" filter on Sources. *Next: join to
+      WQP sample sites / USGS gauges on the same reach for measured (not just listed) values.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
