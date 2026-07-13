@@ -482,6 +482,13 @@ people-direct water education and connect it to air).
       category, each linking to its full **ECHO compliance record** (air · water · waste) —
       the 'one facility, both media' payoff. *Still: match NPDES permits onto the existing
       air/TRI entries (dedupe), discharge/violation badges, minors beyond majors.*
+- [~] **Coal ↔ water — mine NPDES discharge** — BUILT: the mining→water link.
+      `scripts/fetch_coal_npdes.py` pulls WV DEP's Coal NPDES layer (~22k active discharge
+      outlets), aggregated by permit (1,434) → each coal operator maps to the streams it
+      discharges into, with an EPA ECHO **effluent-charts** link. `/api/coal-npdes`. Shown
+      as a **map overlay on the Water page** ("⛏️ Coal discharge", clustered, sized by
+      outlet count) and a **Sources section** ("💧 Coal & water"). *Next: join to WQP
+      sample sites on the same stream; flag streams on the 303(d) impaired list.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
