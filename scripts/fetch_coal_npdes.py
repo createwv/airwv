@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,7 +31,23 @@ import httpx
 
 LAYER = ("https://tagis.dep.wv.gov/arcgis/rest/services/"
          "WVDEP_enterprise/mining_reclamation/MapServer/2/query")
+IMPAIRED = ("https://tagis.dep.wv.gov/arcgis/rest/services/"
+            "WVDEP_enterprise/watershed_assessment/MapServer/15/query")
 OUT = Path(__file__).resolve().parent.parent / "src" / "airwv" / "data" / "coal_npdes.json"
+
+# 303(d) impairment cause columns → friendly label. Marked ● are the classic
+# coal / acid-mine-drainage signatures we highlight.
+CAUSE_LABELS = {
+    "iron": ("Iron", True), "aluminum": ("Aluminum", True), "manganese": ("Manganese", True),
+    "selenium": ("Selenium", True), "ph": ("pH (acidity)", True), "sedimentat": ("Sedimentation", True),
+    "bio": ("Biological", True), "do_": ("Dissolved oxygen", True),
+    "al_trout": ("Aluminum (trout)", True), "iron_trout": ("Iron (trout)", True),
+    "fecal_coli": ("Fecal coliform", False), "bacteria": ("Bacteria", False),
+    "chloride": ("Chloride", False), "cna_algae": ("Algae", False), "dioxin": ("Dioxin", False),
+    "methylmerc": ("Methylmercury", False), "pcbs": ("PCBs", False), "ammonia": ("Ammonia", False),
+    "phosphorus": ("Phosphorus", False), "chlorophyl": ("Chlorophyll", False),
+    "beryllium": ("Beryllium", False),
+}
 
 
 def _clean_streams(vals) -> list[str]:
@@ -44,6 +61,51 @@ def _clean_streams(vals) -> list[str]:
                 seen.add(key)
                 out.append(s)
     return out
+
+
+def _impairment_for(client: httpx.Client, bbox) -> tuple[list, list]:
+    """Query the 2016 303(d) impaired-streams layer over a permit's outlet bbox;
+    return (impairment causes as labels, impaired stream names)."""
+    pad = 0.008  # ~800 m, so an outlet just off the stream still catches it
+    xmin, ymin, xmax, ymax = bbox
+    env = f"{xmin - pad},{ymin - pad},{xmax + pad},{ymax + pad}"
+    params = {
+        "geometry": env, "geometryType": "esriGeometryEnvelope", "inSR": "4326",
+        "spatialRel": "esriSpatialRelIntersects",
+        "outFields": "finalnam_1," + ",".join(CAUSE_LABELS),
+        "returnGeometry": "false", "f": "json",
+    }
+    try:
+        feats = client.get(IMPAIRED, params=params, timeout=60).json().get("features", [])
+    except Exception:
+        return [], []
+    causes: dict[str, bool] = {}
+    streams: set[str] = set()
+    for ft in feats:
+        a = ft["attributes"]
+        hit = False
+        for col, (label, mining) in CAUSE_LABELS.items():
+            if (a.get(col) or "").strip():
+                causes[label] = mining
+                hit = True
+        if hit and (a.get("finalnam_1") or "").strip():
+            streams.add(a["finalnam_1"].strip())
+    # mining-signature causes first
+    ordered = sorted(causes, key=lambda c: (not causes[c], c))
+    return ordered, sorted(streams)
+
+
+def _join_impairment(permits: list) -> None:
+    with httpx.Client() as client:
+        def enrich(p):
+            causes, streams = _impairment_for(client, p["_bbox"])
+            p["impaired"] = bool(causes)
+            p["impairment_causes"] = causes
+            p["impaired_streams"] = streams[:6]
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            for i, _ in enumerate(pool.map(enrich, permits), 1):
+                if i % 200 == 0:
+                    print(f"  joined {i}/{len(permits)}")
 
 
 def fetch() -> dict:
@@ -91,16 +153,25 @@ def fetch() -> dict:
             "lat": round(sum(p["lats"]) / len(p["lats"]), 5),
             "lon": round(sum(p["lons"]) / len(p["lons"]), 5),
             "effluent_url": f"https://echo.epa.gov/effluent-charts/{permit}",
+            # bbox over the permit's outlets, for the 303(d) spatial join
+            "_bbox": (min(p["lons"]), min(p["lats"]), max(p["lons"]), max(p["lats"])),
         })
-    permits.sort(key=lambda x: -x["outlets"])
+
+    print(f"joining {len(permits)} permits to 303(d) impaired streams…")
+    _join_impairment(permits)
+    for p in permits:
+        p.pop("_bbox", None)
+    permits.sort(key=lambda x: (not x["impaired"], -x["outlets"]))
     return {
-        "source": "WV DEP — Coal NPDES (mining water-discharge permits)",
-        "scope": "active coal-mine discharge permits, aggregated by permit",
+        "source": "WV DEP — Coal NPDES + 2016 303(d) impaired streams",
+        "scope": "active coal-mine discharge permits, aggregated by permit, joined to 303(d) impaired streams",
         "partner_note": ("Mining's water impacts are a focus of WV Rivers Coalition and "
                          "the FracTracker Alliance."),
-        "disclaimer": ("A permitted discharge is legal and treated; it is not proof of "
-                       "pollution. Outlet counts and receiving streams are WV DEP's record. "
-                       "See each permit's EPA ECHO effluent charts for measured discharge."),
+        "disclaimer": ("A permitted discharge is legal and treated; it is not proof of pollution. "
+                       "'On an impaired stream' means a discharge outlet falls within ~800 m of a "
+                       "segment on WV's 2016 Clean Water Act 303(d) list — it flags where to look, "
+                       "not that this permit caused the impairment. See each permit's EPA ECHO "
+                       "effluent charts for measured discharge."),
         "fetched_at": datetime.now(tz=timezone.utc).date().isoformat(),
         "permits": permits,
     }
@@ -109,9 +180,14 @@ def fetch() -> dict:
 def main() -> None:
     data = fetch()
     OUT.write_text(json.dumps(data, indent=1), encoding="utf-8")
-    tot_out = sum(p["outlets"] for p in data["permits"])
-    print(f"wrote {len(data['permits'])} permits ({tot_out} outlets) → {OUT}")
-    print("  top by outlets:", [(p["operator"][:22], p["outlets"]) for p in data["permits"][:3]])
+    from collections import Counter
+    permits = data["permits"]
+    tot_out = sum(p["outlets"] for p in permits)
+    impaired = [p for p in permits if p["impaired"]]
+    causes = Counter(c for p in impaired for c in p["impairment_causes"])
+    print(f"wrote {len(permits)} permits ({tot_out} outlets) → {OUT}")
+    print(f"  on 303(d)-impaired streams: {len(impaired)} permits")
+    print("  top impairment causes:", dict(causes.most_common(6)))
 
 
 if __name__ == "__main__":

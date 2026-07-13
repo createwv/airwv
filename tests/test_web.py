@@ -247,12 +247,16 @@ def test_dep_mining_endpoint(tmp_path):
 def test_coal_npdes_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/coal-npdes").json()
-    assert {"permits", "outlets"} <= set(r["summary"])
+    assert {"permits", "outlets", "impaired", "top_causes"} <= set(r["summary"])
     if r["permits"]:                               # data file present in the repo
         p = r["permits"][0]
-        assert {"operator", "permit", "outlets", "receiving_streams", "lat", "lon", "effluent_url"} <= set(p)
+        assert {"operator", "permit", "outlets", "receiving_streams", "lat", "lon",
+                "effluent_url", "impaired", "impairment_causes"} <= set(p)
         big = c.get("/api/coal-npdes?min_outlets=50").json()["permits"]
         assert all(x["outlets"] >= 50 for x in big)
+        # 303(d) join: impaired filter keeps only permits on an impaired stream, each with causes
+        imp = c.get("/api/coal-npdes?impaired=true").json()["permits"]
+        assert all(x["impaired"] and x["impairment_causes"] for x in imp)
     # water map gets the overlay toggle; sources gets the section
     assert 'id="w-coal"' in c.get("/water").text
     page = c.get("/sources").text

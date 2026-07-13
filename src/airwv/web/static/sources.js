@@ -224,18 +224,26 @@ function renderMineSummary() {
 }
 
 let COAL = [], COAL_META = {};
+// mining-signature 303(d) causes (acid mine drainage) get a red chip; others grey.
+const MINING_CAUSES = new Set(['Iron', 'Aluminum', 'Aluminum (trout)', 'Iron (trout)',
+  'Manganese', 'Selenium', 'pH (acidity)', 'Sedimentation', 'Biological', 'Dissolved oxygen']);
 function renderCoal() {
   const min = +$('coal-min').value || 1;
-  const rows = COAL.filter(p => (p.outlets || 0) >= min);
+  const impOnly = $('coal-impaired').checked;
+  const rows = COAL.filter(p => (p.outlets || 0) >= min && (!impOnly || p.impaired));
   $('coal-count').textContent = `${rows.length} of ${COAL.length} permits`;
   $('coal-body').innerHTML = rows.map(p => {
-    const streams = (p.receiving_streams || []).slice(0, 4).map(esc).join(', ')
-      + (p.stream_count > 4 ? ` <span class="meta">+${p.stream_count - 4} more</span>` : '');
+    const streams = (p.receiving_streams || []).slice(0, 3).map(esc).join(', ')
+      + (p.stream_count > 3 ? ` <span class="meta">+${p.stream_count - 3}</span>` : '');
+    const causes = p.impaired
+      ? (p.impairment_causes || []).map(cse =>
+          `<span class="prog-chip" style="${MINING_CAUSES.has(cse) ? 'background:#f6d7d2;color:#a5301f' : ''}">${esc(cse)}</span>`).join(' ')
+      : '<span class="meta">not on the 303(d) list</span>';
     return `<tr>
-      <td><b>${esc(p.operator || 'Operator unknown')}</b></td>
-      <td class="meta">${esc(p.permit || '')}</td>
-      <td><b>${p.outlets}</b> <span class="meta">→ ${p.stream_count} streams</span></td>
+      <td><b>${esc(p.operator || 'Operator unknown')}</b><div class="meta">${esc(p.permit || '')}</div></td>
+      <td><b>${p.outlets}</b> <span class="meta">→ ${p.stream_count}</span></td>
       <td class="meta">${streams || '—'}</td>
+      <td>${causes}</td>
       <td>${p.effluent_url ? `<a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">ECHO effluent →</a>` : '—'}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="5" class="meta" style="padding:14px">No permits match.</td></tr>';
@@ -245,11 +253,15 @@ function renderCoalSummary() {
   const s = COAL_META.summary || {};
   const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
     <b style="color:${color}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+  const pct = s.permits ? Math.round(s.impaired / s.permits * 100) : 0;
   $('coal-summary').innerHTML =
     box(s.permits, 'coal discharge permits', '#8B4513')
-    + box(s.outlets, 'permitted discharge outlets', '#4a7fb0');
+    + box(s.outlets, 'permitted outlets', '#4a7fb0')
+    + box(s.impaired, `on 303(d)-impaired streams (${pct}%)`, '#c0392b');
+  const causes = (s.top_causes || []).map(([c, n]) => `${c} (${n})`).join(' · ');
   $('coal-src').textContent = COAL_META.fetched_at ? `· WV DEP, as of ${COAL_META.fetched_at}` : '';
-  $('coal-disc').textContent = COAL_META.disclaimer || '';
+  $('coal-disc').textContent = (causes ? `Most common impairment causes: ${causes}. ` : '')
+    + (COAL_META.disclaimer || '');
 }
 
 function nearbySensors(s) {
@@ -332,6 +344,7 @@ async function init() {
   $('mine-stage').addEventListener('change', renderMines);
   $('mine-type').addEventListener('change', renderMines);
   $('coal-min').addEventListener('change', renderCoal);
+  $('coal-impaired').addEventListener('change', renderCoal);
   if (!SV_KEY) {
     $('src-count').insertAdjacentHTML('afterend',
       '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');

@@ -919,9 +919,10 @@ def create_app(store: Store) -> FastAPI:
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
     @app.get("/api/coal-npdes")
-    def coal_npdes(min_outlets: int = 0):
-        """WV coal-mine water discharge permits (NPDES), aggregated by permit —
-        ties mining to the streams it discharges into. min_outlets filters small ones."""
+    def coal_npdes(min_outlets: int = 0, impaired: bool = False):
+        """WV coal-mine water discharge permits (NPDES), aggregated by permit and
+        joined to the 2016 303(d) impaired-streams list. min_outlets filters small
+        ones; impaired=true keeps only permits on an impaired stream."""
         try:
             import json
 
@@ -930,10 +931,18 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"permits": [], "summary": {}, "source": "", "fetched_at": None}
         permits = data.get("permits", [])
+        cause_counts: dict = defaultdict(int)
+        for p in permits:
+            for cse in p.get("impairment_causes", []):
+                cause_counts[cse] += 1
         summary = {"permits": len(permits),
-                   "outlets": sum(p.get("outlets", 0) for p in permits)}
+                   "outlets": sum(p.get("outlets", 0) for p in permits),
+                   "impaired": sum(1 for p in permits if p.get("impaired")),
+                   "top_causes": sorted(cause_counts.items(), key=lambda kv: -kv[1])[:6]}
         if min_outlets:
             permits = [p for p in permits if p.get("outlets", 0) >= min_outlets]
+        if impaired:
+            permits = [p for p in permits if p.get("impaired")]
         return {"permits": permits, "summary": summary,
                 "source": data.get("source"), "scope": data.get("scope"),
                 "partner_note": data.get("partner_note"),

@@ -51,10 +51,17 @@ async function toggleCoal(on) {
     if (p.lat == null || p.lon == null) return;
     const r = Math.min(5 + Math.log2(p.outlets || 1) * 1.5, 12);
     const streams = (p.receiving_streams || []).slice(0, 5).map(esc).join('<br>· ');
-    L.circleMarker([p.lat, p.lon], {radius: r, color: '#4a2c12', weight: 1, fillColor: '#8B4513', fillOpacity: 0.8})
+    // discharges onto a 303(d)-impaired stream → crimson; otherwise brown
+    const fill = p.impaired ? '#c0392b' : '#8B4513';
+    const impaired = p.impaired
+      ? `<br><span style="color:#c0392b;font-weight:600">⚠️ On a 303(d)-impaired stream</span>`
+        + `<br><small>Impaired for: ${(p.impairment_causes || []).map(esc).join(', ')}</small>`
+      : '';
+    L.circleMarker([p.lat, p.lon], {radius: r, color: '#333', weight: 1, fillColor: fill, fillOpacity: 0.82})
       .bindPopup(`<b>${esc(p.operator)}</b> <small>${esc(p.permit)}</small>`
         + `<br>⛏️ <b>${p.outlets}</b> permitted discharge outlet${p.outlets === 1 ? '' : 's'}`
         + ` into <b>${p.stream_count}</b> stream${p.stream_count === 1 ? '' : 's'}`
+        + impaired
         + (streams ? `<br><small>Receiving:<br>· ${streams}${p.stream_count > 5 ? '<br>· …' : ''}</small>` : '')
         + `<br><a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">EPA ECHO effluent charts →</a>`)
       .addTo(coalLayer);
