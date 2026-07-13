@@ -326,9 +326,12 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       open US Building Footprints** (~1.05M WV buildings) and tags each well with
       `nearest_building_m` + `near_homes` (<200 m) → **6,053 abandoned wells near a building,
       2,122 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
-      ones fade, "🏠 Near homes only" sub-filter, distance in the popup. *Next: tie H2S/gas to
-      the community-VOC story + [[health]]; surface the plugging backlog (~1–2/yr); a
-      "report a well near me" hook; per-well leak/monitoring data if any becomes public.*
+      ones fade, "🏠 Near homes only" sub-filter, distance in the popup. **Report hook DONE:**
+      each well popup has a "🚨 Report a problem with this well" link that opens the community-
+      report modal pre-filled + pre-located (domain=air, well id/orphan/county context, H2S-symptom
+      prompts) via `window.AIRWV_REPORT_AT` — routed through the normal screen→moderate→notify
+      pipeline. *Next: tie H2S/gas to the community-VOC story + [[health]]; surface the plugging
+      backlog (~1–2/yr); per-well leak/monitoring data if any becomes public.*
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
