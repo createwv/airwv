@@ -33,7 +33,19 @@ const WATER_PARAMS = {
 const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'sulfate', 'nitrate', 'tds',
                'aluminum', 'manganese', 'turbidity', 'temperature', 'discharge', 'gage_height'];
 
-let SITES = [], map, layer, current = 'ph';
+let SITES = [], map, layer, current = 'ph', userMarker;
+
+function nearMe() {
+  if (!navigator.geolocation) { $('w-note').textContent = 'geolocation not available on this device'; return; }
+  navigator.geolocation.getCurrentPosition(p => {
+    const lat = p.coords.latitude, lon = p.coords.longitude;
+    if (userMarker) userMarker.remove();
+    userMarker = L.marker([lat, lon], {zIndexOffset: 1000,
+      icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+      .addTo(map).bindPopup('You are here').openPopup();
+    map.setView([lat, lon], 11);
+  }, () => { $('w-note').textContent = 'could not get your location'; }, {enableHighAccuracy: true, timeout: 10000});
+}
 
 function colorFor(site, param) {
   const l = site.latest[param];
@@ -115,6 +127,7 @@ async function init() {
   $('w-param').innerHTML = opts.map(p => `<option value="${p}">${WATER_PARAMS[p].label}</option>`).join('');
   $('w-param').value = current;
   $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
+  $('w-nearme').addEventListener('click', nearMe);
   draw();
 }
 init();

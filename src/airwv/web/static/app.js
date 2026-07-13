@@ -59,6 +59,14 @@ async function loadCoverage(){
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
 const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false, regions:{}, cats:{}};
+// ⭐ My Sensors — a personal follow-list persisted in the browser (accounts later)
+let mySensors = new Set(JSON.parse(localStorage.getItem('airwv_my_sensors') || '[]'));
+function toggleFollow(sid){
+  mySensors.has(sid) ? mySensors.delete(sid) : mySensors.add(sid);
+  localStorage.setItem('airwv_my_sensors', JSON.stringify([...mySensors]));
+  buildLayers();
+}
+let userMarker;
 function drawMap(sensors){
   if (!map){
     map = L.map('map').setView([38.35, -81.6], 8);
@@ -237,17 +245,24 @@ function buildLayers(){
   cats.forEach(c=>{ if(!(c in layerState.cats)) layerState.cats[c]=true; });
   const row = (attr,val,checked,label,cnt)=>
     `<label><input type="checkbox" data-${attr}="${val}" ${checked?'checked':''}> ${label} <span class="cnt">${cnt}</span></label>`;
+  const srowHtml = s => `<div class="srow${chartSet.has(s.sensor_id)?' on':''}" data-sid="${s.sensor_id}">`+
+    `<span class="star${mySensors.has(s.sensor_id)?' on':''}" data-star="${s.sensor_id}" title="follow">${mySensors.has(s.sensor_id)?'★':'☆'}</span>${s.name}</div>`;
   // community: each region is a <details> (visibility checkbox) holding clickable sensor rows
   const byRegion = {};
   comm.forEach(s => { (byRegion[s.region] = byRegion[s.region] || []).push(s); });
   const regionBlocks = regions.map(r => {
-    const rows = (byRegion[r]||[]).sort((a,b)=>a.name.localeCompare(b.name)).map(s =>
-      `<div class="srow${chartSet.has(s.sensor_id)?' on':''}" data-sid="${s.sensor_id}">${s.name}</div>`).join('');
+    const rows = (byRegion[r]||[]).sort((a,b)=>a.name.localeCompare(b.name)).map(srowHtml).join('');
     return `<details><summary><input type="checkbox" data-region="${r}" ${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
   }).join('');
+  // ⭐ pinned follow-list at the top
+  const followed = comm.filter(s => mySensors.has(s.sensor_id)).sort((a,b)=>a.name.localeCompare(b.name));
+  const myBlock = followed.length
+    ? `<details open><summary>⭐ My Sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
+    : '';
   const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
   $('layers').innerHTML =
-    `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(click a sensor to chart it)</span></b>`+
+    `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(★ to follow · click to chart)</span></b>`+
+    myBlock+
     `<details open><summary><input type="checkbox" id="L-community" ${layerState.community?'checked':''}> ● Community sensors <span class="cnt">${comm.length}</span></summary><div class="children">${regionBlocks}</div></details>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
@@ -271,6 +286,7 @@ function buildLayers(){
   $('layers').querySelectorAll('[data-cat]').forEach(cb=> cb.onchange=e=>{
     layerState.cats[e.target.dataset.cat]=e.target.checked;
     layerState.sources=cats.some(c=>layerState.cats[c]); redrawSources(); syncParents(regions,cats); });
+  $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
 }
@@ -403,10 +419,32 @@ function redrawReports(){
   });
   reportLayer.addTo(map);
 }
+// 📍 Near me — geolocate, drop a pin, zoom in, and list the nearest community sensors
+function nearMe(){
+  const note = $('nearme-note');
+  if (!navigator.geolocation){ if(note) note.textContent='geolocation not available on this device'; return; }
+  if (note) note.textContent = 'locating…';
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat=p.coords.latitude, lon=p.coords.longitude;
+    if (userMarker) userMarker.remove();
+    userMarker = L.marker([lat,lon], {zIndexOffset:1000,
+      icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
+      .addTo(map).bindPopup('You are here').openPopup();
+    map.setView([lat,lon], 11);
+    const near = allSensors.filter(s=>s.kind==='community' && s.lat!=null)
+      .map(s=>({...s, mi:haversineMi(lat,lon,s.lat,s.lon)})).sort((a,b)=>a.mi-b.mi).slice(0,6);
+    if (note) note.innerHTML = near.length
+      ? '📍 Nearest to you: ' + near.map(s=>`<a href="#" data-nsid="${s.sensor_id}">${s.name}</a> <span class="cnt">${s.mi.toFixed(1)}mi</span>`).join(' · ')
+      : 'No community sensors located.';
+    note && note.querySelectorAll('[data-nsid]').forEach(a=>a.addEventListener('click', e=>{
+      e.preventDefault(); toggleChart(a.dataset.nsid); redrawSensors(); render(); }));
+  }, ()=>{ if(note) note.textContent='could not get your location'; }, {enableHighAccuracy:true, timeout:10000});
+}
 // report/feedback modal logic lives in reporting.js (shared with the Overview page)
 // map layer visibility is driven by the layers tree (buildLayers)
 loadGuide().then(loadSensors);
 loadValidation();
 loadCoverage();
 initProximity();
+const _nm = $('nearme'); if (_nm) _nm.addEventListener('click', nearMe);
 $('epacorrect').addEventListener('change', loadValidation);

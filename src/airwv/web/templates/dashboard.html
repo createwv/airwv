@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="controls" style="gap:10px">
+  <button id="nearme">📍 Near me</button>
   <button class="primary" data-open="report">📣 Report a concern</button>
   <button data-open="feedback">💬 Site feedback</button>
-  <span class="meta">See something? Add it to the map. Something broken? Tell us.</span>
+  <span class="meta" id="nearme-note">See something? Add it to the map. Something broken? Tell us.</span>
 </div>
 <div class="controls">
   <label>Metric <select id="field">
