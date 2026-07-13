@@ -545,6 +545,75 @@ def create_app(store: Store) -> FastAPI:
         return {"lat": lat, "lon": lon, "km": km, "county": near_county,
                 "hazards": haz, "counts": dict(cats)}
 
+    @app.get("/api/data-catalog")
+    def data_catalog():
+        """Public provenance catalog — every data layer, its source, freshness, and
+        record count. Freshness/counts are read live from the data files; see
+        docs/DATA-SOURCES.md for the full field guide."""
+        def meta(fname, key):
+            d = _data_json(fname)
+            arr = d.get(key, [])
+            return {"fetched_at": d.get("fetched_at"),
+                    "count": d.get("count") or (len(arr) if isinstance(arr, list) else None)}
+
+        cov = store.coverage_overall()
+        cov_last = cov.get("last_ts")
+        cov_last = cov_last.isoformat()[:10] if cov_last else None
+        # (name, category, org, access, keyless, record, url, api, freshness/count)
+        catalog = [
+            {"name": "PurpleAir community sensors", "category": "Air", "org": "PurpleAir",
+             "access": "REST API", "keyless": False, "record": "community low-cost sensors",
+             "url": "https://www2.purpleair.com/", "api": "/api/sensors",
+             "fetched_at": cov_last, "count": None, "freshness": "on a collection timer"},
+            {"name": "EPA AirNow (live reference)", "category": "Air", "org": "US EPA",
+             "access": "keyless bulk hourly file", "keyless": True, "record": "regulatory monitors (hourly)",
+             "url": "https://www.airnow.gov/", "api": "/api/sensors", "freshness": "hourly, keyless"},
+            {"name": "EPA AirData / AQS (history)", "category": "Air", "org": "US EPA",
+             "access": "keyless annual bulk files", "keyless": True, "record": "QA'd daily history since 2007",
+             "url": "https://aqs.epa.gov/aqsweb/airdata/", "api": "/api/validate", "freshness": "annual"},
+            {"name": "USGS NWIS gauges", "category": "Water", "org": "USGS",
+             "access": "REST JSON", "keyless": True, "record": "real-time stream gauges",
+             "url": "https://waterservices.usgs.gov/", "api": "/api/water/sites", "freshness": "real-time"},
+            {"name": "EPA Water Quality Portal", "category": "Water", "org": "EPA / USGS",
+             "access": "REST CSV", "keyless": True, "record": "lab & grab samples (metals, E. coli, …)",
+             "url": "https://www.waterqualitydata.us/", "api": "/api/water/near", "freshness": "periodic"},
+            {"name": "EPA ECHO — facility compliance", "category": "Facilities", "org": "US EPA",
+             "access": "REST (qid paging)", "keyless": True, "record": "major regulated facilities + violations",
+             "url": "https://echo.epa.gov/", "api": "/api/facilities", **meta("echo_facilities.json", "facilities")},
+            {"name": "EPA SDWIS — drinking water", "category": "Water", "org": "US EPA",
+             "access": "REST (ECHO sdw)", "keyless": True, "record": "public water systems + SDWA violations",
+             "url": "https://echo.epa.gov/", "api": "/api/sdwa", **meta("sdwa_systems.json", "systems")},
+            {"name": "EPA TRI (Envirofacts)", "category": "Facilities", "org": "US EPA",
+             "access": "REST", "keyless": True, "record": "toxic-release facilities",
+             "url": "https://www.epa.gov/toxics-release-inventory-tri-program", "api": "/api/sources",
+             **meta("sources.json", "sources")},
+            {"name": "WV DEP — oil & gas permits", "category": "Permits", "org": "WV DEP",
+             "access": "ArcGIS REST", "keyless": True, "record": "O&G permit pipeline",
+             "url": "https://tagis.dep.wv.gov/", "api": "/api/dep-permits", **meta("dep_permits.json", "permits")},
+            {"name": "WV DEP — mining permits", "category": "Permits", "org": "WV DEP",
+             "access": "ArcGIS REST", "keyless": True, "record": "active/upcoming mining + acreage",
+             "url": "https://tagis.dep.wv.gov/", "api": "/api/dep-mining", **meta("dep_mining.json", "mines")},
+            {"name": "WV DEP — coal NPDES + 303(d)", "category": "Water", "org": "WV DEP",
+             "access": "ArcGIS REST (spatial join)", "keyless": True, "record": "coal discharges on impaired streams",
+             "url": "https://tagis.dep.wv.gov/", "api": "/api/coal-npdes", **meta("coal_npdes.json", "permits")},
+            {"name": "WV DEP — abandoned wells", "category": "Wells", "org": "WV DEP",
+             "access": "ArcGIS REST", "keyless": True, "record": "abandoned & orphan gas wells",
+             "url": "https://tagis.dep.wv.gov/", "api": "/api/abandoned-wells", **meta("abandoned_wells.json", "wells")},
+            {"name": "National Response Center", "category": "Events", "org": "US Coast Guard",
+             "access": "annual .xlsx", "keyless": True, "record": "reported oil/chemical spills",
+             "url": "https://nrc.uscg.mil/", "api": "/api/nrc-spills", **meta("nrc_spills.json", "spills")},
+            {"name": "Microsoft US Building Footprints", "category": "Geospatial", "org": "Microsoft",
+             "access": "open GeoJSON", "keyless": True, "record": "buildings (near-homes well risk)",
+             "url": "https://github.com/microsoft/USBuildingFootprints", "api": "/api/abandoned-wells",
+             "freshness": "static (2021)"},
+            {"name": "Iowa State Mesonet (ASOS)", "category": "Weather", "org": "Iowa State",
+             "access": "CSV", "keyless": True, "record": "wind roses for dispersion",
+             "url": "https://mesonet.agron.iastate.edu/", "api": "/api/wind-roses", "freshness": "periodic"},
+        ]
+        keyless = sum(1 for s in catalog if s.get("keyless"))
+        return {"sources": catalog, "total": len(catalog), "keyless": keyless,
+                "categories": sorted({s["category"] for s in catalog})}
+
     @app.get("/api/coverage")
     def coverage():
         c = store.coverage_overall()
@@ -1423,6 +1492,11 @@ def create_app(store: Store) -> FastAPI:
     def nearby_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="near_me.html",
                                           context={"mode": "nearby"})
+
+    @app.get("/data", response_class=HTMLResponse)
+    def data_page(request: Request):
+        return TEMPLATES.TemplateResponse(request=request, name="data.html",
+                                          context={"mode": "data"})
 
     @app.get("/about", response_class=HTMLResponse)
     def about(request: Request):

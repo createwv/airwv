@@ -284,6 +284,17 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_data_catalog(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/data-catalog").json()
+    assert r["total"] >= 12 and r["keyless"] >= r["total"] - 1   # only PurpleAir needs a key
+    assert {"Air", "Water", "Facilities"} <= set(r["categories"])
+    for s in r["sources"]:
+        assert {"name", "category", "org", "access", "keyless", "url", "api"} <= set(s)
+    assert c.get("/data").status_code == 200 and "data.js" in c.get("/data").text
+    assert "/data" in c.get("/air").text                         # footer link everywhere
+
+
 def test_near_endpoint_and_page(tmp_path):
     c = _client(tmp_path)
     assert c.get("/nearby").status_code == 200 and "near_me.js" in c.get("/nearby").text

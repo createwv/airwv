@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>Where the data comes from</h1>
+    <p>Everything on this site is built from <b>public</b> government and open data — and
+       nearly all of it needs <b>no API key</b>. This page catalogs every layer, its source,
+       and how fresh it is. Half the point of AirWV is showing that this data is <i>out there
+       and connectable</i> — so if you want to build your own tool, start with our
+       <a href="https://github.com/createwv/airwv/blob/main/docs/DATA-SOURCES.md" target="_blank" rel="noopener">Data Sources field guide</a>
+       (the how-to for tapping each source) and the <code>scripts/</code> that pull them.</p></div>
+
+  <div id="dc-summary" class="fac-summary"></div>
+
+  <div id="dc-groups"><p class="meta" style="padding:14px">Loading the catalog…</p></div>
+
+  <div class="about"><p class="meta">Each source below links to its authoritative home. In the app,
+    every layer also carries its source and "as of" date, and each record links back to the official
+    record (EPA ECHO report, WV DEP well record, NRC report, …). Attribution: US EPA, USGS, WV DEP,
+    US Coast Guard / NRC, Microsoft, Iowa State Mesonet, PurpleAir, and OpenAQ. Government data is
+    provisional and not a regulatory determination.</p></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/data.js?v={{ asset_v }}"></script>
+{% endblock %}

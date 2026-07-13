@@ -66,10 +66,16 @@ for the whole state.
                                           └────────────┘
 ```
 
-Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Where the air-quality
-data comes from — community (PurpleAir) + government reference monitors pulled
-**directly from EPA AirNow & AirData, keyless** — is in
-[docs/DATA-SOURCES.md](docs/DATA-SOURCES.md).
+Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+**Where every layer comes from — a field guide to public environmental data.**
+AirWV is stitched from ~15 public, mostly **keyless** sources (EPA AirNow/AirData/ECHO/
+SDWIS/TRI, USGS, the EPA Water Quality Portal, WV DEP's ArcGIS layers, the National
+Response Center, Microsoft Building Footprints, …). [**docs/DATA-SOURCES.md**](docs/DATA-SOURCES.md)
+is written to be learned from and copied — the access patterns, the gotchas, and a
+recipe for adding your own source. The live [`/data`](src/airwv/web/templates/data.html)
+page catalogs each one with its freshness for the public. If you're building your own
+community-environmental tool, start there.
 
 ## Tech stack
 
