@@ -284,6 +284,17 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_abandoned_wells_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/abandoned-wells").json()
+    assert {"count", "orphans", "wells"} <= set(r)
+    if r["wells"]:                                 # data file present in the repo
+        w = r["wells"][0]
+        assert {"id", "lat", "lon", "orphan"} <= set(w)
+        orph = c.get("/api/abandoned-wells?orphan_only=true").json()["wells"]
+        assert all(x["orphan"] for x in orph) and len(orph) <= r["count"]
+
+
 def test_sdwa_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/sdwa").json()

@@ -19,6 +19,36 @@ def _utc(s: str) -> _dt.datetime:
 
 EVENTS = [
     {
+        "title": "Rutledge abandoned-well gas leaks — Charleston",
+        "kind": "other", "medium": "air", "region": "Rutledge / Charleston (Kanawha Valley)",
+        "lat": 38.3727, "lon": -81.6540,
+        "start_ts": _utc("2021-12-01T00:00"),
+        "origin": "Leaking abandoned & orphaned gas wells — raw natural gas and hydrogen sulfide (H2S)",
+        "scope": "Local",
+        "regions_affected": "Rutledge neighborhood, Charleston (Kanawha County), near Crouch Hollow",
+        "captured": False,
+        "source_refs": [],
+        "description": (
+            "In the Rutledge neighborhood of Charleston, aging abandoned and orphaned gas "
+            "wells have leaked raw natural gas and hydrogen sulfide (H2S) into yards and homes "
+            "— including a documented H2S-and-gas leak near Crouch Hollow. Residents have "
+            "reported coughs, headaches, nausea, sleep loss, and rashes described as chemical "
+            "burns. It is one local face of a statewide problem: WV has an estimated ~6,000 "
+            "abandoned wells, and the state can afford to plug only one or two per year. "
+            "'Orphan' wells — those with no known operator — are the state's responsibility. "
+            "This issue was a major early motivation for community environmental organizing in "
+            "the Kanawha Valley. Turn on the '🛢️ Abandoned wells' map layer on the Air page to "
+            "see the wells across the state (orphans in red)."),
+        "sources": [
+            {"label": "Rutledge residents afraid of leaking gas wells (WCHS)",
+             "url": "https://wchstv.com/news/local/somethings-going-on-up-in-this-hollow-rutledge-residents-afraid-of-leaking-gas-wells"},
+            {"label": "Nonprofit tests leaking orphaned wells (WSAZ)",
+             "url": "https://www.wsaz.com/2023/02/13/wsaz-investigates-organization-arrives-test-leaking-orphaned-wells/"},
+            {"label": "Abandoned gas wells dot WV, leaking toxins (LPM / WVPB)",
+             "url": "https://www.lpm.org/news/2026-06-10/abandoned-gas-wells-dot-west-virginia-leaking-toxins"},
+        ],
+    },
+    {
         "title": "Peoples Cartage warehouse fire — Parkersburg",
         "kind": "fire", "region": "Parkersburg / Mid-Ohio Valley",
         "lat": 39.2546, "lon": -81.5601,
@@ -234,11 +264,19 @@ EVENTS = [
 
 
 def main() -> None:
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--title", help="only seed events whose title contains this (case-insensitive) — "
+                                    "avoids re-updating others on prod")
+    args = ap.parse_args()
+    events = [e for e in EVENTS if not args.title or args.title.lower() in e["title"].lower()]
+
     store = Store(os.environ.get("AIRWV_DATABASE_URL", "").strip() or "sqlite:///airwv.sqlite")
     store.create_schema()  # ensure the events table exists
     existing = {e.title: e.id for e in store.events_for_admin()}
     added = updated = 0
-    for ev in EVENTS:
+    for ev in events:
         if ev["title"] in existing:
             store.update_event(existing[ev["title"]], **ev)
             updated += 1

@@ -948,6 +948,24 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/abandoned-wells")
+    def abandoned_wells(orphan_only: bool = False):
+        """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
+        known operator (the state's to plug). Large — loaded lazily by the map layer."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"wells": [], "count": 0, "orphans": 0}
+        wells = data.get("wells", [])
+        if orphan_only:
+            wells = [w for w in wells if w.get("orphan")]
+        return {"wells": wells, "count": data.get("count", len(wells)),
+                "orphans": data.get("orphans", 0), "source": data.get("source"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/sdwa")
     def sdwa(health_only: bool = False, community_only: bool = False, county: str | None = None):
         """WV public drinking-water systems + SDWA violation status, with a county

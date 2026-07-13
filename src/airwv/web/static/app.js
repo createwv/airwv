@@ -59,7 +59,8 @@ async function loadCoverage(){
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
 const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
-  echo:false, dep:false, mine:false, regions:{}, cats:{},
+  echo:false, dep:false, mine:false, wells:false, wellOrphan:true, wellOperator:true,
+  regions:{}, cats:{},
   echoStatus:{significant_violation:true, violation:true, compliant:false},
   depStage:{requested:true, construction:true, approved:true},
   mineStage:{new:true, active:true, inactive:false}};
@@ -354,6 +355,38 @@ function redrawMines(){
   });
   mineLayer.addTo(map);
 }
+// ---- Abandoned & orphaned gas wells (WV DEP — the Rutledge story) ----
+// Large (~15k), so the layer is lazy: fetched only when first switched on.
+let wellLayer, allWells_ = [], wellsLoaded = false, wellMeta = {};
+async function loadAbandonedWells(){
+  if (!wellsLoaded){
+    try { const d = await j('/api/abandoned-wells'); allWells_ = d.wells || []; wellMeta = d; wellsLoaded = true; }
+    catch(e){ allWells_ = []; }
+    buildLayers();   // refresh the tree with real counts + sub-rows
+  }
+  redrawWells();
+}
+function redrawWells(){
+  if (wellLayer) wellLayer.remove();
+  wellLayer = L.markerClusterGroup
+    ? L.markerClusterGroup({chunkedLoading:true, maxClusterRadius:50, disableClusteringAtZoom:14})
+    : L.layerGroup();
+  if (layerState.wells) allWells_.forEach(w => {
+    if (w.lat == null || w.lon == null) return;
+    if (w.orphan ? layerState.wellOrphan===false : layerState.wellOperator===false) return;
+    const col = w.orphan ? '#c0392b' : '#7a6a55';
+    const rec = `http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47${(w.id||'').replace('-','')}`;
+    L.circleMarker([w.lat, w.lon], {radius:4, color:'#333', weight:0.5, fillColor:col, fillOpacity:0.8})
+      .bindPopup(`<b>Abandoned gas well</b> <small>${w.id||''}</small>`+
+        `<br><span style="color:${col};font-weight:600">${w.orphan?'🚱 Orphan — no known operator (state to plug)':'⚠️ Abandoned'}</span>`+
+        (w.operator?`<br><small>${w.operator}</small>`:'')+
+        (w.county?`<br><small>${w.county} County</small>`:'')+
+        `<br><small>Leaking wells can vent natural gas / H2S near homes.</small>`+
+        `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`)
+      .addTo(wellLayer);
+  });
+  wellLayer.addTo(map);
+}
 function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
   sourceLayer = L.markerClusterGroup
@@ -418,6 +451,12 @@ function buildLayers(){
   const mdot = s => `<span style="color:${MINE_COLOR[s]}">●</span>`;
   const mineRows = mStages.map(s=>row('mine',s,layerState.mineStage[s]!==false,`${mdot(s)} ${MINE_LABEL[s]}`,mCounts[s])).join('');
   const mineTotal = allMines_.length;
+  // 🛢️ abandoned/orphan wells — lazy; sub-rows appear once loaded
+  const wellsTotal = wellMeta.count || 0, orphanN = wellMeta.orphans || 0;
+  const wellSubs = wellsLoaded
+    ? row('well','orphan',layerState.wellOrphan!==false,'<span style="color:#c0392b">●</span> Orphan (no operator)',orphanN)
+      + row('well','operator',layerState.wellOperator!==false,'<span style="color:#7a6a55">●</span> Has operator',wellsTotal-orphanN)
+    : '<label class="meta" style="padding:3px 6px">switch on to load ~15k wells…</label>';
   $('layers').innerHTML =
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(★ to follow · click to chart)</span></b>`+
     myBlock+
@@ -428,7 +467,8 @@ function buildLayers(){
     `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`+
     (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'')+
     (depTotal?`<details><summary><input type="checkbox" id="L-dep" ${layerState.dep?'checked':''}> 🛢️ O&amp;G permit pipeline (WV DEP) <span class="cnt">${depTotal}</span></summary><div class="children">${depRows}</div></details>`:'')+
-    (mineTotal?`<details><summary><input type="checkbox" id="L-mine" ${layerState.mine?'checked':''}> ⛏️ Mining permits (WV DEP) <span class="cnt">${mineTotal}</span></summary><div class="children">${mineRows}</div></details>`:'');
+    (mineTotal?`<details><summary><input type="checkbox" id="L-mine" ${layerState.mine?'checked':''}> ⛏️ Mining permits (WV DEP) <span class="cnt">${mineTotal}</span></summary><div class="children">${mineRows}</div></details>`:'')+
+    `<details><summary><input type="checkbox" id="L-wells" ${layerState.wells?'checked':''}> 🛢️ Abandoned wells (WV DEP) <span class="cnt">${wellsTotal || '~15k'}</span></summary><div class="children">${wellSubs}</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
   $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
   // updates happen in place (no rebuild) so open groups stay open
@@ -468,6 +508,11 @@ function buildLayers(){
     layerState.mineStage[e.target.dataset.mine]=e.target.checked;
     layerState.mine=mStages.some(s=>layerState.mineStage[s]);
     redrawMines(); syncMine(mStages); });
+  if($('L-wells')) $('L-wells').onchange = e=>{ layerState.wells=e.target.checked;
+    if(e.target.checked){ layerState.wellOrphan=true; layerState.wellOperator=true; loadAbandonedWells(); }
+    else redrawWells(); };
+  $('layers').querySelectorAll('[data-well]').forEach(cb=> cb.onchange=e=>{
+    layerState[e.target.dataset.well==='orphan'?'wellOrphan':'wellOperator']=e.target.checked; redrawWells(); });
   $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
