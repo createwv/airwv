@@ -1,13 +1,15 @@
-"""Build prevailing wind roses for WV from keyless ASOS data (Iowa Environmental
-Mesonet). For each airport station we pull a year of wind observations and compute
-the frequency the wind blows FROM each of 8 compass directions.
+"""Build prevailing wind roses for WV — how often the wind blows FROM each direction.
 
-The source-proximity panel uses these to weight sensors by how often they sit
-*downwind* of a given source (Level 1 wind weighting — see docs/WIND-AND-DISPERSION.md).
+For each airport station we pull a year of wind observations and compute the frequency
+the wind comes from each of 8 compass directions. The source-proximity panel uses these
+to weight sensors by how often they sit *downwind* of a source (Level 1 wind weighting).
 
-    python scripts/fetch_wind.py            # writes src/airwv/data/wind_roses.json
+Source: Iowa State University — Iowa Environmental Mesonet (ASOS), keyless CSV, no quota.
+Data © Iowa Environmental Mesonet / NWS.
 
-Keyless, no quota — like our EPA sources. Data © Iowa Environmental Mesonet / NWS.
+    python scripts/fetch_wind.py
+
+Writes src/airwv/data/wind_roses.json, served by /api/wind-roses. See docs/WIND-AND-DISPERSION.md.
 """
 
 from __future__ import annotations

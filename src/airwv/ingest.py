@@ -629,41 +629,16 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
 AIRNOW_STATES = {"54", "39", "42", "24", "51", "21"}
 
 
-def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
-    """Pull the latest hourly PM2.5 from EPA **AirNow**'s public hourly file.
+def _airnow_url(t: datetime) -> str:
+    return f"https://files.airnowtech.org/airnow/{t:%Y}/{t:%Y%m%d}/HourlyAQObs_{t:%Y%m%d%H}.dat"
 
-    AirNow is EPA's real-time program — the same source OpenAQ uses for US live
-    data — but we go direct: the ``HourlyAQObs`` file is **keyless, with no rate
-    limit or quota**, and one download has every monitor for that hour. We keep
-    WV + bordering states and store them as source='airnow' (the live reference
-    layer). Also accumulates monitor names/coords in ``data/airnow_monitors.json``.
-    """
+
+def _parse_airnow(content: str):
+    """Parse a HourlyAQObs .dat file → (readings[source='airnow'], monitors{}) for WV + border."""
     import csv
     import io
-    import json
-
-    import httpx
 
     from airwv.sources.base import Reading
-
-    store = store or Store.from_config(config)
-    store.create_schema()
-    now = datetime.now(tz=timezone.utc)
-    content, stamp = None, None
-    for h in range(max_lookback):  # newest file may lag an hour or two — walk back
-        t = now - timedelta(hours=h)
-        s = f"{t:%Y%m%d%H}"
-        url = f"https://files.airnowtech.org/airnow/{t:%Y}/{t:%Y%m%d}/HourlyAQObs_{s}.dat"
-        try:
-            resp = httpx.get(url, timeout=60, follow_redirects=True)
-        except Exception:
-            continue
-        if resp.status_code == 200 and len(resp.content) > 1000:
-            content, stamp = resp.text, s
-            break
-    if content is None:
-        log.warning("airnow: no recent hourly file found (looked back %dh)", max_lookback)
-        return 0
 
     def _num(s):
         try:
@@ -690,9 +665,13 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         monitors[aqsid] = {"name": (row.get("SiteName") or aqsid).strip(),
                            "lat": round(lat, 4), "lon": round(lon, 4),
                            "state": (row.get("StateName") or "").strip()}
-    n = store.save_readings(readings)
+    return readings, monitors
 
-    # accumulate monitor names/coords for the dashboard (gitignored data/ dir)
+
+def _airnow_save_monitors(config: Config, monitors: dict) -> int:
+    """Accumulate monitor names/coords for the dashboard (gitignored data/ dir)."""
+    import json
+
     meta_path = config.index_cache_path.parent / "airnow_monitors.json"
     known = {}
     if meta_path.exists():
@@ -705,9 +684,73 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         meta_path.write_text(json.dumps(known, indent=2))
     except Exception:
         pass
+    return len(known)
+
+
+def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
+    """Pull the latest hourly PM2.5/ozone from EPA **AirNow**'s public hourly file.
+
+    AirNow is EPA's real-time program — the same source OpenAQ uses for US live
+    data — but we go direct: the ``HourlyAQObs`` file is **keyless, with no rate
+    limit or quota**, and one download has every monitor for that hour. We keep
+    WV + bordering states and store them as source='airnow' (the live reference
+    layer). Also accumulates monitor names/coords in ``data/airnow_monitors.json``.
+    """
+    import httpx
+
+    store = store or Store.from_config(config)
+    store.create_schema()
+    now = datetime.now(tz=timezone.utc)
+    content, stamp = None, None
+    for h in range(max_lookback):  # newest file may lag an hour or two — walk back
+        t = now - timedelta(hours=h)
+        try:
+            resp = httpx.get(_airnow_url(t), timeout=60, follow_redirects=True)
+        except Exception:
+            continue
+        if resp.status_code == 200 and len(resp.content) > 1000:
+            content, stamp = resp.text, f"{t:%Y%m%d%H}"
+            break
+    if content is None:
+        log.warning("airnow: no recent hourly file found (looked back %dh)", max_lookback)
+        return 0
+    readings, monitors = _parse_airnow(content)
+    n = store.save_readings(readings)
+    total = _airnow_save_monitors(config, monitors)
     log.info("airnow: %d readings from %d monitors (HourlyAQObs_%s; %d monitors known total)",
-             n, len(monitors), stamp, len(known))
+             n, len(monitors), stamp, total)
     return n
+
+
+def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -> int:
+    """Backfill AirNow reference for a past window — one file per day (at ``hour`` UTC).
+
+    AirNow retains its hourly ``HourlyAQObs`` files, so this pulls **direct EPA** data
+    for a historical range. We use it to replace re-served-via-OpenAQ US data with the
+    primary AirNow feed, so the reference layer is EPA end-to-end and fully above-board.
+    """
+    import httpx
+
+    store = store or Store.from_config(config)
+    store.create_schema()
+    end = datetime.now(tz=timezone.utc)
+    total, monitors_all = 0, {}
+    with httpx.Client(timeout=60, follow_redirects=True) as client:
+        for d in range(days, -1, -1):
+            base = (end - timedelta(days=d)).replace(hour=hour, minute=0, second=0, microsecond=0)
+            got = None
+            for back in range(6):  # that hour's file may be missing — nudge earlier
+                r = client.get(_airnow_url(base - timedelta(hours=back)))
+                if r.status_code == 200 and len(r.content) > 1000:
+                    got = r.text
+                    break
+            if got:
+                readings, monitors = _parse_airnow(got)
+                total += store.save_readings(readings)
+                monitors_all.update(monitors)
+    _airnow_save_monitors(config, monitors_all)
+    log.info("airnow backfill: %d readings across %d days", total, days)
+    return total
 
 
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
@@ -731,7 +774,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
     # certified daily history). Daily values are aggregated in SQL, so we can validate
     # over years — including against the AirData record — without loading raw rows.
     ref_coords: dict[str, tuple] = {}
-    for src in ("airnow", "openaq", "epa_airdata"):
+    for src in ("airnow", "epa_airdata"):   # EPA reference: live AirNow + finalized AirData
         ref_coords.update(store.coords_from_readings(src))
     if not ref_coords:
         log.warning("no reference data yet — run `ingest airnow` / `ingest airdata` first")
@@ -1067,7 +1110,9 @@ def main(argv: list[str] | None = None) -> None:
                            help="chunk size for deep backfills (default 30; keep <40 for hourly data)")
     reference.add_argument("--refresh", action="store_true",
                            help="re-pull windows even if already stored (for ongoing/late data)")
-    sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
+    p_airnow = sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
+    p_airnow.add_argument("--backfill-days", type=int, default=0,
+                          help="backfill this many past days (one file/day) — direct EPA history")
     sub.add_parser("water", help="pull latest USGS real-time water readings for WV (keyless)")
     airdata = sub.add_parser("airdata", help="bulk-import EPA AirData daily PM2.5 history (keyless, no quota)")
     airdata.add_argument("--start-year", type=int, default=2016, help="first year (default 2016)")
@@ -1134,7 +1179,10 @@ def main(argv: list[str] | None = None) -> None:
         run_reference(config, days=args.days, start=_parse_dt(args.start), end=_parse_dt(args.end),
                       window_days=args.window_days, refresh=args.refresh)
     elif command == "airnow":
-        run_airnow(config)
+        if getattr(args, "backfill_days", 0):
+            run_airnow_backfill(config, days=args.backfill_days)
+        else:
+            run_airnow(config)
     elif command == "water":
         run_water(config)
     elif command == "airdata":

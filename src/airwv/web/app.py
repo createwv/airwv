@@ -341,11 +341,10 @@ def create_app(store: Store) -> FastAPI:
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
         latest_o3 = store.latest_value_per_sensor("ozone")   # ppb — AirNow reference monitors
-        # AirNow is the LIVE reference layer; OpenAQ + AirData daily are archive/history.
+        # AirNow is the LIVE reference layer; AirData daily is the finalized-history archive.
         ref_ids = set(store.sensor_ids_by_source("airnow"))
         ref_coords = store.coords_from_readings("airnow")
-        archive_ids = (set(store.sensor_ids_by_source("epa_airdata"))
-                       | set(store.sensor_ids_by_source("openaq")))
+        archive_ids = set(store.sensor_ids_by_source("epa_airdata"))   # AirData = history layer
         out = []
         for sid, cov in coverage.items():
             if sid in archive_ids:
@@ -1355,7 +1354,7 @@ def create_app(store: Store) -> FastAPI:
         for r in results:
             r["sensor_name"] = names.get(r["sensor"], r["sensor"])
         note = ("Each community sensor is paired with its nearest regulatory reference "
-                "monitor (EPA AirNow / AirData / OpenAQ), correlating daily PM2.5 over "
+                "monitor (EPA AirNow live + AirData finalized history), correlating daily PM2.5 over "
                 "their full overlap (up to years). r = correlation (1.0 = perfect "
                 "tracking); bias = sensor − reference (µg/m³). High r validates the "
                 "sensor; a wild bias or low r flags a problem.")

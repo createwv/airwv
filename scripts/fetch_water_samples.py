@@ -1,12 +1,18 @@
-"""Pull discrete WV water-quality samples from the EPA/USGS **Water Quality Portal**
-(waterqualitydata.us — keyless) into the ``water_readings`` table (source='wqp').
+"""Pull discrete WV water-quality samples from the EPA/USGS Water Quality Portal.
 
-Complements the live USGS gauges with lab/grab-sample data that gauges don't carry —
-bacteria (E. coli), metals (iron, aluminum, manganese), sulfate, nitrate, TDS — across
-far more sites (hundreds). Discrete/episodic, so it's the *history* side of water, the
-way EPA AirData is for air. Idempotent via the (source, site_id, ts, parameter) key.
+Complements the live USGS gauges with lab/grab-sample data they don't carry — E. coli,
+metals (iron, aluminum, manganese, selenium), sulfate, nitrate, TDS — across hundreds of
+sites. Discrete/episodic: the *history* side of water, the way EPA AirData is for air.
+Add a parameter by adding a CharacteristicName row to CHARS, then run `--chars <Name>`.
 
-    python scripts/fetch_water_samples.py --start-year 2020
+Source: EPA Water Quality Portal (waterqualitydata.us, keyless CSV REST), statecode
+US:54, one request per characteristic. Idempotent via the (source, site_id, ts,
+parameter) key.
+
+    python scripts/fetch_water_samples.py --start-year 2020     # all characteristics
+    python scripts/fetch_water_samples.py --chars Selenium      # just one
+
+Writes to the water_readings table (source='wqp'), served by /api/water/* and /api/water/near.
 """
 
 from __future__ import annotations

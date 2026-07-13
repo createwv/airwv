@@ -1,12 +1,17 @@
-"""Regenerate the documented pollution-source layer from EPA public records.
+"""Regenerate the documented pollution-source layer (EPA TRI emitters) for Sources.
 
-Pulls EPA TRI (Toxics Release Inventory) facilities via the keyless Envirofacts
-REST API for WV *and* neighboring states (pollution crosses state lines), keeps
-those inside WV's bounding box (i.e. WV + just across every border), converts the
-DMS-encoded coordinates, and merges them with the curated seed. Everything is
-public-record + cited, per docs/SOURCE-POLICY.md.
+The baseline facility set on the Sources page: EPA Toxics Release Inventory (TRI)
+emitters, kept public-record and neutrally framed ("permitted emitter of X", not
+"polluter"). Water NPDES dischargers are layered on separately by fetch_water_sources.py.
+
+Source: EPA Envirofacts TRI REST (data.epa.gov/efservice, keyless) for WV + neighboring
+states (pollution crosses state lines), clipped to WV's bounding box; DMS coordinates
+converted; merged with the curated seed.
 
     python scripts/fetch_sources.py
+
+Writes src/airwv/data/sources.json, served by /api/sources and shown on the Sources page.
+Public-record + cited — see docs/DATA-SOURCES.md.
 """
 
 from __future__ import annotations

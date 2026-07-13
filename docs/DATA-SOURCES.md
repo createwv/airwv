@@ -129,13 +129,23 @@ at <https://aqs.epa.gov/aqsweb/airdata/>. Fully QA'd regulatory data back to the
 2000s. `ingest airdata --start-year 2007`. (Some years use `M/D/YYYY` dates — the
 parser handles both.)
 
-> **Discovery story worth learning from:** we first reached reference data through
-> **[OpenAQ](https://openaq.org)** (a great open aggregator). Poking their API showed
-> US real-time data is tagged `provider="AirNow"` — i.e. they re-serve EPA's feed.
-> That pointed us to the primary sources. We later got the OpenAQ key suspended by
-> **bulk-downloading** a decade of history (against their 60/min · 2,000/hr terms) —
-> our mistake. Lesson: **aggregator APIs are for light queries; bulk history belongs
-> on the agency's bulk files.** OpenAQ stays useful for non-US/global and redundancy.
+> **On OpenAQ — credit where it's due.** We first found reference data through
+> **[OpenAQ](https://openaq.org)**, an excellent open aggregator, and poking their API
+> is how we learned that US real-time data is tagged `provider="AirNow"` — i.e. they
+> **re-serve EPA's own AirNow feed**. That pointed us straight to the primary EPA
+> sources we now use directly. **Our air reference is EPA end-to-end** — AirNow (live)
+> + AirData (finalized history) — so we don't store or re-publish OpenAQ data; every
+> reference row is tagged `source='airnow'` or `'epa_airdata'`, traceable to EPA.
+> OpenAQ's API is designed for **light, real-time querying** (with attribution — not
+> bulk extraction), and it stays genuinely useful for what EPA's US-only feeds can't
+> cover: **non-US / global comparisons, networks outside the US regulatory set, and
+> redundancy** — which is exactly where we'd reach for it, within their terms.
+>
+> *Why this matters for the current year:* EPA finalizes its **AirData** annual files
+> with a lag (the 2026 file lands in ~2027), so for the **current year** the
+> authoritative EPA source is **AirNow**, whose hourly files are retained — we
+> backfill directly from them (`ingest airnow --backfill-days N`) rather than lean on
+> an aggregator for recent data.
 
 ---
 

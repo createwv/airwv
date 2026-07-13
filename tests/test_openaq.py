@@ -126,9 +126,10 @@ def test_run_validate_correlates_sensor_to_nearest_monitor(tmp_path):
     for i, v in enumerate(base):
         ts = datetime(2026, 6, 1 + i, 12, 0)
         store.save_readings([Reading(source="purpleair", sensor_id="111", ts=ts, pm2_5=v + 4)])
-        store.save_readings([Reading(source="openaq", sensor_id="9", ts=ts, pm2_5=v,
+        # reference monitors are EPA now (AirNow live / AirData history) — validate logic is source-agnostic
+        store.save_readings([Reading(source="airnow", sensor_id="9", ts=ts, pm2_5=v,
                                      lat=38.36, lon=-81.62)])  # ~1km away
-        store.save_readings([Reading(source="openaq", sensor_id="99", ts=ts, pm2_5=v,
+        store.save_readings([Reading(source="airnow", sensor_id="99", ts=ts, pm2_5=v,
                                      lat=39.9, lon=-79.9)])  # far monitor, should not be chosen
 
     results = run_validate(config, min_days=5, store=store)

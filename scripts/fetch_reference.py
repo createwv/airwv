@@ -1,11 +1,15 @@
-"""Pull WV regulatory-monitor PM2.5 from EPA AirData (keyless) for the map.
+"""Pull WV regulatory-monitor PM2.5 from EPA AirData for the reference-monitor markers.
 
 Downloads EPA's pre-generated daily PM2.5 file (parameter 88101), filters to West
-Virginia, and writes the regulatory monitor sites + their annual mean PM2.5 to
-`reference_monitors.json`. These are validated, reference-grade monitors — plotting
-them next to our community sensors lets us sanity-check the community data.
+Virginia, and writes the regulatory monitor sites + their annual mean PM2.5. These
+validated, reference-grade monitors plot next to our community sensors to sanity-check
+them. (Live reference is the `airnow` ingest; this is a lightweight annual snapshot.)
+
+Source: EPA AirData / AQS annual daily files (aqs.epa.gov/aqsweb/airdata, keyless, no quota).
 
     python scripts/fetch_reference.py [year]   # default 2024
+
+Writes src/airwv/data/reference_monitors.json, served by /api/reference-monitors.
 """
 
 from __future__ import annotations

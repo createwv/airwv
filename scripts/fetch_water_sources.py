@@ -1,11 +1,15 @@
-"""Add WV water dischargers (NPDES) to the Sources dataset from EPA ECHO (keyless).
+"""Add WV water dischargers (NPDES) to the Sources dataset from EPA ECHO.
 
-Makes the Sources page multi-medium: alongside air/TRI emitters, it now shows facilities
-permitted to discharge to water under the Clean Water Act's NPDES program — each linked to
-its full EPA ECHO compliance record (which covers air + water + waste). Idempotent: replaces
-any prior ``category == "water_discharge"`` entries.
+Makes the Sources page multi-medium: alongside air/TRI emitters, the facilities permitted
+to discharge to water under the Clean Water Act's NPDES program — each linked to its full
+EPA ECHO compliance record (which covers air + water + waste).
+
+Source: EPA ECHO cwa_rest_services (echodata.epa.gov, keyless). Idempotent: replaces any
+prior category == "water_discharge" entries in sources.json.
 
     python scripts/fetch_water_sources.py
+
+Writes src/airwv/data/sources.json (💧 water-discharge category), served by /api/sources.
 """
 
 from __future__ import annotations
