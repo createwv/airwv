@@ -315,6 +315,16 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       (🛢️ O&G permit pipeline) and a filterable **section on Sources** (by stage + county,
       with operator/formation/Marcellus + DEP record links). 651 permits (124 requested).
       *Refresh: re-run the script + redeploy.*
+- [ ] **Orphaned & abandoned gas wells (the Rutledge story)** ⭐ — a **founding** issue for
+      Create WV: leaking abandoned/orphan wells in the **Rutledge** neighborhood of Charleston
+      (near **Crouch Hollow**) venting **hydrogen sulfide (H2S)** + raw natural gas into homes,
+      residents reporting rashes/respiratory illness — part of WV's **~6,000** abandoned wells,
+      with the state able to plug only ~1–2/yr. Data is already in reach: the WV DEP `oil_gas`
+      layer we use carries **'Abandoned Well' (15,459), 'Plugged' (49,732), 'Never Drilled'**
+      statuses + an **orphan-well** program dataset. Build: an **abandoned/orphan-well map
+      layer** (status-colored, near-homes emphasis), tie H2S to the community-VOC story and to
+      **[[health]]**, seed **Rutledge as a curated Event**, and surface the orphan-well plugging
+      backlog. Partners/coverage: WSAZ investigations, WV Watch, LPM. *(See origin memory.)*
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
@@ -535,8 +545,16 @@ people-direct water education and connect it to air).
       violation, click to filter) + filterable system table. **771 active systems, 187 with
       a health-based violation serving 218k people**; answers the Wyoming County crisis
       question directly (10/19 systems, 11 serious violators). Worst: Greenbrier/McDowell/
-      Pocahontas/Mingo. *Next: per-violation detail (contaminant + date) from SDWA_VIOLATIONS;
-      tie a system to its intake + upstream spills/dischargers.*
+      Pocahontas/Mingo.
+- [ ] **SDWA per-violation detail — contaminant + date** — go past the current health-based
+      *flag* to the actual violations: **which contaminant** (nitrate, coliform, TTHM/HAA5,
+      lead/copper, arsenic, radionuclides…), the **violation type** (MCL exceedance vs
+      treatment-technique vs monitoring), and **when** (begin/end dates, still-open vs
+      resolved). Source: EPA **SDWIS `SDWA_VIOLATIONS`** (ECHO `get_effluent`-style detail
+      or Envirofacts `data.epa.gov/efservice/SDWA_VIOLATIONS/PWSID/<id>`). Surface a
+      per-system violation history (contaminant · type · dates) in the SDWA system row/modal,
+      and let the county map/table filter by contaminant. *This is what turns "has a
+      violation" into "has nitrate over the limit since March 2025."*
 - [~] **Drinking-water source mapping** — flag **where each community's drinking water
       comes from** (e.g., **Elk River intake for Charleston**, down to the withdrawal
       point). Education on source water + a hook for **alerts** (upstream spill → warn
