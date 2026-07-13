@@ -492,8 +492,16 @@ people-direct water education and connect it to air).
       no shapely) to WV's 2016 **Clean Water Act 303(d)** impaired-streams layer →
       **1,298 of 1,434 (91%)** sit on an impaired stream, signature acid-mine-drainage
       causes (iron/selenium/pH/aluminum). Impaired dischargers render **crimson** on the
-      Water map + get cause chips + an "impaired only" filter on Sources. *Next: join to
-      WQP sample sites / USGS gauges on the same reach for measured (not just listed) values.*
+      Water map + get cause chips + an "impaired only" filter on Sources.
+- [~] **Measured-values join (loop closed)** — DONE: `Store.water_near(lat,lon,km)` +
+      `/api/water/near` (bbox + haversine over the ingested WQP/USGS samples). Coal
+      discharge popups on the Water map lazily load the nearest sample sites' **measured**
+      iron/aluminum/manganese/sulfate/pH/conductivity, color-coded to the water legend —
+      so "listed impaired for iron" becomes "and measured conductance 430–726 µS/cm at
+      Buffalo Creek 3 mi away." Overlap: 70% of coal permits within 3 mi of a sample site,
+      92% within 5 mi. Now: **permit → 303(d) listing → measured value**. *Next: add
+      **selenium** to the WQP pull (not in the current parameter set); reuse `water_near`
+      on ECHO/TRI facilities too.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
