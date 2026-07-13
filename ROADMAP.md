@@ -499,9 +499,12 @@ people-direct water education and connect it to air).
       iron/aluminum/manganese/sulfate/pH/conductivity, color-coded to the water legend —
       so "listed impaired for iron" becomes "and measured conductance 430–726 µS/cm at
       Buffalo Creek 3 mi away." Overlap: 70% of coal permits within 3 mi of a sample site,
-      92% within 5 mi. Now: **permit → 303(d) listing → measured value**. *Next: add
-      **selenium** to the WQP pull (not in the current parameter set); reuse `water_near`
-      on ECHO/TRI facilities too.*
+      92% within 5 mi. Now: **permit → 303(d) listing → measured value**. **Selenium
+      DONE:** added to the WQP ingest (stored µg/L; `--chars` filter to fetch one
+      characteristic) — 3,307 samples / 1,040 sites, on the Water measure picker + coal
+      popups; 456 of 518 selenium-listed coal permits have a measured selenium sample
+      within 5 mi. *Next: reuse `water_near` on ECHO/TRI facilities; add more WQP metals
+      (e.g. dissolved aluminum forms) as needed.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
