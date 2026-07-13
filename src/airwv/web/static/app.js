@@ -58,7 +58,8 @@ async function loadCoverage(){
   if (c.first_ts) $('coverage').textContent =
     `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
 }
-const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false, regions:{}, cats:{}};
+const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
+  echo:false, regions:{}, cats:{}, echoStatus:{significant_violation:true, violation:true, compliant:false}};
 // ⭐ My Sensors — a personal follow-list persisted in the browser (accounts later)
 let mySensors = new Set(JSON.parse(localStorage.getItem('airwv_my_sensors') || '[]'));
 function toggleFollow(sid){
@@ -82,6 +83,7 @@ function drawMap(sensors){
   if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
   loadReports();
+  loadFacilities();
 }
 function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
@@ -214,6 +216,37 @@ function initProximity(){
     redrawSensors(); render();
   });
 }
+// ---- EPA ECHO compliance layer (WV major facilities, colored by status) ----
+const ECHO_COLOR = {significant_violation:'#c0392b', violation:'#e07b00', compliant:'#137333', unknown:'#8a94a0'};
+const ECHO_LABEL = {significant_violation:'Significant violation', violation:'In violation',
+  compliant:'No violation', unknown:'Not tracked'};
+const ECHO_PROG = {air:'🌫️ Air', water:'💧 Water', waste:'♻️ Waste',
+  'drinking-water':'🚰 Drinking water', 'toxics-release':'☢️ Toxics'};
+let echoLayer, allFacilities_ = [], echoMeta = {};
+async function loadFacilities(){
+  try { const d = await j('/api/facilities'); allFacilities_ = d.facilities || []; echoMeta = d; }
+  catch(e){ allFacilities_ = []; }
+  redrawEcho(); buildLayers();
+}
+function redrawEcho(){
+  if (echoLayer) echoLayer.remove();
+  echoLayer = L.layerGroup();
+  if (layerState.echo) allFacilities_.forEach(f => {
+    if (f.lat == null || f.lon == null) return;
+    if (layerState.echoStatus[f.status] === false) return;
+    const col = ECHO_COLOR[f.status] || ECHO_COLOR.unknown;
+    const r = f.status === 'significant_violation' ? 8 : f.status === 'violation' ? 7 : 5;
+    const progs = (f.programs||[]).map(p=>ECHO_PROG[p]||p).join(' · ');
+    L.circleMarker([f.lat, f.lon], {radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+      .bindPopup(`<b>${f.name}</b><br><span style="color:${col};font-weight:600">⚖️ ${ECHO_LABEL[f.status]||''}</span>`+
+        `<br><small>${[f.city, f.county && f.county+' Co.'].filter(Boolean).join(', ')}</small>`+
+        (progs?`<br><small>${progs}</small>`:'')+
+        (f.last_inspection?`<br><small>last inspected ${f.last_inspection}</small>`:'')+
+        `<br><a href="${f.echo_url}" target="_blank" rel="noopener">EPA ECHO report →</a>`)
+      .addTo(echoLayer);
+  });
+  echoLayer.addTo(map);
+}
 function redrawSources(){
   if (sourceLayer) sourceLayer.remove();
   sourceLayer = L.markerClusterGroup
@@ -260,6 +293,12 @@ function buildLayers(){
     ? `<details open><summary>⭐ My Sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
     : '';
   const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
+  // ⚖️ EPA ECHO compliance — WV major facilities, colored by status
+  const eCounts = groupCount(allFacilities_,'status');
+  const eStatuses = ['significant_violation','violation','compliant'].filter(s=>eCounts[s]);
+  const dot = s => `<span style="color:${ECHO_COLOR[s]}">●</span>`;
+  const echoRows = eStatuses.map(s=>row('echo',s,layerState.echoStatus[s]!==false,`${dot(s)} ${ECHO_LABEL[s]}`,eCounts[s])).join('');
+  const echoTotal = allFacilities_.length;
   $('layers').innerHTML =
     `<b style="font-size:12px;color:#555">Sensors &amp; layers <span class="cnt">(★ to follow · click to chart)</span></b>`+
     myBlock+
@@ -267,7 +306,8 @@ function buildLayers(){
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
-    `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`;
+    `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`+
+    (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'');
   // checkboxes in a <summary> shouldn't toggle its open/close
   $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
   // updates happen in place (no rebuild) so open groups stay open
@@ -286,6 +326,13 @@ function buildLayers(){
   $('layers').querySelectorAll('[data-cat]').forEach(cb=> cb.onchange=e=>{
     layerState.cats[e.target.dataset.cat]=e.target.checked;
     layerState.sources=cats.some(c=>layerState.cats[c]); redrawSources(); syncParents(regions,cats); });
+  if($('L-echo')) $('L-echo').onchange = e=>{ layerState.echo=e.target.checked;
+    eStatuses.forEach(s=>layerState.echoStatus[s]=e.target.checked);
+    $('layers').querySelectorAll('[data-echo]').forEach(cb=>cb.checked=e.target.checked); redrawEcho(); };
+  $('layers').querySelectorAll('[data-echo]').forEach(cb=> cb.onchange=e=>{
+    layerState.echoStatus[e.target.dataset.echo]=e.target.checked;
+    layerState.echo=eStatuses.some(s=>layerState.echoStatus[s]);   // master = any status on
+    redrawEcho(); syncEcho(eStatuses); });
   $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
@@ -295,6 +342,10 @@ function syncParents(regions,cats){
   const cbC=$('L-community'), cbS=$('L-sources');
   if(cbC){ cbC.checked=cOn>0; cbC.indeterminate=cOn>0 && cOn<regions.length; }
   if(cbS){ cbS.checked=sOn>0; cbS.indeterminate=sOn>0 && sOn<cats.length; }
+}
+function syncEcho(eStatuses){
+  const on=eStatuses.filter(s=>layerState.echoStatus[s]).length, cb=$('L-echo');
+  if(cb){ cb.checked=on>0; cb.indeterminate=on>0 && on<eStatuses.length; }
 }
 
 async function loadValidation(){
