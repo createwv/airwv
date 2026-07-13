@@ -80,6 +80,11 @@ function drawMap(sensors){
     setTimeout(() => busy('b-map', false), 5000);     // fallback
     window.AIRWV_MAP = map;                            // reporting.js uses this to drop the location pin
     window.AIRWV_ON_REPORT = loadReports;             // refresh the report layer after a submission
+    // lazily fill a facility popup's "measured water nearby" box the first time it opens
+    map.on('popupopen', e => {
+      const box = e.popup.getElement().querySelector('.fac-wq[data-pending]');
+      if (box) fillFacWater(box).then(() => e.popup.update());
+    });
   }
   redrawSensors();
   const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
@@ -221,6 +226,42 @@ function initProximity(){
     redrawSensors(); render();
   });
 }
+// Compact water-quality bands (mirror of the Water page) so a facility popup can
+// color-code the measured water sampled nearby.
+const WQ = {
+  ph:          {label: 'pH', unit: '', color: v => (v >= 6.5 && v <= 9) ? '#137333' : (v >= 6 && v <= 9.5 ? '#b8860b' : '#c0392b')},
+  conductance: {label: 'Conductivity', unit: 'µS/cm', color: v => v < 500 ? '#137333' : v < 1000 ? '#b8860b' : v < 2000 ? '#e07b00' : '#c0392b'},
+  iron:        {label: 'Iron', unit: 'mg/L', color: v => v < 0.3 ? '#137333' : v < 1 ? '#b8860b' : v < 3 ? '#e07b00' : '#c0392b'},
+  aluminum:    {label: 'Aluminum', unit: 'mg/L', color: v => v < 0.75 ? '#137333' : v < 2 ? '#b8860b' : '#c0392b'},
+  manganese:   {label: 'Manganese', unit: 'mg/L', color: v => v < 0.05 ? '#137333' : v < 0.3 ? '#b8860b' : '#c0392b'},
+  sulfate:     {label: 'Sulfate', unit: 'mg/L', color: v => v < 250 ? '#137333' : v < 500 ? '#b8860b' : '#c0392b'},
+  selenium:    {label: 'Selenium', unit: 'µg/L', color: v => v < 5 ? '#137333' : v < 20 ? '#b8860b' : v < 50 ? '#e07b00' : '#c0392b'},
+  nitrate:     {label: 'Nitrate', unit: 'mg/L', color: v => v < 5 ? '#137333' : v < 10 ? '#b8860b' : '#c0392b'},
+  ecoli:       {label: 'E. coli', unit: 'MPN/100mL', color: v => v < 126 ? '#137333' : v < 235 ? '#b8860b' : '#c0392b'},
+};
+const WQ_ORDER = ['selenium', 'iron', 'aluminum', 'manganese', 'sulfate', 'conductance', 'ph', 'nitrate', 'ecoli'];
+function renderFacWater(sites) {
+  const withVals = sites.filter(s => WQ_ORDER.some(k => s.latest[k]));
+  if (!withVals.length) return '<small class="meta">No water samples within ~5 mi on record.</small>';
+  let html = '<div class="cn-wqbox"><small><b>💧 Measured water nearby</b></small>';
+  withVals.slice(0, 2).forEach(s => {
+    const chips = WQ_ORDER.filter(k => s.latest[k]).map(k => {
+      const l = s.latest[k], m = WQ[k], col = m.color(l.value);
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
+    }).join(' ');
+    if (chips) html += `<div style="margin:3px 0"><small>${s.name} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
+  });
+  return html + '</div>';
+}
+async function fillFacWater(box) {
+  box.removeAttribute('data-pending');
+  box.innerHTML = '<small class="meta">loading nearby measurements…</small>';
+  try {
+    const sites = (await j(`/api/water/near?lat=${box.dataset.lat}&lon=${box.dataset.lon}&km=8&limit=4`)).sites || [];
+    box.innerHTML = renderFacWater(sites);
+  } catch (_) { box.innerHTML = '<small class="meta">measured water unavailable</small>'; }
+}
+
 // ---- EPA ECHO compliance layer (WV major facilities, colored by status) ----
 const ECHO_COLOR = {significant_violation:'#c0392b', violation:'#e07b00', compliant:'#137333', unknown:'#8a94a0'};
 const ECHO_LABEL = {significant_violation:'Significant violation', violation:'In violation',
@@ -242,11 +283,15 @@ function redrawEcho(){
     const col = ECHO_COLOR[f.status] || ECHO_COLOR.unknown;
     const r = f.status === 'significant_violation' ? 8 : f.status === 'violation' ? 7 : 5;
     const progs = (f.programs||[]).map(p=>ECHO_PROG[p]||p).join(' · ');
+    // water/drinking-water dischargers get a lazily-loaded measured-water block
+    const water = (f.programs||[]).some(p=>p==='water'||p==='drinking-water')
+      ? `<div class="fac-wq" data-pending data-lat="${f.lat}" data-lon="${f.lon}"></div>` : '';
     L.circleMarker([f.lat, f.lon], {radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${f.name}</b><br><span style="color:${col};font-weight:600">⚖️ ${ECHO_LABEL[f.status]||''}</span>`+
         `<br><small>${[f.city, f.county && f.county+' Co.'].filter(Boolean).join(', ')}</small>`+
         (progs?`<br><small>${progs}</small>`:'')+
         (f.last_inspection?`<br><small>last inspected ${f.last_inspection}</small>`:'')+
+        water+
         `<br><a href="${f.echo_url}" target="_blank" rel="noopener">EPA ECHO report →</a>`)
       .addTo(echoLayer);
   });

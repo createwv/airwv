@@ -30,6 +30,37 @@ const FAC_STATUS = {
 const PROG = {air: '🌫️ Air', water: '💧 Water', waste: '♻️ Waste',
   'drinking-water': '🚰 Drinking water', 'toxics-release': '☢️ Toxics'};
 
+// Compact water-quality metadata (mirror of the Water page bands) so a facility's
+// nearby measured values can be color-coded here too — the mining/industrial set.
+const WQ = {
+  ph:          {label: 'pH', unit: '', color: v => (v >= 6.5 && v <= 9) ? '#137333' : (v >= 6 && v <= 9.5 ? '#b8860b' : '#c0392b')},
+  conductance: {label: 'Conductivity', unit: 'µS/cm', color: v => v < 500 ? '#137333' : v < 1000 ? '#b8860b' : v < 2000 ? '#e07b00' : '#c0392b'},
+  iron:        {label: 'Iron', unit: 'mg/L', color: v => v < 0.3 ? '#137333' : v < 1 ? '#b8860b' : v < 3 ? '#e07b00' : '#c0392b'},
+  aluminum:    {label: 'Aluminum', unit: 'mg/L', color: v => v < 0.75 ? '#137333' : v < 2 ? '#b8860b' : '#c0392b'},
+  manganese:   {label: 'Manganese', unit: 'mg/L', color: v => v < 0.05 ? '#137333' : v < 0.3 ? '#b8860b' : '#c0392b'},
+  sulfate:     {label: 'Sulfate', unit: 'mg/L', color: v => v < 250 ? '#137333' : v < 500 ? '#b8860b' : '#c0392b'},
+  selenium:    {label: 'Selenium', unit: 'µg/L', color: v => v < 5 ? '#137333' : v < 20 ? '#b8860b' : v < 50 ? '#e07b00' : '#c0392b'},
+  nitrate:     {label: 'Nitrate', unit: 'mg/L', color: v => v < 5 ? '#137333' : v < 10 ? '#b8860b' : '#c0392b'},
+  ecoli:       {label: 'E. coli', unit: 'MPN/100mL', color: v => v < 126 ? '#137333' : v < 235 ? '#b8860b' : '#c0392b'},
+};
+const WQ_ORDER = ['selenium', 'iron', 'aluminum', 'manganese', 'sulfate', 'conductance', 'ph', 'nitrate', 'ecoli'];
+
+async function fetchNearWaterHtml(lat, lon) {
+  if (lat == null || lon == null) return 'No location on file.';
+  let sites = [];
+  try { sites = (await (await fetch(`/api/water/near?lat=${lat}&lon=${lon}&km=8&limit=6`)).json()).sites || []; }
+  catch (e) { return 'Could not load nearby water data.'; }
+  const withVals = sites.filter(s => WQ_ORDER.some(k => s.latest[k]));
+  if (!withVals.length) return 'No water sample sites within ~5 mi on record.';
+  return withVals.slice(0, 3).map(s => {
+    const chips = WQ_ORDER.filter(k => s.latest[k]).map(k => {
+      const l = s.latest[k], m = WQ[k], col = m.color(l.value);
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
+    }).join(' ');
+    return `<div style="margin:4px 0"><span>${esc(s.name)} <span class="meta">${s.mi} mi</span></span><br>${chips}</div>`;
+  }).join('') + '<div class="meta" style="margin-top:4px">Latest WQP / USGS samples nearby · <a href="/water">open the Water map →</a></div>';
+}
+
 let PERMITS = [], DEP_META = {};
 const DEP_STAGE = {
   requested:    {label: 'Requested', color: '#8e44ad', icon: '🟣'},
@@ -294,6 +325,9 @@ function openDetail(s) {
       + 'Look this facility up on '
       + '<a href="https://echo.epa.gov/facilities/facility-search" target="_blank" rel="noopener">EPA ECHO</a>.';
   }
+  // nearby measured water quality (reuses /api/water/near — the coal-discharge join)
+  $('sd-water').textContent = 'Loading nearby measurements…';
+  fetchNearWaterHtml(s.lat, s.lon).then(html => { $('sd-water').innerHTML = html; });
   const q = encodeURIComponent(s.name);
   $('sd-analysis').href = `/air?src=${q}`;
   $('sd-report').href = `/air?src=${q}#report`;
