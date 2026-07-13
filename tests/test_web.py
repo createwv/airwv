@@ -229,6 +229,21 @@ def test_dep_permits_endpoint(tmp_path):
     assert "Oil &amp; gas permit pipeline" in page and "dep-table" in page
 
 
+def test_dep_mining_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/dep-mining").json()
+    assert {"total", "new", "active", "inactive", "acres_disturbed"} <= set(r["summary"])
+    if r["mines"]:                                 # data file present in the repo
+        m = r["mines"][0]
+        assert {"operator", "stage", "type", "lat", "lon"} <= set(m)
+        act = c.get("/api/dep-mining?stage=active").json()["mines"]
+        assert all(x["stage"] == "active" for x in act)
+        coal = c.get("/api/dep-mining?kind=coal").json()["mines"]
+        assert all("coal" in (x["type"] or "").lower() for x in coal)
+    page = c.get("/sources").text
+    assert "Mining permits" in page and "mine-table" in page
+
+
 def test_alert_signup_flow(tmp_path, monkeypatch):
     monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")

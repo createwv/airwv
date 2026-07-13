@@ -38,6 +38,14 @@ const DEP_STAGE = {
   other:        {label: 'Other',     color: '#8a94a0', icon: '·'},
 };
 
+let MINES = [], MINE_META = {};
+const MINE_STAGE = {
+  new:      {label: 'New', color: '#e67e22', icon: '🟠'},
+  active:   {label: 'Active', color: '#8B4513', icon: '🟤'},
+  inactive: {label: 'Inactive', color: '#95a5a6', icon: '⚪'},
+  other:    {label: 'Other', color: '#8a94a0', icon: '·'},
+};
+
 // ---- geo helpers (mirror of app.js proximity math) ----
 const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 function haversineMi(la1, lo1, la2, lo2) {
@@ -181,6 +189,40 @@ function renderPermitSummary() {
     + counties.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 }
 
+function renderMines() {
+  const st = $('mine-stage').value, ty = $('mine-type').value;
+  const rows = MINES.filter(m => (!st || m.stage === st) && (!ty || m.type === ty));
+  $('mine-count').textContent = `${rows.length} of ${MINES.length} permits`;
+  $('mine-body').innerHTML = rows.map(m => {
+    const s = MINE_STAGE[m.stage] || MINE_STAGE.other;
+    const acres = m.acres_disturbed
+      ? `${m.acres_disturbed}${m.acres_reclaimed ? ` <span class="meta">(${m.acres_reclaimed} reclaimed)</span>` : ''}` : '—';
+    return `<tr>
+      <td><b>${esc(m.operator || 'Operator unknown')}</b>${m.facility ? `<div class="meta">${esc(m.facility)}</div>` : ''}</td>
+      <td class="meta">${esc(m.type || '')}</td>
+      <td class="meta">${acres}</td>
+      <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
+      <td class="meta">${esc(m.permit_id || '')}${m.issue_date ? `<div>${esc(m.issue_date)}</div>` : ''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="meta" style="padding:14px">No permits match.</td></tr>';
+}
+
+function renderMineSummary() {
+  const s = MINE_META.summary || {};
+  const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
+    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+  $('mine-summary').innerHTML =
+    box(s.total, 'active + upcoming permits', '#5a6472')
+    + box(s.new, 'new / not started', '#e67e22')
+    + box(s.active, 'active / renewed', '#8B4513')
+    + box(s.acres_disturbed != null ? Number(s.acres_disturbed).toLocaleString() : null, 'acres disturbed', '#7a5b12');
+  $('mine-src').textContent = MINE_META.fetched_at ? `· WV DEP, as of ${MINE_META.fetched_at}` : '';
+  $('mine-disc').textContent = MINE_META.disclaimer || '';
+  const types = [...new Set(MINES.map(m => m.type).filter(Boolean))].sort();
+  $('mine-type').innerHTML = '<option value="">All types</option>'
+    + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+}
+
 function nearbySensors(s) {
   return SENSORS.filter(x => x.lat != null)
     .map(x => ({...x, mi: haversineMi(s.lat, s.lon, x.lat, x.lon), dir: bearing8(s.lat, s.lon, x.lat, x.lon)}))
@@ -223,11 +265,12 @@ async function init() {
   $('src-cat').innerHTML = '<option value="">All categories</option>'
     + CAT_ORDER.map(k => `<option value="${k}">${CAT[k].icon} ${CAT[k].label}</option>`).join('');
   try {
-    const [sd, sensors, fac, dep] = await Promise.all([
+    const [sd, sensors, fac, dep, mine] = await Promise.all([
       fetch('/api/sources').then(r => r.json()),
       fetch('/api/sensors').then(r => r.json()),
       fetch('/api/facilities').then(r => r.json()),
       fetch('/api/dep-permits').then(r => r.json()),
+      fetch('/api/dep-mining').then(r => r.json()),
     ]);
     SOURCES = (sd.sources || []).filter(s => s.lat != null);
     DISCLAIMER = sd.disclaimer || '';
@@ -236,6 +279,8 @@ async function init() {
     FAC_META = fac;
     PERMITS = dep.permits || [];
     DEP_META = dep;
+    MINES = mine.mines || [];
+    MINE_META = mine;
   } catch (e) { $('src-grid').innerHTML = '<p class="meta" style="padding:14px">Could not load facilities.</p>'; return; }
   $('src-disc').textContent = DISCLAIMER;
   renderCarousel();
@@ -244,10 +289,14 @@ async function init() {
   renderFacilities();
   renderPermitSummary();
   renderPermits();
+  renderMineSummary();
+  renderMines();
   $('fac-status').addEventListener('change', renderFacilities);
   $('fac-program').addEventListener('change', renderFacilities);
   $('dep-stage').addEventListener('change', renderPermits);
   $('dep-county').addEventListener('change', renderPermits);
+  $('mine-stage').addEventListener('change', renderMines);
+  $('mine-type').addEventListener('change', renderMines);
   if (!SV_KEY) {
     $('src-count').insertAdjacentHTML('afterend',
       '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');

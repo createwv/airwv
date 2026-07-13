@@ -71,6 +71,27 @@
   </table></div>
   <p class="meta" id="dep-disc" style="margin-top:8px"></p>
 
+  <h2 class="ov-sechead">⛏️ Mining permits <span class="meta" id="mine-src"></span></h2>
+  <p class="meta" style="margin:-6px 0 10px">Active and upcoming coal &amp; mineral mining across West Virginia, from the
+     <a href="https://tagis.dep.wv.gov" target="_blank" rel="noopener">WV DEP</a> Division of Mining &amp; Reclamation —
+     with disturbed vs. reclaimed acreage where reported. Released/revoked historical permits are excluded.</p>
+  <div id="mine-summary" class="fac-summary"></div>
+  <div class="controls src-filter">
+    <label>Stage <select id="mine-stage">
+      <option value="">All stages</option>
+      <option value="new">🟠 New / not started</option>
+      <option value="active">🟤 Active / renewed</option>
+      <option value="inactive">⚪ Inactive (idle)</option>
+    </select></label>
+    <label>Type <select id="mine-type"><option value="">All types</option></select></label>
+    <span class="meta" id="mine-count"></span>
+  </div>
+  <div class="card" style="padding:0"><table id="mine-table" class="fac-table">
+    <thead><tr><th>Operator</th><th>Type</th><th>Acres disturbed</th><th>Stage</th><th>Permit</th></tr></thead>
+    <tbody id="mine-body"><tr><td colspan="5" class="meta" style="padding:14px">Loading…</td></tr></tbody>
+  </table></div>
+  <p class="meta" id="mine-disc" style="margin-top:8px"></p>
+
   <div class="about"><p class="meta" id="src-disc"></p></div>
 </div>
 

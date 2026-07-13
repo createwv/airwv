@@ -892,6 +892,32 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/dep-mining")
+    def dep_mining(stage: str | None = None, kind: str | None = None):
+        """WV DEP active + upcoming mining permits. Optional filters:
+        stage=new|active|inactive, kind=<mining type substring>."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "dep_mining.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"mines": [], "summary": {}, "source": "", "fetched_at": None}
+        mines = data.get("mines", [])
+        summary = {"total": len(mines),
+                   "new": sum(m["stage"] == "new" for m in mines),
+                   "active": sum(m["stage"] == "active" for m in mines),
+                   "inactive": sum(m["stage"] == "inactive" for m in mines),
+                   "acres_disturbed": round(sum(m.get("acres_disturbed") or 0 for m in mines))}
+        if stage:
+            mines = [m for m in mines if m["stage"] == stage]
+        if kind:
+            mines = [m for m in mines if kind.lower() in (m.get("type") or "").lower()]
+        return {"mines": mines, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "partner_note": data.get("partner_note"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/wind-roses")
     def wind_roses():
         try:
