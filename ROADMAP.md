@@ -342,8 +342,18 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       a county backlog bar chart (Ritchie 823…), cited (WV Watch / WV DEP IIJA / US DOI). **Health
       context DONE:** the Learn **Health** tab gained gas/H2S (rotten-egg + olfactory-fatigue danger,
       symptoms, what-to-do), ozone/VOC/benzene, and water-contaminant (lead/nitrate/E.coli/selenium)
-      sections, all linked to the map layers + report hooks (CDC/ATSDR/EPA/WV DHHR cited). *Next:
-      per-well leak/monitoring data if it ever goes public; a symptom→nearby-hazard reverse guide.*
+      sections, all linked to the map layers + report hooks (CDC/ATSDR/EPA/WV DHHR cited).
+      *Next: per-well leak/monitoring data if it ever goes public.*
+- [x] **"What's near me?" — symptom → nearby-hazard reverse guide** (`/nearby`) — the human-first
+      synthesis of every layer. Someone shares their location + (optional) symptoms; `/api/near`
+      aggregates all sources within a radius into one categorized list (gas/air/water/chemical/
+      sensor): abandoned/orphan wells, ECHO facilities (+violations), TRI/curated sources, coal
+      NPDES (+303(d)), mining, NRC spills, live community-sensor VOC/PM2.5, measured water samples,
+      and county health-based drinking-water violations. `near_me.js` maps symptoms→categories,
+      highlights/sorts the matching groups ("matches your symptoms"), shows a hazard map around a
+      "you are here" pin, and offers a pre-filled report per hazard. Linked from Home + Learn Health.
+      Heavy disclaimers (not medical advice, 911 for emergencies, correlation-not-cause). Near
+      Rutledge: 12 gas wells + Elementis (sig. violation) + Charleston WWTW + a VOC-elevated sensor.
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
