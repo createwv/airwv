@@ -244,6 +244,21 @@ def test_dep_mining_endpoint(tmp_path):
     assert "Mining permits" in page and "mine-table" in page
 
 
+def test_coal_npdes_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/coal-npdes").json()
+    assert {"permits", "outlets"} <= set(r["summary"])
+    if r["permits"]:                               # data file present in the repo
+        p = r["permits"][0]
+        assert {"operator", "permit", "outlets", "receiving_streams", "lat", "lon", "effluent_url"} <= set(p)
+        big = c.get("/api/coal-npdes?min_outlets=50").json()["permits"]
+        assert all(x["outlets"] >= 50 for x in big)
+    # water map gets the overlay toggle; sources gets the section
+    assert 'id="w-coal"' in c.get("/water").text
+    page = c.get("/sources").text
+    assert "Coal &amp; water" in page and "coal-table" in page
+
+
 def test_alert_signup_flow(tmp_path, monkeypatch):
     monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")

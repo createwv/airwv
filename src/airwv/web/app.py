@@ -918,6 +918,27 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
+    @app.get("/api/coal-npdes")
+    def coal_npdes(min_outlets: int = 0):
+        """WV coal-mine water discharge permits (NPDES), aggregated by permit —
+        ties mining to the streams it discharges into. min_outlets filters small ones."""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "coal_npdes.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"permits": [], "summary": {}, "source": "", "fetched_at": None}
+        permits = data.get("permits", [])
+        summary = {"permits": len(permits),
+                   "outlets": sum(p.get("outlets", 0) for p in permits)}
+        if min_outlets:
+            permits = [p for p in permits if p.get("outlets", 0) >= min_outlets]
+        return {"permits": permits, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "partner_note": data.get("partner_note"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/wind-roses")
     def wind_roses():
         try:

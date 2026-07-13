@@ -223,6 +223,35 @@ function renderMineSummary() {
     + types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
 }
 
+let COAL = [], COAL_META = {};
+function renderCoal() {
+  const min = +$('coal-min').value || 1;
+  const rows = COAL.filter(p => (p.outlets || 0) >= min);
+  $('coal-count').textContent = `${rows.length} of ${COAL.length} permits`;
+  $('coal-body').innerHTML = rows.map(p => {
+    const streams = (p.receiving_streams || []).slice(0, 4).map(esc).join(', ')
+      + (p.stream_count > 4 ? ` <span class="meta">+${p.stream_count - 4} more</span>` : '');
+    return `<tr>
+      <td><b>${esc(p.operator || 'Operator unknown')}</b></td>
+      <td class="meta">${esc(p.permit || '')}</td>
+      <td><b>${p.outlets}</b> <span class="meta">→ ${p.stream_count} streams</span></td>
+      <td class="meta">${streams || '—'}</td>
+      <td>${p.effluent_url ? `<a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">ECHO effluent →</a>` : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="meta" style="padding:14px">No permits match.</td></tr>';
+}
+
+function renderCoalSummary() {
+  const s = COAL_META.summary || {};
+  const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
+    <b style="color:${color}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+  $('coal-summary').innerHTML =
+    box(s.permits, 'coal discharge permits', '#8B4513')
+    + box(s.outlets, 'permitted discharge outlets', '#4a7fb0');
+  $('coal-src').textContent = COAL_META.fetched_at ? `· WV DEP, as of ${COAL_META.fetched_at}` : '';
+  $('coal-disc').textContent = COAL_META.disclaimer || '';
+}
+
 function nearbySensors(s) {
   return SENSORS.filter(x => x.lat != null)
     .map(x => ({...x, mi: haversineMi(s.lat, s.lon, x.lat, x.lon), dir: bearing8(s.lat, s.lon, x.lat, x.lon)}))
@@ -265,12 +294,13 @@ async function init() {
   $('src-cat').innerHTML = '<option value="">All categories</option>'
     + CAT_ORDER.map(k => `<option value="${k}">${CAT[k].icon} ${CAT[k].label}</option>`).join('');
   try {
-    const [sd, sensors, fac, dep, mine] = await Promise.all([
+    const [sd, sensors, fac, dep, mine, coal] = await Promise.all([
       fetch('/api/sources').then(r => r.json()),
       fetch('/api/sensors').then(r => r.json()),
       fetch('/api/facilities').then(r => r.json()),
       fetch('/api/dep-permits').then(r => r.json()),
       fetch('/api/dep-mining').then(r => r.json()),
+      fetch('/api/coal-npdes').then(r => r.json()),
     ]);
     SOURCES = (sd.sources || []).filter(s => s.lat != null);
     DISCLAIMER = sd.disclaimer || '';
@@ -281,6 +311,8 @@ async function init() {
     DEP_META = dep;
     MINES = mine.mines || [];
     MINE_META = mine;
+    COAL = coal.permits || [];
+    COAL_META = coal;
   } catch (e) { $('src-grid').innerHTML = '<p class="meta" style="padding:14px">Could not load facilities.</p>'; return; }
   $('src-disc').textContent = DISCLAIMER;
   renderCarousel();
@@ -291,12 +323,15 @@ async function init() {
   renderPermits();
   renderMineSummary();
   renderMines();
+  renderCoalSummary();
+  renderCoal();
   $('fac-status').addEventListener('change', renderFacilities);
   $('fac-program').addEventListener('change', renderFacilities);
   $('dep-stage').addEventListener('change', renderPermits);
   $('dep-county').addEventListener('change', renderPermits);
   $('mine-stage').addEventListener('change', renderMines);
   $('mine-type').addEventListener('change', renderMines);
+  $('coal-min').addEventListener('change', renderCoal);
   if (!SV_KEY) {
     $('src-count').insertAdjacentHTML('afterend',
       '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');

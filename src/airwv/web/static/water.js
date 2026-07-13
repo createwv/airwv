@@ -34,6 +34,33 @@ const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'sulfate', 'nitrate',
                'aluminum', 'manganese', 'turbidity', 'temperature', 'discharge', 'gage_height'];
 
 let SITES = [], map, layer, current = 'ph', userMarker;
+let coalLayer, COAL = null;
+
+// WV DEP coal-mine NPDES discharge permits — mining ↔ water overlay.
+async function toggleCoal(on) {
+  if (!on) { if (coalLayer) { coalLayer.remove(); coalLayer = null; } return; }
+  if (!COAL) {
+    try { COAL = (await (await fetch('/api/coal-npdes?min_outlets=1')).json()).permits || []; }
+    catch (e) { COAL = []; }
+  }
+  if (coalLayer) coalLayer.remove();
+  coalLayer = L.markerClusterGroup
+    ? L.markerClusterGroup({chunkedLoading: true, maxClusterRadius: 50})
+    : L.layerGroup();
+  COAL.forEach(p => {
+    if (p.lat == null || p.lon == null) return;
+    const r = Math.min(5 + Math.log2(p.outlets || 1) * 1.5, 12);
+    const streams = (p.receiving_streams || []).slice(0, 5).map(esc).join('<br>· ');
+    L.circleMarker([p.lat, p.lon], {radius: r, color: '#4a2c12', weight: 1, fillColor: '#8B4513', fillOpacity: 0.8})
+      .bindPopup(`<b>${esc(p.operator)}</b> <small>${esc(p.permit)}</small>`
+        + `<br>⛏️ <b>${p.outlets}</b> permitted discharge outlet${p.outlets === 1 ? '' : 's'}`
+        + ` into <b>${p.stream_count}</b> stream${p.stream_count === 1 ? '' : 's'}`
+        + (streams ? `<br><small>Receiving:<br>· ${streams}${p.stream_count > 5 ? '<br>· …' : ''}</small>` : '')
+        + `<br><a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">EPA ECHO effluent charts →</a>`)
+      .addTo(coalLayer);
+  });
+  coalLayer.addTo(map);
+}
 
 function nearMe() {
   if (!navigator.geolocation) { $('w-note').textContent = 'geolocation not available on this device'; return; }
@@ -128,6 +155,7 @@ async function init() {
   $('w-param').value = current;
   $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
   $('w-nearme').addEventListener('click', nearMe);
+  $('w-coal').addEventListener('change', e => toggleCoal(e.target.checked));
   draw();
 }
 init();
