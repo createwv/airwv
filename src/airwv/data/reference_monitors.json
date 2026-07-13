@@ -1,136 +1,137 @@
 {
-  "kind": "reference",
-  "note": "EPA regulatory PM2.5 monitors in WV (2024) \u2014 validated reference-grade data, shown to sanity-check community sensors.",
-  "monitors": [
-    {
-      "id": "54-003-0003",
-      "name": "MARTINSBURG BALL FIELD",
-      "county": "Berkeley",
-      "lat": 39.4481,
-      "lon": -77.9638,
-      "mean_pm25": 7.5,
-      "days": 116,
-      "citation": "EPA AirData / AQS (monitor 54-003-0003, 2024)"
-    },
-    {
-      "id": "54-009-0005",
-      "name": "Follansbee",
-      "county": "Brooke",
-      "lat": 40.341,
-      "lon": -80.5966,
-      "mean_pm25": 6.9,
-      "days": 120,
-      "citation": "EPA AirData / AQS (monitor 54-009-0005, 2024)"
-    },
-    {
-      "id": "54-009-0011",
-      "name": "Weirton",
-      "county": "Brooke",
-      "lat": 40.3947,
-      "lon": -80.6118,
-      "mean_pm25": 7.0,
-      "days": 867,
-      "citation": "EPA AirData / AQS (monitor 54-009-0011, 2024)"
-    },
-    {
-      "id": "54-011-0007",
-      "name": "Huntington",
-      "county": "Cabell",
-      "lat": 38.4102,
-      "lon": -82.4324,
-      "mean_pm25": 7.2,
-      "days": 881,
-      "citation": "EPA AirData / AQS (monitor 54-011-0007, 2024)"
-    },
-    {
-      "id": "54-029-0009",
-      "name": "Weirton",
-      "county": "Hancock",
-      "lat": 40.4274,
-      "lon": -80.5923,
-      "mean_pm25": 6.5,
-      "days": 850,
-      "citation": "EPA AirData / AQS (monitor 54-029-0009, 2024)"
-    },
-    {
-      "id": "54-033-0003",
-      "name": "WASHINGTON IRVING JUNIOR HIGH SCHOOL",
-      "county": "Harrison",
-      "lat": 39.2781,
-      "lon": -80.3423,
-      "mean_pm25": 6.3,
-      "days": 113,
-      "citation": "EPA AirData / AQS (monitor 54-033-0003, 2024)"
-    },
-    {
-      "id": "54-039-0020",
-      "name": "Dixie St.",
-      "county": "Kanawha",
-      "lat": 38.3463,
-      "lon": -81.6212,
-      "mean_pm25": 6.9,
-      "days": 771,
-      "citation": "EPA AirData / AQS (monitor 54-039-0020, 2024)"
-    },
-    {
-      "id": "54-039-1005",
-      "name": "South Charleston",
-      "county": "Kanawha",
-      "lat": 38.3662,
-      "lon": -81.6937,
-      "mean_pm25": 7.0,
-      "days": 120,
-      "citation": "EPA AirData / AQS (monitor 54-039-1005, 2024)"
-    },
-    {
-      "id": "54-049-0006",
-      "name": "MARION HEALTH CARE HOSPITAL",
-      "county": "Marion",
-      "lat": 39.4815,
-      "lon": -80.1347,
-      "mean_pm25": 6.3,
-      "days": 111,
-      "citation": "EPA AirData / AQS (monitor 54-049-0006, 2024)"
-    },
-    {
-      "id": "54-051-1002",
-      "name": "Moundsville",
-      "county": "Marshall",
-      "lat": 39.916,
-      "lon": -80.7339,
-      "mean_pm25": 7.6,
-      "days": 833,
-      "citation": "EPA AirData / AQS (monitor 54-051-1002, 2024)"
-    },
-    {
-      "id": "54-061-0003",
-      "name": "Morgantown",
-      "county": "Monongalia",
-      "lat": 39.6494,
-      "lon": -79.9203,
-      "mean_pm25": 6.2,
-      "days": 115,
-      "citation": "EPA AirData / AQS (monitor 54-061-0003, 2024)"
-    },
-    {
-      "id": "54-069-0010",
-      "name": "Wheeling",
-      "county": "Ohio",
-      "lat": 40.1149,
-      "lon": -80.701,
-      "mean_pm25": 6.7,
-      "days": 120,
-      "citation": "EPA AirData / AQS (monitor 54-069-0010, 2024)"
-    },
-    {
-      "id": "54-107-1002",
-      "name": "Neale Elementary School",
-      "county": "Wood",
-      "lat": 39.3235,
-      "lon": -81.5524,
-      "mean_pm25": 6.8,
-      "days": 131,
-      "citation": "EPA AirData / AQS (monitor 54-107-1002, 2024)"
-    }
-  ]
+ "source": "EPA AirNow (regulatory reference monitors, keyless)",
+ "kind": "reference",
+ "note": "EPA regulatory PM2.5 monitors in WV (2024) \u2014 validated reference-grade data, shown to sanity-check community sensors.",
+ "monitors": [
+  {
+   "id": "54-003-0003",
+   "name": "MARTINSBURG BALL FIELD",
+   "county": "Berkeley",
+   "lat": 39.4481,
+   "lon": -77.9638,
+   "mean_pm25": 7.5,
+   "days": 116,
+   "citation": "EPA AirData / AQS (monitor 54-003-0003, 2024)"
+  },
+  {
+   "id": "54-009-0005",
+   "name": "Follansbee",
+   "county": "Brooke",
+   "lat": 40.341,
+   "lon": -80.5966,
+   "mean_pm25": 6.9,
+   "days": 120,
+   "citation": "EPA AirData / AQS (monitor 54-009-0005, 2024)"
+  },
+  {
+   "id": "54-009-0011",
+   "name": "Weirton",
+   "county": "Brooke",
+   "lat": 40.3947,
+   "lon": -80.6118,
+   "mean_pm25": 7.0,
+   "days": 867,
+   "citation": "EPA AirData / AQS (monitor 54-009-0011, 2024)"
+  },
+  {
+   "id": "54-011-0007",
+   "name": "Huntington",
+   "county": "Cabell",
+   "lat": 38.4102,
+   "lon": -82.4324,
+   "mean_pm25": 7.2,
+   "days": 881,
+   "citation": "EPA AirData / AQS (monitor 54-011-0007, 2024)"
+  },
+  {
+   "id": "54-029-0009",
+   "name": "Weirton",
+   "county": "Hancock",
+   "lat": 40.4274,
+   "lon": -80.5923,
+   "mean_pm25": 6.5,
+   "days": 850,
+   "citation": "EPA AirData / AQS (monitor 54-029-0009, 2024)"
+  },
+  {
+   "id": "54-033-0003",
+   "name": "WASHINGTON IRVING JUNIOR HIGH SCHOOL",
+   "county": "Harrison",
+   "lat": 39.2781,
+   "lon": -80.3423,
+   "mean_pm25": 6.3,
+   "days": 113,
+   "citation": "EPA AirData / AQS (monitor 54-033-0003, 2024)"
+  },
+  {
+   "id": "54-039-0020",
+   "name": "Dixie St.",
+   "county": "Kanawha",
+   "lat": 38.3463,
+   "lon": -81.6212,
+   "mean_pm25": 6.9,
+   "days": 771,
+   "citation": "EPA AirData / AQS (monitor 54-039-0020, 2024)"
+  },
+  {
+   "id": "54-039-1005",
+   "name": "South Charleston",
+   "county": "Kanawha",
+   "lat": 38.3662,
+   "lon": -81.6937,
+   "mean_pm25": 7.0,
+   "days": 120,
+   "citation": "EPA AirData / AQS (monitor 54-039-1005, 2024)"
+  },
+  {
+   "id": "54-049-0006",
+   "name": "MARION HEALTH CARE HOSPITAL",
+   "county": "Marion",
+   "lat": 39.4815,
+   "lon": -80.1347,
+   "mean_pm25": 6.3,
+   "days": 111,
+   "citation": "EPA AirData / AQS (monitor 54-049-0006, 2024)"
+  },
+  {
+   "id": "54-051-1002",
+   "name": "Moundsville",
+   "county": "Marshall",
+   "lat": 39.916,
+   "lon": -80.7339,
+   "mean_pm25": 7.6,
+   "days": 833,
+   "citation": "EPA AirData / AQS (monitor 54-051-1002, 2024)"
+  },
+  {
+   "id": "54-061-0003",
+   "name": "Morgantown",
+   "county": "Monongalia",
+   "lat": 39.6494,
+   "lon": -79.9203,
+   "mean_pm25": 6.2,
+   "days": 115,
+   "citation": "EPA AirData / AQS (monitor 54-061-0003, 2024)"
+  },
+  {
+   "id": "54-069-0010",
+   "name": "Wheeling",
+   "county": "Ohio",
+   "lat": 40.1149,
+   "lon": -80.701,
+   "mean_pm25": 6.7,
+   "days": 120,
+   "citation": "EPA AirData / AQS (monitor 54-069-0010, 2024)"
+  },
+  {
+   "id": "54-107-1002",
+   "name": "Neale Elementary School",
+   "county": "Wood",
+   "lat": 39.3235,
+   "lon": -81.5524,
+   "mean_pm25": 6.8,
+   "days": 131,
+   "citation": "EPA AirData / AQS (monitor 54-107-1002, 2024)"
+  }
+ ]
 }

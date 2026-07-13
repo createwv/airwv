@@ -1089,7 +1089,7 @@ def create_app(store: Store) -> FastAPI:
             path = Path(__file__).parent.parent / "data" / "sources.json"
             data = json.loads(path.read_text(encoding="utf-8"))
             return {"tier": data.get("tier"), "disclaimer": data.get("disclaimer"),
-                    "sources": data.get("sources", [])}
+                    "source": data.get("source"), "sources": data.get("sources", [])}
         except Exception:
             return {"tier": "documented", "disclaimer": "", "sources": []}
 
