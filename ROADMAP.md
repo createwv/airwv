@@ -336,8 +336,14 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       the abandoned/orphan wells within ~2/5 km, VOC flagged when above the network median, with
       an explicit correlation-not-causation note. **The EWV Rutledge sensor reads VOC ~105 (above
       the ~84 median) near wells** — the origin story visible in our own data (9 elevated sensors
-      sit near wells). *Next: surface the plugging backlog (~1–2/yr); a per-sensor VOC-vs-well
-      deeper stat; health context ([[health]]); per-well leak/monitoring data if it goes public.*
+      sit near wells). **Plugging backlog DONE:** `/api/well-backlog` + Air-dashboard card "🕳️ The
+      orphan-well plugging backlog" — 4,721 orphans (2,122 near homes), the years-to-clear math
+      (state ~25/yr → ~190 yrs vs federal IIJA ~210/yr → ~22 yrs; IIJA targets only 1,200 by 2030),
+      a county backlog bar chart (Ritchie 823…), cited (WV Watch / WV DEP IIJA / US DOI). **Health
+      context DONE:** the Learn **Health** tab gained gas/H2S (rotten-egg + olfactory-fatigue danger,
+      symptoms, what-to-do), ozone/VOC/benzene, and water-contaminant (lead/nitrate/E.coli/selenium)
+      sections, all linked to the map layers + report hooks (CDC/ATSDR/EPA/WV DHHR cited). *Next:
+      per-well leak/monitoring data if it ever goes public; a symptom→nearby-hazard reverse guide.*
 - [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
       big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
       Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
