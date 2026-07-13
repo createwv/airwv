@@ -527,10 +527,21 @@ people-direct water education and connect it to air).
       individual polluters: aging combined storm+sewage systems dump untreated sewage
       into rivers (e.g., the **Kanawha**) during rain — possibly the main reason to think
       twice about swimming. (Verify current CSO facts/permits before publishing.)
+- [~] **Drinking-water systems & SDWA violations** — BUILT: `scripts/fetch_sdwa.py`
+      pulls WV public water systems from **EPA ECHO/SDWIS** (keyless) — type, community
+      flag, population served, water source, and violation status (health-based, serious
+      violator, lead/copper) + ECHO record. → `sdwa_systems.json` / `/api/sdwa` (systems +
+      county rollup). On the **Water page**: county bubble map (sized by systems-in-
+      violation, click to filter) + filterable system table. **771 active systems, 187 with
+      a health-based violation serving 218k people**; answers the Wyoming County crisis
+      question directly (10/19 systems, 11 serious violators). Worst: Greenbrier/McDowell/
+      Pocahontas/Mingo. *Next: per-violation detail (contaminant + date) from SDWA_VIOLATIONS;
+      tie a system to its intake + upstream spills/dischargers.*
 - [~] **Drinking-water source mapping** — flag **where each community's drinking water
       comes from** (e.g., **Elk River intake for Charleston**, down to the withdrawal
       point). Education on source water + a hook for **alerts** (upstream spill → warn
       downstream intakes). Sources: WV Bureau for Public Health source-water assessments.
+      *(SDWA layer above now shows each system's source type — ground vs surface.)*
 - [x] **Recreation & fish-consumption guidance** — plain-language "can you swim/boat/eat
       the fish?" per river, from **WV DHHR/DEP fish-consumption advisories** + the DEP
       **303(d) impaired-streams / integrated report**; explain **how to read the river
