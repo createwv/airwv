@@ -36,8 +36,10 @@ CHARS = {
     "Total dissolved solids": ("tds", "mg/L"),
     "Aluminum": ("aluminum", "mg/L"),
     "Manganese": ("manganese", "mg/L"),
+    "Selenium": ("selenium", "µg/L"),
 }
-_MG_METALS = {"iron", "aluminum", "manganese"}
+_MG_METALS = {"iron", "aluminum", "manganese"}   # stored mg/L; convert µg→mg
+_UG_METALS = {"selenium"}                        # stored µg/L (values ~1–20); convert mg→µg
 
 
 def _num(v: str):
@@ -69,6 +71,8 @@ def fetch_char(char: str, start: str) -> list[dict]:
         u = (row.get("ResultMeasure/MeasureUnitCode") or "").lower()
         if param in _MG_METALS and u.startswith("ug"):   # µg/L -> mg/L
             val /= 1000.0
+        if param in _UG_METALS and u.startswith("mg"):   # mg/L -> µg/L
+            val *= 1000.0
         rows.append({"source": "wqp", "site_id": row["MonitoringLocationIdentifier"],
                      "site_name": (row.get("MonitoringLocationName") or row["MonitoringLocationIdentifier"])[:200],
                      "lat": round(lat, 5), "lon": round(lon, 5), "ts": ts,
@@ -79,18 +83,24 @@ def fetch_char(char: str, start: str) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--start-year", type=int, default=2020)
+    ap.add_argument("--chars", help="comma-separated CharacteristicNames to fetch "
+                                     "(default: all). e.g. --chars Selenium")
     args = ap.parse_args()
     start = f"01-01-{args.start_year}"
+    chars = [c.strip() for c in args.chars.split(",")] if args.chars else list(CHARS)
+    unknown = [c for c in chars if c not in CHARS]
+    if unknown:
+        ap.error(f"unknown characteristic(s): {unknown}. Known: {list(CHARS)}")
     store = Store(os.environ.get("AIRWV_DATABASE_URL", "").strip() or "sqlite:///airwv.sqlite")
     store.create_schema()
     total = 0
-    for char in CHARS:
+    for char in chars:
         try:
             rows = fetch_char(char, start)
         except Exception as exc:
             print(f"  {char}: fetch failed ({exc})")
             continue
-        n = store.add_water_readings(rows)
+        store.add_water_readings(rows)
         total += len(rows)
         sites = len({r["site_id"] for r in rows})
         print(f"  {char:22} {len(rows):6} rows  {sites:4} sites")

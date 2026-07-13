@@ -19,6 +19,8 @@ const WATER_PARAMS = {
                 color: v => v < 126 ? '#00e400' : v < 235 ? '#ffff00' : v < 1000 ? '#ff7e00' : '#ff0000'},
   iron:        {label: 'Iron', unit: 'mg/L', note: 'Mining / acid-drainage indicator. Secondary drinking standard 0.3 mg/L.',
                 color: v => v < 0.3 ? '#00e400' : v < 1 ? '#ffff00' : v < 3 ? '#ff7e00' : '#ff0000'},
+  selenium:    {label: 'Selenium', unit: 'µg/L', note: 'Coal-mining pollutant, bioaccumulates in fish. Aquatic-life chronic criterion ~5 µg/L.',
+                color: v => v < 5 ? '#00e400' : v < 20 ? '#ffff00' : v < 50 ? '#ff7e00' : '#ff0000'},
   sulfate:     {label: 'Sulfate', unit: 'mg/L', note: 'Elevated by mining. Secondary standard 250 mg/L.',
                 color: v => v < 250 ? '#00e400' : v < 500 ? '#ffff00' : '#ff0000'},
   nitrate:     {label: 'Nitrate', unit: 'mg/L', note: 'Nutrient (agriculture/sewage). Drinking-water limit 10 mg/L.',
@@ -30,7 +32,7 @@ const WATER_PARAMS = {
   discharge:   {label: 'Streamflow', unit: 'cfs', note: 'How much water is flowing past — context for everything else.', color: () => '#4a7fb0'},
   gage_height: {label: 'Gage height', unit: 'ft', note: 'River stage (height) at the gauge.', color: () => '#4a7fb0'},
 };
-const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'sulfate', 'nitrate', 'tds',
+const ORDER = ['ph', 'ecoli', 'do', 'conductance', 'iron', 'selenium', 'sulfate', 'nitrate', 'tds',
                'aluminum', 'manganese', 'turbidity', 'temperature', 'discharge', 'gage_height'];
 
 let SITES = [], map, layer, current = 'ph', userMarker;
@@ -38,7 +40,7 @@ let coalLayer, COAL = null;
 
 // Measured water near a coal discharger — lazily loaded into its popup, so
 // "listed impaired for iron" becomes "and here's the measured iron nearby".
-const WQ_KEYS = ['iron', 'aluminum', 'manganese', 'sulfate', 'ph', 'conductance'];
+const WQ_KEYS = ['iron', 'selenium', 'aluminum', 'manganese', 'sulfate', 'ph', 'conductance'];
 function renderNearWater(sites) {
   const withVals = sites.filter(s => WQ_KEYS.some(k => s.latest[k]));
   if (!withVals.length) return '<small class="meta">No nearby mine-related water samples on record.</small>';
@@ -141,6 +143,7 @@ function legend(param) {
     turbidity: [['#00e400', '<10'], ['#ffff00', '10–50'], ['#ff7e00', '50–100'], ['#ff0000', '>100 FNU']],
     ecoli: [['#00e400', '<126'], ['#ffff00', '126–235'], ['#ff7e00', '235–1000'], ['#ff0000', '>1000 (unsafe)']],
     iron: [['#00e400', '<0.3'], ['#ffff00', '0.3–1'], ['#ff7e00', '1–3'], ['#ff0000', '>3 mg/L']],
+    selenium: [['#00e400', '<5'], ['#ffff00', '5–20'], ['#ff7e00', '20–50'], ['#ff0000', '>50 µg/L']],
     sulfate: [['#00e400', '<250'], ['#ffff00', '250–500'], ['#ff0000', '>500 mg/L']],
     nitrate: [['#00e400', '<5'], ['#ffff00', '5–10'], ['#ff0000', '>10 mg/L (limit)']],
     tds: [['#00e400', '<500'], ['#ffff00', '500–1000'], ['#ff0000', '>1000 mg/L']],
