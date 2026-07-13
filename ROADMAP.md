@@ -503,8 +503,12 @@ people-direct water education and connect it to air).
       DONE:** added to the WQP ingest (stored µg/L; `--chars` filter to fetch one
       characteristic) — 3,307 samples / 1,040 sites, on the Water measure picker + coal
       popups; 456 of 518 selenium-listed coal permits have a measured selenium sample
-      within 5 mi. *Next: reuse `water_near` on ECHO/TRI facilities; add more WQP metals
-      (e.g. dissolved aluminum forms) as needed.*
+      within 5 mi. **Extended to all facilities:** `water_near` now also powers a
+      "Water quality nearby" block in the **Sources facility detail modal** (every curated
+      source incl. TRI/chemical) and the **dashboard ⚖️ ECHO popups** for water/drinking-
+      water dischargers (e.g. Pleasants Power → Ohio River iron/sulfate/conductivity 1.4 mi
+      away). *Next: add more WQP metals as needed; a "measured-water" column on the ECHO/coal
+      Sources tables.*
 
 ### Cross-medium education & systemic issues
 *(Education DONE as the Learn **"Water"** tab: drinking-water source, CSOs, swimming/E. coli, fish advisories, reading 303(d) maps, air↔water. Cited WV DHHR / EPA / Charleston Waterkeeper. Drinking-water **map** of intakes still to build.)*
