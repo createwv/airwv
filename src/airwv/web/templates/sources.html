@@ -21,6 +21,34 @@
   </div>
   <section class="src-grid" id="src-grid"></section>
 
+  <h2 class="ov-sechead">⚖️ Compliance &amp; permits <span class="meta" id="fac-src"></span></h2>
+  <p class="meta" style="margin:-6px 0 10px">West Virginia's <b>major</b> regulated facilities and their
+     current EPA compliance status — the big permitted air emitters and water dischargers. Live from
+     <a href="https://echo.epa.gov" target="_blank" rel="noopener">EPA ECHO</a>; each links to its official record.</p>
+  <div id="fac-summary" class="fac-summary"></div>
+  <div class="controls src-filter">
+    <label>Status <select id="fac-status">
+      <option value="">All statuses</option>
+      <option value="significant_violation">⛔ Significant violation</option>
+      <option value="violation">⚠️ In violation</option>
+      <option value="compliant">✓ No violation</option>
+    </select></label>
+    <label>Program <select id="fac-program">
+      <option value="">All programs</option>
+      <option value="air">🌫️ Air</option>
+      <option value="water">💧 Water</option>
+      <option value="waste">♻️ Waste</option>
+      <option value="drinking-water">🚰 Drinking water</option>
+      <option value="toxics-release">☢️ Toxics release</option>
+    </select></label>
+    <span class="meta" id="fac-count"></span>
+  </div>
+  <div class="card" style="padding:0"><table id="fac-table" class="fac-table">
+    <thead><tr><th>Facility</th><th>Location</th><th>Programs</th><th>Status</th><th>EPA record</th></tr></thead>
+    <tbody id="fac-body"><tr><td colspan="5" class="meta" style="padding:14px">Loading…</td></tr></tbody>
+  </table></div>
+  <p class="meta" id="fac-disc" style="margin-top:8px"></p>
+
   <div class="about"><p class="meta" id="src-disc"></p></div>
 </div>
 

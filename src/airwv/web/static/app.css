@@ -307,3 +307,14 @@
   .lvl small { color:#667; font-size:12px; }
   .lvl .sw { display:inline-block; width:12px; height:12px; border-radius:3px; border:1px solid #0002; margin-right:5px; vertical-align:middle; }
   #alertform input[type=email], #alertform select { border:1px solid #cfd6dc; border-radius:7px; font-size:15px; }
+
+  /* Sources — compliance & permits (EPA ECHO) */
+  .fac-summary { display:flex; flex-wrap:wrap; gap:10px; margin:6px 0 12px; }
+  .fac-stat { border:1px solid #d7dde3; border-left-width:4px; border-radius:7px; padding:7px 12px; font-size:13px; color:#556; background:#fff; }
+  .fac-stat b { font-size:18px; margin-right:4px; }
+  table.fac-table { width:100%; border-collapse:collapse; font-size:14px; }
+  table.fac-table th { text-align:left; padding:9px 12px; background:#f5f7f9; color:#556; font-weight:600; position:sticky; top:0; }
+  table.fac-table td { padding:9px 12px; border-top:1px solid #eef1f4; vertical-align:top; }
+  table.fac-table tr:hover td { background:#fafbfc; }
+  .fac-badge { display:inline-block; color:#fff; font-size:12px; font-weight:600; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+  .prog-chip { display:inline-block; font-size:11px; color:#445; background:#eef1f4; border-radius:20px; padding:1px 7px; white-space:nowrap; }

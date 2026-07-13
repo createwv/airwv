@@ -843,6 +843,30 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"tier": "documented", "disclaimer": "", "sources": []}
 
+    @app.get("/api/facilities")
+    def facilities(status: str | None = None, program: str | None = None):
+        """WV major regulated facilities + EPA ECHO compliance status. Optional
+        filters: status=significant_violation|violation|compliant, program=air|water|…"""
+        try:
+            import json
+
+            path = Path(__file__).parent.parent / "data" / "echo_facilities.json"
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"facilities": [], "summary": {}, "source": "", "fetched_at": None}
+        facs = data.get("facilities", [])
+        summary = {"total": len(facs),
+                   "significant_violation": sum(f["status"] == "significant_violation" for f in facs),
+                   "violation": sum(f["status"] == "violation" for f in facs),
+                   "compliant": sum(f["status"] == "compliant" for f in facs)}
+        if status:
+            facs = [f for f in facs if f["status"] == status]
+        if program:
+            facs = [f for f in facs if program in (f.get("programs") or [])]
+        return {"facilities": facs, "summary": summary,
+                "source": data.get("source"), "scope": data.get("scope"),
+                "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
+
     @app.get("/api/wind-roses")
     def wind_roses():
         try:

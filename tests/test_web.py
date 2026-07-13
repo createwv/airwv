@@ -193,6 +193,24 @@ def test_area_rollups(tmp_path):
     assert "areas.js" in page and "How's your area doing?" in page
 
 
+def test_facilities_endpoint(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/api/facilities").json()
+    assert {"total", "significant_violation", "violation", "compliant"} <= set(r["summary"])
+    if r["facilities"]:                            # data file is present in the repo
+        f = r["facilities"][0]
+        assert {"name", "lat", "lon", "status", "programs", "echo_url"} <= set(f)
+        # status filter narrows to only that status
+        sv = c.get("/api/facilities?status=significant_violation").json()["facilities"]
+        assert all(x["status"] == "significant_violation" for x in sv)
+        # program filter narrows to only facilities in that program
+        air = c.get("/api/facilities?program=air").json()["facilities"]
+        assert all("air" in x["programs"] for x in air)
+    # sources page wires the compliance section in
+    page = c.get("/sources").text
+    assert "Compliance &amp; permits" in page and "fac-table" in page
+
+
 def test_alert_signup_flow(tmp_path, monkeypatch):
     monkeypatch.delenv("AIRWV_SMTP_HOST", raising=False)  # SMTP off → waitlist path
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")

@@ -18,6 +18,17 @@ const CAT = {
 const CAT_ORDER = ['power', 'chemical', 'oil_gas', 'water_discharge', 'waste', 'materials', 'other'];
 
 let SOURCES = [], SENSORS = [], DISCLAIMER = '';
+let FACILITIES = [], FAC_META = {};
+
+// EPA ECHO compliance status → badge; program code → chip.
+const FAC_STATUS = {
+  significant_violation: {label: 'Significant violation', color: '#c0392b', icon: '⛔'},
+  violation:            {label: 'In violation',          color: '#e07b00', icon: '⚠️'},
+  compliant:            {label: 'No violation',          color: '#137333', icon: '✓'},
+  unknown:              {label: 'Not tracked',           color: '#8a94a0', icon: '·'},
+};
+const PROG = {air: '🌫️ Air', water: '💧 Water', waste: '♻️ Waste',
+  'drinking-water': '🚰 Drinking water', 'toxics-release': '☢️ Toxics'};
 
 // ---- geo helpers (mirror of app.js proximity math) ----
 const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -94,6 +105,37 @@ function renderGrid() {
     || '<p class="meta" style="padding:14px">No matches.</p>';
 }
 
+function renderFacilities() {
+  const st = $('fac-status').value, pg = $('fac-program').value;
+  const rows = FACILITIES.filter(f => (!st || f.status === st) && (!pg || (f.programs || []).includes(pg)));
+  $('fac-count').textContent = `${rows.length} of ${FACILITIES.length} facilities`;
+  $('fac-body').innerHTML = rows.map(f => {
+    const s = FAC_STATUS[f.status] || FAC_STATUS.unknown;
+    const chips = (f.programs || []).map(p => `<span class="prog-chip">${PROG[p] || p}</span>`).join(' ');
+    const loc = [f.city, f.county && `${f.county} Co.`].filter(Boolean).join(', ');
+    return `<tr>
+      <td><b>${esc(f.name)}</b>${f.last_inspection ? `<div class="meta">last inspected ${esc(f.last_inspection)}</div>` : ''}</td>
+      <td class="meta">${esc(loc)}</td>
+      <td>${chips || '<span class="meta">—</span>'}</td>
+      <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
+      <td><a href="${esc(f.echo_url)}" target="_blank" rel="noopener">ECHO report →</a></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="meta" style="padding:14px">No facilities match.</td></tr>';
+}
+
+function renderFacSummary() {
+  const s = FAC_META.summary || {};
+  const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
+    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+  $('fac-summary').innerHTML =
+    box(s.total, 'major facilities', '#5a6472')
+    + box(s.significant_violation, 'in significant violation', '#c0392b')
+    + box(s.violation, 'in violation', '#e07b00')
+    + box(s.compliant, 'no violation identified', '#137333');
+  $('fac-src').textContent = FAC_META.fetched_at ? `· EPA ECHO, as of ${FAC_META.fetched_at}` : '';
+  $('fac-disc').textContent = FAC_META.disclaimer || '';
+}
+
 function nearbySensors(s) {
   return SENSORS.filter(x => x.lat != null)
     .map(x => ({...x, mi: haversineMi(s.lat, s.lon, x.lat, x.lon), dir: bearing8(s.lat, s.lon, x.lat, x.lon)}))
@@ -136,17 +178,24 @@ async function init() {
   $('src-cat').innerHTML = '<option value="">All categories</option>'
     + CAT_ORDER.map(k => `<option value="${k}">${CAT[k].icon} ${CAT[k].label}</option>`).join('');
   try {
-    const [sd, sensors] = await Promise.all([
+    const [sd, sensors, fac] = await Promise.all([
       fetch('/api/sources').then(r => r.json()),
       fetch('/api/sensors').then(r => r.json()),
+      fetch('/api/facilities').then(r => r.json()),
     ]);
     SOURCES = (sd.sources || []).filter(s => s.lat != null);
     DISCLAIMER = sd.disclaimer || '';
     SENSORS = sensors || [];
+    FACILITIES = fac.facilities || [];
+    FAC_META = fac;
   } catch (e) { $('src-grid').innerHTML = '<p class="meta" style="padding:14px">Could not load facilities.</p>'; return; }
   $('src-disc').textContent = DISCLAIMER;
   renderCarousel();
   renderGrid();
+  renderFacSummary();
+  renderFacilities();
+  $('fac-status').addEventListener('change', renderFacilities);
+  $('fac-program').addEventListener('change', renderFacilities);
   if (!SV_KEY) {
     $('src-count').insertAdjacentHTML('afterend',
       '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');
