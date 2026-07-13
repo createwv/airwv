@@ -129,7 +129,7 @@ at <https://aqs.epa.gov/aqsweb/airdata/>. Fully QA'd regulatory data back to the
 2000s. `ingest airdata --start-year 2007`. (Some years use `M/D/YYYY` dates — the
 parser handles both.)
 
-> **On OpenAQ — credit for the path, not a dependency.** The open
+> **OpenAQ.** The open
 > **[OpenAQ](https://openaq.org)** project is how we learned to reach EPA's *own* air
 > data: poking their API showed US real-time data is tagged `provider="AirNow"` — i.e.
 > they re-serve EPA's AirNow feed — which pointed us at the primary EPA sources we now
