@@ -117,34 +117,45 @@ We resolve device names → `sensor_index`, then pull current + historical readi
 - VOC is a **relative gas-response index**, not a concentration, and can't be
   calibrated (no reference VOC). The UI says so everywhere it appears.
 
-### EPA AirNow — live reference (keyless)
-EPA's real-time program (EPA + state/local/tribal agencies). The hourly `HourlyAQObs`
-file at <https://files.airnowtech.org> is **keyless, no quota** — one download has
-every US monitor; we keep WV + border. Preliminary (not QA'd), for public awareness.
-`ingest airnow`, hourly via `airwv-airnow.timer`.
+The two EPA air-reference feeds are the **same monitors at two QA stages** — real-time
+**preliminary** (AirNow) and, about a year later, **finalized** (AirData). Both keyless.
 
-### EPA AirData / AQS — deep history (keyless)
-Pre-generated **annual daily** files (`daily_88101_YYYY.zip` = PM2.5, `44201` = ozone)
-at <https://aqs.epa.gov/aqsweb/airdata/>. Fully QA'd regulatory data back to the
-2000s. `ingest airdata --start-year 2007`. (Some years use `M/D/YYYY` dates — the
-parser handles both.)
+### EPA AirNow — real-time *and* retained recent history (keyless)
+EPA's real-time program (EPA + state/local/tribal agencies). Each hour is published at a
+**dated** path — `files.airnowtech.org/airnow/YYYY/YYYYMMDD/HourlyAQObs_YYYYMMDDHH.dat` —
+**keyless, no quota**, one file with every US monitor (we keep WV + border). The key
+thing people miss: **these files are retained** (we've pulled them 2+ years back), so
+AirNow is *not* "live-only" — you can fetch any past hour directly by constructing its
+URL. It is **preliminary** (not QA'd, for public awareness). Two uses: `ingest airnow`
+(latest hour, on `airwv-airnow.timer`) for the live layer, and `ingest airnow
+--backfill-days N` to pull a past window straight from EPA — which is how we cover the
+**current year** until AirData finalizes it.
 
-> **OpenAQ.** The open
-> **[OpenAQ](https://openaq.org)** project is how we learned to reach EPA's *own* air
-> data: poking their API showed US real-time data is tagged `provider="AirNow"` — i.e.
-> they re-serve EPA's AirNow feed — which pointed us at the primary EPA sources we now
-> use directly. **Our air reference is EPA end-to-end and stores no OpenAQ data:** every
-> reference row is `source='airnow'` or `'epa_airdata'`, traceable to EPA.
->
-> *The current-year wrinkle (worth understanding):* EPA's **finalized** history (the
-> AirData annual files) isn't published *retroactively* for the current year — the 2026
-> file lands ~2027. OpenAQ's platform **does** retain current-year observations in
-> queryable form, but their terms authorize **light, real-time querying within limits
-> (~60/min, ~2,000/hr, with attribution) — not bulk download.** So we don't pull history
-> from them; instead we cover the current year with EPA's own **AirNow**, whose hourly
-> files are *retained* and keyless (`ingest airnow --backfill-days N`). OpenAQ stays
-> worth keeping in mind for what EPA's US-only feeds can't do — non-US / global data,
-> networks outside the US regulatory set, redundancy — used the way they intend.
+### EPA AirData / AQS — finalized, QA'd history (keyless)
+The **certified** counterpart: pre-generated **annual daily** files
+(`daily_88101_YYYY.zip` = PM2.5, `44201` = ozone) at <https://aqs.epa.gov/aqsweb/airdata/>,
+fully quality-assured, back to the 2000s. The trade-off is a **finalization lag** — a
+completed year is published ~a year later (the 2026 file lands ~2027). So AirData is the
+source of record for **completed years**; the **current year** comes from AirNow.
+`ingest airdata --start-year 2007`. (Some years use `M/D/YYYY` dates — the parser handles both.)
+
+> **Preliminary → finalized, each year.** Our policy is to keep **both** — tagged by
+> `source` (`airnow` vs `epa_airdata`) — and treat the finalized value as authoritative
+> where it exists. When EPA finalizes a completed year, we *add* that AirData rather than
+> overwrite the preliminary AirNow, so we always have the certified record **and** an
+> auditable trail of what was reported in real time vs. what QA later changed. QA
+> legitimately drops flagged/malfunctioning readings and applies corrections — keeping
+> the raw preliminary record just means anyone can verify the difference. (See ROADMAP.)
+
+> **OpenAQ.** The open **[OpenAQ](https://openaq.org)** project is how we learned to
+> reach EPA's *own* air data: poking their API showed US real-time data is tagged
+> `provider="AirNow"` — i.e. they re-serve EPA's AirNow feed — which pointed us at the
+> primary EPA sources we use directly. **Our air reference is EPA end-to-end and stores
+> no OpenAQ data;** every reference row is `source='airnow'` or `'epa_airdata'`. We don't
+> need OpenAQ for the current year either — AirNow's dated hourly files are retained and
+> cover it directly. OpenAQ stays worth knowing for what EPA's US-only feeds can't do
+> (non-US / global data, networks outside the US regulatory set), used within their terms
+> (light real-time querying, attribution — not bulk).
 
 ---
 

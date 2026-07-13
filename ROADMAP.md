@@ -471,6 +471,15 @@ Grow the network and secure the record.
       these EPA feeds *via* OpenAQ (credited in DATA-SOURCES.md) but store **no OpenAQ
       data** — reference is EPA end-to-end. The OpenAQ client was removed; only the key
       is kept for optional light, non-US queries within their limits.
+- [ ] **Annual finalization — preliminary → certified (yearly job)** — AirNow (preliminary)
+      and AirData (finalized, ~1yr lag) are the same monitors at two QA stages. Each year
+      when EPA finalizes the prior year, pull that `airdata` and **keep both** — the
+      certified `epa_airdata` row *and* the real-time `airnow` row (tagged by `source`), so
+      we have the authoritative value **and** an auditable trail of what QA changed (drops/
+      corrections). Then: (a) make validation/display **prefer `epa_airdata` where it
+      overlaps `airnow`** for a completed year (today there's no overlap — airnow=current,
+      airdata≤2025); (b) optionally surface a small "preliminary vs finalized" diff for
+      transparency. Set a yearly reminder (~each summer) to run the finalized-year pull.
 - [x] **Sensor-vs-reference validation** (`ingest validate`) — pairs each
       community sensor with its nearest reference monitor, correlates daily-median
       PM2.5 (Pearson r + mean bias). Live: r ≈ 0.73–0.89 across the Kanawha cluster,
