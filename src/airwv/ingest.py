@@ -590,7 +590,16 @@ def _parse_airnow(content: str):
             continue
         try:
             lat, lon = float(row["Latitude"]), float(row["Longitude"])
-            ts = datetime.strptime(f"{row['ValidDate']} {row['ValidTime']}", "%m/%d/%Y %H:%M")
+            raw = f"{row['ValidDate']} {row['ValidTime']}"
+            # AirNow switched ValidDate from 2-digit ('07/01/20') to 4-digit year over time
+            for _fmt in ("%m/%d/%Y %H:%M", "%m/%d/%y %H:%M"):
+                try:
+                    ts = datetime.strptime(raw, _fmt)
+                    break
+                except ValueError:
+                    ts = None
+            if ts is None:
+                continue
         except (ValueError, KeyError):
             continue  # no coords / timestamp
         pm25, ozone = _num(row.get("PM25")), _num(row.get("OZONE"))
@@ -687,6 +696,31 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow backfill: %d readings across %d days", total, days)
     return total
+
+
+def run_qa_check(config: Config, store=None, year: int | None = None, field: str = "pm2_5") -> dict:
+    """Audit preliminary AirNow against finalized AirData for the same monitor+day —
+    how much QA changed, and what it dropped. Prints a report; returns the stats."""
+    store = store or Store.from_config(config)
+    r = store.airnow_vs_airdata(year=year, field=field)
+    scope = f" ({year})" if year else " (all overlapping years)"
+    print(f"\nAirNow (preliminary) vs AirData (finalized) — {field}{scope}")
+    print("=" * 62)
+    if not r["matched_monitor_days"]:
+        print("  No overlapping monitor-days yet — backfill AirNow into a finalized year first.")
+        return r
+    print(f"  matched monitor-days:      {r['matched_monitor_days']:,}")
+    print(f"  correlation (prelim↔final): {r['correlation']}")
+    print(f"  mean diff (final − prelim): {r['mean_diff_final_minus_prelim']} {field}")
+    print(f"  mean |diff|:                {r['mean_abs_diff']}   median |diff|: {r['median_abs_diff']}")
+    print(f"  within 1 / 2 units:         {r['pct_within_1']}% / {r['pct_within_2']}%")
+    print(f"  QA dropped (prelim only):   {r['prelim_only_dropped_by_qa']:,} monitor-days")
+    print(f"  finalized-only (not live):  {r['final_only']:,} monitor-days")
+    if r["largest_diffs"]:
+        print("  largest revisions:")
+        for d in r["largest_diffs"]:
+            print(f"    {d['monitor']} {d['date']}: {d['prelim']} → {d['final']} ({d['diff']:+})")
+    return r
 
 
 def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: int = 5,
@@ -1041,6 +1075,9 @@ def main(argv: list[str] | None = None) -> None:
     p_airnow = sub.add_parser("airnow", help="pull latest AirNow hourly PM2.5 — live reference (keyless, no quota)")
     p_airnow.add_argument("--backfill-days", type=int, default=0,
                           help="backfill this many past days (one file/day) — direct EPA history")
+    p_qa = sub.add_parser("qa-check", help="audit preliminary AirNow vs finalized AirData (what QA changed)")
+    p_qa.add_argument("--year", type=int, help="limit to one finalized year (default: all overlap)")
+    p_qa.add_argument("--field", default="pm2_5", choices=["pm2_5", "ozone"])
     sub.add_parser("water", help="pull latest USGS real-time water readings for WV (keyless)")
     airdata = sub.add_parser("airdata", help="bulk-import EPA AirData daily PM2.5 history (keyless, no quota)")
     airdata.add_argument("--start-year", type=int, default=2016, help="first year (default 2016)")
@@ -1103,6 +1140,8 @@ def main(argv: list[str] | None = None) -> None:
             run_airnow_backfill(config, days=args.backfill_days)
         else:
             run_airnow(config)
+    elif command == "qa-check":
+        run_qa_check(config, year=args.year, field=args.field)
     elif command == "water":
         run_water(config)
     elif command == "airdata":

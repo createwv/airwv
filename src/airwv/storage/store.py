@@ -227,6 +227,58 @@ class Store:
             rows = session.execute(stmt.group_by(day)).all()
         return {_date.fromisoformat(str(d)[:10]): max(0.0, float(v)) for d, v in rows if v is not None}
 
+    def airnow_vs_airdata(self, year: int | None = None, field: str = "pm2_5") -> dict:
+        """Compare **preliminary** AirNow vs **finalized** AirData daily values for the
+        same monitor+day — the QA audit. Reconciles AirNow's AQSID ('210130002') to
+        AirData's dashed id ('21-013-0002'). Returns agreement stats plus how many
+        monitor-days QA dropped (present in AirNow, gone from finalized) or added."""
+        import statistics
+
+        from sqlalchemy import text
+
+        if field not in ("pm2_5", "ozone"):
+            raise ValueError("field must be pm2_5 or ozone")
+        yf = f"AND CAST(strftime('%Y', ts) AS INT) = {int(year)}" if year else ""
+        ctes = (
+            f"WITH an AS (SELECT substr(sensor_id,1,2)||'-'||substr(sensor_id,3,3)||'-'||"
+            f"substr(sensor_id,6) AS mon, date(ts) AS d, avg({field}) AS v FROM readings "
+            f"WHERE source='airnow' AND {field} IS NOT NULL AND length(sensor_id)=9 {yf} GROUP BY mon,d), "
+            f"ad AS (SELECT sensor_id AS mon, date(ts) AS d, avg({field}) AS v FROM readings "
+            f"WHERE source='epa_airdata' AND {field} IS NOT NULL {yf} GROUP BY mon,d)")
+        with self._session_factory() as session:
+            matched = session.execute(text(
+                ctes + " SELECT an.mon, an.d, an.v, ad.v FROM an JOIN ad ON an.mon=ad.mon AND an.d=ad.d")).all()
+            an_total = session.execute(text(ctes + " SELECT count(*) FROM an")).scalar() or 0
+            ad_total = session.execute(text(ctes + " SELECT count(*) FROM ad")).scalar() or 0
+        prelim = [float(r[2]) for r in matched]
+        final = [float(r[3]) for r in matched]
+        diffs = [f - p for p, f in zip(prelim, final)]
+        adiffs = [abs(x) for x in diffs]
+        n = len(matched)
+        corr = None
+        if n >= 2 and len(set(prelim)) > 1 and len(set(final)) > 1:
+            try:
+                corr = round(statistics.correlation(prelim, final), 4)
+            except statistics.StatisticsError:
+                corr = None
+        top = sorted(matched, key=lambda r: abs(r[3] - r[2]), reverse=True)[:5]
+        return {
+            "field": field, "year": year,
+            "matched_monitor_days": n,
+            "mean_diff_final_minus_prelim": round(statistics.mean(diffs), 3) if diffs else None,
+            "mean_abs_diff": round(statistics.mean(adiffs), 3) if adiffs else None,
+            "median_abs_diff": round(statistics.median(adiffs), 3) if adiffs else None,
+            "correlation": corr,
+            "pct_within_1": round(100 * sum(x <= 1 for x in adiffs) / n, 1) if n else None,
+            "pct_within_2": round(100 * sum(x <= 2 for x in adiffs) / n, 1) if n else None,
+            "prelim_only_dropped_by_qa": an_total - n,   # in AirNow, not in finalized AirData
+            "final_only": ad_total - n,                  # in finalized, not captured live
+            "largest_diffs": [
+                {"monitor": r[0], "date": str(r[1]), "prelim": round(float(r[2]), 1),
+                 "final": round(float(r[3]), 1), "diff": round(float(r[3]) - float(r[2]), 1)}
+                for r in top],
+        }
+
     def coverage_overall(self) -> dict:
         """Overall first/last timestamp + total rows across all sensors (fast)."""
         with self._session_factory() as session:
