@@ -266,6 +266,19 @@ Make the data visible and usable.
       (reached-water, year). 223 WV reports 2025–26 (91 reached water). Shared
       `airwv/wvgeo.py` county centroids place the ~80% without coordinates. *Next: auto-log
       big ones as curated Events; a monthly refresh; link a spill to nearby measured water.*
+- [ ] **Storage upgrade — PostgreSQL + TimescaleDB (COMMITTED)** — the deliberate move
+      off SQLite so we can store years of **hourly/sub-hourly** data without losing
+      resolution (the mission needs event-preserving, origin-traceable time-series). We're
+      architecturally ready (SQLAlchemy; README already says "Postgres prod"). Steps:
+      (1) provision Postgres+Timescale (Docker on papa-greatness); (2) **fix SQLite-isms** —
+      `daily_avg`/`daily_avg_corrected` (`func.date`/`strftime` → `date_trunc`), the
+      `qa-check` raw SQL (`substr`/`strftime`/`||`), `INSERT OR IGNORE` → `ON CONFLICT DO
+      NOTHING`, drop WAL pragmas; (3) migrate ~3M+ rows; (4) make `readings` a **hypertable**
+      + **continuous aggregates** (fast hourly/daily rollups) + **compression** on old chunks;
+      (5) `psycopg` dep, `AIRWV_DATABASE_URL=postgresql://`; (6) full suite vs Postgres, then
+      cut over (keep SQLite as instant rollback). Do as a dedicated effort — touches prod.
+      Retention principle: keep RAW high-res; roll up for display; surface **peak/max** so
+      zooming out never hides a spike.
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
 - [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
