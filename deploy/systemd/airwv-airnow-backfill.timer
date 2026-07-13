@@ -1,0 +1,12 @@
+# Runs airwv-airnow-backfill.service once a night (fills any gaps the hourly job missed).
+#   sudo systemctl enable --now airwv-airnow-backfill.timer
+
+[Unit]
+Description=Run AirWV AirNow gap-backfill nightly
+
+[Timer]
+OnCalendar=*-*-* 09:20:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

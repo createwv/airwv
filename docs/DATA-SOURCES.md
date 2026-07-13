@@ -145,7 +145,23 @@ source of record for **completed years**; the **current year** comes from AirNow
 > overwrite the preliminary AirNow, so we always have the certified record **and** an
 > auditable trail of what was reported in real time vs. what QA later changed. QA
 > legitimately drops flagged/malfunctioning readings and applies corrections — keeping
-> the raw preliminary record just means anyone can verify the difference. (See ROADMAP.)
+> the raw preliminary record just means anyone can verify the difference.
+
+**Collecting both — the ongoing model:**
+
+| Job | Command | Cadence | Notes |
+|---|---|---|---|
+| AirNow live | `ingest airnow` | hourly (`airwv-airnow.timer`) | latest hour, live layer |
+| AirNow gap-fill | `ingest airnow --backfill-days 3` | nightly (`airwv-airnow-backfill.timer`) | catches missed hours |
+| AirNow deep backfill | `ingest airnow --backfill-days N` | one-time / as needed | files retained ~mid-2019→now |
+| AirData finalized | `ingest airdata --start-year Y --end-year Y` | **yearly** (each summer) | pull the newly-certified year |
+| **QA audit** | `ingest qa-check [--year N]` | ad-hoc | preliminary vs finalized diff |
+
+`qa-check` reconciles AirNow's AQSID (`540390020`) to AirData's dashed id
+(`54-039-0020`) and reports, per overlapping monitor-day: correlation, mean/abs
+difference, % within tolerance, and **how many monitor-days QA dropped** (present live,
+gone from finalized) or added. That's the transparency mechanism — you can see exactly
+what the certification changed, not just trust that it didn't remove anything.
 
 > **OpenAQ.** The open **[OpenAQ](https://openaq.org)** project is how we learned to
 > reach EPA's *own* air data: poking their API showed US real-time data is tagged

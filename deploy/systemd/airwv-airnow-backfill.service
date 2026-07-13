@@ -1,0 +1,17 @@
+# AirNow gap-backfill — nightly belt-and-suspenders alongside the hourly airwv-airnow
+# timer. AirNow retains its dated hourly files, so this re-pulls the last few days
+# (one file/day) to fill any hours the hourly job missed (server downtime, lag).
+# KEYLESS. Copy both to /etc/systemd/system/, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now airwv-airnow-backfill.timer
+
+[Unit]
+Description=AirWV — nightly AirNow gap-backfill (direct EPA, keyless)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=airwv
+WorkingDirectory=/opt/airwv
+EnvironmentFile=/opt/airwv/.env
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.ingest airnow --backfill-days 3
