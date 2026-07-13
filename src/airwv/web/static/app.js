@@ -81,10 +81,25 @@ function drawMap(sensors){
     setTimeout(() => busy('b-map', false), 5000);     // fallback
     window.AIRWV_MAP = map;                            // reporting.js uses this to drop the location pin
     window.AIRWV_ON_REPORT = loadReports;             // refresh the report layer after a submission
-    // lazily fill a facility popup's "measured water nearby" box the first time it opens
+    // popup wiring: lazily fill a facility's "measured water nearby" box, and wire a
+    // well's "report this well" link into the pre-filled report modal.
     map.on('popupopen', e => {
-      const box = e.popup.getElement().querySelector('.fac-wq[data-pending]');
+      const el = e.popup.getElement();
+      const box = el.querySelector('.fac-wq[data-pending]');
       if (box) fillFacWater(box).then(() => e.popup.update());
+      const rep = el.querySelector('.well-report');
+      if (rep) rep.addEventListener('click', ev => {
+        ev.preventDefault();
+        const d = rep.dataset;
+        if (window.AIRWV_REPORT_AT) window.AIRWV_REPORT_AT({
+          lat: +d.lat, lon: +d.lon, domain: 'air', category: 'Abandoned / leaking gas well',
+          description: `Possible problem at abandoned gas well ${d.id}`
+            + (d.orphan === '1' ? ' (orphan — no known operator)' : '')
+            + (d.county ? `, ${d.county} County` : '')
+            + '. What did you notice? — gas smell, rotten-egg (H2S) odor, bubbling water/soil, '
+            + 'dead vegetation, or health symptoms (headache, nausea, rashes).',
+        });
+      });
     });
   }
   redrawSensors();
@@ -389,7 +404,8 @@ function redrawWells(){
         (w.county?`<br><small>${w.county} County</small>`:'')+
         `<br><small>${prox}</small>`+
         `<br><small>Leaking wells can vent natural gas / H2S near homes.</small>`+
-        `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`)
+        `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`+
+        `<br><a href="#" class="well-report" data-lat="${w.lat}" data-lon="${w.lon}" data-id="${w.id||''}" data-orphan="${w.orphan?1:0}" data-county="${w.county||''}">🚨 Report a problem with this well →</a>`)
       .addTo(wellLayer);
   });
   wellLayer.addTo(map);

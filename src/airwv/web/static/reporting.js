@@ -12,6 +12,25 @@
   const openFeedback = () => $('feedbackmodal').classList.add('on');
   const close = id => $(id).classList.remove('on');
 
+  // Public hook: open the report modal pre-filled and pre-located — used by the
+  // "report this well" link on abandoned-well popups (no map-pick needed).
+  window.AIRWV_REPORT_AT = (opts = {}) => {
+    if (!$('reportmodal')) return;
+    resetReportForm();
+    reportStart = Date.now();
+    if (opts.lat != null && opts.lon != null) {
+      reportLoc = { lat: opts.lat, lng: opts.lon };
+      const m = theMap();
+      if (m) { if (tmpLocMarker) tmpLocMarker.remove(); tmpLocMarker = L.marker([opts.lat, opts.lon]).addTo(m); }
+      $('r-locinfo').textContent = `📍 ${opts.lat.toFixed(4)}, ${opts.lon.toFixed(4)} — or "Set location" to move it`;
+      $('r-submit').disabled = false;
+    }
+    if (opts.domain && $('r-domain')) $('r-domain').value = opts.domain;
+    if (opts.category) $('r-category').value = opts.category;
+    if (opts.description) $('r-desc').value = opts.description;
+    $('reportmodal').classList.add('on');
+  };
+
   function resetReportForm() {
     ['r-category', 'r-desc', 'r-org', 'r-email'].forEach(id => { if ($(id)) $(id).value = ''; });
     reportLoc = null; reportStart = 0;
