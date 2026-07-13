@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>What's near me?</h1>
+    <p>Not feeling right, or just want to know what's around you? Share your location and (optionally)
+       pick any symptoms — we'll show the abandoned wells, facilities, discharges, spills, and sensor
+       readings nearby, and flag the ones that line up with how you feel.</p></div>
+
+  <div class="card nb-disc">⚠️ <b>This is not medical advice and not a diagnosis.</b> For a medical or gas
+    emergency — a strong gas / rotten-egg smell, or trouble breathing — <b>call 911 now</b>. This tool shows
+    what's <i>mapped</i> nearby; being close to something is not proof it caused how you feel.</div>
+
+  <div class="card"><div style="padding:14px 16px">
+    <div style="margin-bottom:6px"><b>1. Any symptoms?</b> <span class="meta">optional — helps us highlight what fits</span></div>
+    <div id="nb-symptoms" class="nb-chips"></div>
+    <div style="margin:14px 0 6px"><b>2. Your location</b></div>
+    <div class="controls" style="gap:12px">
+      <button id="nb-loc" class="primary">📍 Use my location</button>
+      <label>Within <select id="nb-km">
+        <option value="3">2 miles</option>
+        <option value="8" selected>5 miles</option>
+        <option value="16">10 miles</option>
+      </select></label>
+      <span class="meta" id="nb-locinfo">location not set</span>
+    </div>
+  </div></div>
+
+  <div class="card" id="nb-mapcard" style="display:none"><div id="nb-map" style="height:340px"></div>
+    <div class="legend"><span style="color:#c0392b">●</span> gas/wells <span style="color:#7a5b12">●</span> air/industrial
+      <span style="color:#2c7fb8">●</span> water <span style="color:#8e44ad">●</span> spill
+      <span style="color:#2a7a2a">●</span> sensor · 📍 you</div>
+  </div>
+  <div id="nb-results"></div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/near_me.js?v={{ asset_v }}"></script>
+<script src="/static/reporting.js?v={{ asset_v }}"></script>
+{% endblock %}

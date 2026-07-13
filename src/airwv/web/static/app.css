@@ -323,3 +323,22 @@
   .cn-wqbox { margin-top:5px; border-top:1px solid #eee; padding-top:5px; }
   .wq-chip { display:inline-block; font-size:11px; border:1px solid #ccc; border-left-width:3px;
              border-radius:4px; padding:0 5px; margin:1px 2px 1px 0; background:#fff; }
+
+  /* "What's near me?" hazard guide (/nearby) */
+  .nb-disc { padding:12px 16px; background:#fff8f0; border-left:4px solid #e07b00; color:#5a4326; font-size:14px; }
+  .nb-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .nb-chip { border:1px solid #cfd6dc; background:#fff; border-radius:20px; padding:6px 12px; font-size:13px; cursor:pointer; }
+  .nb-chip:hover { background:#f5f7f9; }
+  .nb-chip.on { background:#2c3e70; color:#fff; border-color:#2c3e70; }
+  .nb-group.rel { box-shadow:0 0 0 2px #2c3e70 inset; }
+  .nb-match { font-size:11px; background:#2c3e70; color:#fff; border-radius:20px; padding:1px 9px; margin-left:6px; vertical-align:middle; }
+  .nb-list { display:flex; flex-direction:column; }
+  .nb-item { display:flex; align-items:center; gap:10px; padding:8px 14px; border-top:1px solid #eef1f4; }
+  .nb-item.rel { background:#fbfbfe; }
+  .nb-ic { font-size:18px; width:22px; text-align:center; }
+  .nb-body { flex:1; min-width:0; }
+  .nb-title { font-size:14px; font-weight:600; color:#222; }
+  .nb-meta { font-size:12px; color:#667; }
+  .nb-actions { display:flex; gap:12px; font-size:13px; white-space:nowrap; }
+  .nb-flag { font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:#fff; border-radius:20px; padding:1px 7px; margin-left:6px; }
+  .nb-orphan, .nb-violation, .nb-impaired, .nb-spill { background:#c0392b; }

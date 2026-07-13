@@ -284,6 +284,18 @@ def test_coal_npdes_endpoint(tmp_path):
     assert "Coal &amp; water" in page and "coal-table" in page
 
 
+def test_near_endpoint_and_page(tmp_path):
+    c = _client(tmp_path)
+    assert c.get("/nearby").status_code == 200 and "near_me.js" in c.get("/nearby").text
+    r = c.get("/api/near?lat=38.3727&lon=-81.6540&km=8").json()
+    assert {"hazards", "counts", "county"} <= set(r)
+    for h in r["hazards"]:
+        assert {"category", "label", "mi", "lat", "lon"} <= set(h)
+        assert h["category"] in {"gas", "air", "water", "chemical", "sensor"}
+    # radius is clamped, not unbounded
+    assert c.get("/api/near?lat=38.3&lon=-81.6&km=999").json()["km"] <= 25
+
+
 def test_well_backlog_endpoint(tmp_path):
     c = _client(tmp_path)
     r = c.get("/api/well-backlog").json()
