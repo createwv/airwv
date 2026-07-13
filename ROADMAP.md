@@ -248,6 +248,15 @@ Make the data visible and usable.
       and **community reports** (`report_ids` → `/air`). *v2: map of event locations,
       auto-surface candidates from the algorithmic `/api/events` detection, per-event
       permalink pages (SEO/press), and richer sensor overlays for captured events.*
+- [~] **Reported spills feed (NRC)** — BUILT: `scripts/fetch_nrc_spills.py` pulls the
+      **National Response Center** annual .xlsx (US Coast Guard spill hotline, keyless),
+      keeps WV, flattens report + material + details + caller → `nrc_spills.json` /
+      `/api/nrc-spills`. Answers "where does spill data go?" — the *initial* public report,
+      even when a state agency's follow-up samples never become public. On the **Events
+      page**: clustered map (blue = reached water, hollow = county-approx) + filterable list
+      (reached-water, year). 223 WV reports 2025–26 (91 reached water). Shared
+      `airwv/wvgeo.py` county centroids place the ~80% without coordinates. *Next: auto-log
+      big ones as curated Events; a monthly refresh; link a spill to nearby measured water.*
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
 - [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
