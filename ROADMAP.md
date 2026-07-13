@@ -292,11 +292,13 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       `/api/facilities`). Filter by **status** (significant violation / in violation /
       no violation) and **program** (air/water/waste/drinking-water/toxics), with
       summary counts, colored status badges, and per-facility ECHO Detailed Facility
-      Report links (250 facilities; 41 in significant violation). *Refresh periodically
-      (compliance changes slowly): re-run the script + redeploy — a monthly timer could
-      automate it.* **Still open:** the full permit lifecycle (active / approved /
-      **requesting** planning-pending) from **WV DEP** + **FracTracker** (proposed/planned
-      sites); overlay status coloring on the dashboard sources map layer.
+      Report links (250 facilities; 41 in significant violation). Also a **map layer**
+      on the Air dashboard: "⚖️ Compliance (EPA ECHO)" draws majors as circle markers
+      colored by violation status (toggle whole-layer or by status; leads with violators).
+      *Refresh periodically (compliance changes slowly): re-run the script + redeploy — a
+      monthly timer could automate it.* **Still open:** the full permit lifecycle (active /
+      approved / **requesting** planning-pending) from **WV DEP** + **FracTracker**
+      (proposed/planned sites).
 - [x] **Map scale** — DONE: Leaflet.markercluster on the dense layers (Air pollution
       sources ~530, Water sites ~2,000) — zoom-based clusters + spiderfy, so the maps stay
       usable statewide. (Sensor/reference layers stay unclustered — colors matter there.)
