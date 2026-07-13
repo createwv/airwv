@@ -305,9 +305,18 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       `/api/dep-permits`. Shown as a stage-colored **map layer** on the Air dashboard
       (🛢️ O&G permit pipeline) and a filterable **section on Sources** (by stage + county,
       with operator/formation/Marcellus + DEP record links). 651 permits (124 requested).
-      *Refresh: re-run the script + redeploy.* **Still open:** WV DEP **air/mining/waste**
-      permit lifecycles (their GIS has air_quality/mining_reclamation/waste layers, but
-      thinner status fields); FracTracker's own proposed-infrastructure layers.
+      *Refresh: re-run the script + redeploy.*
+- [~] **Permit lifecycle — WV DEP mining** — BUILT: coal & mineral mining, WV's other
+      big story. `scripts/fetch_dep_mining.py` pulls WV DEP Division of Mining &
+      Reclamation permits and keeps the live set — **new** / not-yet-started, **active** /
+      renewed, **inactive** — dropping ~8,200 released/revoked historical permits. →
+      `dep_mining.json`, `/api/dep-mining`. Dashboard **map layer** (⛏️ Mining permits,
+      stage-colored) + Sources **section** (stage + type filters, operator, disturbed vs.
+      reclaimed **acreage**). 1,494 permits (240 new, 1,056 active, ~112k acres disturbed).
+      *Refresh: re-run the script + redeploy.* **Still open:** WV DEP **air/waste** permit
+      lifecycles (thinner status fields — air_quality "All Facilities" is name+coords only);
+      FracTracker's own proposed-infrastructure ArcGIS layers; a monthly refresh timer for
+      the DEP/ECHO pulls.
 - [x] **Map scale** — DONE: Leaflet.markercluster on the dense layers (Air pollution
       sources ~530, Water sites ~2,000) — zoom-based clusters + spiderfy, so the maps stay
       usable statewide. (Sensor/reference layers stay unclustered — colors matter there.)
