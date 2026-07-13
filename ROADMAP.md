@@ -1,17 +1,26 @@
 # AirWV Roadmap
 
-This roadmap sequences the build so that each phase stands on a working
-foundation. It reflects the current priority: **get reliable ingestion and
-durable storage first**, because trend detection, anomaly flagging, and alerts
-all depend on having clean, historical data to work from.
+AirWV has grown from an air-monitoring MVP into a **multi-medium community
+environmental platform for West Virginia** — air + water today, soil later —
+**live at air.createwv.org**. Phases 0–3 (ingestion, storage, data quality,
+trends) and the public site are largely built; recent work added the **Water**
+lens (live USGS gauges + Water Quality Portal samples), cross-medium **Events**,
+**NPDES** dischargers on Sources, **field-science** spot-check intake, **ozone**
+(history + map), and map clustering.
 
-Phases are directional, not date-bound. Items may move as the sensor network and
-partnerships (WVCAG, Create WV, and a potential research-grade archival partner)
-evolve.
+Phases are directional, not date-bound; items move as the sensor network and
+partnerships (WVCAG, Create WV, **WV Rivers Coalition**) evolve. Status key:
+**✅ done · ◐ partial (built, has follow-ups) · ⬜ open**. A few items are
+*blocked on an input* — API points, SMTP/Twilio creds, or a dataset — not code
+(called out where they appear).
+
+**Nearest-term / staged:** the community-air **collector** is verified and staged
+on the server (enable when points are topped up); **alerts sign-up** and the
+**drinking-water intake map** are the next big threads.
 
 ---
 
-## Phase 0 — Foundation ✅ (in progress)
+## Phase 0 — Foundation ✅
 
 Repo hygiene and a clean open-source starting point.
 
@@ -187,7 +196,7 @@ Make the data visible and usable.
       site-wide (`_modals.html` + `static/reporting.js`, page-agnostic via
       `window.AIRWV_MAP`; opened by `data-open="report|feedback"`).
       **Home** (`/`) = hub: hero + live air snapshot (stats + PM2.5 headline flag +
-      simplified map) + nav-card grid + recent-reports feed. **Analysis** (`/analysis`) =
+      simplified map) + nav-card grid + recent-reports feed. **Air** (`/air`, formerly Analysis) =
       the full power dashboard. **Learn** (`/learn`) = air-quality + health education
       (pollutants, AQI scale, who's at risk, what to do). **About** (`/about`) =
       project/data-source/how-to-help. **Admin** = token-gated console.
@@ -223,26 +232,9 @@ Make the data visible and usable.
       historic Jun 2023 Canada smoke (documented, pre-sensors → no data). Events also carry
       **origin** (likely/suspected cause), **scope** (Local/Regional/Multi-state/Continental),
       **regions affected**, and **links to related facilities** (`source_refs` → `/sources`)
-      and **community reports** (`report_ids` → `/analysis`). *v2: map of event locations,
-      auto-surface candidates from `/api/events` detection, per-event permalink pages
-      (SEO/press), backfill more sensors for the captured wildfire windows.* Original idea below:
-- [ ] **Events page (curated air/pollution events by region + time)** — a page that marks
-      notable events with a **region, time window, type, description, and citations**, and —
-      when the event falls inside our collection window — overlays the **community-sensor
-      data around it** (before/during/after time series, the sensors involved, peak levels).
-      Two classes: **(a) live-captured** events our sensors actually measured — e.g. the
-      **Peoples Cartage fire, Parkersburg, Jul 4–5 2026** (10-min PM2.5 showed a clean
-      plume: sharp 05:50 onset, ~70–84 µg/m³ peaks propagating S→N Pkbg1→Pkbg4→Vienna1,
-      cleared by 08:00); **(b) historical/documented** events that predate or lack sensor
-      coverage — Kanawha Valley "blue haze", the Nitro plant explosion, etc. — shown as
-      documented context (cited), clearly labeled "no sensor data" where we have none.
-      Connects to: the existing algorithmic `/api/events` episodic detection (auto-surface
-      candidates → a maintainer curates them), the reporting pipeline (a confirmed report
-      can become an event), the Sources page (link an event to a facility), and wind data
-      (downwind attribution, as done for the Parkersburg fire). Data model: an `events`
-      table (region, start/end, kind, title, description, lat/lon or bbox, sources[],
-      sensor_ids[], status), admin-curated. Turns "something happened here" into a durable,
-      browsable, evidence-backed record — a strong community & press asset.
+      and **community reports** (`report_ids` → `/air`). *v2: map of event locations,
+      auto-surface candidates from the algorithmic `/api/events` detection, per-event
+      permalink pages (SEO/press), and richer sensor overlays for captured events.*
 - [x] **Frontend architecture decision** — LOCKED: **Jinja2 templates + vanilla/Alpine,
       no build step**; a Svelte/Vite SPA reserved for `/admin` only if it outgrows that.
 - [x] **Jinja2 refactor** — DONE: split the monolithic `INDEX_HTML` string into
@@ -269,12 +261,12 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       ~20km of the WV line, so Ohio-River emitters count) — 437 facilities. Still to
       add: EIA power plants, WV DEP permits + O&G wells.
 - [~] **Dedicated "Sources & Facilities" page** — **v1 BUILT** (`/sources`,
-      `sources.html`/`sources.js`): a browse experience separate from the Analysis map —
+      `sources.html`/`sources.js`): a browse experience separate from the Air map —
       a sliding **carousel of featured facilities** + a search/category-filterable **grid**
       of all 437; click a card → **detail view** with the facts we cite (name, type,
       operator, category, citation), a **Street View photo** (front-of-business), the
-      **nearest air sensors** (distance + bearing), a deep link to the Analysis
-      source-proximity view (`/analysis?src=`), and **report-a-concern / Report-to-WV-DEP**
+      **nearest air sensors** (distance + bearing), a deep link to the Air
+      source-proximity view (`/air?src=`), and **report-a-concern / Report-to-WV-DEP**
       actions. Neutral naming per SOURCE-POLICY. **Imagery = Google Street View Static API**
       (front-of-business, per the request) — needs `AIRWV_GOOGLE_MAPS_KEY` (billing-enabled,
       referrer-restricted); until set, cards show clean category-tile placeholders. *v2:
@@ -475,17 +467,8 @@ people-direct water education and connect it to air).
       instrument reading — medium, parameter, value/unit, method, geolocation (GPS or
       map-pick), notes, and a **downscaled meter photo** — stored in `field_readings`
       (trusted; `/api/field-readings`), rendered on a map + list. *Still: submitter
-      roles beyond the shared token, QA/verify workflow, overlay on Analysis/Water maps,
-      link to events/sources, trend-over-time per spot.* Original idea below:
-- [ ] **Field-reading intake (verified data, not public reports)** — a way for **trained
-      Create WV / partner scientists** to submit **actual instrument readings** in the
-      field (spot-check VOCs, water conductivity/metals, pH, etc.), with a **photo of the
-      meter**, geolocation, timestamp, parameter/unit, and method. Distinct from the
-      public [[COMMUNITY-REPORTING]] flow: authenticated submitter, treated as trusted
-      data, folded in alongside the continuous sensors so we can **officially flag and
-      track a problem area over time**. Needs: submitter auth/roles, a `field_reading`
-      model (param/value/unit/method/photo/QA-flag), map + trend display, and links to
-      events/sources. Ties into the mobile-friendliness of the reporting UI.
+      roles beyond the shared token, QA/verify workflow, overlay on Air/Water maps,
+      link to events/sources, trend-over-time per spot.*
 
 ### Soil & beyond (later)
 - [ ] **Soil maps** — contamination / brownfields / heavy-metal data (EPA, state) as a
