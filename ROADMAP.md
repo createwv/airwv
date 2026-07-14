@@ -754,10 +754,12 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       aggregate yearly EPA ozone; the Climate tab leads with a Plotly chart (yearly avg/peak +
       least-squares trend line) of WV's archived ozone, with an honest "still building" fallback.
 
-### Events → split off `/spills` (decided)
-- [ ] Keep `/events` for curated, narrated events. Move the **NRC reported-spills** feed to its own
-      **`/spills`** page/tab with a clear explainer: what the NRC is, that these are *initial,
-      unverified* reports, why they can look minor, and where they come from.
+### Events → split off `/spills` (decided) — DONE
+- [x] `/events` is now curated, narrated events only; the **NRC reported-spills** feed moved to a
+      dedicated **`/spills`** page (+ nav entry, `spills.js`) with a full explainer: what the NRC is,
+      that reports are *initial &amp; unverified*, why many look minor (the value is the *pattern*),
+      that locations are often county-approximate, and that state follow-up rarely becomes public.
+      `/events` links across to it.
 
 ### Sources — improvements
 - [ ] **Dedupe** (e.g. 3 "Amos" entries — John Amos / AEP Amos / Appalachian Power NPDES). Merge by
