@@ -266,6 +266,10 @@
   .sd-imgwrap .ph .ph-ic { font-size:60px; }
   .sd-imgwrap .ph .ph-cap { font-size:12.5px; }
   .sd-chip { display:inline-block; color:#fff; font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .sd-compliance { color:#fff; font-size:13px; padding:8px 12px; border-radius:7px; margin:2px 0 12px; }
+  .sd-compliance a { color:#fff; }
+  .sd-former { background:#f4efe4; border-left:3px solid #c9a24a; padding:6px 10px; border-radius:5px; margin:8px 0 0; }
+  .sd-known-as { margin:2px 0 6px; color:#77808c; }
   .sd-facts { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:12px 0; }
   .sd-facts > div { display:flex; flex-direction:column; font-size:13.5px; }
   .sd-facts b { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#8a93a0; }

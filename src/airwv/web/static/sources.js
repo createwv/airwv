@@ -121,14 +121,20 @@ window.svFail = function (img) {
   img.replaceWith(d);
 };
 
+// red/orange badge when a matched EPA ECHO record shows a violation
+function compBadge(s) {
+  if (s.compliance !== 'significant_violation' && s.compliance !== 'violation') return '';
+  const f = FAC_STATUS[s.compliance];
+  return ` <span class="catpill" style="background:${f.color}">${f.icon} ${f.label}</span>`;
+}
 function card(s, i) {
   const c = CAT[s.category] || CAT.other;
   return `<button class="srccard" data-i="${i}">
     ${thumb(s, 320, 150, 'srccard-img')}
     <div class="srccard-body">
       <div class="srccard-name">${esc(s.name)}</div>
-      <div class="srccard-meta"><span class="catpill" style="background:${c.color}">${c.icon} ${c.label}</span></div>
-      <div class="srccard-op">${esc(s.operator || s.type || '')}</div>
+      <div class="srccard-meta"><span class="catpill" style="background:${c.color}">${c.icon} ${c.label}</span>${compBadge(s)}</div>
+      <div class="srccard-op">${esc(s.operator || s.type || '')}${s.former ? ' · <i>formerly noted</i>' : ''}</div>
     </div></button>`;
 }
 
@@ -145,8 +151,8 @@ function renderGrid() {
   const q = $('src-q').value.trim().toLowerCase();
   const cat = $('src-cat').value;
   const rows = SOURCES.filter(s => s.lat != null
-    && (!cat || s.category === cat)
-    && (!q || (s.name + ' ' + (s.operator || '') + ' ' + (s.type || '')).toLowerCase().includes(q)));
+    && (!cat || s.category === cat || (s.categories || []).includes(cat))
+    && (!q || (s.name + ' ' + (s.operator || '') + ' ' + (s.type || '') + ' ' + (s.names || []).join(' ')).toLowerCase().includes(q)));
   $('src-count').textContent = `${rows.length} facilit${rows.length === 1 ? 'y' : 'ies'}`;
   $('src-grid').innerHTML = rows.map(s => card(s, SOURCES.indexOf(s))).join('')
     || '<p class="meta" style="padding:14px">No matches.</p>';
@@ -306,23 +312,47 @@ function openDetail(s) {
   $('sd-name').textContent = s.name;
   $('sd-cat').textContent = `${c.icon} ${c.label}`;
   $('sd-cat').style.background = c.color;
-  $('sd-type').textContent = s.type || '—';
+  // multiple categories mean this facility merged several public records
+  const cats = (s.categories || []).filter(k => k !== s.category);
+  $('sd-type').innerHTML = esc(s.type || '—')
+    + (cats.length ? ' <span class="meta">· also: ' + cats.map(k => esc((CAT[k] || CAT.other).label)).join(', ') + '</span>' : '');
   $('sd-operator').textContent = s.operator || 'Unknown';
-  $('sd-citation').textContent = s.citation || 'public record';
+  $('sd-citation').textContent = (s.citation || 'public record')
+    + (s.record_count > 1 ? ` (${s.record_count} public records merged)` : '');
+  // compliance banner (matched EPA ECHO record)
+  const comp = $('sd-compliance');
+  if (s.compliance && s.compliance !== 'unknown') {
+    const f = FAC_STATUS[s.compliance];
+    comp.style.display = 'block';
+    comp.style.background = f.color;
+    comp.innerHTML = `${f.icon} <b>${f.label}</b> (EPA ECHO)`
+      + (s.echo_url ? ` — <a href="${esc(s.echo_url)}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">full compliance record →</a>` : '');
+  } else { comp.style.display = 'none'; }
+  // former corporate identity
+  const former = $('sd-former');
+  if (s.former) { former.style.display = 'block'; former.innerHTML = `🏷️ <b>Formerly:</b> ${esc(s.former)}`; }
+  else former.style.display = 'none';
+  // other names this facility is recorded under
+  const known = $('sd-known-as');
+  const others = (s.names || []).filter(n => n && n !== s.name);
+  if (others.length) { known.style.display = 'block'; known.innerHTML = 'Also recorded as: ' + others.map(n => `<i>${esc(n)}</i>`).join(' · '); }
+  else known.style.display = 'none';
   $('sd-imgwrap').innerHTML = thumb(s, 520, 240, 'sd-img');
   const near = nearbySensors(s);
   $('sd-sensors').innerHTML = near.length ? near.map(x => `<tr>
     <td>${esc(x.name)}</td><td>${x.kind === 'reference' ? '◎ ref' : '● community'}</td>
     <td>${x.mi.toFixed(1)} mi</td><td>${x.dir}</td></tr>`).join('')
     : '<tr><td class="meta">No sensors located yet.</td></tr>';
-  // permit & compliance: NPDES water dischargers link to their EPA ECHO record (air+water+waste)
-  if (s.echo) {
-    $('sd-permit').innerHTML = `NPDES permit <b>${esc(s.permit || '')}</b> — `
-      + `<a href="${esc(s.echo)}" target="_blank" rel="noopener">full EPA ECHO compliance record `
-      + `(air · water · waste) →</a>`;
+  // permit & compliance: link to the facility's EPA ECHO record when we have one —
+  // either its NPDES permit (water dischargers) or a name/proximity-matched ECHO facility.
+  const echoLink = s.echo || s.echo_url;
+  if (echoLink) {
+    $('sd-permit').innerHTML = (s.permit ? `NPDES permit <b>${esc(s.permit)}</b> — ` : '')
+      + `<a href="${esc(echoLink)}" target="_blank" rel="noopener">full EPA ECHO compliance record `
+      + `(air · water · waste) →</a>`
+      + (s.compliance && s.compliance !== 'unknown' ? ` <span class="meta">· current status: ${esc((FAC_STATUS[s.compliance] || {}).label || s.compliance)}</span>` : '');
   } else {
-    $('sd-permit').innerHTML = 'Detailed permit &amp; compliance history coming soon (EPA ECHO / WV DEP). '
-      + 'Look this facility up on '
+    $('sd-permit').innerHTML = 'No EPA ECHO record matched automatically. Look this facility up on '
       + '<a href="https://echo.epa.gov/facilities/facility-search" target="_blank" rel="noopener">EPA ECHO</a>.';
   }
   // nearby measured water quality (reuses /api/water/near — the coal-discharge join)
@@ -393,7 +423,11 @@ async function init() {
   $('src-cat').addEventListener('change', renderGrid);
   // deep link from the Events page: /sources#facility=<name> opens that facility
   const want = decodeURIComponent((location.hash.match(/facility=([^&]+)/) || [])[1] || '');
-  if (want) { const s = SOURCES.find(x => x.name === want); if (s) openDetail(s); }
+  // match the canonical name OR any of the merged variant names (Events may link an old name)
+  if (want) {
+    const s = SOURCES.find(x => x.name === want || (x.names || []).includes(want));
+    if (s) openDetail(s);
+  }
   $('sd-close').addEventListener('click', () => $('srcdetail').classList.remove('on'));
   $('srcdetail').addEventListener('click', e => { if (e.target === $('srcdetail')) $('srcdetail').classList.remove('on'); });
   const scroll = dx => $('carousel').scrollBy({left: dx, behavior: 'smooth'});

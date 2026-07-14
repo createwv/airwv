@@ -1206,15 +1206,33 @@ def create_app(store: Store) -> FastAPI:
             "hours": [{"hour": s.hour, "median": s.median, "count": s.count} for s in profile],
         }
 
+    _sources_cache: dict = {}
+
+    def _enriched_sources() -> dict:
+        """Deduped + compliance-tagged source facilities (see sources_enrich). Cached —
+        the underlying files are static, so we merge once per process."""
+        if "data" not in _sources_cache:
+            import json
+
+            from airwv.sources_enrich import enrich_sources
+            base = Path(__file__).parent.parent / "data"
+            raw = json.loads((base / "sources.json").read_text(encoding="utf-8"))
+            try:
+                echo = json.loads((base / "echo_facilities.json").read_text(encoding="utf-8")).get("facilities", [])
+            except Exception:
+                echo = []
+            merged = enrich_sources(raw.get("sources", []), echo)
+            _sources_cache["data"] = {
+                "tier": raw.get("tier"), "disclaimer": raw.get("disclaimer"),
+                "source": raw.get("source"), "sources": merged,
+                "raw_count": len(raw.get("sources", [])), "merged_count": len(merged),
+            }
+        return _sources_cache["data"]
+
     @app.get("/api/sources")
     def sources():
         try:
-            import json
-
-            path = Path(__file__).parent.parent / "data" / "sources.json"
-            data = json.loads(path.read_text(encoding="utf-8"))
-            return {"tier": data.get("tier"), "disclaimer": data.get("disclaimer"),
-                    "source": data.get("source"), "sources": data.get("sources", [])}
+            return _enriched_sources()
         except Exception:
             return {"tier": "documented", "disclaimer": "", "sources": []}
 
