@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>🛢️ Reported spills</h1>
+    <p>Every oil &amp; chemical release reported in West Virginia to the federal spill hotline —
+      the public record that "something was reported here."</p></div>
+
+  <div class="card"><div class="prose">
+    <h3>What you're looking at</h3>
+    <p>When there's an oil or chemical release, federal law requires it to be reported to the
+      <a href="https://nrc.uscg.mil/" target="_blank" rel="noopener"><b>National Response Center</b></a>
+      (NRC) — a hotline run by the U.S. Coast Guard that takes these reports 24/7 and passes them to
+      the agencies that respond (EPA, the state, etc.). We pull WV's reports from that public record.</p>
+    <ul>
+      <li><b>These are initial, unverified reports.</b> They capture what a caller reported at the
+        time — often before anyone has confirmed the amount, the cause, or even that it happened as
+        described. Treat each as "a release was <em>reported</em> here," not a proven finding.</li>
+      <li><b>Many look minor — and that's the point.</b> A lot are small (a few gallons), or turn out
+        to be nothing. We show them all anyway, because the value is the <b>pattern</b>: where
+        releases cluster, how often, and what's involved. One report is noise; a hotspot is a signal.</li>
+      <li><b>Locations are often approximate.</b> Most reports lack precise coordinates, so we place
+        them at their <b>county center</b> (shown as a hollow dot). Exact-located reports are filled.</li>
+      <li><b>What happens after is usually not public.</b> The state may sample and follow up, but that
+        result rarely makes it back into an open dataset — one of the transparency gaps this project
+        exists to help close.</li>
+    </ul>
+    <p class="meta">Distinct from our <a href="/events">curated Events</a> (narrated pollution episodes,
+      often with our own sensor data). Smell or see a release near you?
+      <a href="#" data-open="report">Report it →</a>, and for an emergency call <b>911</b> or WV DEP's
+      spill line <a href="tel:18006423074">1-800-642-3074</a>.</p>
+  </div></div>
+
+  <h2 class="ov-sechead" style="margin-top:20px">Reported releases <span class="meta" id="spill-src"></span></h2>
+  <div class="controls" style="gap:12px">
+    <label><input type="checkbox" id="spill-water"> 💧 Reached water only</label>
+    <label>Year <select id="spill-year"><option value="">All years</option></select></label>
+    <span class="meta" id="spill-count"></span>
+  </div>
+  <div class="card"><div id="spill-map" style="height:400px"></div>
+    <div class="legend"><span style="color:#2c7fb8">●</span> reached water
+      <span style="color:#8a94a0">●</span> land/air · hollow = approximate (county) location · click a dot for detail</div>
+  </div>
+  <section class="ev-list" id="spill-list"></section>
+  <p class="meta" id="spill-disc" style="margin-top:8px"></p>
+</div>
+
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/spills.js?v={{ asset_v }}"></script>
+<script src="/static/reporting.js?v={{ asset_v }}"></script>
+{% endblock %}

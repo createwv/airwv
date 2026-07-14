@@ -400,9 +400,12 @@ def test_nrc_spills_endpoint(tmp_path):
         assert all(x["reached_water"] for x in water)
         yr = c.get("/api/nrc-spills?year=2026").json()["spills"]
         assert all((x["date"] or "").startswith("2026") for x in yr)
-    # events page wires the spills map + list in
-    page = c.get("/events").text
-    assert "spill-map" in page and "Recently reported spills" in page
+    # the /spills page wires the spills map + list; /events points to it but no longer embeds it
+    spills = c.get("/spills")
+    assert spills.status_code == 200
+    assert "spill-map" in spills.text and "National Response Center" in spills.text
+    events = c.get("/events").text
+    assert "spill-map" not in events and "/spills" in events
 
 
 def test_alert_signup_flow(tmp_path, monkeypatch):
