@@ -761,15 +761,20 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       that locations are often county-approximate, and that state follow-up rarely becomes public.
       `/events` links across to it.
 
-### Sources — improvements
-- [ ] **Dedupe** (e.g. 3 "Amos" entries — John Amos / AEP Amos / Appalachian Power NPDES). Merge by
-      name + proximity into one facility carrying multiple records/permits; add a general dedup pass.
-- [ ] **Retain former company names** with the safest legal framing ("formerly …" / "successor to …")
-      so Chemours↔DuPont, Nitro/Monsanto history isn't lost, while accepting they're legally distinct.
-- [ ] **Front-of-business photos** (the deferred Street View / photo work — see [[streetview-setup]]).
-- [ ] **Connect violations to source cards** — name/proximity-match ECHO facilities to curated
-      sources so a **"significant violation" red badge** shows on the company card, not only as a
-      separate map layer.
+### Sources — improvements (mostly DONE)
+- [x] **Dedupe** — `airwv.sources_enrich.merge_sources` clusters duplicates by proximity + a shared
+      *distinctive* name token (place names excluded, data-driven, so a shared town like "nitro"
+      can't fuse two different plants). 530 → 505; the 3 Amos records are now one facility carrying
+      all categories/records. Applied (cached) in `/api/sources`; detail view shows merged-record
+      count + "also recorded as" names.
+- [x] **Retain former company names** — cautious curated `former_name_note` (Chemours←DuPont,
+      Solutia←Monsanto, Union Carbide→Dow, Bayer/Institute…), shown as "Formerly:" with precise
+      triggers (no false positives — the Nitro WWTP no longer gets Monsanto history).
+- [x] **Connect violations to source cards** — `attach_compliance` name/proximity-matches EPA ECHO
+      facilities and attaches the worst status, so a **red "significant violation" / orange "in
+      violation" badge** shows on the card and a compliance banner + ECHO link on the detail.
+- [ ] **Front-of-business photos** — still deferred (needs the Google Street View key + nonprofit
+      credit — see [[streetview-setup]]). Detail view already has the `thumb()` hook for when it's on.
 
 ### Water — legibility
 - [ ] State the **time window plainly** (it's "latest sample per site" — say so), clearer legend, WV
