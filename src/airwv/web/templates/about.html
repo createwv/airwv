@@ -1,54 +1,83 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="page">
-  <div class="ov-intro"><h1>About AirWV</h1>
-    <p>Open-source, community-run air-quality monitoring for West Virginia.</p></div>
+  <div class="ov-intro"><h1>About Empower WV</h1>
+    <p>Open-source community environmental monitoring for West Virginia — keeping watch on the
+      air we breathe, the water we drink, and the land around us.</p></div>
 
   <div class="card"><div class="prose">
-    <h3>What this is</h3>
-    <p><b>Empower WV — community eco monitoring</b> collects readings from community
-      <a href="https://www2.purpleair.com/" target="_blank" rel="noopener">PurpleAir</a>
-      sensors across West Virginia, stores long-term history, and surfaces trends,
-      anomalies, and how those sensors compare against government reference monitors.
-      It grew out of the
+    <h3>Where Empower WV came from</h3>
+    <p>In one sense this grew out of the
       <a href="https://createwv.org/projects/air-monitoring/" target="_blank" rel="noopener">Kanawha
-      Valley Air Quality Monitoring project</a> (Create WV, WVCAG, and partners).</p>
+      Valley Air Quality Monitoring project</a> at <b>Create WV</b>. But it converged with work that
+      was already happening — neighbors doing their own testing and civic monitoring, hearing about
+      something going on, going out to measure it themselves, and helping one another talk with the
+      DEP, EPA, and whoever else it took to get a problem addressed. That community effort
+      <b>pre-dated</b> the air-sensor project; what Create WV is adding is the shared
+      <b>systems</b> — the sensors, the data, the maps, the reporting — to <b>unify</b> and
+      strengthen it.</p>
+    <p>Partners and collaborators include <b>WVCAG</b> (WV Citizen Action Group),
+      <b>WV Rivers</b>, municipalities and other member organizations of the
+      <b>WV Environmental Council</b>, and the volunteer community members who advocate for their
+      neighbors and their environment.</p>
+
+    <h3>More than air</h3>
+    <p>Air is where we started, but air is really one <em>tool</em> — and one <em>symptom</em> — of
+      a bigger picture. What we breathe, drink, and eat, and what our ecosystem experiences, are all
+      connected. So alongside community air sensors you'll find water quality, drinking-water
+      violations, reported spills, permitted pollution sources, and abandoned gas wells on this site.</p>
+    <p>Where government, law, regulation, and enforcement fall short, our goal is to stay informed,
+      <b>break down the transparency barriers</b>, help <b>triage</b> serious issues, and
+      <b>track the trends</b> — so that we, as people, can push for better policy and action. And to
+      act as an <b>alert system</b> when official channels are slow to warn us — or to help them.</p>
 
     <h3>Where the data comes from</h3>
     <ul>
-      <li><b>Community sensors</b> — low-cost PurpleAir monitors run by residents and
-        partner organizations. Great coverage and responsiveness; calibrated against
-        reference monitors before you lean on the numbers.</li>
-      <li><b>EPA reference monitors</b> — regulatory-grade data pulled directly and
-        keyless from <b>EPA AirNow</b> (live) and <b>EPA AirData/AQS</b> (deep history).
-        We use these to validate the community sensors.</li>
-      <li><b>Pollution-source context</b> — permitted facilities from public records
-        (EPA TRI and others), shown factually and cited, never as an accusation.</li>
+      <li><b>Community air sensors</b> — low-cost
+        <a href="https://www2.purpleair.com/" target="_blank" rel="noopener">PurpleAir</a> monitors
+        run by residents and partner orgs. Great coverage and responsiveness; we calibrate them
+        against reference monitors before anyone leans on the numbers.</li>
+      <li><b>EPA reference monitors</b> — regulatory-grade air data pulled directly and keyless from
+        <b>EPA AirNow</b> (live) and <b>EPA AirData/AQS</b> (deep history). We use these to validate
+        the community sensors.</li>
+      <li><b>Water</b> — measured samples and gauges from the USGS and EPA's Water Quality Portal,
+        plus SDWA drinking-water violations.</li>
+      <li><b>Accountability layers</b> — permitted facilities (EPA TRI), compliance status (EPA
+        ECHO), WV DEP oil-&amp;-gas and mining permits, coal discharge permits, abandoned/orphan gas
+        wells, and reported spills (NRC). All from public records, shown factually and cited.</li>
     </ul>
-    <p class="meta">Full detail: <a href="https://github.com/createwv/airwv/blob/main/docs/DATA-SOURCES.md"
+    <p class="meta">Full detail, and how to pull each source yourself:
+      <a href="/data">the data catalog</a> ·
+      <a href="https://github.com/createwv/airwv/blob/main/docs/DATA-SOURCES.md"
       target="_blank" rel="noopener">DATA-SOURCES.md</a>. Our air reference is EPA end-to-end
-      (AirNow live + AirData history) — but the open <a href="https://openaq.org" target="_blank"
+      (AirNow live + AirData history); the open <a href="https://openaq.org" target="_blank"
       rel="noopener">OpenAQ</a> project is how we learned those EPA feeds existed and how to reach
-      them; thanks to them and their open tooling.</p>
+      them — thanks to them and their open tooling.</p>
 
-    <h3>Provisional, not regulatory</h3>
-    <p>Readings are shown as-is for community awareness. Community sensors are not
-      regulatory instruments; treat the data as a helpful signal, not an official
-      determination. For health decisions during smoke or pollution events, also check
+    <h3>A reading is not a verdict</h3>
+    <p>Readings are shown as-is for community awareness. Community sensors are not regulatory
+      instruments — treat the data as a helpful signal, not an official determination, and for
+      health decisions during smoke or pollution events also check
       <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
+    <p>And the accountability layers are a <em>separate</em> kind of fact: a permit or a
+      <b>violation is a legal state, not a measurement</b>. We keep those distinct from the sensor
+      readings on purpose, so a nearby facility is <em>context to look into</em> — never proof that
+      it caused what a sensor saw.</p>
 
     <h3>Open source — help out</h3>
-    <p>Everything here is open. Read the code, file an issue, run your own instance, or
-      add a sensor. Repo &amp; docs:
+    <p>Everything here is open. Read the code, file an issue, run your own instance, or add a sensor.
+      Repo &amp; docs:
       <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">github.com/createwv/airwv</a>.</p>
-    <p>Have a question or want to get a sensor into the network?
+    <p>Have a question, want to get a sensor into the network, or run this for your own community?
       <a href="#" data-open="feedback">Send us a note →</a></p>
   </div></div>
 
   <div class="ov-cards" style="margin-top:16px">
     <a class="navcard" href="/air"><span class="ico">📊</span><b>Explore the data</b>
-      <small>Maps, trends, and validation.</small></a>
-    <a class="navcard" href="/learn"><span class="ico">📚</span><b>Learn about air quality</b>
+      <small>Air, water &amp; sources — maps, trends, validation.</small></a>
+    <a class="navcard" href="/nearby"><span class="ico">📍</span><b>What's near me</b>
+      <small>See the sensors &amp; hazards around you.</small></a>
+    <a class="navcard" href="/learn"><span class="ico">📚</span><b>Learn</b>
       <small>Pollutants, the AQI, and health.</small></a>
     <a class="navcard accent" href="#" data-open="report"><span class="ico">📣</span><b>Report a concern</b>
       <small>Put it on the map.</small></a>
