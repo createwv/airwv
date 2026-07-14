@@ -143,8 +143,15 @@ function redrawSensors(){
     const charted = chartSet.has(x.sensor_id);
     // charted markers get a gold highlight ring so map ⇔ chart stay in sync
     const ring = charted ? {color:'#c9992f', weight:4} : null;
+    // elevated = orange/red/purple AQI band → nudge toward the "what's nearby" drill-in
+    const elevated = ['#ff7e00','#ff0000','#8f3f97'].includes((x.color||'').toLowerCase());
+    const nearUrl = `/nearby?lat=${x.lat}&lon=${x.lon}&from=${encodeURIComponent(x.name||'this sensor')}`;
+    const nearLink = elevated
+      ? `<br><a href="${nearUrl}" style="color:#c0392b;font-weight:600">⚠ elevated — see what's nearby →</a>`
+      : `<br><a href="${nearUrl}">🔎 What's near this reading? →</a>`;
     const pop = `<b>${x.name}</b>${x.kind==='reference'?'<br><i>reference monitor (EPA/AirNow)</i>':''}`+
       `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`+
+      nearLink+
       `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
@@ -721,9 +728,10 @@ function nearMe(){
     map.setView([lat,lon], 11);
     const near = allSensors.filter(s=>s.kind==='community' && s.lat!=null)
       .map(s=>({...s, mi:haversineMi(lat,lon,s.lat,s.lon)})).sort((a,b)=>a.mi-b.mi).slice(0,6);
-    if (note) note.innerHTML = near.length
+    const seeAll = ` · <a href="/nearby?lat=${lat}&lon=${lon}">🔎 see everything near you →</a>`;
+    if (note) note.innerHTML = (near.length
       ? '📍 Nearest to you: ' + near.map(s=>`<a href="#" data-nsid="${s.sensor_id}">${s.name}</a> <span class="cnt">${s.mi.toFixed(1)}mi</span>`).join(' · ')
-      : 'No community sensors located.';
+      : 'No community sensors located.') + seeAll;
     note && note.querySelectorAll('[data-nsid]').forEach(a=>a.addEventListener('click', e=>{
       e.preventDefault(); toggleChart(a.dataset.nsid); redrawSensors(); render(); }));
   }, ()=>{ if(note) note.textContent='could not get your location'; }, {enableHighAccuracy:true, timeout:10000});

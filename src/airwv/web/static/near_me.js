@@ -110,20 +110,38 @@ function wireReports() {
   }));
 }
 
-async function locate() {
+// Shared loader — fetch nearby hazards for an explicit point and render.
+// `from` is an optional human label (e.g. a sensor name) shown in the location line.
+async function loadAt(lat, lon, from) {
+  const km = $('nb-km').value;
+  $('nb-locinfo').textContent = `📍 ${(+lat).toFixed(3)}, ${(+lon).toFixed(3)}${from ? ' · ' + from : ''}`;
+  try {
+    DATA = await (await fetch(`/api/near?lat=${lat}&lon=${lon}&km=${km}`)).json();
+    $('nb-locinfo').textContent += ` — ${(DATA.hazards || []).length} things nearby${DATA.county ? ' · ' + DATA.county + ' County' : ''}`;
+    renderResults();
+  } catch (e) { $('nb-results').innerHTML = '<div class="card"><p class="meta" style="padding:16px">Could not load nearby data — try again.</p></div>'; }
+}
+
+function locate() {
   if (!navigator.geolocation) { $('nb-locinfo').textContent = 'geolocation not available on this device'; return; }
   $('nb-locinfo').textContent = 'finding your location…';
-  navigator.geolocation.getCurrentPosition(async p => {
-    const km = $('nb-km').value;
-    $('nb-locinfo').textContent = `📍 ${p.coords.latitude.toFixed(3)}, ${p.coords.longitude.toFixed(3)}`;
-    try {
-      DATA = await (await fetch(`/api/near?lat=${p.coords.latitude}&lon=${p.coords.longitude}&km=${km}`)).json();
-      $('nb-locinfo').textContent += ` — ${(DATA.hazards || []).length} things nearby${DATA.county ? ' · ' + DATA.county + ' County' : ''}`;
-      renderResults();
-    } catch (e) { $('nb-results').innerHTML = '<div class="card"><p class="meta" style="padding:16px">Could not load nearby data — try again.</p></div>'; }
-  }, () => { $('nb-locinfo').textContent = 'could not get your location — check browser permissions'; }, {enableHighAccuracy: true, timeout: 10000});
+  navigator.geolocation.getCurrentPosition(
+    p => loadAt(p.coords.latitude, p.coords.longitude),
+    () => { $('nb-locinfo').textContent = 'could not get your location — check browser permissions'; },
+    {enableHighAccuracy: true, timeout: 10000});
 }
 
 renderSymptoms();
 $('nb-loc').addEventListener('click', locate);
-$('nb-km').addEventListener('change', () => { if (DATA) locate(); });
+$('nb-km').addEventListener('change', () => { if (DATA) loadAt(DATA.lat, DATA.lon); });
+
+// Deep-link support: /nearby?lat=&lon=[&km=][&from=] auto-loads that point
+// (e.g. drilling in from a sensor reading on the Air page).
+(function () {
+  const q = new URLSearchParams(location.search);
+  const lat = q.get('lat'), lon = q.get('lon');
+  if (lat && lon && !isNaN(+lat) && !isNaN(+lon)) {
+    if (q.get('km') && $('nb-km')) $('nb-km').value = q.get('km');
+    loadAt(lat, lon, q.get('from') || '');
+  }
+})();
