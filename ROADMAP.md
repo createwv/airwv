@@ -729,13 +729,15 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       unknown-coord sensors never fire); ingest passes sensor coords. Model self-healed via the
       `create_schema` ALTER migration; admin subscriptions API surfaces area/radius.
 
-### About — rewrite (multi-medium origin + partners)
-- [ ] Empower WV grew from KV Air Quality Monitoring **but converged with pre-existing community
-      watchdogging** — residents testing on their own, helping neighbors talk to DEP/EPA; **Create
-      WV helps unify** these efforts. Partners: WVCAG, WV Rivers, municipalities + other WV
-      Environmental Council member orgs, volunteers. **Broaden beyond air** — air is one tool/symptom;
-      we watch air, water, food, ecosystem; break down transparency where enforcement fails; triage
-      + track trends → policy/action.
+### About — rewrite (multi-medium origin + partners) — DONE
+- [x] Rewrote `/about` ("About Empower WV"): origin story (grew from Create WV's KV Air Quality
+      Monitoring **but converged with community watchdogging that pre-dated it** — neighbors testing
+      themselves & helping each other reach DEP/EPA; Create WV adds the shared systems to unify it);
+      partners named (WVCAG, WV Rivers, municipalities + WV Environmental Council member orgs,
+      volunteers); **"More than air"** mission (inform, break down transparency, triage, track trends
+      → policy/action, alert system when official channels lag); broadened data list (water +
+      accountability layers) linking `/data`; **"a reading is not a verdict"** keeps violations
+      (legal state) distinct from measurements.
 
 ### Learn — additions
 - [ ] **Raw natural gas is odorless** — flag prominently in the gas-wells/H2S content: that's
