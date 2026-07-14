@@ -50,13 +50,24 @@ async function loadSensors(){
   const glasgow = allSensors.find(s => /glasgow/i.test(s.name)) ||
                   allSensors.find(s => s.kind === 'community' && s.lat != null);
   if (glasgow) chartSet.add(glasgow.sensor_id);
+  // legend "as of": the newest community reading, so people know it's a live snapshot
+  const asof = $('legend-asof');
+  if (asof){
+    const t = allSensors.filter(s => s.kind === 'community' && s.last_ts).map(s => s.last_ts).sort().pop();
+    asof.textContent = t ? `· as of ${new Date(t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}` : '';
+  }
   drawMap(allSensors);
   render();
 }
 async function loadCoverage(){
   const c = await j('/api/coverage');
-  if (c.first_ts) $('coverage').textContent =
-    `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
+  if (c.first_ts){
+    $('coverage').textContent =
+      `Showing all data · ${Number(c.count).toLocaleString()} readings · first ${c.first_ts.slice(0,10)} → last ${c.last_ts.slice(0,10)}`;
+    // clamp the date pickers to the data's real range so people can't pick empty windows
+    const lo = c.first_ts.slice(0,10), hi = c.last_ts.slice(0,10);
+    ['start','end'].forEach(id => { const el = $(id); if (el){ el.min = lo; el.max = hi; } });
+  }
 }
 const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
   echo:false, dep:false, mine:false, wells:false, wellOrphan:true, wellOperator:true, wellNearOnly:false,
@@ -610,6 +621,16 @@ async function render(){
   const series = await Promise.all(ids.map(id => j(`/api/series/${id}?field=${field}${rng}`)));
   series.forEach((s,i) => tsTraces.push({x:s.points.map(p=>p.ts), y:s.points.map(p=>p.value),
     mode:'lines', name:s.name, line:{color:COLORS[i%COLORS.length], width:1.3}}));
+  // No points in the chosen window? Say so plainly instead of a silent empty chart.
+  if (series.reduce((n,s)=>n+s.points.length,0) === 0){
+    busy('b-ts', false); busy('b-di', false);
+    Plotly.newPlot('ts', [], {margin:{t:10,r:10,b:40,l:45}, annotations:[{showarrow:false, font:{color:'#a00'},
+      text: rng ? 'No data for this sensor in the selected dates — "Clear dates" or pick another sensor.'
+                : 'No data for this sensor yet.'}]}, {responsive:true, displayModeBar:false});
+    Plotly.newPlot('diurnal', [], {margin:{t:10,r:10,b:40,l:45}}, {responsive:true, displayModeBar:false});
+    $('cmp').querySelector('tbody').innerHTML = ''; $('trendinfo').textContent = '';
+    return;
+  }
   if (ids.length === 1){
     const [ev, tr] = await Promise.all([
       j(`/api/events/${ids[0]}?field=${field}${rng}`),

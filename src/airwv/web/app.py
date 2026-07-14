@@ -172,6 +172,11 @@ def _require_admin(request: Request) -> bool:
 # Fields safe to chart (mirror the Reading schema).
 FIELDS = ["pm2_5", "pm1_0", "pm10", "voc", "ozone", "aqi", "temperature", "humidity", "pressure"]
 
+# WV + bordering states (OH/PA/MD/VA/KY) — a generous box to drop bad-coordinate monitors
+# (a miscoded AirNow site was plotting near Russia). Everything real sits well inside this.
+def _IN_WV_REGION(lat: float, lon: float) -> bool:
+    return 36.0 <= lat <= 43.0 and -84.5 <= lon <= -74.5
+
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
@@ -356,6 +361,10 @@ def create_app(store: Store) -> FastAPI:
             else:       # community sensor — coords/name from the resolved listing
                 lat, lon = coords.get(sid, (None, None))
                 name = names.get(sid, sid)
+            # Drop bad-coordinate monitors — a miscoded AirNow site was plotting off in
+            # Russia. Keep only WV + bordering states (generous box); missing coords are fine.
+            if lat is not None and lon is not None and not _IN_WV_REGION(lat, lon):
+                continue
             latest_pm = latest.get(sid)
             # Display-time sanity: a sustained reading this high is a stuck/broken sensor
             # (real ambient PM2.5 doesn't sit above ~1000). Don't paint a false "hazardous"

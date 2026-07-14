@@ -29,6 +29,19 @@ def test_sensors_endpoint(tmp_path):
     assert data[0]["count"] == 50
 
 
+def test_sensors_drops_out_of_region_coords(tmp_path):
+    # a miscoded AirNow monitor was plotting off in Russia — the WV+border box drops it
+    store = Store(f"sqlite:///{tmp_path / 'r.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    store.save_readings([
+        Reading(source="airnow", sensor_id="540390020", ts=t0, pm2_5=8.0, lat=38.35, lon=-81.63),
+        Reading(source="airnow", sensor_id="999999999", ts=t0, pm2_5=5.0, lat=55.75, lon=37.61),  # Moscow
+    ])
+    ids = [s["sensor_id"] for s in TestClient(create_app(store)).get("/api/sensors").json()]
+    assert "540390020" in ids and "999999999" not in ids
+
+
 def test_series_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/series/197127?field=pm2_5")
     assert r.status_code == 200
