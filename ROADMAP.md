@@ -685,19 +685,23 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       out-of-region coords via a **WV+border bounding box** (`_IN_WV_REGION`), killing the
       miscoded AirNow monitor that plotted near Russia (which had stretched Home + Air maps to a
       world view via `fitBounds`). Covered by `test_sensors_drops_out_of_region_coords`.
-- [ ] **Demote context layers.** Collapse ECHO / DEP permits / mining / abandoned wells (and
-      likely 🏭 sources) into one closed **"🔎 Context layers (advanced)"** group in `buildLayers()`.
-      Default map = sensors + reference only.
-- [ ] **Reorder cards reading-first.** map → area rollups → time-series → time-of-day → health;
-      accountability cards (wells-VOC, plugging backlog, source-proximity, validation) behind an
-      "Explore the data / make connections" expander or relocated to `/sources`.
-- [ ] **Contextual drill-in (core new value).** Sensor popup → **"What's near this reading? →"**
-      → `/api/near`, rendered via a **shared renderer extracted from `near_me.js`** (one renderer
-      for `/air` + `/nearby`). Elevated (red/purple) readings get a "⚠ elevated — see what's
-      nearby" prompt. The founder's "from the sensor's perspective, say what's nearby."
-- [ ] **Promote `/nearby` to the nav**; teach `near_me.js` to accept `?lat=&lon=` + auto-load; the
-      `/air` drill-in can deep-link to it. Redirect the existing `📍 Near me` button to `/api/near`
-      (removes the duplicated inline haversine).
+- [x] **Demote context layers** — DONE: `buildLayers()` wraps 🏭 sources, ⚖️ ECHO compliance,
+      🛢️ DEP O&G permits, ⛏️ mining, and 🛢️ abandoned wells into one closed **"🔎 Context layers
+      (advanced)"** group; sources now default off, so the default map = community sensors +
+      reference monitors (+ sparse community reports) only.
+- [x] **Reorder cards reading-first** — DONE: map → area rollups → time-series → time-of-day →
+      day/night → health guide, with the accountability cards (source-proximity, wells-VOC,
+      plugging backlog, validation) moved behind a collapsed **"🔎 Explore the data — make
+      connections & hold sources accountable"** expander on `/air`.
+- [x] **Contextual drill-in (core new value)** — DONE: sensor popups carry a **"🔎 What's near
+      this reading? →"** link (elevated orange/red/purple readings show **"⚠ elevated — see
+      what's nearby →"**) that deep-links to `/nearby?lat=&lon=&from=<sensor>`. Rather than a
+      second inline renderer on `/air`, the drill-in lands on the full `/nearby` symptom-matching
+      view (the founder's "from the sensor's perspective, say what's nearby").
+- [x] **Promote `/nearby` to the nav** — DONE: `📍 Near me` added to the top nav; `near_me.js`
+      now auto-loads from `?lat=&lon=[&km=][&from=]` via a shared `loadAt()` loader. The Air-map
+      `📍 Near me` button keeps its on-map "nearest sensors to chart" value **and** now offers a
+      "🔎 see everything near you →" link into `/nearby` with your coordinates.
 
 ### Reporting redesign
 - [ ] **Location by address / map-coordinate / region + radius** (not individual sensor pick).
