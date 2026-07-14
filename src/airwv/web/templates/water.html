@@ -2,9 +2,11 @@
 {% block content %}
 <div class="page">
   <div class="ov-intro"><h1>West Virginia's water</h1>
-    <p>Real-time conditions from USGS stream gauges across West Virginia. Pick a measure and
-       see where our rivers stand. This is a first look — more sources (Water Quality Portal,
-       WV DEP), history, and health context are coming.</p></div>
+    <p>Where our rivers and drinking water stand <b>right now</b>. Pick a measure — each dot is
+       colored by that site's <b>most recent</b> sample, <b>not</b> an average. USGS stream gauges
+       update continuously; Water Quality Portal lab samples (metals, bacteria, sulfate…) are
+       <b>periodic</b>, so each marker carries its own sample date. New to this? See
+       <a href="/learn#water">Learn: drinking water, swimming, fish &amp; health →</a>.</p></div>
 
   <div class="controls">
     <label>Measure <select id="w-param"></select></label>
@@ -13,7 +15,7 @@
     <span class="meta" id="w-note"></span>
     <a href="/learn#water" class="meta">🎓 Learn: drinking water, swimming, fish &amp; more →</a>
   </div>
-  <div class="card"><h2>Water monitoring sites <span class="meta" id="w-count"></span></h2>
+  <div class="card"><h2>Water monitoring sites <span class="meta" id="w-count"></span><span class="meta" id="w-asof"></span></h2>
     <div id="w-map"></div>
     <div class="legend" id="w-legend"></div>
   </div>

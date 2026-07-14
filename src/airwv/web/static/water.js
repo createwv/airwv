@@ -4,6 +4,11 @@ const $ = id => document.getElementById(id);
 const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const NEUTRAL = '#9aa0a6';
 
+// WV + a border margin — keep the map on West Virginia and drop any stray-coordinate site.
+const WV_BOUNDS = L.latLngBounds([[37.0, -82.8], [40.8, -77.5]]);
+const inWV = (lat, lon) => lat != null && lon != null && lat >= 36.5 && lat <= 41.2 && lon >= -83.5 && lon <= -77.0;
+const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '';
+
 // per-parameter metadata + coloring. Some (pH) are non-monotonic, so a function not bands.
 const WATER_PARAMS = {
   ph:          {label: 'pH', unit: '', note: 'Healthy range ~6.5–9. Mining/acid drainage pushes it low.',
@@ -115,23 +120,31 @@ function draw() {
     ? L.markerClusterGroup({chunkedLoading: true, maxClusterRadius: 45, spiderfyOnMaxZoom: true})
     : L.layerGroup();
   const meta = WATER_PARAMS[current];
-  let withVal = 0;
+  let withVal = 0, newest = null, oldest = null;
   SITES.forEach(s => {
     const l = s.latest[current];
     if (!l || s.lat == null || s.lon == null) return;   // only plot sites reporting this measure
     withVal++;
+    const t = l.ts ? new Date(l.ts).getTime() : null;
+    if (t) { newest = newest == null ? t : Math.max(newest, t); oldest = oldest == null ? t : Math.min(oldest, t); }
     const val = `${l.value}${meta.unit ? ' ' + meta.unit : ''}`;
-    const when = l.ts ? new Date(l.ts).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '';
     L.circleMarker([s.lat, s.lon], {radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
-        + (when ? `<br><small>latest sample: ${when}</small>` : '')
+        + (l.ts ? `<br><small>latest sample: ${fmtDate(l.ts)}</small>` : '')
         + `<br><small>click to chart</small>`)
       .on('click', () => showSite(s)).addTo(layer);
   });
   layer.addTo(map);
   $('w-count').textContent = `· ${withVal} sites report ${meta.label.toLowerCase()}`;
+  // freshness: latest-sample dates vary by site, so state the span plainly
+  $('w-asof').textContent = newest
+    ? ` · latest samples ${oldest && oldest !== newest ? fmtDate(oldest) + '–' : ''}${fmtDate(newest)}`
+    : '';
   $('w-note').textContent = meta.note;
-  $('w-legend').innerHTML = legend(current);
+  const monotone = ['temperature', 'discharge', 'gage_height'].includes(current);
+  const header = `<b>Each dot = a site's most recent ${esc(meta.label.toLowerCase())} sample</b>`
+    + (monotone ? ' (context measure — one color).' : ' — colored good→bad, not an average.') + '<br>';
+  $('w-legend').innerHTML = header + legend(current);
 }
 
 function legend(param) {
@@ -242,10 +255,11 @@ function renderSdwa() {
 }
 
 async function init() {
-  map = L.map('w-map').setView([38.9, -80.5], 7);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
+  map = L.map('w-map', {maxBounds: WV_BOUNDS.pad(0.15), maxBoundsViscosity: 0.6}).fitBounds(WV_BOUNDS);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, minZoom: 6, attribution: '© OpenStreetMap'}).addTo(map);
   try { SITES = (await (await fetch('/api/water/sites')).json()).sites || []; }
   catch (e) { $('w-count').textContent = ' · could not load sites'; return; }
+  SITES = SITES.filter(s => inWV(s.lat, s.lon));   // drop stray-coordinate sites
   // param picker: only params that at least one site reports
   const present = new Set();
   SITES.forEach(s => Object.keys(s.latest).forEach(p => present.add(p)));
