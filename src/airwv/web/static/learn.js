@@ -57,7 +57,13 @@
     if (!chart) return;
     try {
       const d = await (await fetch('/api/climate/trend?field=ozone')).json();
-      const yrs = (d.years || []).filter(y => y.n >= 24);
+      // Ozone is strongly seasonal, so an incomplete year skews its annual mean low.
+      // Keep only years with reasonably full coverage (>= 40% of the median year's reading count).
+      const all = (d.years || []).filter(y => y.n >= 24);
+      const counts = all.map(y => y.n).sort((a, b) => a - b);
+      const medN = counts.length ? counts[counts.length >> 1] : 0;
+      const yrs = all.filter(y => y.n >= 0.4 * medN);
+      const dropped = all.length - yrs.length;
       if (yrs.length < 2) {
         chart.style.display = 'none';
         note.innerHTML = "We're still building enough multi-year history to chart a solid local trend — "
@@ -88,7 +94,9 @@
       const dir = slope > 0.05 ? 'rising' : slope < -0.05 ? 'falling' : 'roughly flat';
       note.innerHTML = `WV reference-monitor ozone, ${x[0]}–${x[x.length - 1]} — the annual average is `
         + `<b>${dir}</b> (${slope >= 0 ? '+' : ''}${slope.toFixed(2)} ${d.unit || 'ppb'}/yr over this span). `
-        + `From EPA AirNow/AirData monitors in our archive; year-to-year weather makes any single year noisy.`;
+        + `From EPA AirNow/AirData monitors in our archive; year-to-year weather makes any single year noisy.`
+        + (dropped ? ` <i>(${dropped} partial year${dropped > 1 ? 's' : ''} with incomplete coverage omitted — `
+          + `ozone is seasonal, so a half-year would skew the average.)</i>` : '');
     } catch (e) {
       chart.style.display = 'none';
       if (note) note.textContent = 'Could not load the local climate trend right now.';
