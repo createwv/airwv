@@ -69,7 +69,7 @@ async function loadCoverage(){
     ['start','end'].forEach(id => { const el = $(id); if (el){ el.min = lo; el.max = hi; } });
   }
 }
-const layerState = {community:true, reference:true, sources:true, reports:true, ozone:false,
+const layerState = {community:true, reference:true, sources:false, reports:true, ozone:false,
   echo:false, dep:false, mine:false, wells:false, wellOrphan:true, wellOperator:true, wellNearOnly:false,
   regions:{}, cats:{},
   echoStatus:{significant_violation:true, violation:true, compliant:false},
@@ -500,11 +500,13 @@ function buildLayers(){
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
-    `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`+
-    (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'')+
-    (depTotal?`<details><summary><input type="checkbox" id="L-dep" ${layerState.dep?'checked':''}> 🛢️ O&amp;G permit pipeline (WV DEP) <span class="cnt">${depTotal}</span></summary><div class="children">${depRows}</div></details>`:'')+
-    (mineTotal?`<details><summary><input type="checkbox" id="L-mine" ${layerState.mine?'checked':''}> ⛏️ Mining permits (WV DEP) <span class="cnt">${mineTotal}</span></summary><div class="children">${mineRows}</div></details>`:'')+
-    `<details><summary><input type="checkbox" id="L-wells" ${layerState.wells?'checked':''}> 🛢️ Abandoned wells (WV DEP) <span class="cnt">${wellsTotal || '~15k'}</span></summary><div class="children">${wellSubs}</div></details>`;
+    `<details class="ctxgroup"><summary>🔎 Context layers <span class="cnt">advanced · sources, violations, permits &amp; wells</span></summary><div class="children">`+
+      `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children">${catRows}</div></details>`+
+      (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children">${echoRows}</div></details>`:'')+
+      (depTotal?`<details><summary><input type="checkbox" id="L-dep" ${layerState.dep?'checked':''}> 🛢️ O&amp;G permit pipeline (WV DEP) <span class="cnt">${depTotal}</span></summary><div class="children">${depRows}</div></details>`:'')+
+      (mineTotal?`<details><summary><input type="checkbox" id="L-mine" ${layerState.mine?'checked':''}> ⛏️ Mining permits (WV DEP) <span class="cnt">${mineTotal}</span></summary><div class="children">${mineRows}</div></details>`:'')+
+      `<details><summary><input type="checkbox" id="L-wells" ${layerState.wells?'checked':''}> 🛢️ Abandoned wells (WV DEP) <span class="cnt">${wellsTotal || '~15k'}</span></summary><div class="children">${wellSubs}</div></details>`+
+    `</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
   $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
   // updates happen in place (no rebuild) so open groups stay open

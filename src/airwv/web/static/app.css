@@ -52,6 +52,13 @@
     border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
   .card h2 { font-size:14px; margin:0; padding:10px 14px; border-bottom:1px solid #eee; color:#444; }
+  details.explore { margin:22px 20px 10px; }
+  details.explore > summary { cursor:pointer; user-select:none; font-size:14px; font-weight:700; color:var(--brand);
+    padding:10px 14px; background:#f4f7fa; border:1px solid #dde5ec; border-radius:8px; }
+  details.explore[open] > summary { border-radius:8px 8px 0 0; }
+  details.explore > summary:hover { background:#eef3f8; }
+  details.explore .explore-intro { padding:10px 14px 2px; max-width:74ch; }
+  details.explore > .card { margin-left:0; margin-right:0; }
   .chart { height:320px; }
   #map { height:360px; border-radius:0 0 8px 8px; }
   #w-map { height:440px; border-radius:0 0 8px 8px; }
@@ -64,6 +71,8 @@
   .layers > b { align-self:center; }
   .layers details { min-width:150px; }
   .layers summary { cursor:pointer; user-select:none; padding:1px 0; }
+  .layers details.ctxgroup > summary { color:#667; font-weight:600; }
+  .layers details.ctxgroup > .children > details { margin-top:2px; }
   .layers .children { padding:2px 0 0 20px; display:flex; flex-direction:column; gap:1px; }
   .layers label { display:block; }
   .layers .cnt { color:#aaa; font-size:11px; }
