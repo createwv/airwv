@@ -27,22 +27,48 @@ async function fbAct(id, status){
 
 function reportCard(r){
   const priv = [r.suspected_org ? `org: <b>${esc(r.suspected_org)}</b>${r.org_public?' (public)':' (private)'}` : '',
+                r.contact_name ? `name: ${esc(r.contact_name)}` : '',
                 r.contact_email ? `email: ${esc(r.contact_email)}` : '',
                 r.contact_phone ? `phone: ${esc(r.contact_phone)}` : ''].filter(Boolean).join(' · ');
   const when = (r.created_at || '').slice(0, 16).replace('T', ' ');
+  const meas = (r.readings && r.readings.length)
+    ? `<div class="meta">📊 ${r.readings.map(x=>`${esc(x.parameter)} <b>${x.value}</b>${x.unit?' '+esc(x.unit):''}`).join(' · ')} <i>(community)</i></div>` : '';
+  const photo = r.photo
+    ? `<div><img class="rphoto" data-src="${r.photo}" style="max-width:220px;max-height:170px;border-radius:6px;margin:4px 0;display:none">
+        <span class="meta rphoto-note">loading photo…</span></div>` : '';
   return `<div class="acard">
     <div><b>#${r.id} ${esc(r.domain)} — ${esc(r.category) || '(no category)'}</b>
       <span class="tag">${esc(r.stage)}</span>
       ${r.flags_count ? `<span class="tag flag">⚑${r.flags_count}</span>` : ''}
+      ${r.photo ? `<span class="tag">📷 ${r.photo_ok?'shown':'held'}</span>` : ''}
       ${r.screen_reason ? `<span class="meta"> held: ${esc(r.screen_reason)}</span>` : ''}</div>
     <div>${esc(r.description) || '<i>no description</i>'}</div>
-    <div class="meta">${when} · ${(r.lat||0).toFixed(4)}, ${(r.lon||0).toFixed(4)}${priv ? ' · ' + priv : ''}${r.mod_note ? ' · note: ' + esc(r.mod_note) : ''}</div>
+    ${meas}${photo}
+    <div class="meta">${when} · ${(r.lat||0).toFixed(4)}, ${(r.lon||0).toFixed(4)}${r.area_label ? ' · ' + esc(r.area_label) : ''}${priv ? ' · ' + priv : ''}${r.mod_note ? ' · note: ' + esc(r.mod_note) : ''}</div>
     <div class="arow">
       ${r.stage !== 'confirmed' ? `<button onclick="act(${r.id},'confirm')">✓ Verify</button>` : ''}
       ${r.stage === 'held' ? `<button onclick="act(${r.id},'publish')">Publish (unverified)</button>` : ''}
       ${r.suspected_org && !r.org_public ? `<button onclick="act(${r.id},'approve_org')">Show org publicly</button>` : ''}
+      ${r.photo && !r.photo_ok ? `<button onclick="act(${r.id},'approve_photo')">📷 Show photo publicly</button>` : ''}
+      ${r.photo && r.photo_ok ? `<button onclick="act(${r.id},'reject_photo')">📷 Hide photo</button>` : ''}
       <button class="danger" onclick="act(${r.id},'remove')">Remove</button>
     </div></div>`;
+}
+
+// Photos are token-gated, so an <img src> can't fetch them directly — load each
+// via an authenticated request and swap in an object URL.
+async function loadReportPhotos(){
+  for (const img of document.querySelectorAll('img.rphoto')){
+    try {
+      const res = await adminFetch(img.dataset.src);
+      if (!res.ok) throw new Error();
+      const url = URL.createObjectURL(await res.blob());
+      img.src = url; img.style.display = '';
+      const note = img.parentElement.querySelector('.rphoto-note'); if (note) note.remove();
+    } catch(e){
+      const note = img.parentElement.querySelector('.rphoto-note'); if (note) note.textContent = 'photo unavailable';
+    }
+  }
 }
 function fbCard(f){
   const when = (f.created_at || '').slice(0, 16).replace('T', ' ');
@@ -137,6 +163,7 @@ async function loadQueue(){
       const d = await (await adminFetch(`/api/admin/reports?status=${q}`)).json();
       $('admin-count').textContent = `${d.results.length} report(s)`;
       $('admin-list').innerHTML = d.results.map(reportCard).join('') || '<p class="meta">none</p>';
+      loadReportPhotos();
     }
     $('admin-auth').textContent = '🔓 authenticated';
   } catch(e){

@@ -146,6 +146,7 @@ class Report(Base):
     photo_path: Mapped[str | None] = mapped_column(String(300), nullable=True)
     photo_ok: Mapped[bool] = mapped_column(default=False)  # held until a maintainer approves the image
 
+    contact_name: Mapped[str | None] = mapped_column(String(160), nullable=True)   # PRIVATE — follow-up only
     contact_email: Mapped[str | None] = mapped_column(String(200), nullable=True)  # PRIVATE — never public
     contact_phone: Mapped[str | None] = mapped_column(String(40), nullable=True)   # PRIVATE
     ip_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)          # PRIVATE — rate-limit/abuse

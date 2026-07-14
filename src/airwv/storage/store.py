@@ -19,6 +19,7 @@ from airwv.config import Config
 from airwv.sources.base import Reading
 from airwv.storage.models import (
     Base,
+    CommunityReading,
     Event,
     Feedback,
     FieldReading,
@@ -90,6 +91,29 @@ class Store:
         take over once the schema starts to evolve.
         """
         Base.metadata.create_all(self._engine)
+        self._ensure_columns()
+
+    def _ensure_columns(self) -> None:
+        """Idempotent, additive column back-fill for tables that predate a new field.
+
+        ``create_all`` never alters existing tables, so a column added to a model
+        won't appear on a database created by an older build. This adds any missing
+        *nullable* columns via ``ALTER TABLE ... ADD COLUMN`` (supported by both
+        SQLite and Postgres) so deploys self-heal without a manual migration step.
+        Non-destructive: it only ever adds, never drops or retypes.
+        """
+        from sqlalchemy import inspect as _inspect, text
+        wanted = {"reports": {"contact_name": "VARCHAR(160)"}}
+        insp = _inspect(self._engine)
+        with self._engine.begin() as conn:
+            for table, cols in wanted.items():
+                try:
+                    have = {c["name"] for c in insp.get_columns(table)}
+                except Exception:
+                    continue
+                for col, ddl in cols.items():
+                    if col not in have:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}"))
 
     def save_readings(self, readings: Iterable[Reading]) -> int:
         """Persist readings. Returns the number written (inserted or updated).
@@ -385,6 +409,34 @@ class Store:
             session.commit()
             return r.id
 
+    def set_report(self, report_id: int, **fields) -> bool:
+        """Patch fields on a report (e.g. attach a photo_path after saving the image)."""
+        with self._session_factory() as session:
+            r = session.get(Report, report_id)
+            if not r:
+                return False
+            for k, v in fields.items():
+                if hasattr(r, k):
+                    setattr(r, k, v)
+            session.commit()
+            return True
+
+    def add_community_reading(self, **fields) -> int:
+        """Store an optional structured measurement a resident attached to a report
+        (e.g. VOC/conductivity/pH + value + unit). Clearly community-submitted and
+        unverified until a maintainer confirms it — never mixed into the sensor network."""
+        with self._session_factory() as session:
+            cr = CommunityReading(**fields)
+            session.add(cr)
+            session.commit()
+            return cr.id
+
+    def community_readings_for_report(self, report_id: int) -> list[CommunityReading]:
+        with self._session_factory() as session:
+            return list(session.scalars(
+                select(CommunityReading).where(CommunityReading.report_id == report_id)
+                .order_by(CommunityReading.id)))
+
     def add_feedback(self, **fields) -> int:
         with self._session_factory() as session:
             f = Feedback(**fields)
@@ -435,6 +487,10 @@ class Store:
             session.delete(e)
             session.commit()
             return True
+
+    def get_report(self, report_id: int) -> Report | None:
+        with self._session_factory() as session:
+            return session.get(Report, report_id)
 
     def published_reports(self, domain: str | None = None, limit: int = 500) -> list[Report]:
         """Reports visible to the public (published-unverified or confirmed)."""
@@ -500,6 +556,10 @@ class Store:
                 r.stage = "removed"
             elif action == "approve_org":
                 r.org_public = True
+            elif action == "approve_photo":
+                r.photo_ok = True
+            elif action == "reject_photo":
+                r.photo_ok = False
             if mod_note:
                 r.mod_note = ((r.mod_note + " | ") if r.mod_note else "") + mod_note
             session.commit()

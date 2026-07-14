@@ -53,16 +53,28 @@ def _asset_version() -> str:
 TEMPLATES.env.globals["asset_v"] = _asset_version()
 
 
+class ReportReadingIn(BaseModel):
+    """An optional structured measurement a resident attaches to a report."""
+    parameter: str                         # VOC, conductivity, pH, PM2.5, …
+    value: float
+    unit: str = ""
+    method: str | None = None              # instrument / how measured
+
+
 class ReportIn(BaseModel):
     domain: str
     category: str = ""
     description: str = ""
     lat: float
     lon: float
+    area_label: str | None = None          # coarse place name (reverse-geocoded, not a street address)
     observed_at: str | None = None
-    suspected_org: str | None = None
+    suspected_org: str | None = None       # legacy/admin only — no longer collected from the public form
+    contact_name: str | None = None        # PRIVATE — follow-up only
     contact_email: str | None = None
     contact_phone: str | None = None
+    readings: list[ReportReadingIn] = []   # optional structured measurements
+    photo: str | None = None               # optional base64 data URL (meter or scene)
     website: str = ""      # honeypot — bots fill it, humans never see it
     elapsed_ms: int = 0    # time on form; near-zero = a bot
 
@@ -76,7 +88,7 @@ class FeedbackIn(BaseModel):
 
 
 class ModerateIn(BaseModel):
-    action: str            # confirm | publish | keep | remove | approve_org
+    action: str            # confirm | publish | keep | remove | approve_org | approve_photo | reject_photo
     mod_note: str | None = None
     verified_by: str | None = None
 
@@ -101,22 +113,29 @@ class FieldReadingIn(BaseModel):
 
 
 FIELD_PHOTO_DIR = Path(os.environ.get("AIRWV_FIELD_PHOTOS", "data/field_photos"))
+REPORT_PHOTO_DIR = Path(os.environ.get("AIRWV_REPORT_PHOTOS", "data/report_photos"))
 
 
-def _save_field_photo(fid: int, data_url: str) -> str | None:
-    """Decode a base64 data-URL image (meter photo) and save it as <id>.<ext>. Best-effort."""
+def _save_photo(directory: Path, item_id: int, data_url: str) -> str | None:
+    """Decode a base64 data-URL image and save it as <id>.<ext> under `directory`.
+    Best-effort: returns the filename, or None on any decode/size failure (cap 8 MB)."""
     try:
         header, b64 = data_url.split(",", 1) if "," in data_url else ("", data_url)
         raw = base64.b64decode(b64)
         if not raw or len(raw) > 8 * 1024 * 1024:   # cap 8 MB
             return None
         ext = "png" if "image/png" in header else "jpg"
-        FIELD_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
-        name = f"{fid}.{ext}"
-        (FIELD_PHOTO_DIR / name).write_bytes(raw)
+        directory.mkdir(parents=True, exist_ok=True)
+        name = f"{item_id}.{ext}"
+        (directory / name).write_bytes(raw)
         return name
     except Exception:
         return None
+
+
+def _save_field_photo(fid: int, data_url: str) -> str | None:
+    """Save a field-reading meter photo (see _save_photo)."""
+    return _save_photo(FIELD_PHOTO_DIR, fid, data_url)
 
 
 class EventIn(BaseModel):
@@ -634,6 +653,9 @@ def create_app(store: Store) -> FastAPI:
     def _public_report(r) -> dict:
         """Public projection: jittered coords, no private fields, org only if approved."""
         lat, lon = jitter(r.lat, r.lon, r.id)
+        rows = [{"parameter": cr.parameter, "value": cr.value, "unit": cr.unit,
+                 "verified": cr.verified}
+                for cr in store.community_readings_for_report(r.id)]
         return {
             "id": r.id, "created_at": r.created_at.isoformat() if r.created_at else None,
             "observed_at": r.observed_at.isoformat() if r.observed_at else None,
@@ -641,6 +663,8 @@ def create_app(store: Store) -> FastAPI:
             "lat": lat, "lon": lon, "area_label": r.area_label, "stage": r.stage,
             "verified": r.stage == "confirmed", "verified_by": r.verified_by,
             "org": r.suspected_org if r.org_public else None,
+            "readings": rows,
+            "photo": f"/api/reports/{r.id}/photo" if (r.photo_path and r.photo_ok) else None,
         }
 
     @app.post("/api/reports")
@@ -657,9 +681,24 @@ def create_app(store: Store) -> FastAPI:
         stage, reason = screen(body.description, body.domain, body.suspected_org, facility_triggers)
         rid = store.add_report(
             domain=body.domain, category=body.category[:64], description=(body.description or "")[:2000],
-            lat=body.lat, lon=body.lon, observed_at=_parse_dt(body.observed_at),
-            suspected_org=(body.suspected_org or None), contact_email=(body.contact_email or None),
-            contact_phone=(body.contact_phone or None), ip_hash=iph, stage=stage, screen_reason=reason)
+            lat=body.lat, lon=body.lon, area_label=(body.area_label or None)[:120] if body.area_label else None,
+            observed_at=_parse_dt(body.observed_at),
+            suspected_org=(body.suspected_org or None), contact_name=(body.contact_name or None),
+            contact_email=(body.contact_email or None), contact_phone=(body.contact_phone or None),
+            ip_hash=iph, stage=stage, screen_reason=reason)
+        # optional structured measurements — stored as community readings, unverified
+        for row in (body.readings or [])[:20]:
+            if not (row.parameter or "").strip():
+                continue
+            store.add_community_reading(
+                report_id=rid, domain=body.domain, parameter=row.parameter[:64],
+                value=row.value, unit=(row.unit or "")[:32], method=(row.method or None),
+                lat=body.lat, lon=body.lon, taken_at=_parse_dt(body.observed_at))
+        # optional photo — held (photo_ok=False) until a maintainer approves the image
+        if body.photo:
+            name = _save_photo(REPORT_PHOTO_DIR, rid, body.photo)
+            if name:
+                store.set_report(rid, photo_path=name)
         if notifier.enabled:   # push to Slack/Discord after the response is sent
             background.add_task(notifier.notify_report, domain=body.domain,
                                 category=body.category, description=body.description,
@@ -825,13 +864,31 @@ def create_app(store: Store) -> FastAPI:
             "lat": r.lat, "lon": r.lon, "area_label": r.area_label, "stage": r.stage,
             "screen_reason": r.screen_reason, "flags_count": r.flags_count, "verified_by": r.verified_by,
             "suspected_org": r.suspected_org, "org_public": r.org_public,
-            "photo_ok": r.photo_ok, "contact_email": r.contact_email, "contact_phone": r.contact_phone,
+            "photo_ok": r.photo_ok,
+            # admin sees the image even before it's approved, so it can be vetted
+            "photo": f"/api/admin/reports/{r.id}/photo" if r.photo_path else None,
+            "readings": [{"parameter": cr.parameter, "value": cr.value, "unit": cr.unit,
+                          "verified": cr.verified}
+                         for cr in store.community_readings_for_report(r.id)],
+            "contact_name": r.contact_name, "contact_email": r.contact_email, "contact_phone": r.contact_phone,
             "ip_hash": r.ip_hash, "mod_note": r.mod_note,
         }
 
     @app.get("/api/admin/reports")
     def admin_reports(status: str = "held", _: bool = Depends(_require_admin)):
         return {"results": [_admin_report(r) for r in store.reports_for_admin(status)]}
+
+    @app.get("/api/admin/reports/{report_id}/photo")
+    def admin_report_photo(report_id: int, _: bool = Depends(_require_admin)):
+        """Serve a report's photo to a maintainer for vetting — regardless of photo_ok,
+        so they can decide whether to approve it for public view."""
+        r = store.get_report(report_id)
+        if not r or not r.photo_path:
+            raise HTTPException(status_code=404, detail="no photo")
+        path = REPORT_PHOTO_DIR / r.photo_path
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="missing file")
+        return FileResponse(path)
 
     @app.post("/api/admin/reports/{report_id}")
     def admin_moderate(report_id: int, body: ModerateIn, _: bool = Depends(_require_admin)):
@@ -1451,6 +1508,19 @@ def create_app(store: Store) -> FastAPI:
         if not fr or fr.status != "published" or not fr.photo_path:
             raise HTTPException(status_code=404, detail="no photo")
         path = FIELD_PHOTO_DIR / fr.photo_path
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="missing file")
+        return FileResponse(path)
+
+    @app.get("/api/reports/{report_id}/photo")
+    def report_photo(report_id: int):
+        """Report photo — served only once a maintainer has approved the image
+        (photo_ok) on a publicly-visible report. Held images stay private."""
+        r = store.get_report(report_id)
+        if (not r or r.stage not in ("published_unverified", "confirmed")
+                or not r.photo_path or not r.photo_ok):
+            raise HTTPException(status_code=404, detail="no photo")
+        path = REPORT_PHOTO_DIR / r.photo_path
         if not path.exists():
             raise HTTPException(status_code=404, detail="missing file")
         return FileResponse(path)

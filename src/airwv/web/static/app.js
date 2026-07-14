@@ -705,9 +705,15 @@ function redrawReports(){
   reportLayer = L.layerGroup();
   if (layerState.reports !== false) allReports.forEach(r => {
     if (r.lat == null) return;
+    const meas = (r.readings && r.readings.length)
+      ? `<br><small>📊 measured: ${r.readings.map(x=>`${x.parameter} ${x.value}${x.unit?' '+x.unit:''}`).join(', ')} <i>(community, unverified)</i></small>`
+      : '';
+    const photo = r.photo ? `<br><a href="${r.photo}" target="_blank" rel="noopener"><img src="${r.photo}" style="max-width:200px;max-height:150px;border-radius:5px;margin-top:4px"></a>` : '';
     L.marker([r.lat, r.lon], {icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${R_ICON[r.domain]||'📣'} ${r.category || r.domain}</b>`+
         (r.description ? `<br>${r.description}` : '')+
+        (r.area_label ? `<br><small>📍 ${r.area_label}</small>` : '')+
+        meas + photo +
         `<br><small>${r.verified ? '✓ verified' : 'Unverified community report'} · ${(r.created_at||'').slice(0,10)}</small>`+
         `<br><small style="color:#a00">Community-reported — not a finding of fact.</small>`)
       .addTo(reportLayer);

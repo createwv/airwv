@@ -40,3 +40,4 @@ data/*
 .vscode/
 *.swp
 data/field_photos/
+data/report_photos/

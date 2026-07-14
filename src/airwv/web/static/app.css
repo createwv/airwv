@@ -118,6 +118,18 @@
     border:1px solid #ccc; border-radius:6px; font-family:inherit; }
   .rform .hp { position:absolute !important; left:-9999px; }
   .rloc { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .rlocbox { display:flex; flex-direction:column; gap:6px; padding:9px 10px; border:1px solid #e2e6ea;
+    border-radius:8px; background:#f7f9fb; }
+  .rlocbox .rlab { font-size:13px; color:#444; }
+  .rlocbox #r-addr { flex:1 1 180px; }
+  .rrow { display:flex; gap:6px; align-items:center; margin-bottom:5px; }
+  .rrow .rr-param { flex:1 1 auto; }
+  .rrow .rr-val { max-width:92px; }
+  .rrow .rr-unit { max-width:80px; }
+  .rrow .rr-del { border:none; background:#eee; color:#a00; border-radius:5px; cursor:pointer;
+    font-size:16px; line-height:1; padding:4px 9px; }
+  .rlink { align-self:flex-start; border:none; background:none; color:var(--brand); cursor:pointer;
+    font-size:13px; padding:2px 0; text-decoration:underline; }
   .rnote { font-size:12px; color:#7a5b12; background:#fff4d6; padding:7px 9px; border-radius:6px; }
   /* ---- Home hero (real WV community-sensor photo) ---- */
   .hero { position:relative; margin-bottom:12px; overflow:hidden;
