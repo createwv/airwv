@@ -783,10 +783,12 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       link**. Legend gained a bold header + an "as of · latest samples" freshness line; map is
       **bounded to WV** (fitBounds + maxBounds) with stray-coordinate sites dropped.
 
-### Ambient awareness (experiment)
-- [ ] **"Haze when the air is bad."** Tint the UI with a grey haze overlay that correlates to
-      conditions (local if possible, else a WV-level signal) — ties the feel of the site to the
-      actual state. Experimental delight/awareness.
+### Ambient awareness (experiment) — DONE (v1)
+- [x] **"Haze when the air is bad."** Site-wide dismissible overlay (`haze.js`) that veils the UI
+      browner/denser as WV's typical (median) community PM2.5 worsens — clear for good air, a
+      top-anchored "horizon smog" gradient otherwise, with an explainer chip (band + value → Learn).
+      Above content + maps, below modals, `pointer-events:none`; honors reduced-motion + print.
+      Uses a **WV-level signal**; local-per-user tint is a future refinement.
 
 ## Documentation & open-source education (ongoing)
 
