@@ -1590,7 +1590,16 @@ def create_app(store: Store) -> FastAPI:
 
 def _default_store() -> Store:
     url = os.environ.get("AIRWV_DATABASE_URL", "").strip() or "sqlite:///airwv.sqlite"
-    return Store(url)
+    store = Store(url)
+    # Self-heal the schema on web boot: create_all is idempotent and _ensure_columns
+    # only ever *adds* missing nullable columns, so a deploy that introduces a new
+    # field works without a manual migration step. Best-effort — never block startup.
+    try:
+        store.create_schema()
+    except Exception:  # pragma: no cover - a read-only/locked DB shouldn't crash serving
+        import logging
+        logging.getLogger(__name__).exception("schema self-heal on startup failed; continuing")
+    return store
 
 
 app = create_app(_default_store())
