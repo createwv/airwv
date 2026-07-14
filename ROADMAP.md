@@ -718,10 +718,16 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
 - [x] **Follow-up (optional, private):** name / email / phone. Added a `contact_name` column, with
       `create_schema` self-healing missing nullable columns via `ALTER TABLE` (no manual migration).
 
-### Alerts redesign
-- [ ] **Multi-select what to be alerted on** (PM2.5, VOC, ozone, water, spills near me, …) and
-      **location by address / region / radius** — not individual sensors. Builds on the existing
-      subscription model + `/alerts`.
+### Alerts redesign — DONE
+- [x] **Multi-select what to watch** (PM2.5, VOC, ozone now; water & spills near me captured as
+      waitlist until those proximity feeds fire). Each metric → its own subscription row, all
+      sharing one token so a single confirm/unsubscribe governs the group; re-signup updates in
+      place. Severity maps to per-metric thresholds (PM2.5 µg/m³, VOC index, ozone EPA ppb).
+- [x] **Location by area, not a sensor** — 📍 use-my-location or type a town/address (Nominatim,
+      WV-biased) + radius (5/10/25 mi, or anywhere in WV) → stored as `center_lat/lon + radius_km`.
+      `evaluate()` gained radius filtering (area subs only fire on sensors inside the radius;
+      unknown-coord sensors never fire); ingest passes sensor coords. Model self-healed via the
+      `create_schema` ALTER migration; admin subscriptions API surfaces area/radius.
 
 ### About — rewrite (multi-medium origin + partners)
 - [ ] Empower WV grew from KV Air Quality Monitoring **but converged with pre-existing community
