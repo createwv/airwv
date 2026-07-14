@@ -254,6 +254,26 @@ class Store:
             rows = session.execute(stmt.group_by(day)).all()
         return {_date.fromisoformat(str(d)[:10]): max(0.0, float(v)) for d, v in rows if v is not None}
 
+    def annual_field_stats(self, field: str, sources=None, min_count: int = 24) -> list[dict]:
+        """Per-calendar-year mean/max/count for a field — the basis of the "our own data"
+        climate trend on the Learn page. Optionally restrict to given sources (e.g. EPA
+        reference monitors). Years with fewer than ``min_count`` readings are dropped so a
+        sparse partial year doesn't masquerade as a trend point. SQLite date functions."""
+        col = getattr(ReadingRow, field)
+        yr = func.strftime("%Y", ReadingRow.ts)
+        stmt = select(yr, func.avg(col), func.max(col), func.count(col)).where(col.isnot(None))
+        if sources:
+            stmt = stmt.where(ReadingRow.source.in_(list(sources)))
+        with self._session_factory() as session:
+            rows = session.execute(stmt.group_by(yr).order_by(yr)).all()
+        out = []
+        for y, avg, mx, n in rows:
+            if not y or n < min_count:
+                continue
+            out.append({"year": int(y), "mean": round(float(avg), 2),
+                        "max": round(float(mx), 1), "n": int(n)})
+        return out
+
     def airnow_vs_airdata(self, year: int | None = None, field: str = "pm2_5") -> dict:
         """Compare **preliminary** AirNow vs **finalized** AirData daily values for the
         same monitor+day — the QA audit. Reconciles AirNow's AQSID ('210130002') to

@@ -94,7 +94,10 @@
           <text x="470" y="132" text-anchor="middle" font-size="11.5" fill="#7a6fb0">PM1.0 ≤1 µm</text>
         </svg>
         <div class="cap">Drawn to scale. PM2.5 is roughly 30× smaller than a human hair — small
-          enough to slip past your body's defenses into the lungs and bloodstream.</div>
+          enough to slip past your body's defenses into the lungs and bloodstream.
+          <span class="meta">(Hair thickness varies a lot from person to person — roughly 17–180 µm
+          depending on hair type — so "~70 µm" is just a common reference point. The takeaway holds
+          for everyone: PM2.5 is far too small to see or feel.)</span></div>
       </div>
     </div></div>
 
@@ -120,6 +123,17 @@
       <p class="meta">Many VOCs also react in sunlight to form <b>ground-level ozone</b>, a
         separate lung irritant. Our sensor's index can't identify or quantify these compounds —
         for actual concentrations you'd need EPA/lab air-toxics sampling.</p>
+      <h3>What our VOC sensor actually detects</h3>
+      <p>To be clear about the hardware: the PurpleAir units in this network sense gases with a
+        <b>low-cost metal-oxide (MOX) gas sensor</b> (a Bosch BME680-class chip). It doesn't identify
+        molecules — its surface resistance changes in the presence of <b>reducing gases as a group</b>:
+        many VOCs (alcohols, aldehydes, ketones, aromatics like the BTEX above) plus things like carbon
+        monoxide and hydrogen. What comes out is <b>one relative "gas resistance" number</b>, sensitive
+        to temperature and humidity, reported as a single index.</p>
+      <p class="meta">So honestly: it's a <b>"something changed" detector</b>, not a benzene meter. A rise
+        means more reducing gas in the air near that sensor — a reason to look closer or report an odor,
+        <b>not</b> a measurement of any one chemical. Pinning down <i>which</i> compound (and how much)
+        takes EPA/lab air-toxics sampling — the kind a confirmed community report can help trigger.</p>
     </div></div>
   </div>
 
@@ -189,6 +203,13 @@
         behind the Rutledge neighborhood in Charleston, and a founding reason communities here started
         monitoring their own air. (Turn on the <a href="/air">🛢️ Abandoned wells</a> map layer to see the
         wells near you — orphans in red.)</p>
+      <p class="rnote"><b>⚠️ Raw natural gas is odorless.</b> The "gas smell" you know from a kitchen stove
+        is a chemical (<b>mercaptan</b>) that utilities <b>add on purpose</b> so you can detect leaks. Gas
+        venting straight from a well has <b>no such additive</b> — it's mostly <b>methane</b>, which is
+        colorless and has <b>no smell</b>. So a leaking well can be releasing gas you'll never notice by
+        nose. <b>That's exactly why an air monitor matters:</b> our community <b>VOC</b> index responds to
+        the hydrocarbons your senses can't, giving a signal where there'd otherwise be none. (H2S, when
+        it's in the mix, <i>does</i> smell — but see below.)</p>
       <p><b>The dangerous part:</b> you can smell H2S at very low levels, but at higher concentrations it
         <b>deadens your sense of smell</b> within minutes — so <i>the smell going away does not mean the
         gas is gone</i>. Never treat "I don't smell it anymore" as safe.</p>
@@ -394,6 +415,51 @@
           air side — NOVs, orders, and penalties, tracked in ECHO.</li>
       </ul>
 
+      <h3>Chemicals, toxins &amp; contaminated land</h3>
+      <p>Air and water permits aren't the whole story. A separate set of laws governs the chemicals
+        themselves — making them, storing them, dumping them, and cleaning them up:</p>
+      <ul>
+        <li><b>TSCA</b> — the <a href="https://www.epa.gov/laws-regulations/summary-toxic-substances-control-act"
+          target="_blank" rel="noopener">Toxic Substances Control Act</a> lets EPA review and restrict
+          industrial chemicals (it's the authority now phasing down <b>PFAS "forever chemicals"</b> and
+          that banned most uses of asbestos).</li>
+        <li><b>RCRA</b> — the <a href="https://www.epa.gov/rcra" target="_blank" rel="noopener">Resource
+          Conservation &amp; Recovery Act</a> governs <b>hazardous waste</b> "cradle to grave": how it's
+          stored, transported, and disposed of, so it doesn't end up in soil and groundwater.</li>
+        <li><b>CERCLA / Superfund</b> — the <a href="https://www.epa.gov/superfund" target="_blank" rel="noopener">cleanup
+          law</a> for <b>already-contaminated sites</b>. It can force the responsible parties to pay for
+          remediation — and where they can't be found, a federal fund covers it.</li>
+        <li><b>EPCRA / Right-to-Know</b> — the Emergency Planning &amp; Community Right-to-Know Act is
+          <i>why</i> the <b>Toxics Release Inventory</b> (our <a href="/sources">Sources</a> page) is public
+          at all: facilities must report the chemicals they store and release.</li>
+      </ul>
+
+      <h3>What pollution does to land &amp; property</h3>
+      <p>Beyond health, contamination has real effects on the environment and on what you own:</p>
+      <ul>
+        <li><b>Soil &amp; groundwater</b> — spills, leaking tanks, mine drainage, and buried waste can
+          leave heavy metals or solvents in the ground for decades, tainting wells and gardens.</li>
+        <li><b>Ecosystems</b> — acid mine drainage and selenium can render a stream unable to support
+          fish; air deposition and runoff carry harm well beyond the fence line.</li>
+        <li><b>Property</b> — contamination can lower value, complicate a sale (buyers and lenders may
+          require a <b>Phase I/II environmental assessment</b>), and in serious cases make land unusable
+          until it's remediated.</li>
+      </ul>
+
+      <h3>If you're affected — your recourse</h3>
+      <ul>
+        <li><b>Report it</b> — to <a href="https://dep.wv.gov/" target="_blank" rel="noopener">WV DEP</a>
+          and/or EPA (numbers below); regulators can inspect, issue violations, and order cleanup.</li>
+        <li><b>Public participation</b> — permits have <b>comment periods</b>, and you can request records
+          under open-records / <b>FOIA</b> laws to see a facility's filings.</li>
+        <li><b>Citizen suits</b> — the Clean Air and Clean Water Acts let citizens sue violators (or a
+          regulator that fails to act) after proper notice — an important backstop when enforcement lags.</li>
+        <li><b>Private claims</b> — nuisance, trespass, or "toxic tort" claims for property damage or
+          health harm are handled through the courts with an attorney.</li>
+      </ul>
+      <p class="rnote">This is plain-language education, <b>not legal advice</b>. For your situation,
+        talk to WV DEP/EPA and, for private claims, a licensed attorney.</p>
+
       <h3>Quick glossary</h3>
       <div class="deflist">
         <div><b>Criteria pollutant</b><p>One of the six pollutants with a national health-based limit (NAAQS).</p></div>
@@ -402,6 +468,9 @@
         <div><b>Effluent limit</b><p>The maximum amount of a pollutant a facility may discharge to water.</p></div>
         <div><b>NOV</b><p>Notice of Violation — a formal finding that a facility broke a rule or permit.</p></div>
         <div><b>TRI</b><p>Toxics Release Inventory — public data on facilities' reported chemical releases (the basis of our Sources page).</p></div>
+        <div><b>Superfund (CERCLA)</b><p>The federal program that funds and forces cleanup of contaminated sites.</p></div>
+        <div><b>RCRA</b><p>The law governing how hazardous waste is stored, hauled, and disposed of — "cradle to grave."</p></div>
+        <div><b>Citizen suit</b><p>A lawsuit the Clean Air/Water Acts let ordinary people file against a violator (after notice).</p></div>
       </div>
       <div class="depbox">
         <b>📞 How to report pollution to WV DEP</b>
@@ -425,6 +494,16 @@
 
   <!-- ============ CLIMATE ============ -->
   <div class="lpanel" id="lp-climate" hidden>
+    <div class="card"><div class="prose">
+      <h3>📈 The trend in our own West Virginia data</h3>
+      <p>Climate isn't only a global story — it shows up in the records we keep right here. Below is
+        the <b>year-by-year ground-level ozone</b> from the EPA reference monitors we archive for WV.
+        Ozone <b>forms faster in heat and sunlight</b>, so it's a local fingerprint of hotter summers
+        as much as of emissions.</p>
+      <div id="climate-chart" class="chart" style="min-height:300px"></div>
+      <p class="meta" id="climate-note">Loading West Virginia's ozone history…</p>
+    </div></div>
+
     <div class="card"><div class="prose">
       <h3>Air quality and climate are the same fire</h3>
       <p>Most of what harms local air also drives climate change — they come from the same

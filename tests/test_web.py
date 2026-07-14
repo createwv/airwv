@@ -94,6 +94,23 @@ def test_bad_field_rejected(tmp_path):
     assert _client(tmp_path).get("/api/series/197127?field=nope").status_code == 400
 
 
+def test_climate_trend(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'c.sqlite'}")
+    store.create_schema()
+    rows = []
+    for yr, base in [(2022, 40), (2023, 44), (2024, 48)]:
+        for i in range(30):  # >= min_count(24) per year
+            rows.append(Reading(source="airnow", sensor_id="540390020",
+                                ts=datetime(yr, 7, 1, tzinfo=timezone.utc) + timedelta(hours=i),
+                                ozone=base + (i % 4)))
+    store.save_readings(rows)
+    c = TestClient(create_app(store))
+    d = c.get("/api/climate/trend?field=ozone").json()
+    assert d["unit"] == "ppb" and [y["year"] for y in d["years"]] == [2022, 2023, 2024]
+    assert d["years"][0]["mean"] < d["years"][2]["mean"]      # rising annual average
+    assert c.get("/api/climate/trend?field=nope").status_code == 400
+
+
 def test_reference_monitors_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/reference-monitors")
     assert r.status_code == 200

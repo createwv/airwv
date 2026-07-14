@@ -50,4 +50,49 @@
     } catch (e) { document.getElementById('learn-now')?.remove(); }
   }
   liveNow();
+
+  // ---- climate trend from our own archived data (Climate tab) ----
+  async function climateTrend() {
+    const note = document.getElementById('climate-note'), chart = document.getElementById('climate-chart');
+    if (!chart) return;
+    try {
+      const d = await (await fetch('/api/climate/trend?field=ozone')).json();
+      const yrs = (d.years || []).filter(y => y.n >= 24);
+      if (yrs.length < 2) {
+        chart.style.display = 'none';
+        note.innerHTML = "We're still building enough multi-year history to chart a solid local trend — "
+          + "our EPA ozone archive is filling in. Check back as it grows, or explore what we have on the "
+          + "<a href='/air'>Air map</a>.";
+        return;
+      }
+      const x = yrs.map(y => y.year);
+      const mean = yrs.map(y => y.mean), max = yrs.map(y => y.max);
+      // simple least-squares fit on the annual means, drawn as a dashed trend line
+      const n = x.length, sx = x.reduce((a, b) => a + b, 0), sy = mean.reduce((a, b) => a + b, 0);
+      const sxx = x.reduce((a, b) => a + b * b, 0), sxy = x.reduce((a, b, i) => a + b * mean[i], 0);
+      const slope = (n * sxy - sx * sy) / (n * sxx - sx * sx), intercept = (sy - slope * sx) / n;
+      const fit = x.map(v => slope * v + intercept);
+      Plotly.newPlot(chart, [
+        { x, y: max, name: 'yearly peak', type: 'scatter', mode: 'lines+markers',
+          line: { color: '#e0b050', width: 1 }, marker: { size: 5 } },
+        { x, y: mean, name: 'yearly average', type: 'scatter', mode: 'lines+markers',
+          line: { color: '#2c7fb8', width: 2 }, marker: { size: 6 } },
+        { x, y: fit, name: 'trend', type: 'scatter', mode: 'lines',
+          line: { color: '#c0392b', width: 1.5, dash: 'dash' }, hoverinfo: 'skip' },
+      ], {
+        margin: { t: 10, r: 10, b: 36, l: 46 }, height: 300,
+        legend: { orientation: 'h', y: 1.12 },
+        xaxis: { dtick: 1, tickformat: 'd' },
+        yaxis: { title: `ozone (${d.unit || 'ppb'})`, rangemode: 'tozero' },
+      }, { displayModeBar: false, responsive: true });
+      const dir = slope > 0.05 ? 'rising' : slope < -0.05 ? 'falling' : 'roughly flat';
+      note.innerHTML = `WV reference-monitor ozone, ${x[0]}–${x[x.length - 1]} — the annual average is `
+        + `<b>${dir}</b> (${slope >= 0 ? '+' : ''}${slope.toFixed(2)} ${d.unit || 'ppb'}/yr over this span). `
+        + `From EPA AirNow/AirData monitors in our archive; year-to-year weather makes any single year noisy.`;
+    } catch (e) {
+      chart.style.display = 'none';
+      if (note) note.textContent = 'Could not load the local climate trend right now.';
+    }
+  }
+  climateTrend();
 })();

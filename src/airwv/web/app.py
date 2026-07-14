@@ -664,6 +664,21 @@ def create_app(store: Store) -> FastAPI:
         return {"sources": catalog, "total": len(catalog), "keyless": keyless,
                 "categories": sorted({s["category"] for s in catalog})}
 
+    @app.get("/api/climate/trend")
+    def climate_trend(field: str = "ozone"):
+        """Annual trend for a field from our own stored history — used by the Learn
+        Climate tab so the climate story is grounded in WV data, not just external framing.
+        Ozone/PM2.5 come from EPA reference monitors; temperature from community sensors."""
+        if field not in FIELDS:
+            raise HTTPException(status_code=400, detail=f"unknown field {field!r}")
+        # reference-grade fields draw from the EPA monitors; weather from community sensors
+        sources = (["airnow", "epa_airdata"] if field in ("ozone", "pm2_5", "pm10")
+                   else ["purpleair"])
+        units = {"ozone": "ppb", "pm2_5": "µg/m³", "pm10": "µg/m³",
+                 "temperature": "°F", "humidity": "%"}
+        years = store.annual_field_stats(field, sources=sources)
+        return {"field": field, "unit": units.get(field, ""), "sources": sources, "years": years}
+
     @app.get("/api/coverage")
     def coverage():
         c = store.coverage_overall()
