@@ -5,7 +5,10 @@
   const el = document.getElementById('haze');
   const chip = document.getElementById('haze-chip');
   if (!el || !chip) return;
-  if (localStorage.getItem('airwv_haze_off') === '1') return;   // user turned it off
+  // Preview/demo override: ?haze=<pm2.5> forces a value so the effect can be seen even
+  // when the real air is good (it usually is). Bypasses a prior dismiss. Handy for testing.
+  const override = parseFloat(new URLSearchParams(location.search).get('haze'));
+  if (isNaN(override) && localStorage.getItem('airwv_haze_off') === '1') return;   // user turned it off
 
   // PM2.5 bands → tint color + strength. "o" is the veil strength (0 = clear).
   const BANDS = [
@@ -39,6 +42,7 @@
   }
 
   async function tick() {
+    if (!isNaN(override)) { apply(override); return; }
     try {
       const sensors = await (await fetch('/api/sensors')).json();
       // reflect *general* conditions: the typical (median) community reading, not one bad sensor
