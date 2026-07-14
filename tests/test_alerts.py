@@ -26,6 +26,9 @@ class _Sub:
         self.quiet_start = kw.get("quiet_start")
         self.quiet_end = kw.get("quiet_end")
         self.last_notified_at = kw.get("last_notified_at")
+        self.center_lat = kw.get("center_lat")
+        self.center_lon = kw.get("center_lon")
+        self.radius_km = kw.get("radius_km")
 
 
 class _Trend:
@@ -46,6 +49,17 @@ def test_fires_when_over_threshold():
 
 def test_no_fire_under_threshold():
     assert evaluate([_Sub(threshold=35)], {"A": _reading(10)}, _NOW) == []
+
+
+def test_area_scoped_alert_respects_radius():
+    # Charleston-centered, 10 km radius. Sensor A is ~2 km away (fires); B is ~80 km (skipped).
+    sub = _Sub(threshold=35, sensor_id=None, center_lat=38.35, center_lon=-81.63, radius_km=10)
+    coords = {"A": (38.36, -81.64), "B": (38.90, -82.30)}
+    latest = {"A": _reading(50), "B": _reading(99)}
+    alerts = evaluate([sub], latest, _NOW, sensor_coords=coords)
+    assert [a.sensor_id for a in alerts] == ["A"]
+    # a sensor with unknown coords never fires an area alert
+    assert evaluate([sub], {"C": _reading(99)}, _NOW, sensor_coords={}) == []
 
 
 def test_rate_limited():
@@ -102,3 +116,41 @@ def test_subscribe_and_dispatch_via_fake(tmp_path):
     assert len(alerts) == 1 and len(sent) == 1
     # second run within the interval is rate-limited (last_notified recorded)
     assert run_alerts(config, send=True, now=_NOW, store=store, notifier_factory=lambda ch: Fake()) == []
+
+
+def test_multi_metric_geo_signup_and_group_confirm(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from airwv.web.app import create_app
+
+    store = Store(f"sqlite:///{tmp_path / 'w.sqlite'}")
+    store.create_schema()
+    c = TestClient(create_app(store))
+    r = c.post("/api/alerts/subscribe", json={
+        "email": "me@x.org", "metrics": ["pm2_5", "voc", "water"], "level": "sensitive",
+        "lat": 38.35, "lon": -81.63, "radius_mi": 10, "label": "Charleston", "elapsed_ms": 5000})
+    assert r.status_code == 200
+
+    subs = store.list_subscriptions(active_only=False)
+    assert {s.field for s in subs} == {"pm2_5", "voc", "water"}     # one row per metric
+    assert len({s.token for s in subs}) == 1                        # sharing one token
+    assert all(s.center_lat == 38.35 and round(s.radius_km) == 16 for s in subs)  # 10 mi ≈ 16 km
+    assert all(not s.active for s in subs)                          # inactive until confirmed
+    pm = next(s for s in subs if s.field == "pm2_5")
+    assert pm.threshold == 35.0 and next(s for s in subs if s.field == "voc").threshold == 250.0
+
+    # one confirm link activates the whole group
+    token = subs[0].token
+    assert c.get(f"/alerts/confirm?token={token}").status_code == 200
+    assert all(s.active and s.confirmed_at for s in store.list_subscriptions(active_only=False))
+
+    # re-signup updates in place (no duplicate rows) and can change what's watched
+    c.post("/api/alerts/subscribe", json={"email": "me@x.org", "metrics": ["pm2_5"],
+                                          "level": "unhealthy", "elapsed_ms": 5000})
+    again = store.list_subscriptions(active_only=False)
+    assert len(again) == 3                                          # still 3 rows, updated not duplicated
+    assert next(s for s in again if s.field == "pm2_5").threshold == 55.0
+
+    # one unsubscribe turns the whole group off
+    assert c.get(f"/alerts/unsubscribe?token={token}").status_code == 200
+    assert all(not s.active for s in store.list_subscriptions(active_only=False))

@@ -103,7 +103,10 @@ class Store:
         Non-destructive: it only ever adds, never drops or retypes.
         """
         from sqlalchemy import inspect as _inspect, text
-        wanted = {"reports": {"contact_name": "VARCHAR(160)"}}
+        wanted = {
+            "reports": {"contact_name": "VARCHAR(160)"},
+            "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT"},
+        }
         insp = _inspect(self._engine)
         with self._engine.begin() as conn:
             for table, cols in wanted.items():
@@ -364,6 +367,17 @@ class Store:
             )
             return session.scalars(stmt).first()
 
+    def update_subscription(self, subscription_id: int, **fields) -> bool:
+        with self._session_factory() as session:
+            sub = session.get(Subscription, subscription_id)
+            if sub is None:
+                return False
+            for k, v in fields.items():
+                if hasattr(sub, k):
+                    setattr(sub, k, v)
+            session.commit()
+            return True
+
     def subscription_by_token(self, token: str):
         with self._session_factory() as session:
             return session.scalars(
@@ -371,34 +385,39 @@ class Store:
             ).first()
 
     def confirm_subscription(self, token: str, when) -> Subscription | None:
-        """Activate a pending sign-up. Returns the subscription (already
-        confirmed ones are returned unchanged so the link is idempotent)."""
+        """Activate a pending sign-up. A single token can cover a *group* of
+        subscriptions (one per chosen metric) — all are activated together.
+        Returns a representative subscription (idempotent: already-confirmed
+        links return unchanged)."""
         with self._session_factory() as session:
-            sub = session.scalars(
-                select(Subscription).where(Subscription.token == token)
-            ).first()
-            if sub is None:
+            subs = list(session.scalars(
+                select(Subscription).where(Subscription.token == token)))
+            if not subs:
                 return None
-            if sub.confirmed_at is None:
-                sub.confirmed_at = when
-            sub.active = True
+            for sub in subs:
+                if sub.confirmed_at is None:
+                    sub.confirmed_at = when
+                sub.active = True
             session.commit()
-            session.refresh(sub)
-            session.expunge(sub)
-            return sub
+            first = subs[0]
+            session.refresh(first)
+            session.expunge(first)
+            return first
 
     def deactivate_subscription(self, token: str) -> Subscription | None:
+        """Turn off every subscription sharing this token (the whole group)."""
         with self._session_factory() as session:
-            sub = session.scalars(
-                select(Subscription).where(Subscription.token == token)
-            ).first()
-            if sub is None:
+            subs = list(session.scalars(
+                select(Subscription).where(Subscription.token == token)))
+            if not subs:
                 return None
-            sub.active = False
+            for sub in subs:
+                sub.active = False
             session.commit()
-            session.refresh(sub)
-            session.expunge(sub)
-            return sub
+            first = subs[0]
+            session.refresh(first)
+            session.expunge(first)
+            return first
 
     # -- reports & feedback ------------------------------------------------
 

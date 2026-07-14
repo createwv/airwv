@@ -395,7 +395,10 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
     for sid, field in trend_pairs:
         trends[(sid, field)] = linear_trend(store.readings_for_sensor(sid), field=field)
 
-    alerts = evaluate(subs, latest, now, trends=trends)
+    # coords for area-scoped (center+radius) subscriptions — from the readings we have
+    sensor_coords = {sid: (r.lat, r.lon) for sid, r in latest.items()
+                     if getattr(r, "lat", None) is not None and getattr(r, "lon", None) is not None}
+    alerts = evaluate(subs, latest, now, trends=trends, sensor_coords=sensor_coords)
 
     log.info("%d subscription(s), %d alert(s) %s", len(subs), len(alerts),
              "to send" if send else "(dry run — use --send to deliver)")

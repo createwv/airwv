@@ -161,8 +161,12 @@ class EventIn(BaseModel):
 
 class AlertSignupIn(BaseModel):
     email: str
-    sensor_id: str | None = None           # None / "" = any WV sensor
+    metrics: list[str] = []                 # what to watch; empty -> ["pm2_5"] (back-compat)
+    sensor_id: str | None = None           # None / "" = any WV sensor (legacy single-sensor path)
     level: str = "unhealthy"               # sensitive | unhealthy | veryunhealthy
+    lat: float | None = None               # area-scoped alert: center + radius
+    lon: float | None = None
+    radius_mi: float | None = None
     label: str | None = None               # human area name for the confirmation copy
     website: str = ""                      # honeypot
     elapsed_ms: int | None = None          # too-fast-submit guard
@@ -175,6 +179,25 @@ ALERT_LEVELS = {
     "unhealthy":     (55.0, "Unhealthy for everyone"),
     "veryunhealthy": (150.0, "Very unhealthy / hazardous"),
 }
+
+# Per-metric thresholds by severity level. PM2.5 mirrors ALERT_LEVELS (µg/m³).
+# VOC is the community relative gas index; ozone is EPA ppb (8-hr AQI-ish bands).
+# "water" and "spills" are proximity advisories with no numeric sensor field yet —
+# captured as intent (waitlist) and skipped by the matcher until those feeds fire.
+METRIC_THRESHOLDS = {
+    "pm2_5": {"sensitive": 35.0, "unhealthy": 55.0, "veryunhealthy": 150.0},
+    "voc":   {"sensitive": 250.0, "unhealthy": 500.0, "veryunhealthy": 1000.0},
+    "ozone": {"sensitive": 70.0, "unhealthy": 85.0, "veryunhealthy": 105.0},
+    "water":  {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
+    "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
+}
+METRIC_LABELS = {
+    "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
+    "ozone": "Ozone (EPA)", "water": "Water advisories near me",
+    "spills": "Reported spills near me",
+}
+# metrics that don't yet have a live matcher (delivery captured as waitlist)
+WAITLIST_METRICS = {"water", "spills"}
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -781,43 +804,62 @@ def create_app(store: Store) -> FastAPI:
         if not _signup_rate_ok(ip_hash(client_ip(request))):
             raise HTTPException(status_code=429, detail="too many sign-ups — try again later")
 
-        threshold, level_label = ALERT_LEVELS[body.level]
+        level_label = ALERT_LEVELS[body.level][1]
+        # metrics to watch (multi-select); default PM2.5 for legacy single-level clients
+        metrics = [m for m in (body.metrics or []) if m in METRIC_THRESHOLDS] or ["pm2_5"]
         sensor_id = (body.sensor_id or "").strip() or None
-        area = (body.label or "").strip()[:120] or (names.get(sensor_id) if sensor_id else "any WV sensor")
 
-        existing = store.find_subscription(target=email, field="pm2_5", sensor_id=sensor_id)
-        if existing is not None:
-            # Idempotent: refresh the level, re-arm confirmation if still pending.
-            token = existing.token or secrets.token_urlsafe(24)
-            confirmed = existing.confirmed_at is not None
+        # location: an explicit point + radius scopes the alert to an area; else any WV sensor
+        center_lat = center_lon = radius_km = None
+        if body.lat is not None and body.lon is not None and _IN_WV_REGION(body.lat, body.lon):
+            center_lat, center_lon = float(body.lat), float(body.lon)
+            radius_km = max(1.0, float(body.radius_mi or 10) * 1.60934)
+        if body.label and body.label.strip():
+            area = body.label.strip()[:120]
+        elif sensor_id:
+            area = names.get(sensor_id, "your sensor")
+        elif center_lat is not None:
+            area = f"within {body.radius_mi or 10:g} mi of your spot"
         else:
-            token = secrets.token_urlsafe(24)
-            confirmed = False
-            store.add_subscription(
-                channel="email", target=email, kind="threshold",
-                sensor_id=sensor_id, field="pm2_5", threshold=threshold,
-                active=False, label=area, token=token,
-            )
+            area = "any WV sensor"
 
+        # One subscription per metric, all sharing a token so a single confirm/unsubscribe
+        # link governs the whole group. Idempotent: re-signup updates rows in place.
+        existing_any = store.find_subscription(target=email, field=metrics[0], sensor_id=sensor_id)
+        token = (existing_any.token if existing_any and existing_any.token else secrets.token_urlsafe(24))
+        confirmed = bool(existing_any and existing_any.confirmed_at is not None)
+        for metric in metrics:
+            threshold = METRIC_THRESHOLDS[metric][body.level]
+            found = store.find_subscription(target=email, field=metric, sensor_id=sensor_id)
+            fields = dict(sensor_id=sensor_id, field=metric, threshold=threshold,
+                          center_lat=center_lat, center_lon=center_lon, radius_km=radius_km,
+                          label=area, token=token)
+            if found is not None:
+                store.update_subscription(found.id, **fields)
+            else:
+                store.add_subscription(channel="email", target=email, kind="threshold",
+                                       active=confirmed, **fields)
+
+        watching = ", ".join(METRIC_LABELS.get(m, m) for m in metrics)
         base = _base_url(request)
         confirm_url = f"{base}/alerts/confirm?token={token}"
         unsub_url = f"{base}/alerts/unsubscribe?token={token}"
         sent = False
         if not confirmed and email_enabled():
             body_txt = (
-                f"Thanks for signing up for AirWV air-quality alerts.\n\n"
-                f"You asked to be emailed when PM2.5 near {area} reaches "
-                f"“{level_label}” ({threshold:g} µg/m³).\n\n"
+                f"Thanks for signing up for AirWV environmental alerts.\n\n"
+                f"You asked to be emailed about {watching} near {area}, at the "
+                f"“{level_label}” level.\n\n"
                 f"Please confirm this address to turn the alerts on:\n{confirm_url}\n\n"
                 f"If you didn't request this, ignore this email — nothing happens "
                 f"until you confirm.\n\nUnsubscribe any time: {unsub_url}\n"
             )
             background.add_task(send_email, email,
-                                "Confirm your AirWV air-quality alerts", body_txt)
+                                "Confirm your AirWV alerts", body_txt)
             sent = True
 
         if confirmed:
-            msg = "You're already subscribed and confirmed — we updated your alert level."
+            msg = "You're already confirmed — we updated what you're watching and where."
         elif sent:
             msg = "Almost there — check your email for a confirmation link to turn on alerts."
         else:
@@ -825,7 +867,7 @@ def create_app(store: Store) -> FastAPI:
             msg = ("You're on the list. Email alert delivery is still being finished — "
                    "we'll send a confirmation link the moment it goes live.")
         return {"ok": True, "confirmed": confirmed, "email_sent": sent,
-                "level": level_label, "area": area, "message": msg}
+                "level": level_label, "area": area, "watching": watching, "message": msg}
 
     def _alert_result_page(request: Request, title: str, body_html: str):
         return TEMPLATES.TemplateResponse(
@@ -917,6 +959,9 @@ def create_app(store: Store) -> FastAPI:
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
                              "field": s.field, "threshold": s.threshold,
+                             "radius_km": s.radius_km,
+                             "center": ([s.center_lat, s.center_lon]
+                                        if s.center_lat is not None else None),
                              "active": s.active,
                              "confirmed": s.confirmed_at is not None,
                              "created_at": s.created_at.isoformat() if s.created_at else None}

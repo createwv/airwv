@@ -1,26 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="page">
-  <div class="ov-intro"><h1>Get air-quality alerts</h1>
-    <p>Tell us where you are and how bad the air has to get — we'll email you when a
-       nearby sensor crosses that line. No account, unsubscribe in one click, and we
-       rate-limit + honor overnight quiet hours so you're never spammed.</p></div>
+  <div class="ov-intro"><h1>Get environmental alerts</h1>
+    <p>Pick what you care about and where you are — we'll email you when a nearby sensor
+       crosses the line you set. No account, unsubscribe in one click, and we rate-limit
+       + honor overnight quiet hours so you're never spammed.</p></div>
 
   <div class="card" style="max-width:640px">
-    <form id="alertform" style="padding:16px 18px; display:flex; flex-direction:column; gap:14px">
+    <form id="alertform" style="padding:16px 18px; display:flex; flex-direction:column; gap:16px">
       <label>Email
         <input type="email" id="a-email" required placeholder="you@example.com"
                autocomplete="email" style="width:100%; padding:8px 10px; margin-top:4px">
       </label>
 
-      <label>Where <select id="a-sensor" style="width:100%; padding:8px 10px; margin-top:4px">
-        <option value="">Any sensor in West Virginia</option>
-      </select></label>
+      <fieldset class="a-fs">
+        <legend>What should we watch?</legend>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="pm2_5" checked>
+          <span><b>PM2.5</b> — fine-particle pollution <small>smoke, dust, haze · best sensor coverage</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="voc">
+          <span><b>VOC</b> — community gas index <small>responds to hydrocarbons &amp; H2S near gas wells</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="ozone">
+          <span><b>Ozone</b> — EPA reference monitors <small>ground-level ozone (ppb)</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="water">
+          <span><b>Water advisories near me</b> <span class="soon">coming soon</span>
+          <small>drinking-water violations &amp; discharges</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="spills">
+          <span><b>Reported spills near me</b> <span class="soon">coming soon</span>
+          <small>oil/chemical releases reported to the NRC</small></span></label>
+      </fieldset>
 
-      <fieldset style="border:1px solid #e0e0e0; border-radius:8px; padding:10px 12px">
-        <legend style="font-size:13px; color:#555; padding:0 6px">Alert me when the air reaches</legend>
+      <fieldset class="a-fs">
+        <legend>How sensitive?</legend>
         <label class="lvl"><input type="radio" name="level" value="sensitive">
-          <span><span class="sw" style="background:#ff7e00"></span> Unhealthy for sensitive groups
+          <span><span class="sw" style="background:#ff7e00"></span> Sensitive groups
           <small>PM2.5 ≥ 35 — kids, older adults, heart/lung conditions</small></span></label>
         <label class="lvl"><input type="radio" name="level" value="unhealthy" checked>
           <span><span class="sw" style="background:#ff0000"></span> Unhealthy for everyone
@@ -28,6 +40,24 @@
         <label class="lvl"><input type="radio" name="level" value="veryunhealthy">
           <span><span class="sw" style="background:#8f3f97"></span> Very unhealthy / hazardous
           <small>PM2.5 ≥ 150 — emergency-level pollution only</small></span></label>
+        <p class="meta" style="margin:4px 6px 0">Thresholds scale per metric (e.g. ozone uses EPA ppb bands).</p>
+      </fieldset>
+
+      <fieldset class="a-fs">
+        <legend>Where?</legend>
+        <div class="rloc" style="margin-bottom:6px">
+          <button type="button" id="a-useloc">📍 Use my location</button>
+          <input id="a-addr" maxlength="160" placeholder="…or type a town / address in WV" style="flex:1 1 160px">
+          <button type="button" id="a-addrfind">Find</button>
+        </div>
+        <label style="flex-direction:row; align-items:center; gap:8px">Within
+          <select id="a-radius" style="padding:6px 8px">
+            <option value="5">5 miles</option>
+            <option value="10" selected>10 miles</option>
+            <option value="25">25 miles</option>
+            <option value="">Anywhere in WV</option>
+          </select> of that spot</label>
+        <span id="a-locinfo" class="meta">location not set — defaults to anywhere in WV</span>
       </fieldset>
 
       <input type="text" id="a-website" name="website" tabindex="-1" autocomplete="off"
@@ -37,10 +67,10 @@
     </form>
   </div>
 
-  <div class="about"><p class="meta">Alerts watch <b>PM2.5</b> (fine-particle pollution) — the
-    pollutant with the clearest health link and the best sensor coverage. We're finishing
-    the email-delivery piece; sign-ups made now are held and confirmed the moment it goes
-    live. Want Slack/Discord or a webhook for your org instead? <a href="/about">Get in touch</a>.</p></div>
+  <div class="about"><p class="meta">We're finishing the email-delivery piece; sign-ups made now are
+    held and confirmed the moment it goes live. <b>Water</b> &amp; <b>spills</b> alerts are captured now
+    and switch on when those proximity feeds are wired. Want Slack/Discord or a webhook for your org
+    instead? <a href="/about">Get in touch</a>.</p></div>
 </div>
 {% endblock %}
 {% block scripts %}

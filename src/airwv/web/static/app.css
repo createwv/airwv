@@ -327,6 +327,10 @@
   .lvl span { display:flex; flex-direction:column; gap:1px; font-size:14px; color:#222; }
   .lvl small { color:#667; font-size:12px; }
   .lvl .sw { display:inline-block; width:12px; height:12px; border-radius:3px; border:1px solid #0002; margin-right:5px; vertical-align:middle; }
+  .a-fs { border:1px solid #e0e0e0; border-radius:8px; padding:6px 12px 10px; }
+  .a-fs > legend { font-size:13px; color:#555; padding:0 6px; font-weight:600; }
+  .soon { font-size:10px; font-weight:700; color:#7a5b12; background:#fff4d6; border-radius:4px;
+    padding:1px 5px; vertical-align:middle; margin-left:2px; }
   #alertform input[type=email], #alertform select { border:1px solid #cfd6dc; border-radius:7px; font-size:15px; }
 
   /* Sources — compliance & permits (EPA ECHO) */

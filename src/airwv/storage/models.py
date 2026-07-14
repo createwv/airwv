@@ -95,6 +95,12 @@ class Subscription(Base):
     field: Mapped[str] = mapped_column(String(32), default="pm2_5")
     threshold: Mapped[float] = mapped_column(Float)
 
+    # Location by area instead of a single sensor: alert when ANY sensor within
+    # radius_km of (center_lat, center_lon) crosses the threshold. All null = any WV sensor.
+    center_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    center_lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    radius_km: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     active: Mapped[bool] = mapped_column(default=True)
     # Rate limiting + quiet hours (local) so people aren't spammed.
     min_interval_seconds: Mapped[int] = mapped_column(Integer, default=21600)  # 6h
