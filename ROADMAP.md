@@ -677,14 +677,14 @@ the events/spills split are **decided** (see below).*
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
 (composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.
-- [ ] **Trust/clarity fixes (do-now).** Rewrite the legend to say plainly *colors = each
-      sensor's **most recent** PM2.5 (as of {max last_ts})* + a live "as of" line; move the
-      compliance/permit legend text off the PM2.5 legend. Fix **blank date pickers**: show "no
-      data for this sensor in these dates" instead of a silent empty chart; clamp inputs' min/max
-      to `/api/coverage`.
-- [ ] **Bound the map to WV + fix the "Russia" blip (do-now).** A bad-coordinate AirNow monitor
-      plots off-map (no lat/lon check in `/api/sensors`). Add a **WV+border bounding-box filter**
-      on reference/all coords; make Home + Air maps bound to WV on load.
+- [x] **Trust/clarity fixes (do-now)** — DONE: legend now states *colors = each sensor's
+      **most recent** PM2.5 (not an average)* + a live "· as of {time}" line; context-layer
+      colors labeled as such. Blank date pickers show "No data for this sensor in the selected
+      dates" instead of a silent empty chart; inputs' min/max clamped to `/api/coverage`.
+- [x] **Bound the map to WV + fix the "Russia" blip (do-now)** — DONE: `/api/sensors` drops
+      out-of-region coords via a **WV+border bounding box** (`_IN_WV_REGION`), killing the
+      miscoded AirNow monitor that plotted near Russia (which had stretched Home + Air maps to a
+      world view via `fitBounds`). Covered by `test_sensors_drops_out_of_region_coords`.
 - [ ] **Demote context layers.** Collapse ECHO / DEP permits / mining / abandoned wells (and
       likely 🏭 sources) into one closed **"🔎 Context layers (advanced)"** group in `buildLayers()`.
       Default map = sensors + reference only.
