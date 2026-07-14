@@ -703,14 +703,20 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       `📍 Near me` button keeps its on-map "nearest sensors to chart" value **and** now offers a
       "🔎 see everything near you →" link into `/nearby` with your coordinates.
 
-### Reporting redesign
-- [ ] **Location by address / map-coordinate / region + radius** (not individual sensor pick).
-- [ ] **Remove "Business/org you suspect"** → generic qualitative report (Type · What you
-      noticed · Details · Location).
-- [ ] **Advanced toggle:** optional structured **data rows** (pick a unit/parameter — e.g.
-      conductivity, VOC — enter a value; add more rows) + **photo validation** (photo of the
-      meter/scene, proves the numbers) + geolocation. Reuse `FieldReadingIn.photo` + base64 save.
-- [ ] Follow-up: optional name / email / phone.
+### Reporting redesign — DONE
+- [x] **Flexible location** — 📍 use-my-location (geolocation), 🗺️ pick-on-map, or type an
+      address/place (OSM Nominatim geocode, biased to WV's bbox). Points reverse-geocode to a
+      coarse `town, county` area_label (never a street number) for privacy.
+- [x] **Removed "Business/org you suspect"** → reports are purely qualitative (Type · What you
+      noticed · Details · Location); org naming stays a maintainer-only, publish-gated action.
+- [x] **Advanced (optional):** structured **measurement rows** (parameter/value/unit → stored as
+      community readings tied to the report, labeled unverified) + a **photo** of the meter/scene
+      (base64, held `photo_ok=False` until a maintainer approves it). New public + admin photo
+      endpoints; moderation gains `approve_photo`/`reject_photo`; admin console previews the image
+      (authed fetch), the measurements, and the contact name; public popups show area, measurements
+      & approved photos.
+- [x] **Follow-up (optional, private):** name / email / phone. Added a `contact_name` column, with
+      `create_schema` self-healing missing nullable columns via `ALTER TABLE` (no manual migration).
 
 ### Alerts redesign
 - [ ] **Multi-select what to be alerted on** (PM2.5, VOC, ozone, water, spills near me, …) and
