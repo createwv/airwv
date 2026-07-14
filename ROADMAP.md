@@ -739,17 +739,20 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       accountability layers) linking `/data`; **"a reading is not a verdict"** keeps violations
       (legal state) distinct from measurements.
 
-### Learn — additions
-- [ ] **Raw natural gas is odorless** — flag prominently in the gas-wells/H2S content: that's
-      *why* it's dangerous (you may not smell it) and *why air monitors matter* (VOC picks it up).
-- [ ] **Exact VOC compound list** the PurpleAir aggregate responds to (research + add, or state
-      honestly what's knowable about the relative gas index).
-- [ ] **Hair-width inclusivity** — note human-hair thickness varies by phenotype so the PM2.5-size
-      analogy stays inclusive.
-- [ ] **Laws** — expand: dangerous-chemical/toxin regulation, effects on environment/soil/property,
-      remedies/recourse.
-- [ ] **Climate** — a trend pulled from *our own* data (EPA ozone trend / WV temperature), not just
-      external framing.
+### Learn — additions — DONE
+- [x] **Raw natural gas is odorless** — prominent callout in the gas-wells/H2S section: the "gas
+      smell" is mercaptan utilities *add*; raw well gas (methane) is odorless — which is *why* a VOC
+      air monitor matters (it catches what your nose can't).
+- [x] **What the VOC sensor actually detects** — honest note that the PurpleAir MOX gas sensor
+      reports one relative reducing-gas index (not compound-specific); a "something changed"
+      detector, not a benzene meter. (Compound list "What's actually in VOCs" already existed.)
+- [x] **Hair-width inclusivity** — PM2.5 size analogy now notes hair thickness varies by person
+      (~17–180 µm), so "~70 µm" is just a reference point.
+- [x] **Laws expanded** — TSCA / RCRA / CERCLA-Superfund / EPCRA, effects on soil/ecosystems/
+      property, and recourse (report, comment periods/FOIA, citizen suits, private claims) + glossary.
+- [x] **Climate from our own data** — new `GET /api/climate/trend` + `store.annual_field_stats`
+      aggregate yearly EPA ozone; the Climate tab leads with a Plotly chart (yearly avg/peak +
+      least-squares trend line) of WV's archived ozone, with an honest "still building" fallback.
 
 ### Events → split off `/spills` (decided)
 - [ ] Keep `/events` for curated, narrated events. Move the **NRC reported-spills** feed to its own
