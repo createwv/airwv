@@ -14,6 +14,13 @@
 <link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
 </head>
 <body>
+<div id="haze" class="haze" aria-hidden="true"></div>
+<div id="haze-chip" class="haze-chip" role="status">
+  <span class="dot"></span>
+  <span>🌫️ WV air is <b class="haze-band">—</b> right now (<span class="haze-val">—</span> µg/m³ PM2.5)</span>
+  <a href="/learn#health" class="haze-why">what this means</a>
+  <button class="haze-off" type="button" title="turn off the haze tint">dismiss</button>
+</div>
 <header>
   <img class="cloud c-gold"  src="/static/banner-clouds-gold.svg"  alt="">
   <img class="cloud c-blue"  src="/static/banner-clouds-blue.svg"  alt="">
@@ -44,5 +51,6 @@
     provisional data, not for regulatory use</div>
 </footer>
 {% block scripts %}{% endblock %}
+<script src="/static/haze.js?v={{ asset_v }}"></script>
 </body>
 </html>
