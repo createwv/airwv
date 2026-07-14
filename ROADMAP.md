@@ -776,10 +776,12 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
 - [ ] **Front-of-business photos** — still deferred (needs the Google Street View key + nonprofit
       credit — see [[streetview-setup]]). Detail view already has the `thumb()` hook for when it's on.
 
-### Water — legibility
-- [ ] State the **time window plainly** (it's "latest sample per site" — say so), clearer legend, WV
-      bounds; **link the "history & health context coming" placeholder** to the now-built Learn Water
-      tab; apply the same reading-first framing as Air.
+### Water — legibility — DONE
+- [x] Reading-first framing like Air: intro states the **time semantics plainly** (each dot = that
+      site's **most recent** sample, not an average; USGS continuous vs WQP periodic w/ per-marker
+      dates), replacing the vague "history & health context coming" placeholder with a **Learn: Water
+      link**. Legend gained a bold header + an "as of · latest samples" freshness line; map is
+      **bounded to WV** (fitBounds + maxBounds) with stray-coordinate sites dropped.
 
 ### Ambient awareness (experiment)
 - [ ] **"Haze when the air is bad."** Tint the UI with a grey haze overlay that correlates to
