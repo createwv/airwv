@@ -660,9 +660,47 @@ people-direct water education and connect it to air).
       roles beyond the shared token, QA/verify workflow, overlay on Air/Water maps,
       link to events/sources, trend-over-time per spot.*
 
-### Soil & beyond (later)
-- [ ] **Soil maps** — contamination / brownfields / heavy-metal data (EPA, state) as a
-      third medium once air + water patterns are proven.
+### Soil & Land — contaminated sites (the third medium)
+The Air | Water lenses have a natural third: **Soil / Land**. Framing up front — unlike air and
+water, there is **no keyless, real-time soil-sensing feed**. "Soil" is a **contaminated-land /
+cleanup** medium: administrative + legal statuses and *historical* contamination, so it behaves
+like the accountability layers (a records state = context, **not** a live measurement). The intake
+side already accepts it (report category **🟤 Soil / land**, `field_readings` `medium=soil`, events
+`medium=soil`); this builds the **data + map** behind it. Reuse the medium-aware shell, the
+`/nearby` drill-in, the county-centroid placement, and the "records-not-readings" framing.
+
+- [ ] **Ingest contaminated-site datasets** — all keyless, each fits an existing access pattern:
+  - **EPA Superfund / CERCLA** (SEMS / National Priorities List) — the flagship contaminated-land
+    sites. Via **EPA Envirofacts** (`data.epa.gov/efservice/…`, the same host we already use for TRI)
+    or the "Cleanups in My Community" geospatial service; WV filter. *(pattern §2 open REST)*
+  - **RCRA corrective action** — hazardous-waste facilities under cleanup. Via Envirofacts RCRAInfo
+    or **EPA ECHO** (we already have the ECHO two-step + `echo_facilities` plumbing). *(pattern §3)*
+  - **EPA Brownfields (ACRES)** — sites being assessed/cleaned for reuse.
+  - **Abandoned Mine Lands (AML)** — **WV DEP TAGIS ArcGIS** (reuse the `fetch_coal_npdes` /
+    `fetch_dep_*` ArcGIS fetch) + OSMRE **e-AMLIS** for national context. Highly WV-relevant; ties
+    straight into the orphan-well / mining story we already tell. *(pattern §4 ArcGIS REST)*
+  - *(stretch)* **LUST** (leaking underground storage tanks) + WV DEP voluntary-remediation /
+    spill-cleanup sites.
+- [ ] **`/soil` (or "Land") lens** — page + nav + Home card, mirroring Water: a map of sites
+      **typed by program** (Superfund / RCRA / Brownfield / AML) and **status** (proposed · active
+      cleanup · completed/deleted). Click → detail: program, status, **contaminants of concern**
+      (where listed), lead agency, and a link back to the authoritative EPA/DEP record. `/api/soil-sites`.
+- [ ] **Wire into the connective tissue** — add contaminated sites as a category in `/api/near` +
+      `/nearby` so "what's near me" surfaces them, and map the reverse **symptom guide** (skin rash,
+      GI, bad well water) to soil/land where relevant; add the **"report a soil/land concern here"**
+      hook on site detail; optionally overlay **community-submitted soil field readings** (unverified,
+      like the water community-readings pattern).
+- [ ] **Learn tie-in** — the Laws tab already explains **Superfund / RCRA / CERCLA / brownfields**
+      and the C6 **"what pollution does to land & property"** section; link the layer to them and
+      extend with soil **exposure pathways** (garden/soil-to-plant uptake, private-well contamination,
+      dust). Keep the "a listed site is a legal/records state, not a soil reading" caveat prominent.
+- **Honesty/caveats:** contaminants-of-concern coverage is uneven across programs; many sites lack
+  precise coords → county-centroid placement (reuse the flag); this is cleanup/records data, not
+  live soil sampling. **Effort:** a new medium comparable to the Water build-out — ingestion is the
+  smaller part (keyless, known patterns); the lens + integration is the bulk. **Sequence:** after the
+  documentation-quality pass; the Postgres migration is independent.
+
+### Beyond (later)
 - [ ] Other exposures worth surfacing over time (radon, noise, PFAS-specific, etc.) —
       driven by community concern.
 
