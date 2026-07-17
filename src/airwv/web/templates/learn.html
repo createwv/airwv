@@ -19,14 +19,14 @@
     <div class="card"><div class="prose">
       <h3>Why air quality matters here</h3>
       <p>West Virginia's ridges and river valleys trap air. On calm nights, cooler air
-        settles into the valleys and forms a <b>temperature inversion</b> — a lid that
+        settles into the valleys and forms a <b>temperature inversion</b>, a lid that
         holds pollution near the ground until the next day's sun or wind mixes it out. Add
-        traffic, wood and coal home heating, and heavy industry along the river corridors —
-        the Kanawha Valley's "Chemical Valley" stretch is a well-known example — and the
+        traffic, wood and coal home heating, and heavy industry along the river corridors
+        (the Kanawha Valley's "Chemical Valley" stretch is a well-known example) and the
         same spot can read clean at midday and hazy by dawn.</p>
       <p>Our own sensors show it: along the industrial corridor, fine particles build up
         overnight (roughly 1.4–2× the daytime level) while an upriver control site stays
-        flat. Smoke can also drift in from far away — regional wildfires have pushed WV into
+        flat. Smoke can also drift in from far away, and regional wildfires have pushed WV into
         "unhealthy" days. Dense, always-on community sensors are exactly what it takes to
         catch these local, hour-by-hour swings that a handful of official monitors can miss.</p>
       <div class="diagram">
@@ -47,8 +47,8 @@
           <path d="M300,214 v-20 h20 v20" fill="#8a5a3b"/><path d="M297,194 l13,-11 l13,11 Z" fill="#6b4429"/>
           <path d="M317,190 C317,175 322,168 318,133" fill="none" stroke="#8a8f95" stroke-width="2" opacity="0.7"/>
         </svg>
-        <div class="cap">On calm nights, warm air settles over cooler valley air and acts as a lid —
-          pollution can't rise past it, so it pools near the ground until the sun or wind breaks the
+        <div class="cap">On calm nights, warm air settles over cooler valley air and acts as a lid.
+          Pollution can't rise past it, so it pools near the ground until the sun or wind breaks the
           inversion. It's why the same spot can read clean at midday and hazy by dawn.</div>
       </div>
     </div></div>
@@ -57,7 +57,7 @@
       <h3>What we measure</h3>
       <div class="deflist">
         <div><b>PM2.5 — fine particles</b>
-          <p>Particles 2.5 micrometers or smaller — about 30× thinner than a hair. They
+          <p>Particles 2.5 micrometers or smaller, about 30× thinner than a hair. They
             come from anything that burns: vehicles, industry, wood stoves, wildfires.
             Because they're so small they slip deep into the lungs and into the bloodstream,
             which is why PM2.5 is the pollutant most tied to health effects. It's the number
@@ -66,7 +66,7 @@
           <p>Bigger particles up to 10 µm: road and construction dust, pollen, mold.
             Irritating to eyes, nose, and throat, and hard on people with asthma.</p></div>
         <div><b>PM1.0 — ultrafine</b>
-          <p>The smallest fraction we report — largely combustion-related and useful for
+          <p>The smallest fraction we report: largely combustion-related and useful for
             spotting fresh smoke or exhaust.</p></div>
         <div><b>VOCs — volatile organic compounds</b>
           <p>Gases released by fuels, solvents, and many industrial processes; often what
@@ -74,7 +74,7 @@
             for spotting changes and odor events, <b>not</b> a calibrated measure of any
             specific compound.</p></div>
         <div><b>Ozone — summer smog</b>
-          <p>Ground-level ozone isn't emitted directly — it <b>forms in sunlight</b> when VOCs
+          <p>Ground-level ozone isn't emitted directly. It <b>forms in sunlight</b> when VOCs
             and nitrogen oxides react, so it peaks on hot, sunny afternoons. It irritates the
             lungs and worsens asthma. Community PurpleAir sensors <b>can't measure ozone</b>, so
             we pull it from <b>EPA AirNow reference monitors</b> — a sparser, reference-only layer
@@ -93,9 +93,9 @@
           <line x1="470" y1="89" x2="470" y2="118" stroke="#7a6fb0" stroke-width="1"/>
           <text x="470" y="132" text-anchor="middle" font-size="11.5" fill="#7a6fb0">PM1.0 ≤1 µm</text>
         </svg>
-        <div class="cap">Drawn to scale. PM2.5 is roughly 30× smaller than a human hair — small
+        <div class="cap">Drawn to scale. PM2.5 is roughly 30× smaller than a human hair, small
           enough to slip past your body's defenses into the lungs and bloodstream.
-          <span class="meta">(Hair thickness varies a lot from person to person — roughly 17–180 µm
+          <span class="meta">(Hair thickness varies a lot from person to person, roughly 17–180 µm
           depending on hair type — so "~70 µm" is just a common reference point. The takeaway holds
           for everyone: PM2.5 is far too small to see or feel.)</span></div>
       </div>
@@ -104,7 +104,7 @@
     <div class="card"><div class="prose">
       <h3>What's actually in "VOCs"</h3>
       <p>"VOC" is an umbrella for hundreds of carbon-based gases. Our low-cost sensors can't
-        tell them apart — they report one combined index. But the individual compounds behind
+        tell them apart; they report one combined index. But the individual compounds behind
         that number matter a lot for health, and EPA's air-toxics network measures many of
         them one by one. Common ones in industrial and traffic settings:</p>
       <ul>
@@ -121,8 +121,8 @@
         <li><b>Styrene</b> — plastics and resins manufacturing.</li>
       </ul>
       <p class="meta">Many VOCs also react in sunlight to form <b>ground-level ozone</b>, a
-        separate lung irritant. Our sensor's index can't identify or quantify these compounds —
-        for actual concentrations you'd need EPA/lab air-toxics sampling.</p>
+        separate lung irritant. Our sensor's index can't identify or quantify these compounds.
+        For actual concentrations you'd need EPA/lab air-toxics sampling.</p>
       <h3>What our VOC sensor actually detects</h3>
       <p>To be clear about the hardware: the PurpleAir units in this network sense gases with a
         <b>low-cost metal-oxide (MOX) gas sensor</b> (a Bosch BME680-class chip). It doesn't identify
@@ -131,7 +131,7 @@
         monoxide and hydrogen. What comes out is <b>one relative "gas resistance" number</b>, sensitive
         to temperature and humidity, reported as a single index.</p>
       <p class="meta">So honestly: it's a <b>"something changed" detector</b>, not a benzene meter. A rise
-        means more reducing gas in the air near that sensor — a reason to look closer or report an odor,
+        means more reducing gas in the air near that sensor: a reason to look closer or report an odor,
         <b>not</b> a measurement of any one chemical. Pinning down <i>which</i> compound (and how much)
         takes EPA/lab air-toxics sampling — the kind a confirmed community report can help trigger.</p>
     </div></div>
@@ -164,7 +164,7 @@
 
     <div class="card"><div class="prose">
       <p style="background:#eef2fb; border-radius:8px; padding:12px 14px"><b>🔍 Not feeling right and wondering what's around you?</b>
-        Try <a href="/nearby"><b>What's near me?</b></a> — share your location and any symptoms, and it maps the
+        Try <a href="/nearby"><b>What's near me?</b></a>: share your location and any symptoms, and it maps the
         wells, facilities, discharges, and spills nearby, flagging the ones that fit how you feel. <span class="meta">(Not medical advice — for emergencies call 911.)</span></p>
       <h3>Who's most at risk</h3>
       <p>Children, adults over 65, pregnant people, and anyone with asthma, COPD, or heart
@@ -187,7 +187,7 @@
     <div class="card"><div class="prose">
       <h3>Beyond PM2.5 — the other exposures we track</h3>
       <p><b>Ground-level ozone</b> is a lung irritant that forms on hot, sunny afternoons. It can
-        trigger asthma, tighten the chest, and inflame airways even in healthy people — which is why
+        trigger asthma, tighten the chest, and inflame airways even in healthy people, which is why
         "code orange/red" ozone days matter most for kids and anyone with lung disease.</p>
       <p><b>VOCs</b> are a mixed bag: some (like <b>benzene</b> and <b>formaldehyde</b>, common around
         oil &amp; gas) are known human <b>carcinogens</b>; others mainly cause short-term headaches,
@@ -199,10 +199,10 @@
     <div class="card"><div class="prose">
       <h3>🕳️ Gas wells &amp; hydrogen sulfide (H2S) — the rotten-egg hazard</h3>
       <p>West Virginia's thousands of <b>abandoned and orphaned gas wells</b> can leak raw natural gas
-        and <b>hydrogen sulfide (H2S)</b> — a toxic gas with a <b>rotten-egg smell</b>. This is the issue
+        and <b>hydrogen sulfide (H2S)</b>, a toxic gas with a <b>rotten-egg smell</b>. This is the issue
         behind the Rutledge neighborhood in Charleston, and a founding reason communities here started
         monitoring their own air. (Turn on the <a href="/air">🛢️ Abandoned wells</a> map layer to see the
-        wells near you — orphans in red.)</p>
+        wells near you, orphans in red.)</p>
       <p class="rnote"><b>⚠️ Raw natural gas is odorless.</b> The "gas smell" you know from a kitchen stove
         is a chemical (<b>mercaptan</b>) that utilities <b>add on purpose</b> so you can detect leaks. Gas
         venting straight from a well has <b>no such additive</b> — it's mostly <b>methane</b>, which is
@@ -211,7 +211,7 @@
         the hydrocarbons your senses can't, giving a signal where there'd otherwise be none. (H2S, when
         it's in the mix, <i>does</i> smell — but see below.)</p>
       <p><b>The dangerous part:</b> you can smell H2S at very low levels, but at higher concentrations it
-        <b>deadens your sense of smell</b> within minutes — so <i>the smell going away does not mean the
+        <b>deadens your sense of smell</b> within minutes, so <i>the smell going away does not mean the
         gas is gone</i>. Never treat "I don't smell it anymore" as safe.</p>
       <ul>
         <li><b>Lower-level, near-home exposure</b> — what residents have reported: headaches, nausea,
@@ -219,7 +219,7 @@
         <li><b>Higher levels</b> can cause rapid dizziness, loss of consciousness, and are life-threatening —
           leave the area immediately and get to fresh air.</li>
       </ul>
-      <p><b>What to do:</b> if you smell persistent gas or rotten eggs, don't ignore it — get to fresh air,
+      <p><b>What to do:</b> if you smell persistent gas or rotten eggs, don't ignore it. Get to fresh air,
         and for a strong or sudden smell call <b>911</b> (or your gas utility's emergency line). Then put it
         on the map: click the well and <a href="#" data-open="report">🚨 report the problem →</a>, and see the
         <a href="/events">Events</a> page for the plugging backlog. <span class="meta">Health info: CDC/ATSDR
@@ -254,10 +254,10 @@
         Charleston's tap water, for example, comes primarily from the <b>Elk River</b>, treated at
         West Virginia American Water's Kanawha Valley plant, and that supply ultimately depends on
         thousands of small mountain streams upstream. Because the intake sits on a river,
-        <b>whatever happens upstream reaches your tap</b> — exactly what the 2014
+        <b>whatever happens upstream reaches your tap</b>. That's exactly what the 2014
         <a href="/events">Freedom Industries spill</a> exposed: the leak was barely a mile and a
         half above the intake, and 300,000 people lost usable water within hours. Knowing your
-        source — and what sits upstream of the intake — is the first step in protecting it.</p>
+        source, and what sits upstream of the intake, is the first step in protecting it.</p>
       <p class="meta">Find your own system's source and test results in its annual <b>Consumer
         Confidence Report</b> (every water utility must publish one), or in WV's source-water
         assessments.</p>
@@ -266,11 +266,11 @@
     <div class="card"><div class="prose">
       <h3>It's the system, not just the polluters — combined sewer overflows</h3>
       <p>Many older WV towns (including parts of Charleston) still have <b>combined sewers</b> that
-        carry stormwater and sewage in the same pipe. In dry weather it all goes to treatment — but
+        carry stormwater and sewage in the same pipe. In dry weather it all goes to treatment, but
         during heavy rain the system overflows <i>by design</i>, discharging <b>untreated sewage
         straight into the river</b> (a "combined sewer overflow," or CSO). That's an aging-
         infrastructure problem, not a single bad actor, and it's a major reason river bacteria
-        spike after storms. Fixing it is a systems question — one worth understanding alongside
+        spike after storms. Fixing it is a systems question, one worth understanding alongside
         individual polluters.</p>
     </div></div>
 
@@ -281,14 +281,14 @@
         spikes for a day or two <b>after rain</b> (see CSOs above); high E. coli signals fecal
         pollution and possible pathogens. <b>Charleston Waterkeeper</b> runs a volunteer
         <a href="https://charlestonwaterkeeper.org/swimalert/" target="_blank" rel="noopener">Swim
-        Alert</a> program that samples bacteria and posts whether it's safe — the best local guide.
+        Alert</a> program that samples bacteria and posts whether it's safe: the best local guide.
         Rules of thumb: avoid water-contact recreation for ~48 hours after heavy rain, steer clear
         of stretches right below industrial outfalls, and heed any WV DEP advisory.</p>
     </div></div>
 
     <div class="card"><div class="prose">
       <h3>Can you eat the fish?</h3>
-      <p>Often yes, in moderation — but check the advisory first. WV publishes a <b>Sport Fish
+      <p>Often yes, in moderation, but check the advisory first. WV publishes a <b>Sport Fish
         Consumption Advisory</b>: the statewide baseline is <b>no more than one meal per week</b> of
         most sport fish (rainbow trout excepted), and for some species in some waters (certain bass,
         catfish) as <b>few as one or two meals per month</b>. The limits are driven mostly by
@@ -302,7 +302,7 @@
     <div class="card"><div class="prose">
       <h3>How to read the river maps</h3>
       <p>WV DEP's <b>Integrated Report</b> flags a stream as <b>"impaired"</b> (the Clean Water Act
-        303(d) list) when it fails a water-quality standard for one of its designated uses —
+        303(d) list) when it fails a water-quality standard for one of its designated uses:
         drinking, recreation, or aquatic life. Crucially, a stream can be listed for one specific
         reason (bacteria, low pH from acid mine drainage, iron, sediment, or "biological"
         impairment) while being fine for others. So <b>"impaired" doesn't mean "toxic everywhere"</b>
@@ -314,7 +314,7 @@
     <div class="card"><div class="prose">
       <h3>Where air and water meet</h3>
       <p>They're not separate problems. The <b>same facilities</b> often hold both air and water
-        permits. <b>Mercury</b> emitted into the air settles into rivers and accumulates in fish —
+        permits. <b>Mercury</b> emitted into the air settles into rivers and accumulates in fish,
         which is why an <i>air</i> pollutant drives <i>fish</i> advisories. Rain washes air
         pollution and land contamination into streams. And the same valleys that trap air pollution
         (see <a href="#basics">Basics</a>) tend to concentrate the industry that affects both.
@@ -331,7 +331,7 @@
       <p>Low-cost community sensors give us dense, real-time coverage that the sparse network
         of regulatory monitors can't. The trade-off is precision: they can read a little high,
         especially in humidity. So we continuously compare each community sensor against the
-        nearest EPA reference monitor and apply a standard EPA correction — you can see all of
+        nearest EPA reference monitor and apply a standard EPA correction; you can see all of
         that on the <a href="/air">Air</a> page's validation panel. For official
         air-quality information, see
         <a href="https://www.airnow.gov/" target="_blank" rel="noopener">AirNow.gov</a>.</p>
@@ -372,7 +372,7 @@
 
       <h3>How permits work</h3>
       <p>A facility that emits above certain thresholds generally can't build or operate without a
-        <b>permit</b> — a legally binding document that sets its limits and obligations:</p>
+        <b>permit</b>, a legally binding document that sets its limits and obligations:</p>
       <ul>
         <li><b>Construction permits (New Source Review / PSD)</b> — required <i>before</i> building
           or expanding a major source; force modern pollution controls up front.</li>
@@ -386,7 +386,7 @@
         stay under.</p>
 
       <h3>What counts as a violation</h3>
-      <p>A <b>violation</b> is a failure to follow the law or a permit — for example:</p>
+      <p>A <b>violation</b> is a failure to follow the law or a permit. For example:</p>
       <ul>
         <li>emitting or discharging <b>more than a permit limit</b> allows;</li>
         <li><b>operating without a required permit</b>, or building before getting one;</li>
@@ -417,7 +417,7 @@
 
       <h3>Chemicals, toxins &amp; contaminated land</h3>
       <p>Air and water permits aren't the whole story. A separate set of laws governs the chemicals
-        themselves — making them, storing them, dumping them, and cleaning them up:</p>
+        themselves: making them, storing them, dumping them, and cleaning them up:</p>
       <ul>
         <li><b>TSCA</b> — the <a href="https://www.epa.gov/laws-regulations/summary-toxic-substances-control-act"
           target="_blank" rel="noopener">Toxic Substances Control Act</a> lets EPA review and restrict
@@ -428,7 +428,7 @@
           stored, transported, and disposed of, so it doesn't end up in soil and groundwater.</li>
         <li><b>CERCLA / Superfund</b> — the <a href="https://www.epa.gov/superfund" target="_blank" rel="noopener">cleanup
           law</a> for <b>already-contaminated sites</b>. It can force the responsible parties to pay for
-          remediation — and where they can't be found, a federal fund covers it.</li>
+          remediation; where they can't be found, a federal fund covers it.</li>
         <li><b>EPCRA / Right-to-Know</b> — the Emergency Planning &amp; Community Right-to-Know Act is
           <i>why</i> the <b>Toxics Release Inventory</b> (our <a href="/sources">Sources</a> page) is public
           at all: facilities must report the chemicals they store and release.</li>
@@ -453,7 +453,7 @@
         <li><b>Public participation</b> — permits have <b>comment periods</b>, and you can request records
           under open-records / <b>FOIA</b> laws to see a facility's filings.</li>
         <li><b>Citizen suits</b> — the Clean Air and Clean Water Acts let citizens sue violators (or a
-          regulator that fails to act) after proper notice — an important backstop when enforcement lags.</li>
+          regulator that fails to act) after proper notice, an important backstop when enforcement lags.</li>
         <li><b>Private claims</b> — nuisance, trespass, or "toxic tort" claims for property damage or
           health harm are handled through the courts with an attorney.</li>
       </ul>
@@ -466,7 +466,7 @@
         <div><b>HAP / air toxic</b><p>A hazardous air pollutant (e.g., benzene) on EPA's separate 180+ list.</p></div>
         <div><b>Point source</b><p>A single identifiable source of pollution — a smokestack or a discharge pipe.</p></div>
         <div><b>Effluent limit</b><p>The maximum amount of a pollutant a facility may discharge to water.</p></div>
-        <div><b>NOV</b><p>Notice of Violation — a formal finding that a facility broke a rule or permit.</p></div>
+        <div><b>NOV</b><p>Notice of Violation: a formal finding that a facility broke a rule or permit.</p></div>
         <div><b>TRI</b><p>Toxics Release Inventory — public data on facilities' reported chemical releases (the basis of our Sources page).</p></div>
         <div><b>Superfund (CERCLA)</b><p>The federal program that funds and forces cleanup of contaminated sites.</p></div>
         <div><b>RCRA</b><p>The law governing how hazardous waste is stored, hauled, and disposed of — "cradle to grave."</p></div>
@@ -506,33 +506,33 @@
 
     <div class="card"><div class="prose">
       <h3>Air quality and climate are the same fire</h3>
-      <p>Most of what harms local air also drives climate change — they come from the same
-        smokestacks and tailpipes. Burning coal, oil, and gas releases <b>fine particles, sulfur
-        dioxide, and nitrogen oxides</b> (the health pollutants we track) <i>and</i>
-        <b>carbon dioxide and methane</b> (the gases that warm the planet). That overlap is good
-        news: cutting fossil-fuel pollution cleans the air you breathe today <b>and</b> slows
-        warming — what scientists call a <b>co-benefit</b>.</p>
+      <p>Most of what harms local air also drives climate change. Both come from the same
+        smokestacks and tailpipes. Burning coal, oil, and gas releases the health pollutants we
+        track (<b>fine particles, sulfur dioxide, and nitrogen oxides</b>) and the gases that warm
+        the planet (<b>carbon dioxide and methane</b>). That overlap is good news: cutting
+        fossil-fuel pollution cleans the air you breathe today and slows warming. Scientists call
+        this a <b>co-benefit</b>.</p>
       <h3>The greenhouse basics</h3>
-      <p>Greenhouse gases — chiefly <b>CO₂</b> from burning fossil fuels and <b>methane</b> from
-        gas systems, coal, and agriculture — trap heat in the atmosphere. Human activity has
+      <p>Greenhouse gases trap heat in the atmosphere. The main ones are <b>CO₂</b> from burning
+        fossil fuels and <b>methane</b> from gas systems, coal, and agriculture. Human activity has
         already warmed the planet about <b>1.1–1.2 °C</b> above pre-industrial levels, driving
-        more extreme heat, heavier rainfall and flooding, and longer wildfire seasons — including
+        more extreme heat, heavier rainfall and flooding, and longer wildfire seasons, including
         the Canadian wildfire smoke that reached West Virginia (see our
         <a href="/events">Events</a> page).</p>
     </div></div>
 
     <div class="card"><div class="prose">
-      <h3>The Paris Agreement — the global goal</h3>
+      <h3>The Paris Agreement: the global goal</h3>
       <p>Under the 2015
         <a href="https://unfccc.int/process-and-meetings/the-paris-agreement" target="_blank" rel="noopener">Paris
         Agreement</a>, nearly every country agreed to hold global warming to <b>well below 2 °C</b>
         above pre-industrial levels and to <b>pursue efforts to limit it to 1.5 °C</b>. Each
-        country sets its own pledge — a <b>Nationally Determined Contribution (NDC)</b> — and many,
+        country sets its own pledge, called a <b>Nationally Determined Contribution (NDC)</b>. Many,
         including the U.S., have set goals of <b>net-zero emissions by around 2050</b>.</p>
 
       <h3>What scientists say it takes</h3>
-      <p>The <a href="https://www.ipcc.ch/report/ar6/syr/" target="_blank" rel="noopener">IPCC</a>
-        — the UN body that synthesizes the world's climate science — is specific about the
+      <p>The <a href="https://www.ipcc.ch/report/ar6/syr/" target="_blank" rel="noopener">IPCC</a>,
+        the UN body that synthesizes the world's climate science, is specific about the
         1.5 °C path:</p>
       <ul>
         <li>Global greenhouse-gas emissions must <b>peak before 2025</b>;</li>
@@ -542,16 +542,25 @@
       <p>Getting there means <b>rapid, deep cuts across every sector</b>: phasing down unabated
         fossil-fuel use, scaling up renewables and efficiency, electrifying transport and
         buildings, sharply <b>reducing methane leaks</b>, protecting forests, and removing some
-        carbon that's already been emitted. The IPCC's finding is blunt but hopeful — the tools
-        exist and are increasingly affordable; the gap is the <b>pace</b> of action. Current
+        carbon that's already been emitted. The IPCC's finding is blunt but hopeful: the tools
+        exist and are increasingly affordable, and the gap is the <b>pace</b> of action. Current
         national pledges, if met, still leave the world short of 1.5 °C.</p>
 
       <h3>What it means for West Virginia</h3>
-      <p>WV's economy has long been tied to coal and, now, natural gas. The energy transition is a
-        real and complicated shift here — but it's also an opportunity: the same changes that cut
-        carbon (cleaner power, less methane leakage, efficiency) directly reduce the PM2.5, SO₂,
-        and VOCs that affect local health. Tracking our own air is one way to make those trade-offs
-        visible and hold the improvements accountable.</p>
+      <p>West Virginia's economy has long been tied to coal and, now, natural gas, so the energy
+        transition lands harder here than in most places. That also makes the co-benefit unusually
+        concrete. Consider the state's <b>orphaned and abandoned gas wells</b>: roughly 6,300 are
+        officially documented and estimates run past 50,000, many drilled before 1929 and never
+        properly sealed. They leak <b>methane</b> — a potent greenhouse gas — along with the
+        volatile organic compounds and other gases that can foul nearby air. Plugging them slows
+        warming and cleans local air in a single act. The same logic runs through the whole
+        transition: cleaner power, less methane leakage, and efficiency each trim the PM2.5, SO₂,
+        and VOCs that West Virginians actually breathe.</p>
+      <p>That is why watching our own air matters. In the Kanawha Valley, the industrial corridor
+        around Charleston, a growing community network of low-cost sensors picked up the smoke
+        when drought-driven fires swept the southern coalfields in November 2024 (see our
+        <a href="/events">Events</a> page). Tracking local air makes these trade-offs visible and
+        holds the improvements accountable.</p>
       <p class="meta">Educational summary of mainstream climate science and policy; sources linked
         above (UNFCCC, IPCC).</p>
     </div></div>
