@@ -12,6 +12,21 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Place picker + "my place now" basic view: new `/place` route and template; status lines per medium from `/api/query`; "what changed" from the same. [auto:M]
 - [ ] Depth toggle + advanced view: `view=adv` shows today's /air controls under the place; /air redirects to `/place?…&view=adv`. [auto:M]
 - [ ] Site pages: `/site/<kind>/<id>` for sensor, monitor, gauge, facility, water system, well, spill; popups and lists link to them. [auto:M]
+- [ ] Data centers, research (Corey 2026-11-05: residents are worried about water, energy and noise): with WebSearch /
+      WebFetch, list every WV data center and crypto-mining site, proposed, permitted or operating, and what public
+      records say about each: operator, location, status, power (MW, utility or on-site generation, PSC dockets,
+      microgrid filings), water (source, withdrawals from WV DEP water-use reports or permits, cooling type), backup
+      generators (WV DEP air permits), noise (ordinances, complaints, any measurements), and what it's used for:
+      generative AI / cloud / crypto mining / storage / government or surveillance / enterprise / unknown, with the
+      evidence and a confidence for each. Write `docs/DATA-CENTERS.md` (sources, what exists, what doesn't) and
+      `data/data_centers.json` with the usual provenance block; "not disclosed" is a real value, not a blank [auto:M]
+- [ ] Data centers on the site: a `data_center` site kind (same site page as the rest) and a layer; on the basic place
+      view a plain card when one is near ("what we know / what's not disclosed" for water, energy, noise and purpose,
+      each with its source), and on the advanced view the full record and filings. Where the data doesn't exist,
+      say so and say how people can ask (PSC dockets, DEP permit comments, public records requests) [auto:M]
+- [ ] Roadmap: a "Data centers" section (water, energy, noise, purpose, what's undisclosed) and a later
+      "Noise and light pollution" medium (night-sky brightness from satellite data, community noise reports and
+      sensors) in ROADMAP.md, placed after Land [auto:S]
 - [ ] Nav collapse + terms pass: six-item nav, "More" menu, glossary file, rename Sources→Facilities, emoji removed, Admin to footer. [auto:S]
 - [ ] Map bounds + y-axis + default sensor: items from §6. [auto:S]
 - [ ] /sources pagination + /water heading fix + haze opt-in. [auto:S]
