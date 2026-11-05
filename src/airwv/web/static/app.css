@@ -390,3 +390,22 @@
   .nb-actions { display:flex; gap:12px; font-size:13px; white-space:nowrap; }
   .nb-flag { font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:#fff; border-radius:20px; padding:1px 7px; margin-left:6px; }
   .nb-orphan, .nb-violation, .nb-impaired, .nb-spill { background:#c0392b; }
+  /* data centers: basic card (site page + Near me) and the full record */
+  .dc-card { padding:12px 14px; }
+  .dc-card + .dc-card { border-top:1px solid #eef1f4; }
+  .dc-head { display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; margin-bottom:6px; }
+  .dc-head .nb-title a { color:#222; }
+  .dc-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:10px; margin:8px 0; }
+  .dc-topic { background:#f8f9fb; border-radius:6px; padding:8px 10px; min-width:0; overflow-wrap:anywhere; }
+  .dc-topic h3 { font-size:14px; margin:0 0 4px; color:#1a2b3c; }
+  .dc-topic ul, .dc-sources ul, .dc-ask ul, .dc-files { margin:2px 0 6px; padding-left:18px; font-size:13px; line-height:1.45; color:#333; }
+  .dc-sub { font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:#2a7a2a; margin-top:4px; }
+  .dc-sub.dc-gap { color:#a35a00; }
+  .dc-sources, .dc-ask { font-size:13px; margin-top:8px; overflow-wrap:anywhere; }
+  .dc-ask { background:#fff8f0; border-left:4px solid #e07b00; padding:8px 10px; }
+  .dc-files { padding:8px 14px 8px 30px; }
+  .dc-files li { margin:4px 0; }
+  .dc-rec { width:100%; border-collapse:collapse; font-size:13px; }
+  .dc-rec th, .dc-rec td { text-align:left; vertical-align:top; padding:6px 14px; border-top:1px solid #eef1f4; overflow-wrap:anywhere; }
+  .dc-rec th { width:30%; color:#556; font-weight:600; }
+  @media (max-width:560px){ .dc-rec th, .dc-rec td { display:block; width:auto; } .dc-rec td { border-top:none; padding-top:0; } }

@@ -7,7 +7,12 @@ someone skipped a question, so these tests fail on it. Only lat/lon may be null
 
 import json
 
+from fastapi.testclient import TestClient
+
+from airwv import data_centers as dcs
+from airwv.storage import Store
 from airwv.storage.readmodel import DATA_DIR
+from airwv.web.app import create_app
 
 DOC = json.loads((DATA_DIR / "data_centers.json").read_text())
 SITES = DOC["sites"]
@@ -65,3 +70,79 @@ def test_every_site_is_sourced():
         assert s["sources"], f"{s['id']} has no source"
         for src in s["sources"]:
             assert src["url"].startswith("https://"), s["id"]
+
+
+# ---- on the site: the data_center kind, /api/data-centers, /site/data_center/<id> ----
+
+MONARCH = next(s for s in SITES if s["id"] == "monarch-compute-campus")
+
+
+def _client(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'dc.sqlite'}")
+    store.create_schema()
+    return TestClient(create_app(store))
+
+
+def test_card_sorts_known_and_not_disclosed():
+    c = dcs.card(MONARCH)
+    topics = {t["topic"]: t for t in c["topics"]}
+    assert list(topics) == ["water", "energy", "noise", "purpose"]
+    water = topics["water"]
+    assert {"label": "How much water it takes", "value": None} in water["gaps"]   # "not disclosed"
+    assert any(k["label"] == "Water source" and "Ohio River" in k["value"] for k in water["known"])
+    assert all(not dcs.is_gap(k["value"]) for t in c["topics"] for k in t["known"])
+    assert any(k["label"].startswith("Generative AI (high") for k in topics["purpose"]["known"])
+    assert c["sources"] == MONARCH["sources"] and c["url"] == "/site/data_center/monarch-compute-campus"
+
+
+def test_card_keeps_the_note_on_a_qualified_gap():
+    dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}}
+    energy = next(t for t in dcs.card(dc)["topics"] if t["topic"] == "energy")
+    assert {"label": "Backup generators", "value": "none found (federal facility)"} in energy["gaps"]
+
+
+def test_how_to_ask_covers_psc_dep_and_records():
+    where = " ".join(a["where"] for a in dcs.HOW_TO_ASK)
+    assert "PSC" in where and "DEP" in where and "records request" in where
+
+
+def test_api_near_a_place(tmp_path):
+    c = _client(tmp_path)
+    r = c.get(f"/api/data-centers?lat={MONARCH['lat']}&lon={MONARCH['lon'] + 0.05}&km=16").json()
+    assert r["county"] == "Mason" and r["fetched_at"] == DOC["fetched_at"] and r["disclaimer"]
+    assert r["near"][0]["id"] == MONARCH["id"] and r["near"][0]["mi"] < 4
+    assert all(x["lat"] is None and "Mason" in x["county"] for x in r["in_county"])
+    assert r["how_to_ask"] == dcs.HOW_TO_ASK and r["dockets"] == DOC["dockets"]
+    # far away: Monarch isn't listed
+    far = c.get("/api/data-centers?lat=37.27&lon=-81.22&km=5").json()
+    assert all(x["id"] != MONARCH["id"] for x in far["near"] + far["in_county"])
+    # no place: the whole layer
+    assert len(c.get("/api/data-centers").json()["near"]) == len(SITES)
+
+
+def test_data_center_is_a_site_kind(tmp_path):
+    c = _client(tmp_path)
+    q = c.get(f"/api/query?lat={MONARCH['lat']}&lon={MONARCH['lon']}&km=2&kind=data_center").json()
+    assert [s["site_id"] for s in q["sites"]] == ["data_center:monarch-compute-campus"]
+    assert q["sites"][0]["records"][0]["kind"] == "project_status"
+    assert q["sites"][0]["records"][0]["value"] == "under_construction"
+    assert q["provenance"]["data_centers"]["fetched_at"] == DOC["fetched_at"]
+
+
+def test_site_page_basic_and_advanced(tmp_path):
+    c = _client(tmp_path)
+    basic = c.get("/site/data_center/monarch-compute-campus")
+    assert basic.status_code == 200
+    assert "Monarch Compute Campus" in basic.text and "Not disclosed or not found" in basic.text
+    assert "psc.state.wv.us" in basic.text and "Full record and filings" in basic.text
+    adv = c.get("/site/data_center/monarch-compute-campus?view=adv")
+    assert adv.status_code == 200
+    assert "R14-0042" in adv.text and "24-0611-E-T-PW" in adv.text
+    for src in MONARCH["sources"]:
+        assert src["url"].replace("&", "&amp;") in adv.text
+    # a site with no public coordinates still has a page
+    unmapped = next(s for s in SITES if s["lat"] is None)
+    page = c.get(f"/site/data_center/{unmapped['id']}")
+    assert page.status_code == 200 and "exact location not public" in page.text
+    assert c.get("/site/data_center/no-such-site").status_code == 404
+    assert c.get("/site/well/anything").status_code == 404   # other kinds come with the site-pages item
