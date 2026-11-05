@@ -49,4 +49,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] An `/api/query` series mode: `site_id` + `param` + `from`/`to` returns measurement rows plus a CSV link, as the base for Explore v1 [auto:M]
 - [ ] Re-queue "Depth toggle + advanced view" once the Place picker branch (`czjob/6d558c`) is merged into `corey/auto`. [auto:M]
 - [ ] Data centers, primary records: pull DEP DAQ engineering evaluations for R14-0042, R13-3713/3714/3715 and DEP water-use (large-quantity user) reports; fill the "none found" water and generator fields in `data_centers.json`. [auto]
+- [ ] Data centers, PSC: search the PSC case system for each operator and confirm the 24-0611-E-T-PW final order; add case links to `dockets`. [auto]
 
