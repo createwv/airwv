@@ -35,6 +35,10 @@ ruff check .
 pytest
 ```
 
+`pytest` includes the product harness (`tests/product/`): it boots the app, screenshots the
+key pages at phone and laptop widths and checks them; it skips without node + Playwright.
+See `tests/product/README.md`.
+
 ## Pull requests
 
 1. Fork and branch from `main`.
