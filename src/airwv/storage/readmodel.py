@@ -34,6 +34,7 @@ FILE_LAYERS = {
     "nrc_spills": "nrc_spills.json",
     "sdwa_systems": "sdwa_systems.json",
     "reference_monitors": "reference_monitors.json",
+    "data_centers": "data_centers.json",
 }
 
 # air fields of ``readings`` exposed as measurements: (column, unit)
@@ -45,7 +46,10 @@ AIR_PARAMETERS = (
 
 
 def hav_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle miles; registered in SQL as ``hav_mi`` (same math as the app's)."""
+    """Great-circle miles; registered in SQL as ``hav_mi`` (same math as the app's).
+    NULL in, NULL out: SQLite may call it before ``lat IS NOT NULL`` filters a row."""
+    if None in (lat1, lon1, lat2, lon2):
+        return None
     dp, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
     h = (math.sin(dp / 2) ** 2 + math.cos(math.radians(lat1))
          * math.cos(math.radians(lat2)) * math.sin(dl / 2) ** 2)
@@ -91,6 +95,8 @@ SITE_VIEW = "CREATE TEMP VIEW site AS" + " UNION ALL".join([
                   _j("county"), _j("dfr_url")),
     _layer_branch("reference_monitors", "monitors", "reference_monitor", "'air'", _j("id"),
                   _j("name"), _j("county")),
+    _layer_branch("data_centers", "sites", "data_center", "'land'", _j("id"), _j("name"), _j("county"),
+                  "'/site/data_center/' || " + _j("id")),
     _layer_branch("community_sensors", "sensors", "sensor", "'air'", _j("sid"), _j("name")),
     # one site per site_id, placed where its latest reading was taken (DEP sample sites
     # drift a few metres between visits); SQLite takes bare columns from the max(ts) row
@@ -136,6 +142,8 @@ RECORD_VIEW = "CREATE TEMP VIEW record AS" + " UNION ALL".join([
          "'https://nrc.uscg.mil/'", _j("date")),
     _rec("sdwa_systems", "systems", "water_system", _j("pws_id"), "health_violation",
          _j("contaminants"), _j("health_violation"), _j("dfr_url")),
+    _rec("data_centers", "sites", "data_center", _j("id"), "project_status", _j("status"), "1",
+         "'/site/data_center/' || " + _j("id")),
 ])
 
 

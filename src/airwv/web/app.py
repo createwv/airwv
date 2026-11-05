@@ -699,6 +699,11 @@ def create_app(store: Store) -> FastAPI:
             {"name": "National Response Center", "category": "Events", "org": "US Coast Guard",
              "access": "annual .xlsx", "keyless": True, "record": "reported oil/chemical spills",
              "url": "https://nrc.uscg.mil/", "api": "/api/nrc-spills", **meta("nrc_spills.json", "spills")},
+            {"name": "Data centers & crypto mining (desk research)", "category": "Facilities",
+             "org": "Empower WV (from DEP, PSC, company and news records)", "access": "hand-compiled",
+             "keyless": True, "record": "data centers: power, water, noise, use, what's not disclosed",
+             "url": "/site/data_center/monarch-compute-campus", "api": "/api/data-centers",
+             **meta("data_centers.json", "sites")},
             {"name": "Microsoft US Building Footprints", "category": "Geospatial", "org": "Microsoft",
              "access": "open GeoJSON", "keyless": True, "record": "buildings (near-homes well risk)",
              "url": "https://github.com/microsoft/USBuildingFootprints", "api": "/api/abandoned-wells",
@@ -1524,6 +1529,44 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"note": "", "monitors": []}
 
+    @app.get("/api/data-centers")
+    def data_centers_layer(lat: float | None = None, lon: float | None = None, km: float = 16.0):
+        """Data centers and crypto-mining sites (hand-researched, data/data_centers.json),
+        each with its basic-view card (what we know / what's not disclosed for water,
+        energy, noise and purpose). With lat/lon: ``near`` = mapped sites within ``km``,
+        nearest first, and ``in_county`` = sites in the nearest county with no public
+        coordinates. Without: every site in ``near``. Plus how to ask for what's missing."""
+        import json
+
+        from airwv import data_centers as dcs
+        from airwv.wvgeo import WV_COUNTY_CENTROID
+
+        rm = store.read_model
+        with rm.connect() as conn:
+            prov = rm.provenance(conn, ["data_centers"]).get("data_centers", {})
+            dockets = json.loads(conn.exec_driver_sql(
+                "SELECT coalesce(json_extract(doc, '$.dockets'), '[]') FROM layer_doc "
+                "WHERE layer = 'data_centers'").scalar() or "[]")
+            county, in_county = None, []
+            if lat is None or lon is None:
+                near = rm.sites(conn, layer="data_centers")
+            else:
+                km = min(max(km, 1.0), 50.0)
+                near = rm.sites_near(conn, lat, lon, km * 0.621371, layer="data_centers")
+                county = min(WV_COUNTY_CENTROID,
+                             key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
+                in_county = [s for s in rm.sites(conn, layer="data_centers", where="lat IS NULL")
+                             if county in [c.strip() for c in (s["county"] or "").split("/")]]
+
+        def row(s):
+            out = dcs.card(s["attrs"])
+            out.update(lat=s["lat"], lon=s["lon"], mi=round(s["d"], 1) if s["d"] is not None else None)
+            return out
+
+        return {"place": {"lat": lat, "lon": lon, "km": km} if lat is not None and lon is not None else None,
+                "county": county, "near": [row(s) for s in near], "in_county": [row(s) for s in in_county],
+                "how_to_ask": dcs.HOW_TO_ASK, "dockets": dockets, **prov}
+
     _validate_cache: dict = {}
 
     @app.get("/api/validate")
@@ -1700,6 +1743,26 @@ def create_app(store: Store) -> FastAPI:
     def nearby_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="near_me.html",
                                           context={"mode": "nearby"})
+
+    @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
+    def site_page(request: Request, kind: str, ref: str, view: str = "basic"):
+        """The single home of one site (docs/DIRECTION.md). Data centers for now; the
+        other kinds come with the site-pages plan item. ``view=adv`` is the full record."""
+        from airwv import data_centers as dcs
+
+        if kind != "data_center":
+            raise HTTPException(status_code=404, detail="no site page for this kind yet")
+        api = data_centers_layer()
+        rm = store.read_model
+        with rm.connect() as conn:
+            found = rm.sites(conn, layer="data_centers", where="ref = :ref", params={"ref": ref})
+        if not found:
+            raise HTTPException(status_code=404, detail="unknown data center")
+        dc = found[0]["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
+            "mode": "site", "kind": kind, "view": "adv" if view == "adv" else "basic",
+            "dc": dc, "card": dcs.card(dc), "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
+            "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
 
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
