@@ -712,6 +712,9 @@ make the connections we already hold** — and keep the accountability/legal fra
 from readings (a violation is a legal state, not a measurement). Air-experience direction and
 the events/spills split are **decided** (see below).*
 
+*2026-11-05: direction approved: six-noun model, Basic/Advanced over one place, nav collapse,
+demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes the redesign below.*
+
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
 (composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.
