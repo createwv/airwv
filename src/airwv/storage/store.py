@@ -79,6 +79,15 @@ class Store:
         self._session_factory: sessionmaker[Session] = sessionmaker(
             bind=self._engine, future=True
         )
+        self._read_model = None
+
+    @property
+    def read_model(self):
+        """The unified read views (site / measurement / record) — storage/readmodel.py."""
+        if self._read_model is None:
+            from airwv.storage.readmodel import ReadModel
+            self._read_model = ReadModel(self._engine)
+        return self._read_model
 
     @classmethod
     def from_config(cls, config: Config) -> "Store":

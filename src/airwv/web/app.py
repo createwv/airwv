@@ -379,6 +379,11 @@ def create_app(store: Store) -> FastAPI:
     coords = _index_to_coords()
     regions = _index_to_region()
     airnow_names = _airnow_meta()
+    # community sensors join the read model's `site` view (resolved listing, WV regions only)
+    store.read_model.set_layer("community_sensors", [
+        {"sid": sid, "lat": c[0], "lon": c[1], "name": names.get(sid, sid)}
+        for sid, c in coords.items() if sid in regions],
+        source="PurpleAir public listing (resolved)")
     facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
     notifier = chat_notifier_from_env()   # Slack/Discord webhooks (env); disabled if unset
 
@@ -490,104 +495,111 @@ def create_app(store: Store) -> FastAPI:
         """Everything potentially health-relevant near a point — the 'what's around me
         and could it explain how I feel?' aggregation across all our layers. Each hazard
         carries a broad category (gas / air / water / chemical / sensor) the UI matches
-        to symptoms. Not medical advice."""
+        to symptoms. Not medical advice. Reads the unified views (site / measurement /
+        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output."""
         km = min(max(km, 1.0), 25.0)
         radius_mi = km * 0.621371
+        rm = store.read_model
 
-        def near_pts(items, cap, make, latk="lat", lonk="lon"):
-            out = []
-            for it in items:
-                la, lo = it.get(latk), it.get(lonk)
-                if la is None or lo is None:
-                    continue
-                d = _hav_mi(lat, lon, la, lo)
-                if d <= radius_mi:
-                    out.append((d, it))
-            out.sort(key=lambda x: x[0])
-            return [make(it, round(d, 1)) for d, it in out[:cap]]
+        def flags(conn, sites):
+            recs = rm.records_for(conn, [s["site_id"] for s in sites])
+            return [(s, {r["kind"] for r in recs.get(s["site_id"], [])}) for s in sites]
 
-        haz: list[dict] = []
+        with rm.connect() as conn:
+            def near_pts(layer, cap, make):
+                sites = rm.sites_near(conn, lat, lon, radius_mi, layer=layer, limit=cap)
+                return [make(s, s["attrs"], f, round(s["d"], 1)) for s, f in flags(conn, sites)]
 
-        # abandoned / orphan gas wells → gas (H2S / natural gas)
-        haz += near_pts(_data_json("abandoned_wells.json").get("wells", []), 12, lambda w, d: {
-            "category": "gas", "icon": "🛢️",
-            "label": ("Orphan" if w.get("orphan") else "Abandoned") + " gas well",
-            "detail": (f"{w['nearest_building_m']} m from a building" if w.get("near_homes")
-                       else (w.get("county") and f"{w['county']} County")),
-            "flag": "orphan" if w.get("orphan") else None, "mi": d, "lat": w["lat"], "lon": w["lon"],
-            "link": f"http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47{(w.get('id') or '').replace('-', '')}",
-            "report": True})
+            haz: list[dict] = []
 
-        # EPA ECHO major facilities → air or water by program; violations flagged
-        def _fac(f, d):
-            water = any(p in (f.get("programs") or []) for p in ("water", "drinking-water"))
-            return {"category": "water" if water and "air" not in (f.get("programs") or []) else "air",
-                    "icon": "⚖️", "label": f.get("name"),
-                    "detail": (f.get("compliance_status") or "").strip() or "regulated facility",
-                    "flag": "violation" if f.get("status") in ("significant_violation", "violation") else None,
-                    "mi": d, "lat": f["lat"], "lon": f["lon"], "link": f.get("echo_url"), "report": True}
-        haz += near_pts(_data_json("echo_facilities.json").get("facilities", []), 8, _fac)
+            # abandoned / orphan gas wells → gas (H2S / natural gas)
+            haz += near_pts("abandoned_wells", 12, lambda s, w, f, d: {
+                "category": "gas", "icon": "🛢️",
+                "label": ("Orphan" if "orphan" in f else "Abandoned") + " gas well",
+                "detail": (f"{w['nearest_building_m']} m from a building" if w.get("near_homes")
+                           else (s["county"] and f"{s['county']} County")),
+                "flag": "orphan" if "orphan" in f else None, "mi": d, "lat": s["lat"], "lon": s["lon"],
+                "link": s["url"], "report": True})
 
-        # curated TRI / documented pollution sources → air/chemical
-        haz += near_pts(_data_json("sources.json").get("sources", []), 8, lambda s, d: {
-            "category": "air", "icon": "🏭", "label": s.get("name"),
-            "detail": s.get("type") or s.get("operator"), "flag": None, "mi": d,
-            "lat": s["lat"], "lon": s["lon"], "link": f"/sources#facility={s.get('name', '')}", "report": True})
+            # EPA ECHO major facilities → air or water by program; violations flagged
+            haz += near_pts("echo_facilities", 8, lambda s, a, f, d: {
+                "category": s["medium"], "icon": "⚖️", "label": s["name"],
+                "detail": (a.get("compliance_status") or "").strip() or "regulated facility",
+                "flag": "violation" if "violation" in f else None,
+                "mi": d, "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": True})
 
-        # coal-mine water discharges → water
-        haz += near_pts(_data_json("coal_npdes.json").get("permits", []), 6, lambda p, d: {
-            "category": "water", "icon": "⛏️", "label": f"Coal discharge — {p.get('operator')}",
-            "detail": (f"impaired for {', '.join(p.get('impairment_causes', [])[:2])}"
-                       if p.get("impaired") else f"{p.get('outlets')} outlets"),
-            "flag": "impaired" if p.get("impaired") else None, "mi": d,
-            "lat": p["lat"], "lon": p["lon"], "link": p.get("effluent_url"), "report": False})
+            # curated TRI / documented pollution sources → air/chemical
+            haz += near_pts("sources", 8, lambda s, a, f, d: {
+                "category": "air", "icon": "🏭", "label": s["name"],
+                "detail": a.get("type") or a.get("operator"), "flag": None, "mi": d,
+                "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": True})
 
-        # active mining permits → air (dust) / land
-        haz += near_pts(_data_json("dep_mining.json").get("mines", []), 6, lambda m, d: {
-            "category": "air", "icon": "⛏️", "label": f"{m.get('type') or 'Mining'} — {m.get('operator')}",
-            "detail": (f"{m.get('acres_disturbed')} acres disturbed" if m.get("acres_disturbed") else m.get("permit_status")),
-            "flag": None, "mi": d, "lat": m["lat"], "lon": m["lon"], "link": None, "report": True})
+            # coal-mine water discharges → water
+            haz += near_pts("coal_npdes", 6, lambda s, p, f, d: {
+                "category": "water", "icon": "⛏️", "label": f"Coal discharge — {p.get('operator')}",
+                "detail": (f"impaired for {', '.join(p.get('impairment_causes', [])[:2])}"
+                           if "impaired_303d" in f else f"{p.get('outlets')} outlets"),
+                "flag": "impaired" if "impaired_303d" in f else None, "mi": d,
+                "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": False})
 
-        # NRC reported spills → chemical (and water when they reached water)
-        haz += near_pts(_data_json("nrc_spills.json").get("spills", []), 6, lambda s, d: {
-            "category": "water" if s.get("reached_water") else "chemical", "icon": "🛢️",
-            "label": "Reported spill — " + (", ".join(m["name"] for m in s.get("materials", [])[:2]) or "release"),
-            "detail": f"{s.get('date') or ''}{' · reached water' if s.get('reached_water') else ''}".strip(" ·"),
-            "flag": "spill", "mi": d, "lat": s["lat"], "lon": s["lon"],
-            "link": "https://nrc.uscg.mil/", "report": False})
+            # active mining permits → air (dust) / land
+            haz += near_pts("dep_mining", 6, lambda s, m, f, d: {
+                "category": "air", "icon": "⛏️", "label": f"{m.get('type') or 'Mining'} — {m.get('operator')}",
+                "detail": (f"{m.get('acres_disturbed')} acres disturbed" if m.get("acres_disturbed")
+                           else m.get("permit_status")),
+                "flag": None, "mi": d, "lat": s["lat"], "lon": s["lon"], "link": None, "report": True})
 
-        # community sensors → sensor (VOC / PM2.5 right now)
-        latest_pm = store.latest_value_per_sensor("pm2_5")
-        latest_voc = store.latest_value_per_sensor("voc")
-        sensor_items = [{"sid": sid, "lat": c[0], "lon": c[1]} for sid, c in coords.items() if sid in regions]
-        haz += near_pts(sensor_items, 4, lambda s, d: {
-            "category": "sensor", "icon": "📡", "label": names.get(s["sid"], s["sid"]) + " sensor",
-            "detail": " · ".join(x for x in [
-                (latest_pm.get(s["sid"]) is not None and f"PM2.5 {round(latest_pm[s['sid']], 1)}"),
-                (latest_voc.get(s["sid"]) is not None and f"VOC {round(latest_voc[s['sid']], 0):g}")] if x) or "community sensor",
-            "flag": None, "mi": d, "lat": s["lat"], "lon": s["lon"],
-            "link": "/air", "report": False})
+            # NRC reported spills → chemical (and water when they reached water)
+            haz += near_pts("nrc_spills", 6, lambda s, a, f, d: {
+                "category": "water" if s["medium"] == "water" else "chemical", "icon": "🛢️",
+                "label": "Reported spill — " + (", ".join(m["name"] for m in a.get("materials", [])[:2])
+                                                or "release"),
+                "detail": f"{a.get('date') or ''}{' · reached water' if a.get('reached_water') else ''}".strip(" ·"),
+                "flag": "spill", "mi": d, "lat": s["lat"], "lon": s["lon"],
+                "link": s["url"], "report": False})
 
-        # measured water sample sites → water
-        for s in store.water_near(lat, lon, km=km, limit=4):
-            keys = [k for k in ("selenium", "iron", "manganese", "sulfate", "conductance", "ph", "ecoli") if k in s.get("latest", {})]
-            haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
-                        "detail": ", ".join(f"{k} {s['latest'][k]['value']}" for k in keys[:3]) or "sample site",
-                        "flag": None, "mi": s["mi"], "lat": s["lat"], "lon": s["lon"],
-                        "link": "/water", "report": False})
+            # community sensors → sensor (VOC / PM2.5 right now)
+            sensors = rm.sites_near(conn, lat, lon, radius_mi, layer="community_sensors", limit=4)
+            refs = [s["ref"] for s in sensors]
+            latest_pm = rm.latest(conn, "air", refs, "pm2_5")
+            latest_voc = rm.latest(conn, "air", refs, "voc")
+            for s in sensors:
+                pm = latest_pm.get(s["ref"], {}).get("pm2_5", {}).get("value")
+                voc = latest_voc.get(s["ref"], {}).get("voc", {}).get("value")
+                haz.append({
+                    "category": "sensor", "icon": "📡", "label": s["name"] + " sensor",
+                    "detail": " · ".join(x for x in [
+                        (pm is not None and f"PM2.5 {round(pm, 1)}"),
+                        (voc is not None and f"VOC {round(voc, 0):g}")] if x) or "community sensor",
+                    "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
+                    "link": "/air", "report": False})
 
-        # drinking-water systems with a health-based violation in the nearest county → water
-        from airwv.wvgeo import WV_COUNTY_CENTROID
-        near_county = min(WV_COUNTY_CENTROID,
-                          key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
-        if near_county:
-            for sy in _data_json("sdwa_systems.json").get("systems", []):
-                if sy.get("county") == near_county and sy.get("health_violation"):
-                    haz.append({"category": "water", "icon": "🚰",
-                                "label": f"{sy.get('name')} (water system)",
-                                "detail": f"health-based SDWA violation · serves {sy.get('population')}",
-                                "flag": "violation", "mi": None, "lat": sy.get("lat"), "lon": sy.get("lon"),
-                                "link": sy.get("dfr_url"), "report": False})
+            # measured water sample sites → water
+            wsites = rm.sites_near(conn, lat, lon, radius_mi, layer="water_readings", limit=10_000, bbox_km=km)
+            wsites = sorted(wsites, key=lambda s: (round(s["d"], 1), s["ref"]))[:4]   # nearest by 0.1 mi
+            wlatest = rm.latest(conn, "water", [s["ref"] for s in wsites])
+            for s in wsites:
+                latest = wlatest.get(s["ref"], {})
+                keys = [k for k in ("selenium", "iron", "manganese", "sulfate", "conductance", "ph", "ecoli")
+                        if k in latest]
+                haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
+                            "detail": ", ".join(f"{k} {latest[k]['value']}" for k in keys[:3]) or "sample site",
+                            "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
+                            "link": "/water", "report": False})
+
+            # drinking-water systems with a health-based violation in the nearest county → water
+            from airwv.wvgeo import WV_COUNTY_CENTROID
+            near_county = min(WV_COUNTY_CENTROID,
+                              key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
+            if near_county:
+                systems = rm.sites(conn, layer="sdwa_systems", where="county = :c", params={"c": near_county})
+                for sy, f in flags(conn, systems):
+                    if "health_violation" in f:
+                        haz.append({"category": "water", "icon": "🚰",
+                                    "label": f"{sy['name']} (water system)",
+                                    "detail": f"health-based SDWA violation · serves {sy['attrs'].get('population')}",
+                                    "flag": "violation", "mi": None, "lat": sy["lat"], "lon": sy["lon"],
+                                    "link": sy["url"], "report": False})
 
         cats: dict = defaultdict(int)
         for h in haz:
