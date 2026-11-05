@@ -53,3 +53,4 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]   # test this checkout's code even when the venv's editable install points elsewhere
