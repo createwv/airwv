@@ -21,7 +21,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
       generative AI / cloud / crypto mining / storage / government or surveillance / enterprise / unknown, with the
       evidence and a confidence for each. Write `docs/DATA-CENTERS.md` (sources, what exists, what doesn't) and
       `data/data_centers.json` with the usual provenance block; "not disclosed" is a real value, not a blank [auto:M]
-- [ ] Data centers on the site: a `data_center` site kind (same site page as the rest) and a layer; on the basic place
+- [x] Data centers on the site: a `data_center` site kind (same site page as the rest) and a layer; on the basic place
       view a plain card when one is near ("what we know / what's not disclosed" for water, energy, noise and purpose,
       each with its source), and on the advanced view the full record and filings. Where the data doesn't exist,
       say so and say how people can ask (PSC dockets, DEP permit comments, public records requests) [auto:M]
