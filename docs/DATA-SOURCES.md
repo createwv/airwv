@@ -245,7 +245,14 @@ follow-up sampling never becomes public. → `/api/nrc-spills`, Events page.
 `/api/near?lat=&lon=&km=` aggregates **all** of the above within a radius into one
 categorized list (gas/air/water/chemical/sensor). It's the clearest example of the
 payoff: once every source carries coordinates + provenance, joining them by location
-is easy. Powers the **What's near me?** page.
+is easy. Powers the **What's near me?** page. Reads the unified views below; output is
+pinned by `tests/snapshots/api_near.json`.
+
+### `/api/query` — one read path over the unified views
+`/api/query?lat=&lon=&km=&kind=&medium=&param=&limit=` returns sites near a place from
+the `site` / `measurement` / `record` SQL views, each with its records, its latest
+`param` value (sensors, monitors, gauges, sample sites) and the provenance block of every
+layer in the answer. See [READ-MODEL.md](READ-MODEL.md).
 
 ---
 

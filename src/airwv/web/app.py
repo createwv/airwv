@@ -607,6 +607,41 @@ def create_app(store: Store) -> FastAPI:
         return {"lat": lat, "lon": lon, "km": km, "county": near_county,
                 "hazards": haz, "counts": dict(cats)}
 
+    @app.get("/api/query")
+    def query(lat: float, lon: float, km: float = 8.0, kind: str | None = None,
+              medium: str | None = None, param: str | None = None, limit: int = 100):
+        """One read path over the unified views: sites near a place (``kind`` is a comma
+        list: well, facility, permit, spill_report, water_system, reference_monitor,
+        sensor, gauge, sample_site; ``medium`` air / water / land), each with its
+        records, its latest ``param`` value when it has measurements, and the
+        provenance of every layer it came from. See docs/READ-MODEL.md."""
+        km = min(max(km, 1.0), 25.0)
+        limit = min(max(limit, 1), 500)
+        kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
+        rm = store.read_model
+        with rm.connect() as conn:
+            sites = rm.sites_near(conn, lat, lon, km * 0.621371, kinds=kinds, medium=medium, limit=limit)
+            recs = rm.records_for(conn, [s["site_id"] for s in sites])
+            latest: dict = {}
+            if param:
+                for med in ("air", "water"):
+                    refs = [s["ref"] for s in sites if s["medium"] == med
+                            and s["kind"] in ("sensor", "reference_monitor", "gauge", "sample_site")]
+                    latest[med] = rm.latest(conn, med, refs, param)
+            prov = rm.provenance(conn, sorted({s["layer"] for s in sites}))
+        out = []
+        for s in sites:
+            row = {k: s[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
+                                     "lat", "lon", "county", "url")}
+            row["mi"] = round(s["d"], 2)
+            row["records"] = recs.get(s["site_id"], [])
+            if param:
+                row["latest"] = latest.get(s["medium"], {}).get(s["ref"], {}).get(param)
+            out.append(row)
+        return {"place": {"lat": lat, "lon": lon, "km": km},
+                "filters": {"kind": kinds, "medium": medium, "param": param, "limit": limit},
+                "count": len(out), "sites": out, "provenance": prov}
+
     @app.get("/api/data-catalog")
     def data_catalog():
         """Public provenance catalog — every data layer, its source, freshness, and

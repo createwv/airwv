@@ -82,3 +82,77 @@ def test_api_near_matches_snapshot(tmp_path, monkeypatch):
     # the snapshot actually exercises every hazard category
     cats = {h["category"] for r in want.values() for h in r["hazards"]}
     assert cats == {"gas", "air", "water", "chemical", "sensor"}
+
+
+def test_views_cover_tables_and_layers(tmp_path, monkeypatch):
+    _, store = _client(tmp_path, monkeypatch)
+    rm = store.read_model
+    with rm.connect() as conn:
+        kinds = dict(conn.exec_driver_sql("SELECT kind, count(*) FROM site GROUP BY kind").all())
+        # every JSON layer and both tables land in `site`
+        assert {"well", "facility", "permit", "spill_report", "water_system", "reference_monitor",
+                "sensor", "gauge", "sample_site"} <= set(kinds)
+        assert kinds["sensor"] == 2 and kinds["gauge"] == 1 and kinds["sample_site"] == 2
+        # site_id is the identity; it only repeats where a source file repeats a row verbatim
+        # (abandoned_wells today; /api/near has always listed both), or for dep_permits,
+        # where one well's API number carries several permit applications
+        dup = conn.exec_driver_sql(
+            "SELECT site_id, count(DISTINCT attrs) FROM site WHERE layer != 'dep_permits' "
+            "GROUP BY site_id HAVING count(*) > 1").all()
+        assert all(n == 1 for _, n in dup)
+        # measurement is tall: one row per non-null air field + every water row
+        m = dict(conn.exec_driver_sql(
+            "SELECT parameter, count(*) FROM measurement GROUP BY parameter").all())
+        assert m["pm2_5"] == 6 and m["voc"] == 3 and m["ozone"] == 1 and m["iron"] == 2
+        assert conn.exec_driver_sql("SELECT count(*) FROM measurement").scalar() == 6 + 3 + 1 + 5
+        # records carry public-record state, each tied to a site in the `site` view
+        rk = dict(conn.exec_driver_sql("SELECT kind, count(*) FROM record GROUP BY kind").all())
+        assert {"orphan", "violation", "compliance_status", "impaired_303d", "permit_stage",
+                "spill", "health_violation"} <= set(rk)
+        orphans = json.loads((webapp.Path(webapp.__file__).parent.parent / "data"
+                              / "abandoned_wells.json").read_text())["orphans"]
+        assert rk["orphan"] == orphans
+        dangling = conn.exec_driver_sql(
+            "SELECT count(*) FROM record r WHERE NOT EXISTS (SELECT 1 FROM site s WHERE s.site_id = r.site_id)").scalar()
+        assert dangling == 0
+
+
+def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
+    from airwv.storage.readmodel import ReadModel
+    _, store = _client(tmp_path, monkeypatch)
+    data = tmp_path / "data"
+    data.mkdir()
+    f = data / "nrc_spills.json"
+    f.write_text(json.dumps({"source": "NRC", "fetched_at": "2026-01-01", "spills": [
+        {"report_id": 1, "lat": 38.3, "lon": -81.6, "type": "Sheen"}]}))
+    rm = ReadModel(store._engine, data_dir=data)
+    with rm.connect() as conn:
+        assert conn.exec_driver_sql("SELECT count(*) FROM site WHERE kind = 'spill_report'").scalar() == 1
+    f.write_text(json.dumps({"source": "NRC", "fetched_at": "2026-02-01", "spills": []}))
+    os.utime(f, ns=(f.stat().st_mtime_ns + 10**9,) * 2)
+    with rm.connect() as conn:
+        assert conn.exec_driver_sql("SELECT count(*) FROM site WHERE kind = 'spill_report'").scalar() == 0
+        assert rm.provenance(conn, ["nrc_spills"])["nrc_spills"]["fetched_at"] == "2026-02-01"
+
+
+def test_api_query(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    r = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&param=pm2_5").json()
+    assert r["count"] == len(r["sites"]) > 0 and r["place"]["km"] == 8
+    mis = [s["mi"] for s in r["sites"]]
+    assert mis == sorted(mis) and max(mis) <= 8 * 0.621371
+    by_id = {s["site_id"]: s for s in r["sites"]}
+    assert by_id["sensor:197127"]["latest"]["value"] == 10.04          # latest of 8.04, 9.04, 10.04
+    assert by_id["sensor:197127"]["name"] == "Kanawha City"
+    # provenance travels with the answer
+    assert all(layer in r["provenance"] for layer in {s["layer"] for s in r["sites"]}
+               if layer not in ("water_readings",))
+    # filters
+    water = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&medium=water").json()["sites"]
+    assert water and all(s["medium"] == "water" for s in water)
+    g = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&kind=gauge,sample_site&param=iron").json()["sites"]
+    assert {s["site_id"] for s in g} == {"gauge:03198000", "sample_site:S1"}
+    assert {s["site_id"]: s["latest"] and s["latest"]["value"] for s in g}["sample_site:S1"] == 1.9
+    viol = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&kind=facility").json()["sites"]
+    assert any(rec["kind"] == "violation" for s in viol for rec in s["records"])
+    assert c.get("/api/query?lat=38.3&lon=-81.6&km=999&limit=9999").json()["filters"]["limit"] == 500

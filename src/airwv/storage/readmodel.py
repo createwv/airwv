@@ -239,6 +239,18 @@ class ReadModel:
                     {k: r[k] for k in ("kind", "value", "effective", "url", "as_of")})
         return out
 
+    def provenance(self, conn, layers: list[str]) -> dict[str, dict]:
+        """Each layer file's provenance block (source, scope, disclaimer, fetched_at)."""
+        out = {}
+        for layer in layers:
+            row = conn.exec_driver_sql(
+                "SELECT json_extract(doc, '$.source'), json_extract(doc, '$.scope'), "
+                "json_extract(doc, '$.disclaimer'), fetched_at FROM layer_doc WHERE layer = ?",
+                (layer,)).first()
+            if row is not None:
+                out[layer] = dict(zip(("source", "scope", "disclaimer", "fetched_at"), row))
+        return out
+
     def latest(self, conn, medium: str, refs: list[str], parameter: str | None = None) -> dict:
         """Latest value per (ref, parameter): ``{ref: {parameter: {value, unit, ts}}}``.
         With one ``parameter``, per-ref indexed LIMIT-1 lookups (the fast path on
