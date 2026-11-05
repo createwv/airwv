@@ -45,4 +45,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Move `/api/areas` and `/api/water/near` onto `/api/query` (add an area filter and a time window for measurements), with snapshot tests like `/api/near`'s [auto:M]
 - [ ] A small sites table for AirNow reference monitors and readings-table sensors, filled at ingest, so they join the `site` view without a GROUP BY over `readings` [auto:S]
 - [ ] Remove the exact-duplicate rows from `abandoned_wells.json` in its fetch script (this changes the Nearby list, so Corey decides) [auto:S]
+- [ ] An `/api/query` series mode: `site_id` + `param` + `from`/`to` returns measurement rows plus a CSV link, as the base for Explore v1 [auto:M]
 
