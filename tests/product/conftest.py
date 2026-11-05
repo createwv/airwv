@@ -46,6 +46,9 @@ PAGES = [
     ("alerts", "/alerts"),
     ("about", "/about"),
     ("data", "/data"),
+    # data centers: Near me at Point Pleasant (Monarch is ~4 mi) and a site page
+    ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
+    ("site-dc", "/site/data_center/monarch-compute-campus"),
 ]
 VIEWPORTS = [(390, 844), (1280, 800)]   # phone (iPhone 12–15), laptop
 GEO = {"lat": 38.35, "lon": -81.63}     # Charleston

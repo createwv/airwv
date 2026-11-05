@@ -19,11 +19,13 @@ tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 |---|---|---|
 | `site` | `site_id` (`kind:ref`), `kind`, `medium`, `layer`, `ref`, `name`, `lat`, `lon`, `county`, `url`, `ord`, `attrs` (the source row as JSON) | every JSON layer; `water_readings` (one site per id, placed at its latest reading); the resolved community-sensor listing |
 | `measurement` | `medium`, `source`, `ref`, `ts`, `parameter`, `value`, `unit`, `quality`, `raw` | `readings` (one row per non-null air field: pm1_0, pm2_5, pm10, aqi, voc, ozone, temperature, humidity, pressure) and `water_readings` |
-| `record` | `site_id`, `layer`, `kind`, `value`, `effective`, `url`, `as_of` | orphan wells, ECHO violation + compliance status, coal 303(d) listing, mining / oil-and-gas permit stage, NRC spill reports, SDWA health-based violations |
+| `record` | `site_id`, `layer`, `kind`, `value`, `effective`, `url`, `as_of` | orphan wells, ECHO violation + compliance status, coal 303(d) listing, mining / oil-and-gas permit stage, NRC spill reports, SDWA health-based violations, data-center project status |
 
 Site kinds today: `well`, `facility` (ECHO + TRI/curated sources), `permit` (coal NPDES,
 DEP mining, DEP oil & gas), `spill_report`, `water_system`, `reference_monitor`, `sensor`,
-`gauge` (USGS), `sample_site` (WQP). Measurements join sites on (`medium`, `ref`).
+`gauge` (USGS), `sample_site` (WQP), `data_center` (`data_centers.json`, medium `land`; most
+have no public coordinates, so `lat`/`lon` are NULL and only county finds them; one
+`project_status` record each). Measurements join sites on (`medium`, `ref`).
 
 ## Known gaps
 

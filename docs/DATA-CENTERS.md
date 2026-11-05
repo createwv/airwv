@@ -7,8 +7,15 @@ just as important, **what nobody has disclosed**.
 
 Data file: [`src/airwv/data/data_centers.json`](../src/airwv/data/data_centers.json). It
 carries the usual provenance block (`source`, `scope`, `disclaimer`, `fetched_at`) and lives
-next to the other layers. `data/` is gitignored, so the file isn't kept there. It isn't on
-the site yet.
+next to the other layers. `data/` is gitignored, so the file isn't kept there.
+
+**On the site:** each entry is a `data_center` site (read model layer `data_centers`).
+`/site/data_center/<id>` is its page: a plain card by default (water, energy, noise and
+what it's for: what we know / what's not disclosed, with sources, and where to ask), and
+`?view=adv` for the full record, its filings and the statewide dockets. **Near me** shows
+the same card for sites within 10 miles (or the chosen radius, if larger) and for sites in
+the nearest county that have no public coordinates, and puts mapped ones on its map.
+API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 
 **How to read the values**
 - **not disclosed**: the developer or agency hasn't made this public.
