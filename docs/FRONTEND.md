@@ -1,5 +1,8 @@
 # Frontend / UX Architecture — Plan
 
+> **Superseded in part (2026-11-05):** the modes and navigation below are replaced by
+> [DIRECTION.md](DIRECTION.md) (place-first, Basic/Advanced depth toggle, ≤ 6 nav items).
+
 The dashboard has outgrown "one long scroll." This plans the restructure into
 **modes**, a **layered map-control hierarchy**, better **labeling**, and a
 **framework decision** — so we build the next phase deliberately.
