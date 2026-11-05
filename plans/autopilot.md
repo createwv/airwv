@@ -5,6 +5,7 @@ CZadmin `projects/airwv/CHARTER.md`. Workers tick an item when it's done and nev
 Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the repo; approved by Corey 2026-11-05).
 
 ## Now
+- [ ] Screen sizes in the harness (Corey 2026-11-05): screenshot every page or screen the harness covers at all sizes in `~/.czadmin/tools/devices.json` (phone-small 360x780, phone 390x844, phone-landscape 844x390, tablet 820x1180, desktop 1280x800, desktop-wide 1920x1080; touch + pixel ratio on phones and tablets), and make the report flag anything cut off, overlapping, unreadable or scrolling sideways at any size. Fix nothing yet; list what breaks as proposed items [auto:S]
 - [ ] Product harness: a pytest + Playwright smoke suite that boots the app on the local SQLite copy, screenshots the key pages at 390/1280, asserts a reading is visible above the fold, nav count, map bounds, and no console errors. Every later item cites it. Do first. [auto:M]
 - [x] Direction spec: Corey approved the review's direction on 2026-11-05 (six-noun model, Basic/Advanced toggle, nav collapse, demo place Rutledge). Write the one-page spec in docs/ from the review so later items build on it [auto:S]
 - [x] Unified read model, views + `/api/query`: SQL views (`site`, `measurement`, `record`) over the existing tables and JSON layers; `/api/near` reimplemented on them with a snapshot test proving identical output. (sized L in the review: fit it in one M job or split it, and say so) [auto:M]
