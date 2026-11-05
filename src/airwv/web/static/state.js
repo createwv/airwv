@@ -11,6 +11,9 @@
   const KEYS = ['lat', 'lon', 'km', 'label', 'medium', 'param', 'from', 'to', 'layers', 'view'];
   const DATE = /^\d{4}-\d{2}-\d{2}$/;
   const WORD = /^[a-z0-9_]{1,32}$/;
+  // the place and depth follow you between these pages; param/time/layers stay per page
+  const CARRY_KEYS = ['lat', 'lon', 'km', 'label', 'view'];
+  const CARRY_PATHS = ['/', '/air', '/water', '/nearby'];
   const num = (v, lo, hi) => { const n = parseFloat(v); return v !== '' && isFinite(n) && n >= lo && n <= hi ? n : null; };
 
   // query string → {lat, lon, km, label, medium, param, from, to, layers: [], view}; missing = null
@@ -55,10 +58,24 @@
       if (!root.location || !root.history) return;
       const qs = merge(root.location.search, patch);
       if (qs !== root.location.search) root.history.replaceState(null, '', root.location.pathname + qs + root.location.hash);
+      api.carry();
+    },
+    // rewrite same-site links to Home/Air/Water/Nearby so they keep the current place + view
+    carry() {
+      if (!root.document) return;
+      const cur = new URLSearchParams(root.location.search), patch = {};
+      CARRY_KEYS.forEach(k => { if (cur.get(k)) patch[k] = cur.get(k); });
+      if (!Object.keys(patch).length) return;
+      root.document.querySelectorAll('a[href^="/"]').forEach(a => {
+        const u = new URL(a.getAttribute('href'), root.location.origin);
+        if (!CARRY_PATHS.includes(u.pathname)) return;
+        a.setAttribute('href', u.pathname + merge(u.search, patch) + u.hash);
+      });
     },
     // a link to another page carrying the given state, e.g. href('/nearby', {lat, lon})
     href: (path, patch) => path + merge('', patch),
   };
   root.AirwvState = api;
+  if (root.document) api.carry();
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -100,12 +100,16 @@ function nearMe() {
   if (!navigator.geolocation) { $('w-note').textContent = 'geolocation not available on this device'; return; }
   navigator.geolocation.getCurrentPosition(p => {
     const lat = p.coords.latitude, lon = p.coords.longitude;
-    if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat, lon], {zIndexOffset: 1000,
-      icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
-      .addTo(map).bindPopup('You are here').openPopup();
-    map.setView([lat, lon], 11);
+    showPlace(lat, lon, 'You are here');
+    AirwvState.set({lat, lon, label: null});
   }, () => { $('w-note').textContent = 'could not get your location'; }, {enableHighAccuracy: true, timeout: 10000});
+}
+function showPlace(lat, lon, label) {
+  if (userMarker) userMarker.remove();
+  userMarker = L.marker([lat, lon], {zIndexOffset: 1000,
+    icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+    .addTo(map).bindPopup(esc(label)).openPopup();
+  map.setView([lat, lon], 11);
 }
 
 function colorFor(site, param) {
@@ -264,12 +268,17 @@ async function init() {
   const present = new Set();
   SITES.forEach(s => Object.keys(s.latest).forEach(p => present.add(p)));
   const opts = ORDER.filter(p => present.has(p));
-  current = opts.includes('ph') ? 'ph' : opts[0];
+  // shared URL state (state.js): ?param=&layers=coal&lat=&lon=[&label=]
+  const st = AirwvState.get();
+  current = opts.includes(st.param) ? st.param : opts.includes('ph') ? 'ph' : opts[0];
   $('w-param').innerHTML = opts.map(p => `<option value="${p}">${WATER_PARAMS[p].label}</option>`).join('');
   $('w-param').value = current;
-  $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
+  $('w-param').addEventListener('change', e => { current = e.target.value; AirwvState.set({param: current}); draw(); });
   $('w-nearme').addEventListener('click', nearMe);
-  $('w-coal').addEventListener('change', e => toggleCoal(e.target.checked));
+  $('w-coal').addEventListener('change', e => {
+    AirwvState.set({layers: e.target.checked ? ['coal'] : null}); toggleCoal(e.target.checked); });
+  if (st.layers && st.layers.includes('coal')) { $('w-coal').checked = true; toggleCoal(true); }
+  if (st.lat != null) showPlace(st.lat, st.lon, st.label || 'Selected place');
   loadSdwa();
   // lazily fill a coal popup's "measured water nearby" box the first time it opens
   map.on('popupopen', async e => {
