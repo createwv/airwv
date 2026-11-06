@@ -76,4 +76,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Skip link ("Skip to content") and a `<main>` landmark in `base.html` [auto:S]
 - [ ] Explore v2: a "measurements" option using the `/api/query` series mode (site + param + from/to), with table, CSV and API link [auto:M]
 - [ ] Move the place list from `place.js` and `explore.js` into the shared `state.js` when URL-state lands [auto:S]
+- [ ] Explore: a county filter and a "where value over N" filter on `/api/query`, with tests [auto:M]
 
