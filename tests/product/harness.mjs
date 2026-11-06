@@ -62,6 +62,109 @@ function probe() {
   };
 }
 
+// In-page accessibility probe (WCAG 2.1 AA, the checks a script can make reliably):
+//  contrast  visible text below 4.5:1 (3:1 for large text) against its painted background;
+//            text over an image/gradient background is skipped (can't be computed)
+//  noAlt     <img> with no alt attribute (alt="" is fine: decorative)
+//  noName    buttons, links, form fields, summaries and role=button/tab/… with no accessible name
+//  clickable elements styled as clickable (cursor:pointer) that a keyboard can't reach
+//  motion    animations still running infinitely with prefers-reduced-motion: reduce
+// Leaflet's own map internals are left out (tiles, panes); its zoom/attribution controls aren't.
+function a11yProbe() {
+  const vis = el => { const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && +cs.opacity > 0
+      && !el.closest("[hidden], [aria-hidden=true], .hp"); };
+  const desc = el => {
+    const t = (el.getAttribute("aria-label") || el.textContent || el.getAttribute("title")
+               || el.getAttribute("src") || "").trim().replace(/\s+/g, " ").slice(0, 50);
+    return `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}${el.classList[0]
+      ? "." + el.classList[0] : ""} "${t}"`; };
+  const rgba = s => { const m = s.match(/[\d.]+/g) || []; return m.length < 3 ? [0, 0, 0, 0]
+    : [+m[0], +m[1], +m[2], m[3] === undefined ? 1 : +m[3]]; };
+  const lum = ([r, g, b]) => { const c = v => (v /= 255) <= 0.03928 ? v / 12.92
+    : ((v + 0.055) / 1.055) ** 2.4; return 0.2126 * c(r) + 0.7152 * c(g) + 0.0722 * c(b); };
+  const over = (top, bot) => { const a = top[3];
+    return [0, 1, 2].map(i => top[i] * a + bot[i] * (1 - a)).concat(1); };
+  // background actually painted under el: blend translucent layers down to an opaque one
+  const bgOf = el => { const layers = [];
+    for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e);
+      if (cs.backgroundImage !== "none") return null;
+      const c = rgba(cs.backgroundColor); if (c[3] > 0) layers.push(c);
+      if (c[3] >= 1) break; }
+    return layers.reverse().reduce((acc, c) => over(c, acc), [255, 255, 255, 1]); };
+
+  const contrast = [], seen = new Set();
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const el = n.parentElement;
+    if (!el || seen.has(el) || !n.textContent.trim() || el.closest(".leaflet-pane, script, style"))
+      continue;
+    seen.add(el);
+    if (!vis(el)) continue;
+    const cs = getComputedStyle(el), bg = bgOf(el);
+    if (!bg) continue;
+    let op = 1; for (let e = el; e; e = e.parentElement) op *= +getComputedStyle(e).opacity;
+    const fg = over([...rgba(cs.color).slice(0, 3), rgba(cs.color)[3] * op], bg);
+    const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    const ratio = (a + 0.05) / (b + 0.05), px = parseFloat(cs.fontSize);
+    const large = px >= 24 || (px >= 18.66 && +cs.fontWeight >= 700);
+    if (ratio < (large ? 3 : 4.5))
+      contrast.push(`${desc(el)} ${ratio.toFixed(2)}:1 (${cs.color} on rgb(${bg.slice(0, 3)
+        .map(Math.round)}), ${px}px)`);
+  }
+  const imgs = [...document.querySelectorAll("img:not([alt])")].filter(vis).map(desc);
+  const NAMED = "button, a[href], input:not([type=hidden]), select, textarea, summary, "
+    + "[role=button], [role=tab], [role=switch], [role=checkbox], [role=link], [role=menuitem]";
+  const name = el => { if ((el.getAttribute("aria-label") || el.getAttribute("title") || "").trim())
+      return true;
+    const lb = el.getAttribute("aria-labelledby");
+    if (lb && lb.split(/\s+/).some(id => document.getElementById(id)?.textContent.trim())) return true;
+    if (el.labels && [...el.labels].some(l => l.textContent.trim())) return true;
+    if (["submit", "button", "reset"].includes(el.type) && el.value) return true;
+    if (el.placeholder && el.matches("input, textarea")) return true;  // weak, but announced
+    if (el.textContent.trim()) return true;
+    return [...el.querySelectorAll("img[alt]")].some(i => i.alt.trim()); };
+  const noName = [...document.querySelectorAll(NAMED)]
+    .filter(el => vis(el) && !el.closest(".leaflet-pane") && !name(el)).map(desc);
+  const FOCUSABLE = "a[href], button, input, select, textarea, summary, label, [tabindex], "
+    + "[contenteditable], .leaflet-container";
+  const clickable = [...document.querySelectorAll("body *")].filter(el =>
+    getComputedStyle(el).cursor === "pointer" && vis(el) && !el.closest(FOCUSABLE)
+    && !el.closest(".leaflet-pane") && !(el.parentElement
+      && getComputedStyle(el.parentElement).cursor === "pointer")).map(desc);
+  const motion = document.getAnimations().filter(an => an.playState === "running"
+    && an.effect?.getTiming().iterations === Infinity)
+    .map(an => desc(an.effect.target || document.body) + ` ${an.animationName || "animation"}`);
+  const cap = a => a.slice(0, 25);
+  return { contrast: cap(contrast), noAlt: cap(imgs), noName: cap(noName),
+           clickable: cap(clickable), motion: cap(motion) };
+}
+
+// Keyboard: Tab through the first stops and record any that show no focus indicator
+// (no outline and no box-shadow change versus unfocused).
+async function focusProbe(page, stops = 15) {
+  const missing = [];
+  for (let i = 0; i < stops; i++) {
+    await page.keyboard.press("Tab");
+    const r = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body) return null;
+      const f = getComputedStyle(el), on = { o: f.outlineStyle !== "none" && parseFloat(f.outlineWidth) > 0,
+        s: f.boxShadow, b: f.backgroundColor, c: f.borderColor, t: f.textDecorationLine };
+      el.blur();
+      const u = getComputedStyle(el);
+      const shown = on.o || on.s !== u.boxShadow || on.b !== u.backgroundColor
+        || on.c !== u.borderColor || on.t !== u.textDecorationLine;
+      el.focus();
+      const t = (el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 40);
+      return { shown, el: `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""} "${t}"` };
+    });
+    if (!r) break;
+    if (!r.shown) missing.push(r.el);
+  }
+  return missing;
+}
+
 const vendorFile = name => cfg.vendorDirs.map(d => join(d, name)).find(existsSync);
 
 // Sandboxed shells (agent runs) deny Chromium's Mach-port rendezvous; one process avoids it,
@@ -74,6 +177,7 @@ async function visit(vp, pg) {
   const ctx = await browser.newContext({
     viewport: { width: vp.w, height: vp.h }, isMobile: vp.w < 600, hasTouch: vp.w < 600,
     geolocation: { latitude: cfg.geo.lat, longitude: cfg.geo.lon }, permissions: ["geolocation"],
+    reducedMotion: "reduce",   // the a11y probe checks the page honors it (screenshots hold still too)
   });
   const shimmed = new Set();
   await ctx.route("**/*", async route => {
@@ -115,9 +219,16 @@ async function visit(vp, pg) {
   await page.screenshot({ path: shot }).catch(() => {});   // viewport = above the fold
   await page.screenshot({ path: shot.replace(/\.png$/, "-full.png"), fullPage: true })
     .catch(() => {});
+  // after the screenshots: tabbing scrolls and moves focus
+  let a11y = null;
+  if (!err) try {
+    a11y = await page.evaluate(a11yProbe);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    a11y.noFocus = await focusProbe(page);
+  } catch (e) { a11y = { error: String(e.message || e).split("\n")[0] }; }
   await browser.close().catch(() => {});
   return { page: pg.name, path: pg.path, width: vp.w, height: vp.h, status, error: err, ms,
-           consoleErrors, pageErrors, failed, shot, shimmed: [...shimmed], ...info };
+           consoleErrors, pageErrors, failed, shot, shimmed: [...shimmed], a11y, ...info };
 }
 
 mkdirSync(cfg.out, { recursive: true });
