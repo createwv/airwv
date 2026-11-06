@@ -77,6 +77,11 @@ _ECHO_WATER = ("(EXISTS (SELECT 1 FROM json_each(j.value, '$.programs') p WHERE 
 # `readings` sources that are EPA reference monitors (the rest are community sensors)
 _REFERENCE_SOURCES = "'airnow', 'epa_airdata'"
 
+# AirNow ids are 9-digit AQSIDs (540390020); reference_monitors.json and AirData use the
+# dashed AQS form (54-039-0020). Normalise to the dashed form so one monitor is one site.
+_AQS_ID = ("CASE WHEN sensor_id GLOB '" + "[0-9]" * 9 + "*' THEN substr(sensor_id, 1, 2) || '-' || "
+           "substr(sensor_id, 3, 3) || '-' || substr(sensor_id, 6, 4) ELSE sensor_id END")
+
 SITE_VIEW = "CREATE TEMP VIEW site AS" + " UNION ALL".join([
     _layer_branch("abandoned_wells", "wells", "well", "'land'", _j("id"), "NULL", _j("county"),
                   "'http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47' || "
@@ -112,16 +117,21 @@ SITE_VIEW = "CREATE TEMP VIEW site AS" + " UNION ALL".join([
           WHERE lat IS NOT NULL AND lon IS NOT NULL GROUP BY site_id)""",
     # sensors in `readings` (AirNow / AirData reference monitors, PurpleAir), from the
     # small `reading_sites` table filled at ingest; ones a layer above already lists
-    # (reference_monitors.json, the resolved community listing) are left to that layer
+    # (reference_monitors.json, the resolved community listing) are left to that layer,
+    # and an AirData monitor AirNow also reports is left to AirNow (matched on AQS id)
     f"""
     SELECT kind || ':' || sensor_id, kind, 'air', 'reading_sites', sensor_id, name, lat, lon,
            NULL, NULL, NULL,
            json_object('source', source, 'first_ts', first_ts, 'last_ts', last_ts)
     FROM (SELECT CASE WHEN source IN ({_REFERENCE_SOURCES}) THEN 'reference_monitor' ELSE 'sensor' END
-                 AS kind, * FROM reading_sites WHERE lat IS NOT NULL AND lon IS NOT NULL) rs
-    WHERE NOT (kind = 'reference_monitor' AND sensor_id IN (
+                 AS kind, {_AQS_ID} AS aqs_id, * FROM reading_sites
+          WHERE lat IS NOT NULL AND lon IS NOT NULL) rs
+    WHERE NOT (kind = 'reference_monitor' AND aqs_id IN (
                    SELECT {_j('id')} FROM layer_doc d, json_each(d.doc, '$.monitors') j
                    WHERE d.layer = 'reference_monitors' AND {_j('id')} IS NOT NULL))
+      AND NOT (source = 'epa_airdata' AND aqs_id IN (
+                   SELECT {_AQS_ID} FROM reading_sites
+                   WHERE source = 'airnow' AND lat IS NOT NULL AND lon IS NOT NULL))
       AND NOT (kind = 'sensor' AND sensor_id IN (
                    SELECT {_j('sid')} FROM layer_doc d, json_each(d.doc, '$.sensors') j
                    WHERE d.layer = 'community_sensors' AND {_j('sid')} IS NOT NULL))""",

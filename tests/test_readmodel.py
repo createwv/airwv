@@ -122,22 +122,32 @@ def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
     t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
     store.save_readings([
         # the monitor moves: the site follows its latest located reading, not an older one
-        Reading(source="airnow", sensor_id="540390020", ts=t0 + timedelta(hours=2), pm2_5=7.0,
+        Reading(source="airnow", sensor_id="540250003", ts=t0 + timedelta(hours=2), pm2_5=7.0,
                 lat=38.36, lon=-81.64),
-        Reading(source="airnow", sensor_id="540390020", ts=t0 - timedelta(hours=5), pm2_5=5.0,
+        Reading(source="airnow", sensor_id="540250003", ts=t0 - timedelta(hours=5), pm2_5=5.0,
                 lat=38.0, lon=-81.0),
         # a located PurpleAir sensor the resolved listing doesn't carry, and an AirData
         # monitor reference_monitors.json already lists (left to that layer)
         Reading(source="purpleair", sensor_id="999001", ts=t0, pm2_5=4.0, lat=38.4, lon=-81.6),
-        Reading(source="epa_airdata", sensor_id="54-003-0003", ts=t0, pm2_5=8.0, lat=39.4481, lon=-77.9638)])
-    store.name_reading_sites("airnow", {"540390020": "Charleston", "nope": "unknown monitor"})
+        Reading(source="epa_airdata", sensor_id="54-003-0003", ts=t0, pm2_5=8.0, lat=39.4481, lon=-77.9638),
+        # AirData's copy of the AirNow monitor above (left to AirNow), and one AirNow lacks
+        Reading(source="epa_airdata", sensor_id="54-025-0003", ts=t0, pm2_5=7.5, lat=38.36, lon=-81.64),
+        Reading(source="epa_airdata", sensor_id="54-099-0001", ts=t0, pm2_5=6.5, lat=38.2, lon=-82.5)])
+    store.name_reading_sites("airnow", {"540250003": "Test monitor", "nope": "unknown monitor"})
     with store.read_model.connect() as conn:
         rows = conn.exec_driver_sql(
             "SELECT site_id, kind, name, lat, lon, attrs FROM site WHERE layer = 'reading_sites' "
             "ORDER BY site_id").all()
-    assert [r[0] for r in rows] == ["reference_monitor:540390020", "sensor:999001"]
-    site_id, kind, name, lat, lon, attrs = rows[0]
-    assert (kind, name, lat, lon) == ("reference_monitor", "Charleston", 38.36, -81.64)
+        # Charleston is AirNow 540390020 in `readings` and 54-039-0020 in
+        # reference_monitors.json: one site, not two
+        charleston = conn.exec_driver_sql(
+            "SELECT site_id FROM site WHERE site_id IN "
+            "('reference_monitor:540390020', 'reference_monitor:54-039-0020')").scalars().all()
+    assert charleston == ["reference_monitor:54-039-0020"]
+    assert [r[0] for r in rows] == ["reference_monitor:54-099-0001", "reference_monitor:540250003",
+                                    "sensor:999001"]
+    site_id, kind, name, lat, lon, attrs = rows[1]
+    assert (kind, name, lat, lon) == ("reference_monitor", "Test monitor", 38.36, -81.64)
     attrs = json.loads(attrs)
     assert attrs["source"] == "airnow" and attrs["first_ts"][:13] == "2026-06-30 19"
     assert attrs["last_ts"][:13] == "2026-07-01 02"
@@ -147,7 +157,7 @@ def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
     store.create_schema()
     with store._engine.connect() as conn:
         got = dict(conn.exec_driver_sql("SELECT sensor_id, lat FROM reading_sites").all())
-    assert got["540390020"] == 38.36 and got["197127"] is None and len(got) == 5
+    assert got["540250003"] == 38.36 and got["197127"] is None and len(got) == 8
 
 
 def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
@@ -169,7 +179,9 @@ def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
 
 
 def test_api_query(tmp_path, monkeypatch):
-    c, _ = _client(tmp_path, monkeypatch)
+    c, store = _client(tmp_path, monkeypatch)
+    store.save_readings([Reading(source="airnow", sensor_id="540250003", pm2_5=5.5, lat=38.36,
+                                 lon=-81.64, ts=datetime(2026, 7, 1, tzinfo=timezone.utc))])
     r = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&param=pm2_5").json()
     assert r["count"] == len(r["sites"]) > 0 and r["place"]["km"] == 8
     mis = [s["mi"] for s in r["sites"]]
@@ -180,9 +192,11 @@ def test_api_query(tmp_path, monkeypatch):
     # provenance travels with the answer
     assert all(layer in r["provenance"] for layer in {s["layer"] for s in r["sites"]}
                if layer not in ("water_readings", "reading_sites"))
-    # the AirNow monitor in `readings` is a site too, with its latest value
-    assert by_id["reference_monitor:540390020"]["layer"] == "reading_sites"
-    assert by_id["reference_monitor:540390020"]["latest"]["value"] == 6.0
+    # an AirNow monitor in `readings` is a site too, with its latest value; one
+    # reference_monitors.json carries (Charleston, 54-039-0020) isn't listed twice
+    assert by_id["reference_monitor:540250003"]["layer"] == "reading_sites"
+    assert by_id["reference_monitor:540250003"]["latest"]["value"] == 5.5
+    assert "reference_monitor:54-039-0020" in by_id and "reference_monitor:540390020" not in by_id
     # filters
     water = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&medium=water").json()["sites"]
     assert water and all(s["medium"] == "water" for s in water)
