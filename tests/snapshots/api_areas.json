@@ -1,0 +1,214 @@
+{
+ "humidity,180": {
+  "areas": [
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "Kanawha City",
+    "max_value": 60.0,
+    "region": "Kanawha Valley",
+    "reporting": 1,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "flat",
+     "n_days": 30,
+     "pct_change": 0.0,
+     "r": 0.0,
+     "watch": false
+    },
+    "value": 60.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "300003",
+    "max_value": 57.0,
+    "region": "Mid-Ohio Valley",
+    "reporting": 1,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "flat",
+     "n_days": 30,
+     "pct_change": 0.5,
+     "r": 0.09,
+     "watch": false
+    },
+    "value": 57.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "humidity"
+ },
+ "pm2_5,180": {
+  "areas": [
+   {
+    "color": "#00e400",
+    "max_sensor": "Rutledge",
+    "max_value": 12.3,
+    "region": "Kanawha Valley",
+    "reporting": 2,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": 235.2,
+     "r": 0.85,
+     "watch": true
+    },
+    "value": 11.2
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Mid-Ohio Valley",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": -335.2,
+     "r": 0.3,
+     "watch": false
+    },
+    "value": null
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "pm2_5"
+ },
+ "pm2_5,20": {
+  "areas": [
+   {
+    "color": "#00e400",
+    "max_sensor": "Rutledge",
+    "max_value": 12.3,
+    "region": "Kanawha Valley",
+    "reporting": 2,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": 11.2
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Mid-Ohio Valley",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "rising",
+     "n_days": 21,
+     "pct_change": -331.1,
+     "r": 0.37,
+     "watch": false
+    },
+    "value": null
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "pm2_5"
+ },
+ "voc,180": {
+  "areas": [
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "300003",
+    "max_value": 120.0,
+    "region": "Mid-Ohio Valley",
+    "reporting": 1,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "falling",
+     "n_days": 31,
+     "pct_change": -20.0,
+     "r": -1.0,
+     "watch": false
+    },
+    "value": 120.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "Kanawha City",
+    "max_value": 99.6,
+    "region": "Kanawha Valley",
+    "reporting": 1,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": 39.8,
+     "r": 0.92,
+     "watch": true
+    },
+    "value": 99.6
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "voc"
+ }
+}
