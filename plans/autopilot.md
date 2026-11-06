@@ -72,4 +72,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Show sensor names on the local database copy, not bare IDs, so screenshots read like production. [auto:S]
 - [ ] Move /air's controls on phone below the map into a collapsed "Filters" sheet (the next §6 item). [auto:S]
 - [ ] Harness: run the a11y checks with a dialog open and a map popup open (report modal, facility detail, a sensor popup) [auto:S]
+- [ ] Map markers: give the Leaflet markers that open popups keyboard access and names (`keyboard: true`, `title`/`alt`) once Leaflet is vendored for the harness [auto:S]
 
