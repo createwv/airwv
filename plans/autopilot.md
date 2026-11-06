@@ -80,4 +80,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] CORS + rate limit on `/api/*` and `/data/dumps/*` (after Postgres) [auto:S]
 - [ ] Add published events (`events` with status 'published') as an `events.csv.gz` dump [auto:S]
 - [ ] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
+- [ ] Show the dumps' "as of" date and file sizes on `/data` from `manifest.json` [auto:S]
 
