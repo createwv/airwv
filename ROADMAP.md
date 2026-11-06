@@ -700,8 +700,66 @@ side already accepts it (report category **🟤 Soil / land**, `field_readings` 
   smaller part (keyless, known patterns); the lens + integration is the bulk. **Sequence:** after the
   documentation-quality pass; the Postgres migration is independent.
 
+### Data centers — water, energy, noise, purpose, what's undisclosed
+Residents keep asking what the proposed data centers and crypto mines will do to their **water,
+power bills and quiet**, and what they're *for*. HB 2014 (2025) makes certification petitions
+confidential and blocks local zoning/noise/lighting ordinances for certified sites, so much of the
+answer is **"not disclosed"** — and saying that plainly is part of the product. Desk research +
+data: [`docs/DATA-CENTERS.md`](docs/DATA-CENTERS.md). This is a **records layer** (permits, dockets,
+filings, news), not a measurement, like Soil/Land above.
+
+- [~] **Site list + per-site record** — BUILT: `src/airwv/data/data_centers.json` (provenance block;
+      every fact sourced and tagged primary / company / news / tracker) → read-model layer
+      `data_centers`, `/site/data_center/<id>` (plain card: water · energy · noise · purpose, each
+      *what we know* / *what's not disclosed*, with where to ask; `?view=adv` for filings and the
+      statewide dockets), `/api/data-centers`, `/api/query?kind=data_center`, and a card on **Near me**.
+- [ ] **Keep it current** — re-check the sources DATA-CENTERS.md lists (DEP DAQ applications, PSC
+      dockets, Air Quality Board, Commerce's Data Economy Office) on a schedule; show each site's
+      "last checked" date. Any new fetcher needs Corey's OK (charter data rule 2).
+- [ ] **Water** — look up DEP large-quantity water-use reports and withdrawal / NPDES / stormwater
+      permits per site; tie each site to the river or mine pool it draws from and to the Water
+      lens (nearest gauges, downstream drinking-water intakes).
+- [ ] **Energy** — per site: grid vs off-grid, MW, fuel, backup diesel; link the PSC dockets and what
+      they mean for rates in plain words; for on-site gas plants, put the DEP permit's potential
+      emissions next to the nearest air monitors (an Air-lens tie-in).
+- [ ] **Noise** — no operating measurement exists in WV yet: say so on each card; link local noise
+      ordinances where they exist (and note HB 2014 preempts them for certified sites); hook into the
+      *Noise and light pollution* medium below for community reports and sensors.
+- [ ] **Purpose + what's undisclosed** — keep the use labels (AI / cloud / crypto / government…)
+      with confidence, and a statewide "what nobody has disclosed" tally (water volume, tenant,
+      backup generators, certification) so the gaps are visible, not hidden.
+- **Honesty/caveats:** news and tracker claims can be wrong or stale; use labels are our read, not
+  findings; "none found" isn't proof of absence. Wording on health/legal effects stays sourced
+  (charter data rule 3).
+
+### Noise and light pollution (a later medium)
+A fourth lens after Air | Water | Land: what residents **hear and see at night** — compressor
+stations, gas engines, data-center fans, mines, highways, and the sky glow that comes with them.
+Two halves with very different data: **light** has a real satellite record; **noise** has almost
+none in WV, so it starts as community reports and a few sensors. Candidate sources below are
+ideas only — each needs Corey's OK before any fetching (charter data rule 2).
+
+- [ ] **Night-sky brightness (satellite)** — NASA/NOAA **VIIRS Day/Night Band** monthly composites
+      (e.g. NASA Black Marble) for change over time, and the **World Atlas of Artificial Night Sky
+      Brightness** for a baseline; a map layer + "how dark is my sky / what changed since <year>"
+      on Near me. Add ground truth from **Globe at Night** citizen observations and WV dark-sky
+      places (e.g. Watoga / Calvin Price, if still certified — verify).
+- [ ] **Community noise reports** — a **🔊 Noise / 💡 Light** report category (time, duration,
+      what it sounds like, suspected source), mapped like other community reports and labeled
+      unverified; reuse the reporting flow and the `/nearby` drill-in.
+- [ ] **Noise sensors** — field readings with `medium=noise` (dB(A), meter type, method, duration),
+      using the existing field-reading intake; later, low-cost continuous sound-level monitors at
+      partner sites, the way PurpleAir works for air. Context layer: the **US DOT (BTS) National
+      Transportation Noise Map** for road/rail/air noise.
+- [ ] **Tie-ins** — data-center, compressor-station and mine sites near a report or a bright patch;
+      Learn content on health effects of chronic noise and light at night (sourced, e.g. WHO noise
+      guidelines) and what local ordinances do and don't cover.
+- **Honesty/caveats:** satellite radiance is light leaving the ground, not what a person sees, and
+      it's coarse (~500 m) with snow/moon/cloud artifacts; one dB reading depends on the meter,
+      distance and time; community reports are unverified. **Sequence:** after Soil/Land.
+
 ### Beyond (later)
-- [ ] Other exposures worth surfacing over time (radon, noise, PFAS-specific, etc.) —
+- [ ] Other exposures worth surfacing over time (radon, PFAS-specific, etc.) —
       driven by community concern.
 
 ## Phase 8 — Legibility & the public experience 👁️
