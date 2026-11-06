@@ -60,4 +60,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Site pages: a recent-readings chart for sensors, monitors and gauges, using the `/api/query` series mode. [auto]
 - [ ] Hide the statewide haze pop-up on `/place`, or scope it to the chosen place, so it doesn't contradict the air line [auto:S]
 - [ ] Point the status lines at `/site/<kind>/<id>` once site pages cover sensors, gauges and sample sites [auto:S]
+- [ ] Make `/` show "my place now" when a place is set (in the URL or saved in the browser), otherwise statewide as now [auto:S]
 
