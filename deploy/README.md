@@ -89,6 +89,20 @@ Notes: the dashboard has no auth (it shows public data); add HTTP basic-auth at 
 proxy if you want it private during preview. Sensor coordinates shown are the same
 ones PurpleAir already publishes.
 
+## Nightly public dumps
+
+`python -m airwv.dumps` writes gzipped CSV of the public read views (`site`, `measurement`,
+`record`) plus `manifest.json` (row counts, columns, each layer's provenance) into
+`AIRWV_DUMPS_DIR` (default `data/dumps`, gitignored). The dashboard serves them at
+`/data/dumps/<name>` and links them from `/data`; until the first run they 404.
+
+```bash
+sudo cp deploy/systemd/airwv-dumps.* /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now airwv-dumps.timer   # 03:30 nightly
+```
+
+It reads only the public views (no reports, feedback or subscriptions) and needs no API key.
+
 ## Notes
 
 - **Resolve occasionally, not every run.** Re-run `resolve` after deploying or

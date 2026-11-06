@@ -29,6 +29,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from airwv import dumps
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import query_records_to_csv, query_sites_to_csv, readings_to_csv
 from airwv.notify.chat import chat_notifier_from_env
@@ -1821,6 +1822,17 @@ def create_app(store: Store) -> FastAPI:
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
                                           context={"mode": "data"})
+
+    @app.get("/data/dumps/{name}")
+    def data_dump(name: str):
+        """The nightly public dumps (dumps.py): gzipped CSV of the read views + manifest.json.
+        Only the fixed file names; 404 until the first nightly run has written them."""
+        path = dumps.default_dir() / name
+        if name not in dumps.FILES or not path.is_file():
+            raise HTTPException(status_code=404, detail="no such dump (yet)")
+        media = "application/json" if name.endswith(".json") else "application/gzip"
+        return FileResponse(path, media_type=media, filename=name,
+                            headers={"Cache-Control": "public, max-age=3600"})
 
     @app.get("/about", response_class=HTMLResponse)
     def about(request: Request):
