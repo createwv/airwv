@@ -37,7 +37,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] (session with Corey) Postgres + Timescale migration — session with Corey, L: steps 1–6 from ROADMAP; touches prod. SQLite-ism fixes beforehand are.
 - [ ] (session with Corey) Read-only SQL role + `/explore/sql` — session (needs Postgres), M.
 - [x] Nightly public dumps + rate limit + CORS after Postgres; S on SQLite for the dumps alone. [auto:S]
-- [ ] Place-based alerts, any medium: subscriptions keyed to place + rule; spill/violation triggers; SMTP go-live is a session item. [auto:M]
+- [x] Place-based alerts, any medium: subscriptions keyed to place + rule; spill/violation triggers; SMTP go-live is a session item. [auto:M]
 - [ ] (session with Corey) Land medium ingest (Superfund/RCRA/AML) — session S to fetch (network), then to model and surface.
 - [x] Neighbor cross-check + auto event candidates. [auto:M]
 - [ ] (session with Corey) Demo script + partner walkthrough S with Corey: the five-step narrative from §4, one URL per step.
