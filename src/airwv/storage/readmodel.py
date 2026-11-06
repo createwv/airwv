@@ -200,13 +200,21 @@ class ReadModel:
             yield conn
 
     # ---- queries ----
-    def sites_near(self, conn, lat: float, lon: float, radius_mi: float, *, layer: str | None = None,
-                   kinds: list[str] | None = None, medium: str | None = None,
+    def sites_near(self, conn, lat: float | None, lon: float | None, radius_mi: float, *,
+                   layer: str | None = None, kinds: list[str] | None = None,
+                   medium: str | None = None, area: str | None = None,
                    limit: int = 50, bbox_km: float | None = None) -> list[dict]:
         """Sites within ``radius_mi`` of a point, nearest first (ties in layer order).
-        ``bbox_km`` adds the cheap lat/lon box the water query has always used."""
-        where = ["lat IS NOT NULL", "lon IS NOT NULL", "hav_mi(:lat, :lon, lat, lon) <= :r"]
+        ``area`` keeps sites whose county or WV region (community sensors) is that name;
+        with no point (``lat``/``lon`` None) it's the only place filter, in layer order,
+        and sites without coordinates count too. ``bbox_km`` adds the cheap lat/lon box
+        the water query has always used."""
         params: dict = {"lat": lat, "lon": lon, "r": radius_mi, "limit": limit}
+        point = lat is not None and lon is not None
+        where = ["lat IS NOT NULL", "lon IS NOT NULL", "hav_mi(:lat, :lon, lat, lon) <= :r"] if point else []
+        if area:
+            where.append("(county = :area OR json_extract(attrs, '$.region') = :area)")
+            params["area"] = area
         if layer:
             where.append("layer = :layer")
             params["layer"] = layer
@@ -216,15 +224,16 @@ class ReadModel:
         if medium:
             where.append("medium = :medium")
             params["medium"] = medium
-        if bbox_km is not None:
+        if bbox_km is not None and point:
             dlat = bbox_km / 111.0
             dlon = bbox_km / (111.0 * max(math.cos(math.radians(lat)), 0.01))
             where += ["lat BETWEEN :la0 AND :la1", "lon BETWEEN :lo0 AND :lo1"]
             params.update(la0=lat - dlat, la1=lat + dlat, lo0=lon - dlon, lo1=lon + dlon)
         rows = conn.exec_driver_sql(
             "SELECT site_id, kind, medium, layer, ref, name, lat, lon, county, url, attrs, "
-            "hav_mi(:lat, :lon, lat, lon) AS d FROM site WHERE " + " AND ".join(where)
-            + " ORDER BY d, ord, ref LIMIT :limit", params).mappings().all()
+            "hav_mi(:lat, :lon, lat, lon) AS d FROM site WHERE " + (" AND ".join(where) or "1")
+            + (" ORDER BY d, ord, ref" if point else " ORDER BY layer, ord, ref")
+            + " LIMIT :limit", params).mappings().all()
         return [_site(r) for r in rows]
 
     def sites(self, conn, *, layer: str, where: str = "1", params: dict | None = None) -> list[dict]:
@@ -259,25 +268,28 @@ class ReadModel:
                 out[layer] = dict(zip(("source", "scope", "disclaimer", "fetched_at"), row))
         return out
 
-    def latest(self, conn, medium: str, refs: list[str], parameter: str | None = None) -> dict:
-        """Latest value per (ref, parameter): ``{ref: {parameter: {value, unit, ts}}}``.
-        With one ``parameter``, per-ref indexed LIMIT-1 lookups (the fast path on
-        ``readings``, which has millions of rows)."""
+    def latest(self, conn, medium: str, refs: list[str], parameter: str | None = None,
+               since=None, until=None) -> dict:
+        """Latest value per (ref, parameter): ``{ref: {parameter: {value, unit, ts}}}``,
+        optionally inside a time window (``since`` / ``until``, inclusive; a date string
+        or a naive-UTC datetime). With one ``parameter``, per-ref indexed LIMIT-1 lookups
+        (the fast path on ``readings``, which has millions of rows)."""
         out: dict[str, dict] = {}
+        window, wp = _window(since, until)
         if parameter:
             for ref in refs:
                 row = conn.exec_driver_sql(
                     "SELECT value, unit, ts FROM measurement WHERE medium = :m AND parameter = :p "
-                    "AND ref = :r ORDER BY ts DESC LIMIT 1",
-                    {"m": medium, "p": parameter, "r": ref}).first()
+                    f"AND ref = :r{window} ORDER BY ts DESC LIMIT 1",
+                    {"m": medium, "p": parameter, "r": ref, **wp}).first()
                 if row is not None:
                     out[ref] = {parameter: {"value": row[0], "unit": row[1], "ts": row[2]}}
             return out
         if not refs:
             return out
         marks = ", ".join(f":r{n}" for n in range(len(refs)))
-        params = {"medium": medium, **{f"r{n}": r for n, r in enumerate(refs)}}
-        cond = f"medium = :medium AND ref IN ({marks})"
+        params = {"medium": medium, **{f"r{n}": r for n, r in enumerate(refs)}, **wp}
+        cond = f"medium = :medium AND ref IN ({marks}){window}"
         rows = conn.exec_driver_sql(
             "SELECT m.ref, m.parameter, m.value, m.unit, m.ts FROM measurement m JOIN ("
             f"SELECT ref, parameter, max(ts) AS mts FROM measurement WHERE {cond} GROUP BY ref, parameter"
@@ -287,18 +299,51 @@ class ReadModel:
             out.setdefault(ref, {})[param] = {"value": value, "unit": unit, "ts": ts}
         return out
 
-    def peak(self, conn, medium: str, refs: list[str], parameter: str, since: str) -> dict:
-        """Highest ``parameter`` value per ref at or after ``since`` (``YYYY-MM-DD``):
-        ``{ref: {value, unit, ts}}``; per-ref indexed lookups like ``latest``."""
+    def peak(self, conn, medium: str, refs: list[str], parameter: str, since, until=None) -> dict:
+        """Highest ``parameter`` value per ref at or after ``since`` (``YYYY-MM-DD``) and
+        up to ``until`` when given: ``{ref: {value, unit, ts}}``; per-ref indexed lookups
+        like ``latest``."""
         out: dict[str, dict] = {}
+        window, wp = _window(since, until)
         for ref in refs:
             row = conn.exec_driver_sql(
                 "SELECT value, unit, ts FROM measurement WHERE medium = :m AND parameter = :p "
-                "AND ref = :r AND ts >= :since ORDER BY value DESC, ts DESC LIMIT 1",
-                {"m": medium, "p": parameter, "r": ref, "since": since}).first()
+                f"AND ref = :r{window} ORDER BY value DESC, ts DESC LIMIT 1",
+                {"m": medium, "p": parameter, "r": ref, **wp}).first()
             if row is not None:
                 out[ref] = {"value": row[0], "unit": row[1], "ts": row[2]}
         return out
+
+    def daily(self, conn, medium: str, ref: str, parameter: str, since=None, until=None) -> dict:
+        """Daily mean of ``parameter`` for one ref inside the window: ``{date: value}``
+        (aggregated in SQL, like ``Store.daily_avg``)."""
+        from datetime import date
+
+        window, wp = _window(since, until)
+        rows = conn.exec_driver_sql(
+            "SELECT date(ts), avg(value) FROM measurement WHERE medium = :m AND parameter = :p "
+            f"AND ref = :r{window} GROUP BY date(ts)",
+            {"m": medium, "p": parameter, "r": ref, **wp}).all()
+        return {date.fromisoformat(str(d)[:10]): float(v) for d, v in rows if v is not None}
+
+
+def _ts(t) -> str:
+    """A bound for ``ts``: date strings pass through; datetimes take the stored text form
+    (SQLAlchemy's SQLite DateTime), so comparisons match the ORM's."""
+    return t if isinstance(t, str) else t.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+
+def _window(since, until) -> tuple[str, dict]:
+    """SQL and params for an inclusive ``ts`` window; a date-only ``until`` covers that day."""
+    sql, params = "", {}
+    if since is not None:
+        sql += " AND ts >= :since"
+        params["since"] = _ts(since)
+    if until is not None:
+        u = _ts(until)
+        sql += " AND ts <= :until"
+        params["until"] = u + " 99" if len(u) == 10 else u   # sorts after any time that day
+    return sql, params
 
 
 def _site(r) -> dict:

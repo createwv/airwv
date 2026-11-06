@@ -380,10 +380,12 @@ def create_app(store: Store) -> FastAPI:
     coords = _index_to_coords()
     regions = _index_to_region()
     airnow_names = _airnow_meta()
-    # community sensors join the read model's `site` view (resolved listing, WV regions only)
+    # community sensors join the read model's `site` view (resolved listing, WV regions only;
+    # `region` is the /api/query area; a sensor without listed coords still counts in its area)
     store.read_model.set_layer("community_sensors", [
-        {"sid": sid, "lat": c[0], "lon": c[1], "name": names.get(sid, sid)}
-        for sid, c in coords.items() if sid in regions],
+        {"sid": sid, "lat": coords.get(sid, (None, None))[0], "lon": coords.get(sid, (None, None))[1],
+         "name": names.get(sid, sid), "region": region or "Other"}
+        for sid, region in regions.items()],
         source="PurpleAir public listing (resolved)")
     facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
     notifier = chat_notifier_from_env()   # Slack/Discord webhooks (env); disabled if unset
@@ -1265,19 +1267,23 @@ def create_app(store: Store) -> FastAPI:
 
     _areas_cache: dict = {}
 
-    def _region_groups() -> dict[str, list[str]]:
+    def _region_groups(conn, region: str | None = None) -> dict[str, list[str]]:
+        """Community-sensor refs per WV region, from the read model's `site` view (the
+        same ``area`` filter /api/query takes), in listing order."""
         groups: dict[str, list[str]] = defaultdict(list)
-        for sid, region in regions.items():
-            groups[region or "Other"].append(sid)
+        for s in store.read_model.sites_near(conn, None, None, 0, layer="community_sensors",
+                                             area=region, limit=-1):
+            groups[s["attrs"]["region"]].append(s["ref"])
         return groups
 
-    def _area_daily(sids, field: str, since):
+    def _area_daily(conn, sids, field: str, since):
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
-        Uses SQL daily averages per sensor (cheap over years), then takes the median
-        across the sensors reporting each day so one noisy unit can't swing the area."""
+        Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
+        then takes the median across the sensors reporting each day so one noisy unit
+        can't swing the area."""
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.daily_avg(sid, field=field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1292,8 +1298,10 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/api/areas")
     def areas(field: str = "pm2_5", days: int = 180):
-        """Current rollup + trend per WV region, over community sensors. Aggregates
-        history, so cached briefly."""
+        """Current rollup + trend per WV region, over community sensors. Reads the
+        unified views (the `area` filter and measurement window /api/query uses);
+        tests/snapshots/api_areas.json pins the output. Aggregates history, so cached
+        briefly."""
         from airwv.analysis import is_worsening
 
         if field not in AREA_FIELDS:
@@ -1306,14 +1314,19 @@ def create_app(store: Store) -> FastAPI:
         if hit and _t.time() - hit[0] < 300:
             return hit[1]
 
-        latest = store.latest_value_per_sensor(field)
         since = datetime.utcnow() - timedelta(days=days)
         is_pm = field.startswith("pm")
+        rm = store.read_model
         out = []
-        for region, sids in _region_groups().items():
+        with rm.connect() as conn:
+            groups = _region_groups(conn)
+            latest = {ref: v[field]["value"] for ref, v in
+                      rm.latest(conn, "air", [s for g in groups.values() for s in g], field).items()}
+            dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
+        for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
                    if sid in latest and not (is_pm and latest[sid] > 1000)]
-            daily = _area_daily(sids, field, since)
+            daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
             worst = max(cur, key=lambda p: p[1]) if cur else None
@@ -1338,9 +1351,10 @@ def create_app(store: Store) -> FastAPI:
     def area_series(region: str, field: str = "pm2_5", days: int = 180):
         if field not in AREA_FIELDS:
             raise HTTPException(status_code=400, detail="unsupported field for area series")
-        sids = _region_groups().get(region, [])
         since = datetime.utcnow() - timedelta(days=days)
-        daily = _area_daily(sids, field, since) if sids else []
+        with store.read_model.connect() as conn:
+            sids = _region_groups(conn, region).get(region, [])
+            daily = _area_daily(conn, sids, field, since) if sids else []
         t = _area_trend(daily, field)
         return {
             "region": region, "field": field, "sensor_count": len(sids),
@@ -1728,8 +1742,21 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/api/water/near")
     def water_near(lat: float, lon: float, km: float = 5.0, limit: int = 6):
         """Water sample sites near a point with their latest measured values —
-        used to attach measured water quality to a coal discharger / facility."""
-        return {"sites": store.water_near(lat, lon, km=min(km, 25), limit=min(limit, 20))}
+        used to attach measured water quality to a coal discharger / facility. Reads the
+        unified views (the water sites /api/query?medium=water returns);
+        tests/snapshots/api_water_near.json pins the output."""
+        km, limit = min(km, 25), min(limit, 20)
+        rm = store.read_model
+        with rm.connect() as conn:
+            sites = rm.sites_near(conn, lat, lon, km * 0.621371, layer="water_readings",
+                                  limit=10_000, bbox_km=km)
+            sites = sorted(sites, key=lambda s: (round(s["d"], 1), s["ref"]))[:limit]
+            latest = rm.latest(conn, "water", [s["ref"] for s in sites])
+        return {"sites": [{
+            "site_id": s["ref"], "name": s["name"], "lat": s["lat"], "lon": s["lon"],
+            "latest": {p: {**v, "ts": v["ts"] and datetime.fromisoformat(v["ts"]).isoformat()}
+                       for p, v in latest.get(s["ref"], {}).items()},
+            "mi": round(s["d"], 1)} for s in sites]}
 
     @app.get("/api/water/series/{site_id}")
     def water_series(site_id: str, parameter: str = "ph", days: int = 30):
