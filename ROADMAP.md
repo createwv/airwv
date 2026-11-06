@@ -715,6 +715,12 @@ the events/spills split are **decided** (see below).*
 *2026-11-05: direction approved: six-noun model, Basic/Advanced over one place, nav collapse,
 demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes the redesign below.*
 
+- [x] **Place picker + "my place now" (basic view)** — `/place?place=rutledge&km=8` (or
+      `?lat=&lon=&name=`): known places / my location, 5 · 10 · 25 mi; one plain status line per
+      medium (air band + PM2.5 + time + nearest sensor; water gauge or latest sample; drinking-water
+      health violations; wells) and "what changed (7 days)" (PM2.5 band peaks, spills, permit
+      dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
+
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
 (composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.

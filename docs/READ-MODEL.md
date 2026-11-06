@@ -2,7 +2,9 @@
 
 The first step of the six-noun model in [DIRECTION.md](DIRECTION.md) §1: SQL views over the
 tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
-(`store.read_model`). Endpoints on it: `/api/near` (unchanged output) and `/api/query`.
+(`store.read_model`). Endpoints on it: `/api/near` (unchanged output) and `/api/query`
+(parameters in [DATA-SOURCES.md](DATA-SOURCES.md#apiquery--one-read-path-over-the-unified-views)),
+which the `/place` basic view reads for every line it shows.
 
 ## How it works
 
@@ -35,3 +37,7 @@ have no public coordinates, so `lat`/`lon` are NULL and only county finds them; 
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
 - `/api/areas` and `/api/water/near` aren't moved onto `/api/query` yet.
+- "What changed" (`since`) only sees records with a date (`effective`): spills and permit
+  issue dates. Violations and compliance status carry no date in the source files, so a
+  *new* violation can't be told apart from an old one yet; community reports and events
+  aren't in the views.

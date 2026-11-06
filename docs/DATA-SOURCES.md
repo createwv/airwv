@@ -249,10 +249,14 @@ is easy. Powers the **What's near me?** page. Reads the unified views below; out
 pinned by `tests/snapshots/api_near.json`.
 
 ### `/api/query` — one read path over the unified views
-`/api/query?lat=&lon=&km=&kind=&medium=&param=&limit=` returns sites near a place from
+`/api/query?lat=&lon=&km=&kind=&medium=&param=&since=&limit=` returns sites near a place from
 the `site` / `measurement` / `record` SQL views, each with its records, its latest
 `param` value (sensors, monitors, gauges, sample sites) and the provenance block of every
-layer in the answer. See [READ-MODEL.md](READ-MODEL.md).
+layer in the answer. `param` may be a comma list (the first one a site has wins; `latest`
+names it). `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
+`param` since then, and a `changes` list of records dated on/after it (spills, permit
+dates), newest first. `km` is capped at 40.25 (25 mi). Powers the **My place now** page
+(`/place`). See [READ-MODEL.md](READ-MODEL.md).
 
 ---
 

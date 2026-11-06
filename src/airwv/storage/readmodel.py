@@ -287,6 +287,19 @@ class ReadModel:
             out.setdefault(ref, {})[param] = {"value": value, "unit": unit, "ts": ts}
         return out
 
+    def peak(self, conn, medium: str, refs: list[str], parameter: str, since: str) -> dict:
+        """Highest ``parameter`` value per ref at or after ``since`` (``YYYY-MM-DD``):
+        ``{ref: {value, unit, ts}}``; per-ref indexed lookups like ``latest``."""
+        out: dict[str, dict] = {}
+        for ref in refs:
+            row = conn.exec_driver_sql(
+                "SELECT value, unit, ts FROM measurement WHERE medium = :m AND parameter = :p "
+                "AND ref = :r AND ts >= :since ORDER BY value DESC, ts DESC LIMIT 1",
+                {"m": medium, "p": parameter, "r": ref, "since": since}).first()
+            if row is not None:
+                out[ref] = {"value": row[0], "unit": row[1], "ts": row[2]}
+        return out
+
 
 def _site(r) -> dict:
     s = {k: r[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name", "lat", "lon", "county", "url")}

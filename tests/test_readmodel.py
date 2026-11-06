@@ -156,3 +156,33 @@ def test_api_query(tmp_path, monkeypatch):
     viol = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&kind=facility").json()["sites"]
     assert any(rec["kind"] == "violation" for s in viol for rec in s["records"])
     assert c.get("/api/query?lat=38.3&lon=-81.6&km=999&limit=9999").json()["filters"]["limit"] == 500
+
+
+def test_api_query_param_list_and_since(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    base = "/api/query?lat=38.3727&lon=-81.6540&km=8"
+    # a comma list of params: the first one each site has wins, named in `latest`
+    g = {s["site_id"]: s["latest"] for s in c.get(
+        f"{base}&kind=gauge,sample_site&param=selenium,iron,conductance").json()["sites"]}
+    assert g["sample_site:S1"]["value"] == 1.9 and g["sample_site:S1"]["parameter"] == "iron"
+    assert g["gauge:03198000"]["parameter"] == "conductance"
+    # since: each measured site's peak of the first param, and records dated on/after it
+    r = c.get(f"{base}&kind=sensor&param=pm2_5&since=2026-06-30").json()
+    peaks = {s["site_id"]: s["peak"] and s["peak"]["value"] for s in r["sites"]}
+    assert peaks["sensor:197127"] == 10.04 and peaks["sensor:200001"] == 12.35
+    assert r["filters"]["since"] == "2026-06-30" and r["changes"] == []
+    assert c.get(f"{base}&kind=sensor&param=pm2_5&since=2026-07-02").json()["sites"][0]["peak"] is None
+    ch = c.get("/api/query?lat=38.3727&lon=-81.6540&km=40&kind=spill_report,permit&since=2026-01-01"
+               "&limit=500").json()["changes"]
+    assert ch and all(x["effective"][:10] >= "2026-01-01" for x in ch)
+    assert [x["effective"] for x in ch] == sorted((x["effective"] for x in ch), reverse=True)
+    assert {x["site_kind"] for x in ch} <= {"spill_report", "permit"}
+    assert "changes" not in c.get(base).json()
+    assert c.get(f"{base}&since=July").status_code == 400
+    assert c.get("/api/query?lat=38.3&lon=-81.6&km=999").json()["place"]["km"] == 40.25   # 25 mi
+
+
+def test_place_page(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    r = c.get("/place?place=rutledge&km=8")
+    assert r.status_code == 200 and "place.js" in r.text and "reportmodal" in r.text

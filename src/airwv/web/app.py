@@ -609,38 +609,63 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/api/query")
     def query(lat: float, lon: float, km: float = 8.0, kind: str | None = None,
-              medium: str | None = None, param: str | None = None, limit: int = 100):
+              medium: str | None = None, param: str | None = None, since: str | None = None,
+              limit: int = 100):
         """One read path over the unified views: sites near a place (``kind`` is a comma
         list: well, facility, permit, spill_report, water_system, reference_monitor,
         sensor, gauge, sample_site; ``medium`` air / water / land), each with its
-        records, its latest ``param`` value when it has measurements, and the
-        provenance of every layer it came from. See docs/READ-MODEL.md."""
-        km = min(max(km, 1.0), 25.0)
+        records, its latest ``param`` value when it has measurements (``param`` may be a
+        comma list: the first one the site has wins), and the provenance of every layer
+        it came from. ``since`` (YYYY-MM-DD) adds "what changed": a ``changes`` list of
+        records dated on/after it and each measured site's ``peak`` of the first
+        ``param`` since then. ``km`` is capped at 25 mi. See docs/READ-MODEL.md."""
+        km = min(max(km, 1.0), 40.25)
         limit = min(max(limit, 1), 500)
         kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
+        params = [p.strip() for p in param.split(",") if p.strip()] if param else []
+        if since is not None:
+            try:
+                since = date.fromisoformat(since[:10]).isoformat()
+            except ValueError:
+                raise HTTPException(status_code=400, detail="since must be YYYY-MM-DD")
         rm = store.read_model
         with rm.connect() as conn:
             sites = rm.sites_near(conn, lat, lon, km * 0.621371, kinds=kinds, medium=medium, limit=limit)
             recs = rm.records_for(conn, [s["site_id"] for s in sites])
             latest: dict = {}
-            if param:
-                for med in ("air", "water"):
-                    refs = [s["ref"] for s in sites if s["medium"] == med
-                            and s["kind"] in ("sensor", "reference_monitor", "gauge", "sample_site")]
-                    latest[med] = rm.latest(conn, med, refs, param)
+            peaks: dict = {}
+            for med in ("air", "water") if params else ():
+                refs = [s["ref"] for s in sites if s["medium"] == med
+                        and s["kind"] in ("sensor", "reference_monitor", "gauge", "sample_site")]
+                latest[med] = {p: rm.latest(conn, med, refs, p) for p in params}
+                if since:
+                    peaks[med] = rm.peak(conn, med, refs, params[0], since)
             prov = rm.provenance(conn, sorted({s["layer"] for s in sites}))
-        out = []
+        out, changes = [], []
         for s in sites:
             row = {k: s[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
                                      "lat", "lon", "county", "url")}
             row["mi"] = round(s["d"], 2)
             row["records"] = recs.get(s["site_id"], [])
-            if param:
-                row["latest"] = latest.get(s["medium"], {}).get(s["ref"], {}).get(param)
+            if params:
+                by_param = latest.get(s["medium"], {})
+                row["latest"] = next(({**by_param[p][s["ref"]][p], "parameter": p} for p in params
+                                      if s["ref"] in by_param.get(p, {})), None)
+            if since:
+                pk = peaks.get(s["medium"], {}).get(s["ref"])
+                if params:
+                    row["peak"] = pk and {**pk, "parameter": params[0]}
+                changes += [{"site_id": s["site_id"], "site_kind": s["kind"], "name": s["name"],
+                             "medium": s["medium"], "mi": row["mi"], **r}
+                            for r in row["records"] if (r["effective"] or "")[:10] >= since]
             out.append(row)
-        return {"place": {"lat": lat, "lon": lon, "km": km},
-                "filters": {"kind": kinds, "medium": medium, "param": param, "limit": limit},
+        body = {"place": {"lat": lat, "lon": lon, "km": km},
+                "filters": {"kind": kinds, "medium": medium, "param": param, "since": since,
+                            "limit": limit},
                 "count": len(out), "sites": out, "provenance": prov}
+        if since:
+            body["changes"] = sorted(changes, key=lambda c: c["effective"], reverse=True)
+        return body
 
     @app.get("/api/data-catalog")
     def data_catalog():
@@ -1743,6 +1768,13 @@ def create_app(store: Store) -> FastAPI:
     def nearby_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="near_me.html",
                                           context={"mode": "nearby"})
+
+    @app.get("/place", response_class=HTMLResponse)
+    def place_page(request: Request):
+        # "my place now" (basic view, DIRECTION.md §2): the page reads lat/lon/km/name
+        # from its URL and builds every line from /api/query
+        return TEMPLATES.TemplateResponse(request=request, name="place.html",
+                                          context={"mode": "place"})
 
     @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic"):

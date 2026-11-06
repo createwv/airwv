@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="card pl-pick"><div style="padding:10px 14px">
+    <div class="controls" style="gap:10px">
+      <label>Place <select id="pl-place"></select></label>
+      <label>within <select id="pl-km">
+        <option value="8">5 miles</option>
+        <option value="16">10 miles</option>
+        <option value="40.25">25 miles</option>
+      </select></label>
+      <button id="pl-loc" type="button">Use my location</button>
+    </div>
+  </div></div>
+
+  <h1 class="pl-h" id="pl-title">My place now</h1>
+  <div class="card"><div id="pl-status" class="pl-status"><div class="pl-line meta">Loading…</div></div></div>
+
+  <h2 class="pl-h2">What changed <span class="meta" id="pl-since"></span></h2>
+  <div class="card"><div id="pl-changes" class="pl-status"><div class="pl-line meta">Loading…</div></div></div>
+
+  <div class="pl-actions">
+    <a id="pl-nearby" href="/nearby">What's near me →</a>
+    <a id="pl-watch" href="/alerts">Watch this place →</a>
+    <a href="#" id="pl-report">Report something here →</a>
+  </div>
+  <div class="meta pl-prov" id="pl-prov"></div>
+</div>
+{% include "_modals.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/place.js?v={{ asset_v }}"></script>
+<script src="/static/reporting.js?v={{ asset_v }}"></script>
+{% endblock %}
