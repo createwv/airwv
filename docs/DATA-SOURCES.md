@@ -188,7 +188,8 @@ conductance, E. coli, …) in `fetch_water_samples.py`. **Add a parameter** by a
 `CharacteristicName → (key, unit)` row to `CHARS` and running `--chars <Name>` (that's
 how selenium got added). Periodic samples, not live — each site shows its latest date.
 Served via `/api/water/near` (the reusable "measured water near a point" join used by
-coal dischargers *and* facilities).
+coal dischargers *and* facilities), which reads the unified views; output is pinned by
+`tests/snapshots/api_water_near.json`.
 
 ### WV DEP Coal NPDES + 303(d) impaired streams (ArcGIS)
 `fetch_coal_npdes.py` pulls active coal-mine discharge outlets from WV DEP's
@@ -249,13 +250,18 @@ is easy. Powers the **What's near me?** page. Reads the unified views below; out
 pinned by `tests/snapshots/api_near.json`.
 
 ### `/api/query` — one read path over the unified views
-`/api/query?lat=&lon=&km=&kind=&medium=&param=&since=&limit=` returns sites near a place from
-the `site` / `measurement` / `record` SQL views, each with its records, its latest
+`/api/query?lat=&lon=&km=&kind=&medium=&area=&param=&from=&to=&since=&limit=` returns sites near
+a place from the `site` / `measurement` / `record` SQL views, each with its records, its latest
 `param` value (sensors, monitors, gauges, sample sites) and the provenance block of every
 layer in the answer. `param` may be a comma list (the first one a site has wins; `latest`
-names it). `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
+names it). `area` is a county (`Kanawha`) or a WV sensor region (`Kanawha Valley`); with
+an area, `lat`/`lon` are optional (then `place` is null, `mi` is null and sites without
+coordinates count). `from` / `to` (YYYY-MM-DD, inclusive) bound which measurements count
+for `latest` and `peak`. `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
 `param` since then, and a `changes` list of records dated on/after it (spills, permit
-dates), newest first. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
+dates), newest first. `/api/areas` (+ `/series`) and `/api/water/near` read the same views
+(the area filter and a measurement window), pinned by `tests/snapshots/api_areas.json` and
+`api_water_near.json`. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
 as a CSV download: one row per site (latest/peak values flattened, a record count), or with
 `show=records` one row per record (only the dated `changes` when `since` is given). Powers the
 **My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose

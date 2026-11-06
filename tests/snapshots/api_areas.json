@@ -1,0 +1,568 @@
+{
+ "humidity,180": {
+  "areas": [
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "Kanawha City",
+    "max_value": 60.0,
+    "region": "Kanawha Valley",
+    "reporting": 1,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "flat",
+     "n_days": 30,
+     "pct_change": 0.0,
+     "r": 0.0,
+     "watch": false
+    },
+    "value": 60.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "300003",
+    "max_value": 57.0,
+    "region": "Mid-Ohio Valley",
+    "reporting": 1,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "flat",
+     "n_days": 30,
+     "pct_change": 0.5,
+     "r": 0.09,
+     "watch": false
+    },
+    "value": 57.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "humidity"
+ },
+ "pm2_5,180": {
+  "areas": [
+   {
+    "color": "#00e400",
+    "max_sensor": "Rutledge",
+    "max_value": 12.3,
+    "region": "Kanawha Valley",
+    "reporting": 2,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": 235.2,
+     "r": 0.85,
+     "watch": true
+    },
+    "value": 11.2
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Mid-Ohio Valley",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": -335.2,
+     "r": 0.3,
+     "watch": false
+    },
+    "value": null
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "pm2_5"
+ },
+ "pm2_5,20": {
+  "areas": [
+   {
+    "color": "#00e400",
+    "max_sensor": "Rutledge",
+    "max_value": 12.3,
+    "region": "Kanawha Valley",
+    "reporting": 2,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": 11.2
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Mid-Ohio Valley",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "rising",
+     "n_days": 21,
+     "pct_change": -331.1,
+     "r": 0.37,
+     "watch": false
+    },
+    "value": null
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "pm2_5"
+ },
+ "series:Kanawha Valley,pm2_5": {
+  "field": "pm2_5",
+  "points": [
+   {
+    "date": "2026-05-22",
+    "n": 1,
+    "value": 5.0
+   },
+   {
+    "date": "2026-05-23",
+    "n": 1,
+    "value": 5.5
+   },
+   {
+    "date": "2026-05-24",
+    "n": 1,
+    "value": 6.0
+   },
+   {
+    "date": "2026-05-25",
+    "n": 1,
+    "value": 6.5
+   },
+   {
+    "date": "2026-05-26",
+    "n": 1,
+    "value": 7.0
+   },
+   {
+    "date": "2026-05-27",
+    "n": 1,
+    "value": 7.5
+   },
+   {
+    "date": "2026-05-28",
+    "n": 1,
+    "value": 8.0
+   },
+   {
+    "date": "2026-05-29",
+    "n": 1,
+    "value": 8.5
+   },
+   {
+    "date": "2026-05-30",
+    "n": 1,
+    "value": 9.0
+   },
+   {
+    "date": "2026-05-31",
+    "n": 1,
+    "value": 9.5
+   },
+   {
+    "date": "2026-06-01",
+    "n": 1,
+    "value": 10.0
+   },
+   {
+    "date": "2026-06-02",
+    "n": 1,
+    "value": 10.5
+   },
+   {
+    "date": "2026-06-03",
+    "n": 1,
+    "value": 11.0
+   },
+   {
+    "date": "2026-06-04",
+    "n": 1,
+    "value": 11.5
+   },
+   {
+    "date": "2026-06-05",
+    "n": 1,
+    "value": 12.0
+   },
+   {
+    "date": "2026-06-06",
+    "n": 1,
+    "value": 12.5
+   },
+   {
+    "date": "2026-06-07",
+    "n": 1,
+    "value": 13.0
+   },
+   {
+    "date": "2026-06-08",
+    "n": 1,
+    "value": 13.5
+   },
+   {
+    "date": "2026-06-09",
+    "n": 1,
+    "value": 14.0
+   },
+   {
+    "date": "2026-06-10",
+    "n": 1,
+    "value": 14.5
+   },
+   {
+    "date": "2026-06-11",
+    "n": 1,
+    "value": 15.0
+   },
+   {
+    "date": "2026-06-12",
+    "n": 1,
+    "value": 15.5
+   },
+   {
+    "date": "2026-06-13",
+    "n": 1,
+    "value": 16.0
+   },
+   {
+    "date": "2026-06-14",
+    "n": 1,
+    "value": 16.5
+   },
+   {
+    "date": "2026-06-15",
+    "n": 1,
+    "value": 17.0
+   },
+   {
+    "date": "2026-06-16",
+    "n": 1,
+    "value": 17.5
+   },
+   {
+    "date": "2026-06-17",
+    "n": 1,
+    "value": 18.0
+   },
+   {
+    "date": "2026-06-18",
+    "n": 1,
+    "value": 18.5
+   },
+   {
+    "date": "2026-06-19",
+    "n": 1,
+    "value": 19.0
+   },
+   {
+    "date": "2026-06-20",
+    "n": 1,
+    "value": 19.5
+   },
+   {
+    "date": "2026-07-01",
+    "n": 2,
+    "value": 10.7
+   }
+  ],
+  "region": "Kanawha Valley",
+  "sensor_count": 2,
+  "trend": {
+   "direction": "rising",
+   "first": 6.4,
+   "last": 21.5,
+   "n_days": 31,
+   "pct_change": 235.2,
+   "r": 0.85
+  }
+ },
+ "series:Mid-Ohio Valley,voc": {
+  "field": "voc",
+  "points": [
+   {
+    "date": "2026-07-01",
+    "n": 1,
+    "value": 150.0
+   },
+   {
+    "date": "2026-07-02",
+    "n": 1,
+    "value": 149.0
+   },
+   {
+    "date": "2026-07-03",
+    "n": 1,
+    "value": 148.0
+   },
+   {
+    "date": "2026-07-04",
+    "n": 1,
+    "value": 147.0
+   },
+   {
+    "date": "2026-07-05",
+    "n": 1,
+    "value": 146.0
+   },
+   {
+    "date": "2026-07-06",
+    "n": 1,
+    "value": 145.0
+   },
+   {
+    "date": "2026-07-07",
+    "n": 1,
+    "value": 144.0
+   },
+   {
+    "date": "2026-07-08",
+    "n": 1,
+    "value": 143.0
+   },
+   {
+    "date": "2026-07-09",
+    "n": 1,
+    "value": 142.0
+   },
+   {
+    "date": "2026-07-10",
+    "n": 1,
+    "value": 141.0
+   },
+   {
+    "date": "2026-07-11",
+    "n": 1,
+    "value": 140.0
+   },
+   {
+    "date": "2026-07-12",
+    "n": 1,
+    "value": 139.0
+   },
+   {
+    "date": "2026-07-13",
+    "n": 1,
+    "value": 138.0
+   },
+   {
+    "date": "2026-07-14",
+    "n": 1,
+    "value": 137.0
+   },
+   {
+    "date": "2026-07-15",
+    "n": 1,
+    "value": 136.0
+   },
+   {
+    "date": "2026-07-16",
+    "n": 1,
+    "value": 135.0
+   },
+   {
+    "date": "2026-07-17",
+    "n": 1,
+    "value": 134.0
+   },
+   {
+    "date": "2026-07-18",
+    "n": 1,
+    "value": 133.0
+   },
+   {
+    "date": "2026-07-19",
+    "n": 1,
+    "value": 132.0
+   },
+   {
+    "date": "2026-07-20",
+    "n": 1,
+    "value": 131.0
+   },
+   {
+    "date": "2026-07-21",
+    "n": 1,
+    "value": 130.0
+   },
+   {
+    "date": "2026-07-22",
+    "n": 1,
+    "value": 129.0
+   },
+   {
+    "date": "2026-07-23",
+    "n": 1,
+    "value": 128.0
+   },
+   {
+    "date": "2026-07-24",
+    "n": 1,
+    "value": 127.0
+   },
+   {
+    "date": "2026-07-25",
+    "n": 1,
+    "value": 126.0
+   },
+   {
+    "date": "2026-07-26",
+    "n": 1,
+    "value": 125.0
+   },
+   {
+    "date": "2026-07-27",
+    "n": 1,
+    "value": 124.0
+   },
+   {
+    "date": "2026-07-28",
+    "n": 1,
+    "value": 123.0
+   },
+   {
+    "date": "2026-07-29",
+    "n": 1,
+    "value": 122.0
+   },
+   {
+    "date": "2026-07-30",
+    "n": 1,
+    "value": 121.0
+   },
+   {
+    "date": "2026-07-31",
+    "n": 1,
+    "value": 120.0
+   }
+  ],
+  "region": "Mid-Ohio Valley",
+  "sensor_count": 1,
+  "trend": {
+   "direction": "falling",
+   "first": 150.0,
+   "last": 120.0,
+   "n_days": 31,
+   "pct_change": -20.0,
+   "r": -1.0
+  }
+ },
+ "series:Nowhere,pm2_5": {
+  "field": "pm2_5",
+  "points": [],
+  "region": "Nowhere",
+  "sensor_count": 0,
+  "trend": {
+   "direction": "insufficient",
+   "first": null,
+   "last": null,
+   "n_days": 0,
+   "pct_change": null,
+   "r": null
+  }
+ },
+ "voc,180": {
+  "areas": [
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "300003",
+    "max_value": 120.0,
+    "region": "Mid-Ohio Valley",
+    "reporting": 1,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "falling",
+     "n_days": 31,
+     "pct_change": -20.0,
+     "r": -1.0,
+     "watch": false
+    },
+    "value": 120.0
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": "Kanawha City",
+    "max_value": 99.6,
+    "region": "Kanawha Valley",
+    "reporting": 1,
+    "sensor_count": 2,
+    "trend": {
+     "direction": "rising",
+     "n_days": 31,
+     "pct_change": 39.8,
+     "r": 0.92,
+     "watch": true
+    },
+    "value": 99.6
+   },
+   {
+    "color": "#9aa0a6",
+    "max_sensor": null,
+    "max_value": null,
+    "region": "Other",
+    "reporting": 0,
+    "sensor_count": 1,
+    "trend": {
+     "direction": "insufficient",
+     "n_days": 0,
+     "pct_change": null,
+     "r": null,
+     "watch": false
+    },
+    "value": null
+   }
+  ],
+  "field": "voc"
+ }
+}

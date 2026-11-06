@@ -218,3 +218,112 @@ def test_explore_page(tmp_path, monkeypatch):
     r = c.get("/explore?place=rutledge&km=8&param=pm2_5")
     assert r.status_code == 200 and "explore.js" in r.text and 'id="ex-csv"' in r.text
     assert 'id="ex-api"' in r.text and 'name="kind"' in r.text
+
+
+# /api/water/near and /api/areas moved onto the read model too; these snapshots were
+# recorded from their pre-views implementations (store.water_near, store.daily_avg).
+WATER_SNAPSHOT = Path(__file__).parent / "snapshots" / "api_water_near.json"
+AREAS_SNAPSHOT = Path(__file__).parent / "snapshots" / "api_areas.json"
+
+# (lat, lon, km, limit): Charleston, the coalfields, a tight radius, a clamped radius
+# and limit, a limit of one, and a point outside WV.
+WATER_POINTS = [
+    (38.3727, -81.6540, 8, 6), (37.805, -81.905, 8, 6), (38.37, -81.62, 1, 6),
+    (38.3, -81.6, 999, 99), (38.3727, -81.6540, 8, 1), (40.7, -74.0, 8, 6),
+]
+NOW = datetime(2026, 7, 31, 12, 0)   # /api/areas windows from utcnow(); frozen for the snapshot
+
+
+def _check_snapshot(path, got):
+    if os.environ.get("AIRWV_UPDATE_SNAPSHOTS") or not path.exists():
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps(got, indent=1, ensure_ascii=False, sort_keys=True) + "\n",
+                        encoding="utf-8")
+    want = json.loads(path.read_text(encoding="utf-8"))
+    assert set(got) == set(want)
+    for key in want:
+        assert got[key] == want[key], key
+    return want
+
+
+def test_api_water_near_matches_snapshot(tmp_path, monkeypatch):
+    c, store = _client(tmp_path, monkeypatch)
+    t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    store.add_water_readings([   # a second sample site near Charleston, two visits
+        {"source": "wqp", "site_id": "S3", "site_name": "Davis Creek", "lat": 38.33, "lon": -81.70,
+         "ts": t0 - timedelta(days=40), "parameter": "ecoli", "value": 410.0, "unit": "cfu/100mL",
+         "ingested_at": t0},
+        {"source": "wqp", "site_id": "S3", "site_name": "Davis Creek", "lat": 38.33, "lon": -81.70,
+         "ts": t0 - timedelta(days=3), "parameter": "ecoli", "value": 88.0, "unit": "cfu/100mL",
+         "ingested_at": t0},
+    ])
+    got = {f"{la},{lo},{km},{n}": c.get(f"/api/water/near?lat={la}&lon={lo}&km={km}&limit={n}").json()
+           for la, lo, km, n in WATER_POINTS}
+    want = _check_snapshot(WATER_SNAPSHOT, got)
+    assert any(len(r["sites"]) > 1 for r in want.values())
+
+
+def _areas_client(tmp_path, monkeypatch):
+    _, store = _client(tmp_path, monkeypatch)
+    monkeypatch.setattr(webapp, "_index_to_region", lambda: {
+        "197127": "Kanawha Valley", "200001": "Kanawha Valley", "300003": "Mid-Ohio Valley",
+        "400004": "Other"})
+    # a month of daily readings: Kanawha City climbs (40-70 days ago), the Mid-Ohio sensor
+    # eases off; its latest reading is a PM spike over 1000 µg/m³, which /api/areas drops
+    days = [NOW - timedelta(days=d) for d in range(30, 0, -1)]
+    utc = timezone.utc
+    store.save_readings(
+        [Reading(source="purpleair", sensor_id="197127", ts=(t - timedelta(days=40)).replace(tzinfo=utc),
+                 pm2_5=5.0 + i * 0.5, voc=80.0 + i, humidity=60.0) for i, t in enumerate(days)]
+        + [Reading(source="purpleair", sensor_id="300003", ts=t.replace(tzinfo=utc),
+                   pm2_5=20.0 - i * 0.3, voc=150.0 - i, humidity=55.0 + i % 3) for i, t in enumerate(days)]
+        + [Reading(source="purpleair", sensor_id="300003", ts=NOW.replace(tzinfo=utc),
+                   pm2_5=4000.0, voc=120.0)])
+
+    class Frozen(datetime):
+        @classmethod
+        def utcnow(cls):
+            return NOW
+    monkeypatch.setattr(webapp, "datetime", Frozen)
+    return TestClient(webapp.create_app(store))
+
+
+def test_api_areas_matches_snapshot(tmp_path, monkeypatch):
+    c = _areas_client(tmp_path, monkeypatch)
+    got = {f"{f},{d}": c.get(f"/api/areas?field={f}&days={d}").json()
+           for f, d in [("pm2_5", 180), ("voc", 180), ("humidity", 180), ("pm2_5", 20)]}
+    got |= {f"series:{r},{f}": c.get(f"/api/areas/series?region={r}&field={f}").json()
+            for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"), ("Nowhere", "pm2_5")]}
+    want = _check_snapshot(AREAS_SNAPSHOT, got)
+    trends = {a["trend"]["direction"] for r in want.values() for a in r.get("areas", [])}
+    assert len(trends) > 1 and any(a["reporting"] == 0 for a in want["pm2_5,180"]["areas"])
+
+
+def test_api_query_area_and_window(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    # area alone (no point): a WV region matches community sensors, a county matches the rest
+    r = c.get("/api/query?area=Kanawha Valley&param=pm2_5").json()
+    assert r["place"] is None and r["filters"]["area"] == "Kanawha Valley"
+    assert {s["site_id"] for s in r["sites"]} == {"sensor:197127", "sensor:200001"}
+    assert all(s["mi"] is None for s in r["sites"])
+    k = c.get("/api/query?area=Kanawha&kind=facility,water_system&limit=500").json()["sites"]
+    assert k and all(s["county"] == "Kanawha" for s in k)
+    # area with a point narrows the radius search
+    near = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&area=Kanawha Valley").json()["sites"]
+    assert {s["kind"] for s in near} == {"sensor"}
+    assert c.get("/api/query").status_code == 400
+    assert c.get("/api/query?lat=38.3").status_code == 400
+    # from/to bound the measurements: latest inside the window, peak inside it too
+    base = "/api/query?lat=38.3727&lon=-81.6540&km=8&kind=sensor,sample_site&param=iron,pm2_5"
+    full = {s["site_id"]: s["latest"] for s in c.get(base).json()["sites"]}
+    assert full["sample_site:S1"]["value"] == 1.9 and full["sensor:197127"]["value"] == 10.04
+    early = {s["site_id"]: s["latest"] for s in c.get(f"{base}&to=2026-07-01").json()["sites"]}
+    assert early["sample_site:S1"]["value"] == 2.4                 # the 07-02 visit is outside
+    assert early["sensor:197127"]["value"] == 10.04                # all three hours are on 07-01
+    late = {s["site_id"]: s["latest"] for s in c.get(f"{base}&from=2026-07-02").json()["sites"]}
+    assert late["sample_site:S1"]["value"] == 1.9
+    assert late["sensor:197127"] is None and late["sensor:200001"] is None
+    pk = c.get(f"{base}&since=2026-06-01&to=2026-07-01").json()
+    assert {s["site_id"]: s["peak"] and s["peak"]["value"] for s in pk["sites"]}["sample_site:S1"] == 2.4
+    assert pk["filters"]["to"] == "2026-07-01"
+    assert c.get(f"{base}&from=July").status_code == 400
