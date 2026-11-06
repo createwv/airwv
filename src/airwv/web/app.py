@@ -25,6 +25,7 @@ from pathlib import Path
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -51,6 +52,42 @@ def _asset_version() -> str:
 
 
 TEMPLATES.env.globals["asset_v"] = _asset_version()
+
+VENDOR_DIR = Path(__file__).parent / "static" / "vendor"
+
+
+def _vendor(name: str, cdn: str) -> str:
+    """URL for a third-party lib: the pinned self-hosted copy in static/vendor/ when it's
+    there (see static/vendor/README.md), else the CDN — so a checkout without the copies
+    still works."""
+    return f"/static/vendor/{name}" if (VENDOR_DIR / name).is_file() else cdn
+
+
+TEMPLATES.env.globals["vendor"] = _vendor
+
+
+def _parse_bbox(bbox: str | None) -> tuple[float, float, float, float] | None:
+    """``bbox=west,south,east,north`` (lon/lat degrees, the GeoJSON/OGC order) → a tuple,
+    or None when absent. 400 on anything malformed."""
+    if not bbox:
+        return None
+    try:
+        w, s, e, n = (float(v) for v in bbox.split(","))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="bbox is west,south,east,north")
+    if w > e or s > n:
+        raise HTTPException(status_code=400, detail="bbox is west,south,east,north")
+    return w, s, e, n
+
+
+def _in_bbox(lat, lon, box: tuple[float, float, float, float]) -> bool:
+    return lat is not None and lon is not None and box[0] <= lon <= box[2] and box[1] <= lat <= box[3]
+
+
+# Heavy, slow-changing JSON (hourly collectors, monthly layer refreshes): let browsers and
+# Cloudflare reuse it briefly instead of refetching megabytes on every page view.
+_SHORT_CACHE = {"Cache-Control": "public, max-age=60"}
+_LAYER_CACHE = {"Cache-Control": "public, max-age=600"}
 
 
 class ReportReadingIn(BaseModel):
@@ -375,6 +412,9 @@ def _index_to_coords() -> dict[str, tuple[float, float]]:
 
 def create_app(store: Store) -> FastAPI:
     app = FastAPI(title="AirWV Dashboard")
+    # gzip JSON/HTML/JS/CSS: the big layers (/api/abandoned-wells, /api/water/sites) are
+    # mostly repeated keys and shrink ~8-10×
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()
@@ -387,8 +427,23 @@ def create_app(store: Store) -> FastAPI:
     facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
     notifier = chat_notifier_from_env()   # Slack/Discord webhooks (env); disabled if unset
 
+    _sensors_cache: dict = {}
+
     @app.get("/api/sensors")
-    def sensors():
+    def sensors(response: Response):
+        # Every page fetches this (~0.8s uncached on prod); collectors run hourly, so a
+        # 60s cache costs nothing in freshness.
+        import time as _t
+
+        response.headers.update(_SHORT_CACHE)
+        hit = _sensors_cache.get("v")
+        if hit and _t.time() - hit[0] < 60:
+            return hit[1]
+        out = _sensors_uncached()
+        _sensors_cache["v"] = (_t.time(), out)
+        return out
+
+    def _sensors_uncached() -> list[dict]:
         # SQL aggregation instead of loading every row (was O(all rows) per sensor).
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
@@ -1418,23 +1473,40 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
-    @app.get("/api/abandoned-wells")
-    def abandoned_wells(orphan_only: bool = False, near_homes: bool = False):
-        """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
-        known operator; near_homes keeps those within ~200 m of a building. Large —
-        loaded lazily by the map layer."""
-        try:
-            import json
+    _wells_file: dict = {}
 
-            path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
-            data = json.loads(path.read_text(encoding="utf-8"))
+    def _abandoned_wells_data() -> dict | None:
+        """The parsed abandoned-wells file (2.4MB), re-read only when it changes on disk."""
+        import json
+
+        path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
+        try:
+            mtime = path.stat().st_mtime
+            if _wells_file.get("mtime") != mtime:
+                _wells_file.update(mtime=mtime, data=json.loads(path.read_text(encoding="utf-8")))
+            return _wells_file["data"]
         except Exception:
+            return None
+
+    @app.get("/api/abandoned-wells")
+    def abandoned_wells(response: Response, orphan_only: bool = False, near_homes: bool = False,
+                        bbox: str | None = None):
+        """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
+        known operator; near_homes keeps those within ~200 m of a building; bbox
+        (west,south,east,north) keeps those inside a map view. Large — loaded lazily by
+        the map layer. The count fields stay statewide."""
+        box = _parse_bbox(bbox)
+        data = _abandoned_wells_data()
+        if data is None:
             return {"wells": [], "count": 0, "orphans": 0}
+        response.headers.update(_LAYER_CACHE)
         wells = data.get("wells", [])
         if orphan_only:
             wells = [w for w in wells if w.get("orphan")]
         if near_homes:
             wells = [w for w in wells if w.get("near_homes")]
+        if box:
+            wells = [w for w in wells if _in_bbox(w.get("lat"), w.get("lon"), box)]
         return {"wells": wells, "count": data.get("count", len(wells)),
                 "orphans": data.get("orphans", 0),
                 "near_homes": data.get("near_homes", 0),
@@ -1644,9 +1716,24 @@ def create_app(store: Store) -> FastAPI:
             headers={"Content-Disposition": f'attachment; filename="airwv_{sensor_id}.csv"'},
         )
 
+    _water_sites_cache: dict = {}
+
     @app.get("/api/water/sites")
-    def water_sites():
-        return {"sites": store.water_sites()}
+    def water_sites(response: Response, bbox: str | None = None):
+        """Every water site with its latest value per parameter (~1MB statewide);
+        bbox (west,south,east,north) keeps those inside a map view. Cached 5 min —
+        the USGS/WQP collectors run hourly."""
+        import time as _t
+
+        box = _parse_bbox(bbox)
+        response.headers.update(_SHORT_CACHE)
+        hit = _water_sites_cache.get("v")
+        if not (hit and _t.time() - hit[0] < 300):
+            hit = _water_sites_cache["v"] = (_t.time(), store.water_sites())
+        sites = hit[1]
+        if box:
+            sites = [s for s in sites if _in_bbox(s.get("lat"), s.get("lon"), box)]
+        return {"sites": sites}
 
     @app.get("/api/water/near")
     def water_near(lat: float, lon: float, km: float = 5.0, limit: int = 6):

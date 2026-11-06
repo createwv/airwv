@@ -461,3 +461,63 @@ def test_alert_signup_flow(tmp_path, monkeypatch):
     c.get(f"/alerts/unsubscribe?token={tok}")
     assert not c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"][0]["active"]
     assert "not found" in c.get("/alerts/confirm?token=bogus").text.lower()
+
+
+def test_water_sites_bbox(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'web.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    store.add_water_readings([
+        {"source": "wqp", "site_id": "S1", "site_name": "Buffalo Creek", "lat": 37.80, "lon": -81.90,
+         "ts": t0, "parameter": "iron", "value": 2.4, "unit": "mg/L"},
+        {"source": "wqp", "site_id": "S2", "site_name": "Far Away", "lat": 39.50, "lon": -80.00,
+         "ts": t0, "parameter": "iron", "value": 0.1, "unit": "mg/L"},
+    ])
+    c = TestClient(create_app(store))
+    assert len(c.get("/api/water/sites").json()["sites"]) == 2
+    ids = [s["site_id"] for s in c.get("/api/water/sites?bbox=-82.5,37.2,-81.5,38.2").json()["sites"]]
+    assert ids == ["S1"]
+    assert c.get("/api/water/sites?bbox=1,2,3").status_code == 400
+    assert c.get("/api/water/sites?bbox=-80,38,-82,39").status_code == 400   # west > east
+
+
+def test_abandoned_wells_bbox_keeps_statewide_counts(tmp_path):
+    c = _client(tmp_path)
+    full = c.get("/api/abandoned-wells").json()
+    if not full["wells"]:
+        return   # data file absent in this checkout
+    box = c.get("/api/abandoned-wells?bbox=-81.8,38.2,-81.4,38.5").json()
+    assert 0 < len(box["wells"]) < len(full["wells"])
+    assert all(-81.8 <= w["lon"] <= -81.4 and 38.2 <= w["lat"] <= 38.5 for w in box["wells"])
+    assert box["count"] == full["count"]          # summary fields stay statewide
+    assert "max-age" in c.get("/api/abandoned-wells").headers["cache-control"]
+
+
+def test_large_json_is_gzipped(tmp_path):
+    r = _client(tmp_path).get("/api/abandoned-wells", headers={"Accept-Encoding": "gzip"})
+    if len(r.content) > 1000:
+        assert r.headers.get("content-encoding") == "gzip"
+
+
+def test_sensors_cached_briefly(tmp_path):
+    store = Store(f"sqlite:///{tmp_path / 'web.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    store.save_readings([Reading(source="purpleair", sensor_id="197127", ts=t0, pm2_5=10.0)])
+    c = TestClient(create_app(store))
+    first = c.get("/api/sensors")
+    assert "max-age=60" in first.headers["cache-control"]
+    store.save_readings([Reading(source="purpleair", sensor_id="197127", ts=t0 + timedelta(hours=1),
+                                 pm2_5=12.0)])
+    assert c.get("/api/sensors").json() == first.json()   # served from the 60s cache
+
+
+def test_vendor_falls_back_to_cdn(tmp_path, monkeypatch):
+    from airwv.web import app as web
+
+    monkeypatch.setattr(web, "VENDOR_DIR", tmp_path)
+    assert web._vendor("leaflet.js", "https://cdn/x.js") == "https://cdn/x.js"
+    (tmp_path / "leaflet.js").write_text("//")
+    assert web._vendor("leaflet.js", "https://cdn/x.js") == "/static/vendor/leaflet.js"
+    html = _client(tmp_path).get("/").text
+    assert "/static/vendor/leaflet.js" in html and "unpkg.com/leaflet@1.9.4/dist/leaflet.js" not in html
