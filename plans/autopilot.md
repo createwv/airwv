@@ -74,4 +74,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Harness: run the a11y checks with a dialog open and a map popup open (report modal, facility detail, a sensor popup) [auto:S]
 - [ ] Map markers: give the Leaflet markers that open popups keyboard access and names (`keyboard: true`, `title`/`alt`) once Leaflet is vendored for the harness [auto:S]
 - [ ] Skip link ("Skip to content") and a `<main>` landmark in `base.html` [auto:S]
+- [ ] Explore v2: a "measurements" option using the `/api/query` series mode (site + param + from/to), with table, CSV and API link [auto:M]
 
