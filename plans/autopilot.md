@@ -97,4 +97,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Mark the flaky `test_a11y[air-1280-noFocus]` product check as unreliable, or make it pass consistently [auto:S]
 - [ ] Explore: when a single sensor, gauge or sample site is picked, show its readings as a table and chart from the series mode, with its CSV link [auto:M]
 - [ ] Read model: add AirNow monitors in `readings` as sites (a small sites table) so series mode covers them [auto:M]
+- [ ] Long-lived `Cache-Control` (immutable) on `/static/vendor/*`, since the file names are pinned to versions. [S] [auto]
 
