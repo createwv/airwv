@@ -63,4 +63,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Make `/` show "my place now" when a place is set (in the URL or saved in the browser), otherwise statewide as now [auto:S]
 - [ ] Site pages for permits (coal discharge, DEP mining, oil & gas): `/site/permit/<id>`, with the permit stage and 303(d) impaired-stream records. [auto:S]
 - [ ] Link the Air-map curated-source markers to `/site/facility/tri-<n>` by giving `/api/sources` rows a stable id. [auto:S]
+- [ ] "Related nearby" on site pages: the 5 nearest sites of other kinds from `/api/query`, each linking to its page. [auto:S]
 
