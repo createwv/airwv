@@ -1,0 +1,17 @@
+# Nightly public dumps — one-shot, triggered by airwv-dumps.timer.
+# Writes gzipped CSV of the public read views (site / measurement / record) + manifest.json
+# into AIRWV_DUMPS_DIR (default /opt/airwv/data/dumps); the web app serves them at
+# /data/dumps/<name>. Reads only; no network, no API key.
+# Copy both to /etc/systemd/system/, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now airwv-dumps.timer
+
+[Unit]
+Description=AirWV — write the nightly public data dumps
+
+[Service]
+Type=oneshot
+User=airwv
+WorkingDirectory=/opt/airwv
+EnvironmentFile=/opt/airwv/.env
+Nice=10
+ExecStart=/opt/airwv/.venv/bin/python -m airwv.dumps

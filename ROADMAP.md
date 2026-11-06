@@ -556,7 +556,9 @@ Grow the network and secure the record.
 - [ ] Additional community-sensor sources beyond PurpleAir
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
-- [ ] Open-data exports and a documented public dataset
+- [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
+      views + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
+      `deploy/systemd/airwv-dumps.*`). *Parquet, CORS and rate limiting after Postgres.*
 - [ ] Public API documentation and rate limiting
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)
