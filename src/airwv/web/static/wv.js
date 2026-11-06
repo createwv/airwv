@@ -50,7 +50,51 @@
     return {cap, above: v.filter(x => x > cap).length, max: top};
   }
 
-  const api = {WV_BBOX, fitWV, haversineMi, pickDefaultSensor, clampY};
+  // A status color made readable as text on white: the same hue, darkened in steps until it
+  // reaches WCAG AA contrast (4.5:1). Swatches and borders keep the bright color; numbers
+  // and words drawn in it use this. '#rrggbb' in, '#rrggbb' out.
+  function ink(hex, min) {
+    const lum = c => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    if (!/^#[0-9a-f]{6}$/i.test(hex || '')) return hex;
+    const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+    for (let k = 1; k > 0; k -= 0.04) {
+      const c = rgb.map(v => Math.round(v * k));
+      const l = 0.2126 * lum(c[0]) + 0.7152 * lum(c[1]) + 0.0722 * lum(c[2]);
+      if (1.05 / (l + 0.05) >= (min || 4.5))
+        return k === 1 ? hex : '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+    }
+    return '#000000';
+  }
+
+  // A `.modal` overlay as a dialog: open() moves focus to its close button, close() (the × ,
+  // a click on the backdrop, or Escape) hands focus back to whatever opened it.
+  function dialog(el, closeBtn) {
+    let opener = null;
+    const close = () => {
+      if (!el.classList.contains('on')) return;
+      el.classList.remove('on');
+      if (opener && opener.isConnected) opener.focus();
+      opener = null;
+    };
+    const open = () => {
+      if (!el.classList.contains('on')) opener = document.activeElement;
+      el.classList.add('on');
+      closeBtn.focus();
+    };
+    closeBtn.addEventListener('click', close);
+    el.addEventListener('click', e => { if (e.target === el) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    return {open, close};
+  }
+
+  // 'smooth' for scrollIntoView/scrollTo, unless the visitor asked for reduced motion
+  // (CSS scroll-behavior doesn't override a script's explicit 'smooth').
+  function scrollBehavior() {
+    const m = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)');
+    return m && m.matches ? 'auto' : 'smooth';
+  }
+
+  const api = {WV_BBOX, fitWV, haversineMi, pickDefaultSensor, clampY, ink, dialog, scrollBehavior};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.AIRWV_WV = api;
 })(this);

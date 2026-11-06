@@ -1,5 +1,6 @@
-/* Empower WV brand palette — blue / gold / purple. */
-  :root { --brand:#4a7fb0; --brand-accent:#c9992f; --brand-purple:#7a6fb0; --sky:#a9c4dc; --bg:#f4f7f9; }
+/* Empower WV brand palette — blue / gold / purple. Brand blue is one step darker than the
+   logo (#4a7fb0) so text and buttons in it pass WCAG AA (4.5:1) on white and on --bg. */
+  :root { --brand:#3f74a6; --brand-accent:#c9992f; --brand-purple:#7a6fb0; --sky:#a9c4dc; --bg:#f4f7f9; }
   body { font-family: system-ui, sans-serif; margin: 0; background:var(--bg); color:#1a1a1a; }
   /* Parallax hero: still sky gradient + panning cloud layers + still logo.
      Height scales with viewport width -> more sky on desktop, compact on mobile. */
@@ -20,7 +21,14 @@
     header .c-white { --amp:66px; }
   }
   @keyframes sway { 0%,9%{transform:translateX(calc(-50% - var(--amp)))} 91%,100%{transform:translateX(calc(-50% + var(--amp)))} }
-  @media (prefers-reduced-motion:reduce){ header .cloud{animation:none} }
+  /* Reduced motion, site-wide: clouds, spinner (holds still as a ring), fades and slides all
+     stop; nothing listens for transitionend/animationend, so none is safe. */
+  @media (prefers-reduced-motion:reduce){
+    *, *::before, *::after { animation:none !important; transition:none !important;
+      scroll-behavior:auto !important; } }
+  /* Keyboard focus: one visible ring on every control (mouse clicks don't show it). */
+  :focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+  .modenav a:focus-visible, .modenav summary:focus-visible { outline-offset:1px; }
   /* Logo: floors ~165px on narrow screens (≈30vw near 570px), scales at 20vw
      through desktop, capped so it stays in the banner on big monitors. */
   header img.logo { position:relative; z-index:2; height:clamp(165px, 20vw, 230px); width:auto; max-width:92%;
@@ -49,7 +57,7 @@
   .modenav .more-menu a { padding:9px 14px; border-radius:8px; }
   @media (max-width:560px){ .modenav { gap:2px; padding:8px 6px; }
     .modenav a, .modenav summary { padding:7px 8px; font-size:13px; } }
-  footer > a.admin { color:#8a93a0; font-weight:400; }
+  footer > a.admin { color:#687280; font-weight:400; }
   .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     padding:8px 20px; font-size:13px; text-align:center; }
   .betabar { background:#fff4d6; color:#7a5b12; border-bottom:1px solid #f0e0b0;
@@ -92,12 +100,14 @@
   .layers .ctx-intro a, .layers .ctx-help a { color:var(--brand); }
   .layers .children { padding:2px 0 0 20px; display:flex; flex-direction:column; gap:1px; }
   .layers label { display:block; }
-  .layers .cnt { color:#aaa; font-size:11px; }
-  .layers .srow { cursor:pointer; padding:1px 2px; border-radius:3px; }
+  .layers .cnt { color:#687280; font-size:11px; }
+  .layers .srow { padding:1px 2px; border-radius:3px; }
+  .layers .srow button { border:none; background:none; padding:0; font:inherit; color:inherit;
+    text-align:left; cursor:pointer; }
   .layers .srow:hover { color:var(--brand); background:#f0f4f8; }
   .layers .srow.on { font-weight:700; color:#111; }
   .layers .srow.on::before { content:'●'; color:var(--brand-accent); margin-right:4px; font-size:10px; }
-  .layers .star { cursor:pointer; color:#c9b45a; margin-right:4px; font-size:12px; user-select:none; }
+  .layers .star { cursor:pointer; color:#8a6d00; margin-right:4px; font-size:12px; user-select:none; }
   .layers .star:hover { color:var(--brand-accent); }
   .layers .star.on { color:var(--brand-accent); }
   .o3mk { width:13px; height:13px; transform:rotate(45deg); border:1.5px solid #333; box-shadow:0 0 2px #0006; }
@@ -112,11 +122,11 @@
   .guide .note { flex-basis:100%; color:#666; font-size:12px; margin-top:4px; }
   .about { padding:10px 14px; font-size:13px; color:#444; max-width:70ch; }
   .about a { color:var(--brand); }
-  footer { text-align:center; color:#888; font-size:13px; padding:24px 20px; margin-top:20px;
+  footer { text-align:center; color:#6f6f6f; font-size:13px; padding:24px 20px; margin-top:20px;
     border-top:1px solid #e5e5e8; background:#fff; }
   footer > a { color:var(--brand); text-decoration:none; font-weight:600; margin:0 2px; }
   footer > a:hover { text-decoration:underline; }
-  footer .fnote { color:#98a0a8; font-size:11.5px; margin-top:8px; }
+  footer .fnote { color:#687280; font-size:11.5px; margin-top:8px; }
   /* report / feedback modal */
   button.primary { background:var(--brand); color:#fff; border:none; }
   button.primary:disabled { opacity:.5; cursor:not-allowed; }
@@ -144,7 +154,7 @@
   .modalbox h3 { position:sticky; top:0; background:#fff; margin:0; padding:14px 0 8px;
     border-bottom:1px solid #eee; font-size:16px; }
   .modalbox h3 .x { float:right; border:none; background:none; font-size:22px; line-height:1;
-    cursor:pointer; color:#999; padding:0; }
+    cursor:pointer; color:#687280; padding:0; }
   .rform { display:flex; flex-direction:column; gap:10px; padding-top:12px; }
   .rform label { display:flex; flex-direction:column; gap:3px; font-size:13px; color:#444; }
   .rform input, .rform select, .rform textarea { padding:7px 9px; font-size:14px;
@@ -190,7 +200,7 @@
   .ov-intro h1 { font-size:clamp(23px,3.4vw,32px); margin:0 0 8px; color:#1a2b3c; line-height:1.15; }
   .ov-intro p { font-size:15px; color:#556; max-width:60ch; margin:0 auto; }
   .ov-sechead { max-width:1000px; margin:22px 20px 2px; font-size:13px; letter-spacing:.06em;
-    text-transform:uppercase; color:#8a93a0; }
+    text-transform:uppercase; color:#687280; }
   .ov-headline { margin:14px 20px 4px; padding:13px 17px; border-radius:10px; font-size:15px;
     background:#eef4f9; border:1px solid #d9e6f0; }
   .ov-headline.good { background:#edf8ed; border-color:#cfe9cf; }
@@ -201,7 +211,7 @@
     text-align:center; border-top:3px solid var(--brand); }
   .statval { font-size:32px; font-weight:700; line-height:1.05; color:#1a1a1a; }
   .statlabel { font-size:12.5px; color:#556; margin-top:4px; font-weight:600; }
-  .statsub { font-size:11px; color:#98a0a8; margin-top:2px; }
+  .statsub { font-size:11px; color:#687280; margin-top:2px; }
   .ov-mapcard #ov-map { height:400px; }
   .ov-maplink { float:right; font-size:12px; font-weight:600; color:var(--brand); text-decoration:none; }
   .ov-maplink:hover { text-decoration:underline; }
@@ -305,7 +315,7 @@
   .sd-known-as { margin:2px 0 6px; color:#77808c; }
   .sd-facts { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:12px 0; }
   .sd-facts > div { display:flex; flex-direction:column; font-size:13.5px; }
-  .sd-facts b { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#8a93a0; }
+  .sd-facts b { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#687280; }
   .sd-section { border-top:1px solid #eee; padding-top:10px; margin-top:10px; }
   .sd-section > b { font-size:13px; color:#1a2b3c; display:block; margin-bottom:5px; }
   .sd-sensors { width:100%; border-collapse:collapse; font-size:13px; }
@@ -336,7 +346,7 @@
   .ev-links { margin-top:10px; font-size:13px; }
   .ev-links a { color:var(--brand); text-decoration:none; margin-right:2px; }
   .ev-links a:hover { text-decoration:underline; }
-  .ev-sub { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#8a93a0; margin:12px 0 4px; }
+  .ev-sub { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#687280; margin:12px 0 4px; }
   .ev-chartwrap { border-top:1px solid #eee; margin-top:10px; padding-top:6px; }
   .ev-chart { height:320px; }
   .ev-nodata { border-top:1px solid #eee; margin-top:10px; padding-top:12px; font-size:13px; color:#7a5b12;

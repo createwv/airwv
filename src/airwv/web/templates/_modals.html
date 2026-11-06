@@ -1,7 +1,7 @@
 {# Shared report + feedback modals, used by both dashboard.html and overview.html.
    Wired by static/reporting.js; opened by any element with data-open="report|feedback". #}
-<div class="modal" id="reportmodal"><div class="modalbox">
-  <h3>📣 Report an environmental concern <button class="x" id="closereport" type="button">×</button></h3>
+<div class="modal" id="reportmodal" role="dialog" aria-modal="true" aria-labelledby="reporttitle"><div class="modalbox">
+  <h3 id="reporttitle">📣 Report an environmental concern <button class="x" id="closereport" type="button" aria-label="Close">×</button></h3>
   <div class="rform">
     <label>Type <select id="r-domain">
       <option value="air">💨 Air — odor, smoke, dust</option>
@@ -50,8 +50,8 @@
   </div>
 </div></div>
 
-<div class="modal" id="feedbackmodal"><div class="modalbox">
-  <h3>💬 Site feedback <button class="x" id="closefeedback" type="button">×</button></h3>
+<div class="modal" id="feedbackmodal" role="dialog" aria-modal="true" aria-labelledby="feedbacktitle"><div class="modalbox">
+  <h3 id="feedbacktitle">💬 Site feedback <button class="x" id="closefeedback" type="button" aria-label="Close">×</button></h3>
   <div class="rform">
     <label>Type <select id="f-kind">
       <option value="bug">🐞 Something's broken</option>

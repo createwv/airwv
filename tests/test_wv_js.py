@@ -72,3 +72,25 @@ def test_clamp_y_cuts_a_lone_spike():
 def test_clamp_y_leaves_normal_data_alone():
     assert _js(f"W.clampY({json.dumps([5 + (i % 10) for i in range(1000)])})") is None
     assert _js("W.clampY([1, 2, 900])") is None   # too few points to judge
+
+
+def _contrast_on_white(hex_: str) -> float:
+    def lum(c):
+        v = c / 255
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (int(hex_[i:i + 2], 16) for i in (1, 3, 5))
+    return 1.05 / (0.2126 * lum(r) + 0.7152 * lum(g) + 0.0722 * lum(b) + 0.05)
+
+
+def test_ink_darkens_status_colors_to_aa():
+    # AQI yellow/orange, ECHO orange, DEP blue, r-value green: too light for text on white
+    for c in ["#ffff00", "#ff7e00", "#e07b00", "#2c7fb8", "#1b9e77"]:
+        out = _js(f"W.ink('{c}')")
+        assert out != c and _contrast_on_white(out) >= 4.5, (c, out)
+
+
+def test_ink_leaves_dark_colors_and_non_hex_alone():
+    assert _js("W.ink('#137333')") == "#137333"
+    assert _js("W.ink('#C0392B')") == "#C0392B"
+    assert _js("W.ink('red')") == "red"
+    assert _js("W.ink(undefined) === undefined") is True

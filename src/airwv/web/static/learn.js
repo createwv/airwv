@@ -11,7 +11,7 @@
   tabs.forEach(t => t.addEventListener('click', () => {
     show(t.dataset.tab);
     history.replaceState(null, '', '#' + t.dataset.tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: AIRWV_WV.scrollBehavior() });
   }));
   // in-page links like <a href="#law"> switch tabs
   window.addEventListener('hashchange', () => show(location.hash.slice(1)));

@@ -4,10 +4,11 @@ const $ = id => document.getElementById(id);
 const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 // EPA PM2.5 AQI categories (mirror of PM25_BANDS in app.py) — for the headline label.
+// `text`: a darker shade of the band color for numbers on white (WCAG AA, 3:1 at this size).
 const PM_BANDS = [
-  {max: 12.0, label: 'Good', color: '#00e400'},
-  {max: 35.4, label: 'Moderate', color: '#ffff00'},
-  {max: 55.4, label: 'Unhealthy for sensitive groups', color: '#ff7e00'},
+  {max: 12.0, label: 'Good', color: '#00e400', text: '#137333'},
+  {max: 35.4, label: 'Moderate', color: '#ffff00', text: '#8a7400'},
+  {max: 55.4, label: 'Unhealthy for sensitive groups', color: '#ff7e00', text: '#b85c00'},
   {max: 150.4, label: 'Unhealthy', color: '#ff0000'},
   {max: 250.4, label: 'Very unhealthy', color: '#8f3f97'},
   {max: Infinity, label: 'Hazardous', color: '#7e0023'},
@@ -46,9 +47,9 @@ function renderStats(sensors){
   const elevated = withVal.filter(s => s.latest_pm2_5 > 35.4);
 
   $('ov-stats').innerHTML =
-    statCard(typ.toFixed(1), 'typical PM2.5 now', tb.label + ' · µg/m³', tb.color === '#ffff00' ? '#b59a00' : tb.color) +
+    statCard(typ.toFixed(1), 'typical PM2.5 now', tb.label + ' · µg/m³', tb.text || tb.color) +
     statCard(withVal.length, 'sensors reporting', `of ${community.length} community`) +
-    statCard(hi.toFixed(1), 'highest now', esc(hiS ? hiS.name : ''), hb.color === '#ffff00' ? '#b59a00' : hb.color) +
+    statCard(hi.toFixed(1), 'highest now', esc(hiS ? hiS.name : ''), hb.text || hb.color) +
     statCard(refs.length, 'EPA reference monitors', 'for validation');
 
   const h = $('ov-headline');

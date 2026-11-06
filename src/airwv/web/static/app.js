@@ -8,9 +8,16 @@ let defaultPick = null;     // {sensor, why}: the auto-chosen sensor, while the 
 function setDefaultSensor(pick){
   if (!pick) return;
   chartSet = new Set([pick.sensor.sensor_id]);
-  document.querySelectorAll('.srow.on').forEach(el => el.classList.remove('on'));
-  document.querySelectorAll(`.srow[data-sid="${pick.sensor.sensor_id}"]`).forEach(el => el.classList.add('on'));
+  markRows('.srow.on', false);
+  markRows(`.srow[data-sid="${pick.sensor.sensor_id}"]`, true);
   defaultPick = pick;
+}
+// a sensor row's "charted" state: the highlight, and aria-pressed on its name button
+function markRows(sel, on){
+  document.querySelectorAll(sel).forEach(el => {
+    el.classList.toggle('on', on);
+    const b = el.querySelector('.sname'); if (b) b.setAttribute('aria-pressed', on);
+  });
 }
 function showWhy(){
   const el = $('ts-why'); if (!el) return;
@@ -20,7 +27,7 @@ function showWhy(){
 function toggleChart(sid){
   if (chartSet.has(sid)) chartSet.delete(sid); else chartSet.add(sid);
   // update the tree row(s) in place (don't rebuild — that would collapse open groups)
-  document.querySelectorAll(`.srow[data-sid="${sid}"]`).forEach(el => el.classList.toggle('on', chartSet.has(sid)));
+  markRows(`.srow[data-sid="${sid}"]`, chartSet.has(sid));
   redrawSensors(); render();
 }
 
@@ -198,7 +205,7 @@ async function loadSources(){
   const wantSrc = new URLSearchParams(location.search).get('src');
   if (wantSrc && allSources_.some(s => s.name === wantSrc)){
     $('srcpick').value = wantSrc; showProximity(wantSrc);
-    document.querySelector('#proxtable').scrollIntoView({behavior:'smooth', block:'center'});
+    document.querySelector('#proxtable').scrollIntoView({behavior:AIRWV_WV.scrollBehavior(), block:'center'});
   }
 }
 // ---- Source-proximity: pick a polluter, see the sensors around it by distance + bearing ----
@@ -226,7 +233,7 @@ const prevailing = rose => Object.keys(rose).reduce((a,b)=> rose[b]>rose[a]?b:a)
 function showProximity(name){
   const src = allSources_.find(s => s.name === name && s.lat != null);
   const tb = document.querySelector('#proxtable tbody');
-  if (!src){ tb.innerHTML='<tr><td colspan="6" style="color:#999">Pick a pollution source above.</td></tr>';
+  if (!src){ tb.innerHTML='<tr><td colspan="6" class="meta">Pick a pollution source above.</td></tr>';
     $('chartnear').disabled=true; $('proxsector').textContent=''; if(proxRings){proxRings.remove();proxRings=null;} return; }
   const weighted = $('windweight').checked && windRoses.length;
   const station = weighted ? nearestStation(src.lat, src.lon) : null;
@@ -268,7 +275,7 @@ function initProximity(){
   $('windweight').addEventListener('change', () => showProximity($('srcpick').value.trim()));
   $('chartnear').addEventListener('click', () => {
     proxNearest.forEach(s => chartSet.add(s.sensor_id));
-    proxNearest.forEach(s => document.querySelectorAll(`.srow[data-sid="${s.sensor_id}"]`).forEach(el => el.classList.add('on')));
+    proxNearest.forEach(s => markRows(`.srow[data-sid="${s.sensor_id}"]`, true));
     redrawSensors(); render();
   });
 }
@@ -293,7 +300,7 @@ function renderFacWater(sites) {
   withVals.slice(0, 2).forEach(s => {
     const chips = WQ_ORDER.filter(k => s.latest[k]).map(k => {
       const l = s.latest[k], m = WQ[k], col = m.color(l.value);
-      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
     }).join(' ');
     if (chips) html += `<div style="margin:3px 0"><small>${s.name} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
   });
@@ -471,14 +478,17 @@ function buildLayers(){
   cats.forEach(c=>{ if(!(c in layerState.cats)) layerState.cats[c]=true; });
   const row = (attr,val,checked,label,cnt)=>
     `<label><input type="checkbox" data-${attr}="${val}" ${checked?'checked':''}> ${label} <span class="cnt">${cnt}</span></label>`;
-  const srowHtml = s => `<div class="srow${chartSet.has(s.sensor_id)?' on':''}" data-sid="${s.sensor_id}">`+
-    `<span class="star${mySensors.has(s.sensor_id)?' on':''}" data-star="${s.sensor_id}" title="follow">${mySensors.has(s.sensor_id)?'★':'☆'}</span>${s.name}</div>`;
+  // buttons, so the follow star and "chart this sensor" work from the keyboard too
+  const srowHtml = s => { const on = chartSet.has(s.sensor_id), fav = mySensors.has(s.sensor_id);
+    return `<div class="srow${on?' on':''}" data-sid="${s.sensor_id}">`+
+      `<button type="button" class="star${fav?' on':''}" data-star="${s.sensor_id}" title="follow" aria-pressed="${fav}" aria-label="follow ${s.name}">${fav?'★':'☆'}</button>`+
+      `<button type="button" class="sname" aria-pressed="${on}" title="chart this sensor">${s.name}</button></div>`; };
   // community: each region is a <details> (visibility checkbox) holding clickable sensor rows
   const byRegion = {};
   comm.forEach(s => { (byRegion[s.region] = byRegion[s.region] || []).push(s); });
   const regionBlocks = regions.map(r => {
     const rows = (byRegion[r]||[]).sort((a,b)=>a.name.localeCompare(b.name)).map(srowHtml).join('');
-    return `<details><summary><input type="checkbox" data-region="${r}" ${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
+    return `<details><summary><input type="checkbox" data-region="${r}"${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
   }).join('');
   // ⭐ pinned follow-list at the top
   const followed = comm.filter(s => mySensors.has(s.sensor_id)).sort((a,b)=>a.name.localeCompare(b.name));
@@ -528,7 +538,10 @@ function buildLayers(){
       `<details><summary><input type="checkbox" id="L-wells" ${layerState.wells?'checked':''}> 🛢️ Abandoned wells (WV DEP) <span class="cnt">${wellsTotal || '~15k'}</span></summary><div class="children"><p class="ctx-help">Old gas wells no longer producing. <b>Orphans</b> (red) have no responsible operator and can leak gas/H2S. <a href="/learn#health">why that matters →</a></p>${wellSubs}</div></details>`+
     `</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
-  $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
+  // …and, not being inside a <label>, they take their name from the summary text minus the count
+  $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> { cb.addEventListener('click', e=>e.stopPropagation());
+    const s = cb.parentElement.cloneNode(true); s.querySelectorAll('.cnt').forEach(c => c.remove());
+    cb.setAttribute('aria-label', 'show ' + s.textContent.trim()); });
   // updates happen in place (no rebuild) so open groups stay open
   $('L-community').onchange = e=>{ layerState.community=e.target.checked;
     regions.forEach(r=>layerState.regions[r]=e.target.checked);
@@ -572,7 +585,8 @@ function buildLayers(){
   $('layers').querySelectorAll('[data-well]').forEach(cb=> cb.onchange=e=>{
     layerState[e.target.dataset.well==='orphan'?'wellOrphan':'wellOperator']=e.target.checked; redrawWells(); });
   if($('L-wellnear')) $('L-wellnear').onchange = e=>{ layerState.wellNearOnly=e.target.checked; redrawWells(); };
-  $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
+  $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star);
+    const again = $('layers').querySelector(`[data-star="${el.dataset.star}"]`); if (again) again.focus(); }));   // the tree was rebuilt
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
 }
@@ -605,7 +619,7 @@ async function loadValidation(){
   }
   tb.innerHTML = d.results.map(v => {
     const r = v.r;
-    const rcol = r==null ? '#888' : r>=0.7 ? '#1b9e77' : r>=0.4 ? '#e07b00' : '#d62728';
+    const rcol = AIRWV_WV.ink(r==null ? '#888888' : r>=0.7 ? '#1b9e77' : r>=0.4 ? '#e07b00' : '#d62728');
     const rtxt = r==null ? 'n/a' : r.toFixed(2);
     const bad = Math.abs(v.bias) > 50;   // an absurd bias flags a malfunctioning sensor
     const btxt = (v.bias>0?'+':'') + v.bias.toFixed(1) + ' µg/m³';

@@ -79,3 +79,22 @@ def test_map_bounds(product, name, width):
         assert WV["south"] < lat < WV["north"] and WV["west"] < lon < WV["east"], \
             f"#{m['id']} centered off West Virginia: {lat:.2f},{lon:.2f}"
         assert m["north"] - m["south"] < 12, f"#{m['id']} zoomed out to a continent"
+
+
+# Accessibility (harness.mjs a11yProbe/focusProbe; the browser asks for reduced motion).
+A11Y = {
+    "contrast": "text below WCAG AA contrast (4.5:1; 3:1 for large text or symbols in a control)",
+    "noAlt": "images with no alt attribute",
+    "noName": "controls with no accessible name",
+    "clickable": "mouse-only controls (cursor:pointer, not keyboard-focusable)",
+    "motion": "infinite animations despite prefers-reduced-motion",
+    "noFocus": "tab stops with no visible focus indicator",
+}
+
+
+@pytest.mark.parametrize("check", list(A11Y))
+@pytest.mark.parametrize("name,width", CASES, ids=IDS)
+def test_a11y(product, name, width, check):
+    a = _get(product, name, width).get("a11y") or {}
+    assert "error" not in a, a.get("error")
+    assert a.get(check) == [], f"{A11Y[check]}: {a.get(check)}"

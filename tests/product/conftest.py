@@ -189,14 +189,17 @@ def product(tmp_path_factory):
 def _report(data) -> str:
     rows = ["# Product harness report", "",
             f"DB: `{data['db']}` · {datetime.now().isoformat(timespec='minutes')}", "",
-            "| page | width | status | ms | nav | reading above fold | maps | console/page errors |",
-            "|---|---|---|---|---|---|---|---|"]
+            "| page | width | status | ms | nav | reading above fold | maps | console/page errors "
+            "| a11y |",
+            "|---|---|---|---|---|---|---|---|---|"]
     for r in data["results"]:
         reading = (r.get("reading") or {}).get("text", "—").replace("|", "/")[:60]
         maps = ", ".join(f"{m['id']} z{m['zoom']}" for m in r.get("maps", [])) or "—"
         errs = len(r["consoleErrors"]) + len(r["pageErrors"])
+        a11y = ", ".join(f"{k} {len(v)}" for k, v in (r.get("a11y") or {}).items()
+                         if isinstance(v, list) and v) or "ok"
         rows.append(f"| {r['page']} | {r['width']} | {r['status']} | {r['ms']} | "
-                    f"{r.get('navCount', '—')} | {reading} | {maps} | {errs} |")
+                    f"{r.get('navCount', '—')} | {reading} | {maps} | {errs} | {a11y} |")
     shimmed = sorted({s for r in data["results"] for s in r.get("shimmed", [])})
     if shimmed:
         rows += ["", (f"Shimmed (no local copy, no network): {', '.join(shimmed)}. Map/chart "

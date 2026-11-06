@@ -7,6 +7,7 @@ const KIND = {fire:'🔥', wildfire:'🔥', explosion:'💥', haze:'🌫️', sm
 const MEDIUM = {air:'💨 air', water:'💧 water', soil:'🌱 soil', other:'📍'};
 const COLORS = ['#4a7fb0', '#c9992f', '#7a6fb0', '#c0392b', '#2a7a2a', '#e07b39', '#5a6472'];
 let EVENTS = [], NAMES = {};
+const evDialog = AIRWV_WV.dialog($('ev-detail'), $('ev-close'));
 
 const fmtD = iso => iso ? new Date(iso).toLocaleDateString('en-US',
   {year:'numeric', month:'short', day:'numeric'}) : '';
@@ -109,7 +110,7 @@ function openEvent(e) {
   const cap = e.captured && (e.sensor_ids || []).length;
   $('ev-chartwrap').style.display = cap ? 'block' : 'none';
   $('ev-nodata').style.display = cap ? 'none' : 'block';
-  $('ev-detail').classList.add('on');
+  evDialog.open();
   if (cap) { $('ev-chart').innerHTML = ''; drawChart(e); }
 }
 
@@ -126,7 +127,5 @@ async function init() {
     const b = ev.target.closest('.evcard');
     if (b) openEvent(EVENTS.find(x => x.id === +b.dataset.id));
   });
-  $('ev-close').addEventListener('click', () => $('ev-detail').classList.remove('on'));
-  $('ev-detail').addEventListener('click', ev => { if (ev.target === $('ev-detail')) $('ev-detail').classList.remove('on'); });
 }
 init();

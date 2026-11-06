@@ -55,7 +55,7 @@ function renderNearWater(sites) {
       const l = s.latest[k], m = WATER_PARAMS[k];
       const col = m ? m.color(l.value) : '#333';
       const unit = m && m.unit ? m.unit : (l.unit || '');
-      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${unit ? ' ' + unit : ''}</b> ${m ? m.label : k}</span>`;
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${l.value}${unit ? ' ' + unit : ''}</b> ${m ? m.label : k}</span>`;
     }).join(' ');
     if (chips) html += `<div style="margin:3px 0"><small>${esc(s.name)} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
   });
@@ -181,7 +181,7 @@ async function showSite(s) {
        yaxis: {title: meta.label + (meta.unit ? ` (${meta.unit})` : '')}},
       {displayModeBar: false, responsive: true});
   } catch (e) { $('w-chart').innerHTML = '<p class="meta" style="padding:14px">Could not load the chart.</p>'; }
-  $('w-sitename').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  $('w-sitename').scrollIntoView({behavior: AIRWV_WV.scrollBehavior(), block: 'nearest'});
 }
 
 // ---- 🚰 SDWA drinking-water systems + violations ----
@@ -191,7 +191,7 @@ async function loadSdwa() {
   catch (e) { $('sdwa-body').innerHTML = '<tr><td colspan="6" class="meta" style="padding:14px">Could not load drinking-water data.</td></tr>'; return; }
   SDWA_META = SDWA;
   const s = SDWA.summary || {};
-  const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${col}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+  const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
   $('sdwa-summary').innerHTML =
     box(s.systems, 'active water systems', '#5a6472')
     + box(s.community, 'community (serve homes)', '#2c7fb8')
@@ -219,7 +219,7 @@ function drawSdwaMap() {
     const rate = c.systems ? c.health / c.systems : 0;
     const col = rate >= 0.4 ? '#7e0023' : rate >= 0.25 ? '#c0392b' : rate >= 0.12 ? '#e07b00' : '#e0a030';
     L.circleMarker([c.lat, c.lon], {radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
-      .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${col}">${c.health}</b> of ${c.systems} systems with a health-based violation`
+      .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${AIRWV_WV.ink(col)}">${c.health}</b> of ${c.systems} systems with a health-based violation`
         + `<br><small>${c.serious} serious violator(s) · ${Number(c.pop_affected).toLocaleString()} people served</small>`
         + `<br><small><a href="#" data-cofilter="${esc(c.county)}">show these systems ↓</a></small>`)
       .addTo(sdwaLayer);

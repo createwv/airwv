@@ -97,7 +97,9 @@ function a11yProbe() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     const el = n.parentElement;
-    if (!el || seen.has(el) || !n.textContent.trim() || el.closest(".leaflet-pane, script, style"))
+    // disabled controls are exempt from contrast (WCAG 1.4.3)
+    if (!el || seen.has(el) || !n.textContent.trim()
+        || el.closest(".leaflet-pane, script, style, :disabled"))
       continue;
     seen.add(el);
     if (!vis(el)) continue;
@@ -108,7 +110,11 @@ function a11yProbe() {
     const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
     const ratio = (a + 0.05) / (b + 0.05), px = parseFloat(cs.fontSize);
     const large = px >= 24 || (px >= 18.66 && +cs.fontWeight >= 700);
-    if (ratio < (large ? 3 : 4.5))
+    // symbol-only text (●, ☆, ×) is a graphic: 3:1 inside a control, and a legend swatch
+    // outside one (its color has to match the map marker; the label next to it carries it)
+    const glyph = !/[\p{L}\p{N}]/u.test(el.textContent);
+    if (glyph && !el.closest("button, a[href], summary, [role], [tabindex]")) continue;
+    if (ratio < (large || glyph ? 3 : 4.5))
       contrast.push(`${desc(el)} ${ratio.toFixed(2)}:1 (${cs.color} on rgb(${bg.slice(0, 3)
         .map(Math.round)}), ${px}px)`);
   }
@@ -141,23 +147,19 @@ function a11yProbe() {
 }
 
 // Keyboard: Tab through the first stops and record any that show no focus indicator
-// (no outline and no box-shadow change versus unfocused).
+// (neither an outline nor a box-shadow while focused).
 async function focusProbe(page, stops = 15) {
   const missing = [];
   for (let i = 0; i < stops; i++) {
     await page.keyboard.press("Tab");
-    const r = await page.evaluate(() => {
+    const r =await page.evaluate(() => {
       const el = document.activeElement;
       if (!el || el === document.body) return null;
-      const f = getComputedStyle(el), on = { o: f.outlineStyle !== "none" && parseFloat(f.outlineWidth) > 0,
-        s: f.boxShadow, b: f.backgroundColor, c: f.borderColor, t: f.textDecorationLine };
-      el.blur();
-      const u = getComputedStyle(el);
-      const shown = on.o || on.s !== u.boxShadow || on.b !== u.backgroundColor
-        || on.c !== u.borderColor || on.t !== u.textDecorationLine;
-      el.focus();
-      const t = (el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 40);
-      return { shown, el: `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""} "${t}"` };
+      const f = getComputedStyle(el);
+      const shown = (f.outlineStyle !== "none" && parseFloat(f.outlineWidth) > 0) || f.boxShadow !== "none";
+      const t = (el.getAttribute("aria-label") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40);
+      return { shown, el: `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""} "${t}" `
+        + `(outline ${f.outlineStyle} ${f.outlineWidth}, focus-visible ${el.matches(":focus-visible")})` };
     });
     if (!r) break;
     if (!r.shown) missing.push(r.el);

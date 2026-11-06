@@ -9,7 +9,7 @@
     try { d = await (await fetch('/api/data-catalog')).json(); }
     catch (e) { el('dc-groups').innerHTML = '<p class="meta" style="padding:14px">Could not load the catalog.</p>'; return; }
 
-    const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${col}">${n}</b> ${txt}</span>`;
+    const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${n}</b> ${txt}</span>`;
     el('dc-summary').innerHTML =
       box(d.total, 'public data sources', '#2c7fb8')
       + box(d.keyless, 'usable with no API key', '#137333')
