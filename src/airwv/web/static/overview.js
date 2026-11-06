@@ -68,10 +68,9 @@ function renderStats(sensors){
 
 function drawMap(sensors){
   const pts = sensors.filter(s => s.lat != null && s.lon != null);
-  const map = L.map('ov-map', {scrollWheelZoom: false}).setView([38.9, -80.5], 7);
+  const map = AIRWV_WV.fitWV(L.map('ov-map', {scrollWheelZoom: false}));
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
-  const group = [];
   pts.forEach(s => {
     const ref = s.kind === 'reference';
     const val = s.latest_pm2_5 != null ? `${s.latest_pm2_5.toFixed(1)} µg/m³ PM2.5` : 'no current reading';
@@ -79,9 +78,8 @@ function drawMap(sensors){
       radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
       fillColor: s.color, fillOpacity: ref ? 0.7 : 0.85})
       .bindPopup(`<b>${esc(s.name)}</b><br>${val}${ref ? '<br><i>EPA reference monitor</i>' : ''}`);
-    m.addTo(map); group.push([s.lat, s.lon]);
+    m.addTo(map);
   });
-  if (group.length) map.fitBounds(group, {padding: [30, 30], maxZoom: 9});
   $('ov-legend').innerHTML = 'Dots = community sensors · rings = EPA monitors · '
     + 'color = latest PM2.5 (green good → red unhealthy). Click a dot for details.';
   window.AIRWV_MAP = map;               // reporting.js drops the report pin here

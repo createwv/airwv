@@ -204,11 +204,11 @@ async function loadSdwa() {
   drawSdwaMap();
   renderSdwa();
   ['sdwa-health', 'sdwa-community', 'sdwa-county'].forEach(id => $(id).addEventListener('change', renderSdwa));
-  setTimeout(() => sdwaMap && sdwaMap.invalidateSize(), 200);
+  setTimeout(() => { if (sdwaMap) { sdwaMap.invalidateSize(); AIRWV_WV.fitWV(sdwaMap); } }, 200);
 }
 function drawSdwaMap() {
   if (!sdwaMap) {
-    sdwaMap = L.map('sdwa-map').setView([38.6, -80.6], 7);
+    sdwaMap = AIRWV_WV.fitWV(L.map('sdwa-map'));
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(sdwaMap);
   }
   if (sdwaLayer) sdwaLayer.remove();

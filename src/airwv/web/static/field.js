@@ -95,7 +95,7 @@ async function loadRecent() {
 
 function init() {
   showAuth();
-  map = L.map('fr-map').setView([38.9, -80.5], 7);
+  map = AIRWV_WV.fitWV(L.map('fr-map'));
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
   map.on('click', e => { if (picking) { picking = false; setLoc(e.latlng.lat, e.latlng.lng); } });
   $('fr-login').addEventListener('click', setToken);
