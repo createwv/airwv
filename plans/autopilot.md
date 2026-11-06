@@ -70,4 +70,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Put local copies of Leaflet, markercluster and Plotly in `static/vendor/` so the harness's map and chart checks run (also part of "self-hosted libs"). [auto:S]
 - [ ] Tighten the harness map check to "the map's first view contains West Virginia and is at most about 2× its size", at every screen size. [auto:S]
 - [ ] Show sensor names on the local database copy, not bare IDs, so screenshots read like production. [auto:S]
+- [ ] Move /air's controls on phone below the map into a collapsed "Filters" sheet (the next §6 item). [auto:S]
 
