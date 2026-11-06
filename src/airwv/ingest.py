@@ -800,13 +800,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
 
     # Community sensor coords: passed in, or from the resolved public-sensor listing.
     if coords is None:
-        coords = {}
-        listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
-        if listing_path.exists():
-            for rec in json.loads(listing_path.read_text()):
-                idx = str(rec.get("sensor_index") or rec.get("index") or "")
-                if idx and rec.get("latitude") is not None:
-                    coords[idx] = (rec["latitude"], rec["longitude"])
+        coords = _community_coords(config)
 
     since = None if not window_days else (
         datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=window_days))
@@ -989,6 +983,91 @@ def run_events(
     return found
 
 
+def _community_coords(config: Config) -> dict[str, tuple]:
+    """Community sensor coords from the resolved public-sensor listing (best-effort)."""
+    coords: dict[str, tuple] = {}
+    listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
+    if listing_path.exists():
+        for rec in json.loads(listing_path.read_text()):
+            idx = str(rec.get("sensor_index") or rec.get("index") or "")
+            if idx and rec.get("latitude") is not None:
+                coords[idx] = (rec["latitude"], rec["longitude"])
+    return coords
+
+
+def run_candidates(
+    config: Config | None = None,
+    field: str = "pm2_5",
+    days: int = 30,
+    start: datetime | None = None,
+    end: datetime | None = None,
+    z_threshold: float = 6.0,
+    radius_km: float = 15.0,
+    window_h: float = 3.0,
+    neighbor_z: float = 3.0,
+    top: int = 15,
+    store=None,
+    coords: dict | None = None,
+) -> dict:
+    """Neighbor cross-check every spike in a window and propose event candidates.
+
+    Spikes come from :func:`detrend_events` on each community sensor and AirNow
+    monitor (hourly sources; AirData's daily archive is left out). Each spike is
+    corroborated (a neighbor within ``radius_km`` rose too), single-sensor
+    (neighbors reporting, flat: local source or sensor fault) or unchecked (no
+    neighbor reporting). Corroborated spikes that overlap merge into candidates.
+    The window is ``[start, end]``, default the last ``days`` up to the newest
+    reading. Read-only, no API cost.
+    """
+    from airwv.analysis.crosscheck import cross_check, episodes, event_candidates
+    from airwv.analysis.events import residual_scores
+
+    store = store or Store.from_config(config)
+    if coords is None:
+        coords = _community_coords(config)
+    coords = {**coords, **store.coords_from_readings("airnow")}
+    sids = sorted(set(store.sensor_ids_by_source("purpleair")) | set(store.sensor_ids_by_source("airnow")))
+
+    def naive(dt):
+        return dt.astimezone(timezone.utc).replace(tzinfo=None) if dt and dt.tzinfo else dt
+
+    until = naive(end)
+    if until is None:
+        lasts = [t for t in (store.last_ts_for_sensor(s) for s in sids) if t is not None]
+        until = max(lasts).replace(tzinfo=None) if lasts else None
+    if until is None:
+        return {"since": None, "until": None, "checks": [], "candidates": []}
+    since = naive(start) or until - timedelta(days=days)
+
+    scores, flagged = {}, []
+    for sid in sids:
+        rows = store.readings_for_sensor(sid, since=since, until=until)
+        pts = residual_scores(rows, field=field)
+        if not pts:
+            continue
+        scores[sid] = pts
+        flagged.extend(detrend_events(rows, field=field, z_threshold=z_threshold))
+
+    checks = cross_check(episodes(flagged, gap_h=window_h), scores, coords,
+                         radius_km=radius_km, window_h=window_h, neighbor_z=neighbor_z)
+    cands = event_candidates(checks, coords, window_h=window_h)
+
+    by_status = Counter(c.status for c in checks)
+    log.info("%s spikes %s → %s: %d corroborated, %d single-sensor, %d unchecked; %d candidate(s)",
+             field, since.date(), until.date(), by_status["corroborated"], by_status["single_sensor"],
+             by_status["no_neighbors"], len(cands))
+    for c in cands[:top]:
+        log.info("  candidate %s → %s  %d sensors  peak %s=%.1f at %s (z=%.0f)",
+                 c.start.strftime("%Y-%m-%d %H:%M"), c.end.strftime("%Y-%m-%d %H:%M"),
+                 len(c.sensor_ids), field, c.peak_value, c.peak_sensor, c.peak_score)
+    for c in sorted((c for c in checks if c.status == "single_sensor"),
+                    key=lambda c: -c.episode.peak.score)[:top]:
+        log.info("  single-sensor %s  sensor %s  %s=%.1f  (%d neighbor(s) flat)",
+                 c.episode.peak.ts.strftime("%Y-%m-%d %H:%M"), c.episode.sensor_id,
+                 field, c.episode.peak.value, len(c.neighbors))
+    return {"since": since, "until": until, "checks": checks, "candidates": cands}
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -1095,6 +1174,15 @@ def main(argv: list[str] | None = None) -> None:
     events.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
     events.add_argument("--threshold", type=float, default=6.0, help="residual robust-z threshold")
     events.add_argument("--top", type=int, default=15, help="how many top events to show")
+    cands = sub.add_parser("candidates",
+                           help="neighbor cross-check of spikes + proposed events (no API cost)")
+    cands.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
+    cands.add_argument("--days", type=int, default=30, help="window length, ending at the newest reading")
+    cands.add_argument("--start", help="window start YYYY-MM-DD (UTC)")
+    cands.add_argument("--end", help="window end YYYY-MM-DD (UTC)")
+    cands.add_argument("--threshold", type=float, default=6.0, help="spike residual robust-z threshold")
+    cands.add_argument("--radius-km", type=float, default=15.0, help="neighbor radius")
+    cands.add_argument("--top", type=int, default=15, help="how many to show")
     trends = sub.add_parser("trends", help="long-term trends + areas to watch (no API cost)")
     trends.add_argument("--field", default="pm2_5", help="field to trend (default pm2_5)")
     trends.add_argument("--sensor", help="limit to one sensor name (default: all)")
@@ -1173,6 +1261,10 @@ def main(argv: list[str] | None = None) -> None:
         run_compare(config, args.sensor, field=args.field)
     elif command == "events":
         run_events(config, args.sensor, field=args.field, z_threshold=args.threshold, top=args.top)
+    elif command == "candidates":
+        run_candidates(config, field=args.field, days=args.days, start=_date(args.start),
+                       end=_date(args.end), z_threshold=args.threshold, radius_km=args.radius_km,
+                       top=args.top)
     elif command == "trends":
         run_trends(config, field=args.field, sensor_name=args.sensor, min_days=args.min_days)
     elif command == "baseline":
