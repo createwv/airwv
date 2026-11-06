@@ -94,4 +94,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Bring the Alembic baseline up to date with the models (missing: `events`, `field_readings`, `water_readings`, `readings.ozone`, subscription columns) [auto:S]
 - [ ] Set names for AirData-only monitors in `reading_sites` from the AirData CSV's site name column at ingest [auto:S]
 - [ ] Remove the exact-duplicate natural-gas spill rows that `/api/near` still shows twice near 39.65,-80.02 (NRC spills fetch script) [auto:S]
+- [ ] Mark the flaky `test_a11y[air-1280-noFocus]` product check as unreliable, or make it pass consistently [auto:S]
 
