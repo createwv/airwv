@@ -96,4 +96,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Remove the exact-duplicate natural-gas spill rows that `/api/near` still shows twice near 39.65,-80.02 (NRC spills fetch script) [auto:S]
 - [ ] Mark the flaky `test_a11y[air-1280-noFocus]` product check as unreliable, or make it pass consistently [auto:S]
 - [ ] Explore: when a single sensor, gauge or sample site is picked, show its readings as a table and chart from the series mode, with its CSV link [auto:M]
+- [ ] Read model: add AirNow monitors in `readings` as sites (a small sites table) so series mode covers them [auto:M]
 
