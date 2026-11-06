@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict
+from datetime import datetime, timezone
 from typing import Iterable
 
 from sqlalchemy import and_, create_engine, func, insert, select
@@ -24,6 +25,7 @@ from airwv.storage.models import (
     Feedback,
     FieldReading,
     ReadingRow,
+    ReadingSite,
     Report,
     Subscription,
     WaterReading,
@@ -71,6 +73,11 @@ _READING_FIELDS = (
 )
 
 
+def _ts_key(t: datetime) -> datetime:
+    """Comparable form of a reading ts: naive UTC (SQLite hands back naive datetimes)."""
+    return t.astimezone(timezone.utc).replace(tzinfo=None) if t.tzinfo else t
+
+
 class Store:
     """Durable storage for normalized readings."""
 
@@ -101,6 +108,7 @@ class Store:
         """
         Base.metadata.create_all(self._engine)
         self._ensure_columns()
+        self._backfill_reading_sites()
 
     def _ensure_columns(self) -> None:
         """Idempotent, additive column back-fill for tables that predate a new field.
@@ -153,10 +161,72 @@ class Store:
                     result = session.execute(self._upsert_stmt(rows[i:i + batch]))
                     written += result.rowcount
                 session.commit()
-            return written
+        else:
+            # Portable fallback for dialects without native upsert: check-then-write.
+            written = self._save_readings_fallback(rows)
+        self._update_reading_sites(rows)
+        return written
 
-        # Portable fallback for dialects without native upsert: check-then-write.
-        return self._save_readings_fallback(rows)
+    def _update_reading_sites(self, rows: list[dict]) -> None:
+        """Fold a batch of reading rows into ``reading_sites`` (one row per sensor):
+        widen its first/last ts, and move it to the coords of its latest located reading."""
+        seen: dict[tuple, dict] = {}
+        for row in rows:
+            key, ts = (row["source"], row["sensor_id"]), row["ts"]
+            s = seen.setdefault(key, {"first_ts": ts, "last_ts": ts, "located_ts": None})
+            if _ts_key(ts) < _ts_key(s["first_ts"]):
+                s["first_ts"] = ts
+            if _ts_key(ts) > _ts_key(s["last_ts"]):
+                s["last_ts"] = ts
+            if row.get("lat") is not None and row.get("lon") is not None and (
+                    s["located_ts"] is None or _ts_key(ts) >= _ts_key(s["located_ts"])):
+                s.update(lat=row["lat"], lon=row["lon"], located_ts=ts)
+        with self._session_factory() as session:
+            for (source, sensor_id), s in seen.items():
+                site = session.get(ReadingSite, (source, sensor_id))
+                if site is None:
+                    session.add(ReadingSite(source=source, sensor_id=sensor_id, **s))
+                    continue
+                if _ts_key(s["first_ts"]) < _ts_key(site.first_ts):
+                    site.first_ts = s["first_ts"]
+                if _ts_key(s["last_ts"]) > _ts_key(site.last_ts):
+                    site.last_ts = s["last_ts"]
+                if s["located_ts"] is not None and (
+                        site.located_ts is None or _ts_key(s["located_ts"]) >= _ts_key(site.located_ts)):
+                    site.lat, site.lon, site.located_ts = s["lat"], s["lon"], s["located_ts"]
+            session.commit()
+
+    def name_reading_sites(self, source: str, names: dict[str, str]) -> None:
+        """Set display names on known ``reading_sites`` rows (e.g. AirNow site names)."""
+        with self._session_factory() as session:
+            for sensor_id, name in names.items():
+                site = session.get(ReadingSite, (source, sensor_id))
+                if site is not None and name:
+                    site.name = name
+            session.commit()
+
+    def _backfill_reading_sites(self) -> None:
+        """One-off fill of ``reading_sites`` for a database that has readings from
+        before the table existed (one GROUP BY, then per-sensor indexed lookups)."""
+        with self._session_factory() as session:
+            if session.scalar(select(ReadingSite.sensor_id).limit(1)) is not None:
+                return
+            spans = session.execute(
+                select(ReadingRow.source, ReadingRow.sensor_id, func.min(ReadingRow.ts),
+                       func.max(ReadingRow.ts)).group_by(ReadingRow.source, ReadingRow.sensor_id)).all()
+            for source, sensor_id, first_ts, last_ts in spans:
+                loc = session.execute(
+                    select(ReadingRow.lat, ReadingRow.lon, ReadingRow.ts).where(
+                        ReadingRow.sensor_id == sensor_id, ReadingRow.source == source,
+                        ReadingRow.lat.isnot(None), ReadingRow.lon.isnot(None))
+                    .order_by(ReadingRow.ts.desc()).limit(1)).first()
+                session.add(ReadingSite(
+                    source=source, sensor_id=sensor_id, first_ts=first_ts, last_ts=last_ts,
+                    lat=loc[0] if loc else None, lon=loc[1] if loc else None,
+                    located_ts=loc[2] if loc else None))
+            if spans:
+                log.info("reading_sites: back-filled %d sensors from readings", len(spans))
+            session.commit()
 
     def count(self) -> int:
         with self._session_factory() as session:

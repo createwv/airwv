@@ -76,6 +76,25 @@ class ReadingRow(Base):
     )
 
 
+class ReadingSite(Base):
+    """One row per (source, sensor_id) in ``readings``, kept current at ingest by
+    ``Store.save_readings``: where the sensor is (coords of its latest located
+    reading), its name when the source gives one (AirNow), and the span of its data.
+    Lets the read model's ``site`` view list AirNow / AirData reference monitors and
+    readings-table sensors without a GROUP BY over ``readings``."""
+
+    __tablename__ = "reading_sites"
+
+    source: Mapped[str] = mapped_column(String(64), primary_key=True)
+    sensor_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    located_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    first_ts: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_ts: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class Subscription(Base):
     """A person/system asking to be alerted when a field crosses a threshold."""
 

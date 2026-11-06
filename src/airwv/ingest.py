@@ -664,6 +664,7 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         return 0
     readings, monitors = _parse_airnow(content)
     n = store.save_readings(readings)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors.items()})
     total = _airnow_save_monitors(config, monitors)
     log.info("airnow: %d readings from %d monitors (HourlyAQObs_%s; %d monitors known total)",
              n, len(monitors), stamp, total)
@@ -696,6 +697,7 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
                 readings, monitors = _parse_airnow(got)
                 total += store.save_readings(readings)
                 monitors_all.update(monitors)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow backfill: %d readings across %d days", total, days)
     return total
@@ -741,6 +743,7 @@ def run_airnow_hourly(config: Config, year: int, store=None, workers: int = 10) 
     if batch:
         total += store.save_readings(batch)
     client.close()
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow hourly %d: %d readings from %d files", year, total, len(hours))
     return total
