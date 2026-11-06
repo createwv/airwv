@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from airwv.config import Config
 from airwv.sources.base import Reading
 from airwv.storage.models import (
+    AlertSeen,
     Base,
     CommunityReading,
     Event,
@@ -114,7 +115,8 @@ class Store:
         from sqlalchemy import inspect as _inspect, text
         wanted = {
             "reports": {"contact_name": "VARCHAR(160)"},
-            "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT"},
+            "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT",
+                              "records_checked_at": "TIMESTAMP"},
         }
         insp = _inspect(self._engine)
         with self._engine.begin() as conn:
@@ -384,6 +386,31 @@ class Store:
             if sub is not None:
                 sub.last_notified_at = when
                 session.commit()
+
+    def seen_records(self, subscription_ids) -> dict[int, set[str]]:
+        """Record keys each record-kind subscription already knows."""
+        ids = list(subscription_ids)
+        out: dict[int, set[str]] = {i: set() for i in ids}
+        if not ids:
+            return out
+        with self._session_factory() as session:
+            for sid, key in session.execute(
+                    select(AlertSeen.subscription_id, AlertSeen.record_key)
+                    .where(AlertSeen.subscription_id.in_(ids))):
+                out[sid].add(key)
+        return out
+
+    def mark_records_seen(self, subscription_id: int, keys, when) -> None:
+        """Remember these records for the subscription and stamp ``records_checked_at``."""
+        with self._session_factory() as session:
+            have = set(session.scalars(select(AlertSeen.record_key)
+                                       .where(AlertSeen.subscription_id == subscription_id)))
+            session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when)
+                            for k in sorted(set(keys) - have))
+            sub = session.get(Subscription, subscription_id)
+            if sub is not None:
+                sub.records_checked_at = when
+            session.commit()
 
     def find_subscription(self, *, target: str, field: str, sensor_id: str | None):
         """Existing sub for this email+trigger, if any (to avoid duplicates)."""

@@ -162,6 +162,15 @@ Get warnings to the people who need them.
 - [x] `subscribe` + `alerts` CLI (dry-run by default; `--send` to deliver)
 - [x] Trend-based triggers — alert when a field is rising by >= N% (`kind=trend`,
       reuses Phase 3 `linear_trend`). Glasgow VOC (+79%) fires a +20% subscription.
+- [x] **Place-based record alerts, any medium** — `kind=record` subscriptions keyed to a
+      place (center + radius, or anywhere in WV) + a rule (`alerts.RECORD_RULES`: `spills` =
+      NRC spill reports, `water` = SDWA health-based violations, `violations` = ECHO facility
+      violations), read from the `record` view. Fires on records new for the place since the
+      last check (`alert_seen` table; first check = silent baseline); county-only records also
+      match a place in that county. The `/alerts` form's water/spills waitlist rows went live
+      (old rows are matched by field, no migration) and gained facility violations; `/place`'s
+      *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
+      *Email delivery still waits on SMTP go-live (a session with Corey).*
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)

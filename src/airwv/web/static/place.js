@@ -144,7 +144,7 @@ async function load(p) {
   $('pl-km').value = String(p.km);
   $('pl-place').value = p.id;
   $('pl-nearby').href = `/nearby?lat=${p.lat}&lon=${p.lon}&km=${p.km}`;
-  $('pl-watch').href = `/alerts?lat=${p.lat}&lon=${p.lon}`;
+  $('pl-watch').href = `/alerts?lat=${p.lat}&lon=${p.lon}&name=${encodeURIComponent(p.name)}`;
   const since = new Date(Date.now() - CHANGE_DAYS * 864e5).toISOString().slice(0, 10);
   $('pl-since').textContent = `since ${fmtDay(since)}`;
   try {

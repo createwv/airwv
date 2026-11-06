@@ -32,6 +32,11 @@ DEP mining, DEP oil & gas), `spill_report`, `water_system`, `reference_monitor`,
 have no public coordinates, so `lat`/`lon` are NULL and only county finds them; one
 `project_status` record each). Measurements join sites on (`medium`, `ref`).
 
+Place-based record alerts (`alerts.RECORD_RULES`, `ReadModel.alert_records`) read the
+`record` view joined to `site`: spill reports, SDWA health-based violations and ECHO
+violations. A record is "new" when its `site_id|kind|value` key wasn't there at the last
+check, so a status or contaminant change counts as new too.
+
 ## Known gaps
 
 - `site_id` repeats for oil & gas permits, where one API number has several applications.
