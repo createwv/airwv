@@ -79,4 +79,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Explore: a county filter and a "where value over N" filter on `/api/query`, with tests [auto:M]
 - [ ] CORS + rate limit on `/api/*` and `/data/dumps/*` (after Postgres) [auto:S]
 - [ ] Add published events (`events` with status 'published') as an `events.csv.gz` dump [auto:S]
+- [ ] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
 
