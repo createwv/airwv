@@ -59,4 +59,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Harness: add the `/site/<kind>/<id>` pages (one per kind, all screen sizes) to `tests/product/run.sh` once the harness exists. [auto]
 - [ ] Site pages: a recent-readings chart for sensors, monitors and gauges, using the `/api/query` series mode. [auto]
 - [ ] Hide the statewide haze pop-up on `/place`, or scope it to the chosen place, so it doesn't contradict the air line [auto:S]
+- [ ] Point the status lines at `/site/<kind>/<id>` once site pages cover sensors, gauges and sample sites [auto:S]
 
