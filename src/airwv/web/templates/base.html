@@ -36,7 +36,7 @@
   <a href="/alerts"   class="{{ 'on' if mode == 'alerts' }}">Alerts</a>
   {# "More" holds the rest (docs/DIRECTION.md §3); a <details> so it opens without JS #}
   <details class="more">
-    <summary class="{{ 'on' if mode in ('nearby', 'sources', 'events', 'spills', 'learn', 'data', 'about') }}">More</summary>
+    <summary class="{{ 'on' if mode in ('nearby', 'sources', 'events', 'spills', 'learn', 'data', 'explore', 'about') }}">More</summary>
     <div class="more-menu">
       <a href="/nearby"     class="{{ 'on' if mode == 'nearby' }}">Near me</a>
       <a href="/facilities" class="{{ 'on' if mode == 'sources' }}">Facilities</a>
@@ -44,6 +44,7 @@
       <a href="/spills"     class="{{ 'on' if mode == 'spills' }}">Spills</a>
       <a href="/learn"      class="{{ 'on' if mode == 'learn' }}">Learn</a>
       <a href="/data"       class="{{ 'on' if mode == 'data' }}">Data sources</a>
+      <a href="/explore"    class="{{ 'on' if mode == 'explore' }}">Explore</a>
       <a href="/about"      class="{{ 'on' if mode == 'about' }}">About</a>
     </div>
   </details>

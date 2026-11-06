@@ -434,6 +434,34 @@
   .dc-rec th { width:30%; color:#556; font-weight:600; }
   @media (max-width:560px){ .dc-rec th, .dc-rec td { display:block; width:auto; } .dc-rec td { border-top:none; padding-top:0; } }
 
+  /* Explore v1 query builder (/explore) */
+  .ex-lede { margin:0 2px 10px; font-size:14px; }
+  .ex-form { padding:12px 14px; }
+  .ex-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px 14px; }
+  .ex-grid label { display:flex; flex-direction:column; gap:3px; font-size:13px; color:#556; }
+  .ex-grid select, .ex-grid input { font-size:15px; min-height:36px; max-width:100%; }
+  .ex-kinds { border:0; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px 14px; }
+  .ex-kinds legend { font-size:13px; color:#556; padding:0; margin-bottom:4px; }
+  .ex-kinds label { font-size:14px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; min-height:32px; }
+  .ex-go { margin-top:12px; }
+  .ex-go button { font-size:15px; padding:8px 16px; }
+  .ex-bar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 14px; margin:14px 2px 8px; font-size:14px; }
+  .ex-count { font-weight:600; }
+  .ex-links { display:flex; gap:14px; }
+  .ex-out { overflow-x:auto; }
+  .ex-table td { overflow-wrap:break-word; }
+  .ex-table td:first-child { width:45%; }
+  .ex-table td:nth-child(2) { white-space:nowrap; }
+  .ex-recs-in { display:none; font-size:12px; color:#556; margin-top:3px; }
+  @media (max-width:560px){
+    .ex-table .ex-recs { display:none; }
+    .ex-recs-in { display:block; }
+    .ex-table td:first-child { width:auto; }
+    .ex-grid { grid-template-columns:1fr 1fr; gap:8px 10px; }
+    .ex-grid select, .ex-grid input { font-size:14px; min-width:0; width:100%; }
+    .ex-table th, .ex-table td { padding:7px 6px; font-size:13px; }
+  }
+
   /* "My place now" basic view (/place) */
   .pl-pick .controls { padding:0; }
   .pl-pick .controls select { max-width:60vw; }
