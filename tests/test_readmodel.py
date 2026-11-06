@@ -93,9 +93,8 @@ def test_views_cover_tables_and_layers(tmp_path, monkeypatch):
         assert {"well", "facility", "permit", "spill_report", "water_system", "reference_monitor",
                 "sensor", "gauge", "sample_site"} <= set(kinds)
         assert kinds["sensor"] == 2 and kinds["gauge"] == 1 and kinds["sample_site"] == 2
-        # site_id is the identity; it only repeats where a source file repeats a row verbatim
-        # (abandoned_wells today; /api/near has always listed both), or for dep_permits,
-        # where one well's API number carries several permit applications
+        # site_id is the identity; it only repeats where a source file repeats a row verbatim,
+        # or for dep_permits, where one well's API number carries several permit applications
         dup = conn.exec_driver_sql(
             "SELECT site_id, count(DISTINCT attrs) FROM site WHERE layer != 'dep_permits' "
             "GROUP BY site_id HAVING count(*) > 1").all()

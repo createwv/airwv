@@ -355,15 +355,15 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       *Refresh: re-run the script + redeploy.*
 - [~] **Orphaned & abandoned gas wells (the Rutledge story)** ⭐ — a **founding** issue for
       Create WV. v1 BUILT: `scripts/fetch_abandoned_wells.py` → `abandoned_wells.json` /
-      `/api/abandoned-wells` — **15,455** abandoned wells statewide, **4,721 orphans** (no
+      `/api/abandoned-wells` — **13,827** abandoned wells statewide, **4,596 orphans** (no
       operator = the state's to plug). Air-dashboard **"🛢️ Abandoned wells"** layer, lazy-loaded
       on toggle (15k clustered; orphans red, operator-abandoned brown; orphan/operator
       sub-filters; popups link the DEP record + note H2S/gas-near-homes risk). The **Rutledge**
       event is seeded on the Events page (H2S + raw gas near Crouch Hollow; sourced WCHS/WSAZ/
       LPM). **Near-homes flag DONE:** `scripts/enrich_wells_proximity.py` grids **Microsoft's
       open US Building Footprints** (~1.05M WV buildings) and tags each well with
-      `nearest_building_m` + `near_homes` (<200 m) → **6,053 abandoned wells near a building,
-      2,122 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
+      `nearest_building_m` + `near_homes` (<200 m) → **5,461 abandoned wells near a building,
+      2,055 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
       ones fade, "🏠 Near homes only" sub-filter, distance in the popup. **Report hook DONE:**
       each well popup has a "🚨 Report a problem with this well" link that opens the community-
       report modal pre-filled + pre-located (domain=air, well id/orphan/county context, H2S-symptom
@@ -375,8 +375,8 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       an explicit correlation-not-causation note. **The EWV Rutledge sensor reads VOC ~105 (above
       the ~84 median) near wells** — the origin story visible in our own data (9 elevated sensors
       sit near wells). **Plugging backlog DONE:** `/api/well-backlog` + Air-dashboard card "🕳️ The
-      orphan-well plugging backlog" — 4,721 orphans (2,122 near homes), the years-to-clear math
-      (state ~25/yr → ~190 yrs vs federal IIJA ~210/yr → ~22 yrs; IIJA targets only 1,200 by 2030),
+      orphan-well plugging backlog" — 4,596 orphans (2,055 near homes), the years-to-clear math
+      (state ~25/yr → ~184 yrs vs federal IIJA ~210/yr → ~22 yrs; IIJA targets only 1,200 by 2030),
       a county backlog bar chart (Ritchie 823…), cited (WV Watch / WV DEP IIJA / US DOI). **Health
       context DONE:** the Learn **Health** tab gained gas/H2S (rotten-egg + olfactory-fatigue danger,
       symptoms, what-to-do), ozone/VOC/benzene, and water-contaminant (lead/nitrate/E.coli/selenium)

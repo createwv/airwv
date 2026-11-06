@@ -33,9 +33,8 @@ have no public coordinates, so `lat`/`lon` are NULL and only county finds them; 
 
 ## Known gaps
 
-- `site_id` repeats where a source file repeats a row verbatim (about 1,300 abandoned-well
-  ids) and for oil & gas permits, where one API number has several applications.
-  `/api/near` has always listed the duplicate wells; deduping them is a visible change.
+- `site_id` repeats for oil & gas permits, where one API number has several applications.
+  (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
 - `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*

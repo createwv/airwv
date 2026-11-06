@@ -38,6 +38,17 @@ def _is_orphan(respparty: str | None) -> bool:
     return r in _ORPHAN_MARKERS or "UNKNOWN" in r or "ORPHAN" in r
 
 
+def dedupe(wells: list[dict]) -> list[dict]:
+    """Drop rows the layer repeats verbatim (~1,600 of them), keeping the first of each."""
+    seen, out = set(), []
+    for w in wells:
+        key = json.dumps(w, sort_keys=True)
+        if key not in seen:
+            seen.add(key)
+            out.append(w)
+    return out
+
+
 def fetch() -> dict:
     params = {
         "where": "wellstatus='Abandoned Well'",
@@ -70,6 +81,7 @@ def fetch() -> dict:
             if len(feats) < page_size:
                 break
 
+    wells = dedupe(wells)
     orphans = sum(w["orphan"] for w in wells)
     return {
         "source": "WV DEP — Office of Oil & Gas (abandoned wells)",

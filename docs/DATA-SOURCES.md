@@ -231,8 +231,8 @@ both from `tagis.dep.wv.gov/.../WVDEP_enterprise/{oil_gas,mining_reclamation}`. 
 ## Wells, spills & the "near me" synthesis
 
 ### WV DEP abandoned & orphan wells (ArcGIS)
-`fetch_abandoned_wells.py` — 15,455 abandoned wells, 4,721 orphans (no operator = the
-state's to plug). `enrich_wells_proximity.py` then tags each with distance to the
+`fetch_abandoned_wells.py` — 13,827 abandoned wells, 4,596 orphans (no operator = the
+state's to plug), after dropping the ~1,600 rows the layer repeats verbatim. `enrich_wells_proximity.py` then tags each with distance to the
 nearest **Microsoft building footprint** (§Geospatial) for the near-homes risk flag.
 
 ### National Response Center — reported spills (keyless)
