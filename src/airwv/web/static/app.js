@@ -4,6 +4,19 @@ const busy = (id,on) => { const el=$(id); if(el) el.classList.toggle('on', on); 
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
 let map, markers = {}, allSensors = [], GUIDE = null;
 let chartSet = new Set();   // sensor ids currently plotted (click a row or a map dot to toggle)
+let defaultPick = null;     // {sensor, why}: the auto-chosen sensor, while the chart still shows only it
+function setDefaultSensor(pick){
+  if (!pick) return;
+  chartSet = new Set([pick.sensor.sensor_id]);
+  document.querySelectorAll('.srow.on').forEach(el => el.classList.remove('on'));
+  document.querySelectorAll(`.srow[data-sid="${pick.sensor.sensor_id}"]`).forEach(el => el.classList.add('on'));
+  defaultPick = pick;
+}
+function showWhy(){
+  const el = $('ts-why'); if (!el) return;
+  const auto = defaultPick && chartSet.size === 1 && chartSet.has(defaultPick.sensor.sensor_id);
+  el.textContent = auto ? `Showing ${defaultPick.sensor.name}: ${defaultPick.why}. Click any sensor to compare.` : '';
+}
 function toggleChart(sid){
   if (chartSet.has(sid)) chartSet.delete(sid); else chartSet.add(sid);
   // update the tree row(s) in place (don't rebuild — that would collapse open groups)
@@ -46,10 +59,11 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  // default: chart EWV Glasgow 1 (falls back to the first community sensor)
-  const glasgow = allSensors.find(s => /glasgow/i.test(s.name)) ||
-                  allSensors.find(s => s.kind === 'community' && s.lat != null);
-  if (glasgow) chartSet.add(glasgow.sensor_id);
+  // default: nearest community sensor to ?lat=&lon= if the link has one, else the
+  // highest current PM2.5; the reason is shown above the chart (AIRWV_WV.pickDefaultSensor)
+  const q = new URLSearchParams(location.search), qlat = parseFloat(q.get('lat')), qlon = parseFloat(q.get('lon'));
+  setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors,
+    isNaN(qlat) || isNaN(qlon) ? null : {lat: qlat, lon: qlon, label: 'the place in this link'}));
   // legend "as of": the newest community reading, so people know it's a live snapshot
   const asof = $('legend-asof');
   if (asof){
@@ -85,7 +99,7 @@ function toggleFollow(sid){
 let userMarker;
 function drawMap(sensors){
   if (!map){
-    map = L.map('map').setView([38.35, -81.6], 8);
+    map = AIRWV_WV.fitWV(L.map('map'));
     const tile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     tile.on('load', () => busy('b-map', false));      // hide spinner once tiles are in
@@ -114,8 +128,6 @@ function drawMap(sensors){
     });
   }
   redrawSensors();
-  const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
-  if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
   loadReports();
   loadFacilities();
@@ -616,6 +628,8 @@ function range(){ const s=$('start').value, e=$('end').value;
 const nameOf = id => (allSensors.find(s=>s.sensor_id===id)||{}).name || id;
 async function render(){
   const ids = selected(), field = $('field').value, rng = range();
+  showWhy();
+  const clampNote = $('ts-clamp'); if (clampNote) clampNote.textContent = '';
   $('dl').href = ids.length ? `/api/export/${ids[0]}.csv` : '#';
   if (!ids.length){
     Plotly.newPlot('ts', [], {margin:{t:10,r:10,b:40,l:45},
@@ -657,20 +671,33 @@ async function render(){
     $('trendinfo').textContent = tr.direction === 'insufficient' ? '' :
       `trend: ${tr.direction}${tr.watch ? ' ⚠ watch' : ''} · Δ${tr.pct_change}% over period (r=${tr.r})`;
   } else { $('trendinfo').textContent = ''; }
-  const yMax = Math.max(1, ...tsTraces.flatMap(t => t.y.filter(v => v != null)));
+  // one stuck-sensor spike shouldn't flatten weeks of data: clamp the axis, mark what's above
+  const clamp = AIRWV_WV.clampY(series.flatMap(s => s.points.map(p => p.value)));
+  const yaxis = {title:field};
+  if (clamp){
+    yaxis.range = [0, clamp.cap];
+    const hi = series.flatMap(s => s.points.filter(p => p.value > clamp.cap).map(p => ({...p, name:s.name})));
+    tsTraces.push({x:hi.map(p=>p.ts), y:hi.map(()=>clamp.cap), mode:'markers', name:'above axis',
+      marker:{symbol:'triangle-up', size:9, color:'#7a1f1f'}, customdata:hi.map(p=>[p.value, p.name]),
+      hovertemplate:'%{customdata[1]}: %{customdata[0]} at %{x}<extra>above axis</extra>'});
+    if (clampNote) clampNote.textContent = `Axis cut at ${clamp.cap}: ${clamp.above} reading${clamp.above>1?'s':''} `
+      + `above it (highest ${Math.round(clamp.max).toLocaleString()}) shown as ▲ at the top. Double-click the chart for the full range.`;
+  }
+  const yMax = clamp ? clamp.cap : Math.max(1, ...tsTraces.flatMap(t => t.y.filter(v => v != null)));
   const gd = await Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45},
-    yaxis:{title:field}, legend:{orientation:'h'}, shapes:bandShapes(field, yMax)},
+    yaxis, legend:{orientation:'h'}, shapes:bandShapes(field, yMax)},
     {responsive:true, displayModeBar:false});
   gd.on('plotly_click', e => {
     const p = e.points[0];
     let msg = `${p.x} — ${field} = ${p.y}`;
+    if (p.data.name === 'above axis') msg = `${p.x} — ${p.customdata[1]}: ${field} = ${p.customdata[0]} (above the axis cut)`;
     if (p.data.name === 'event' && p.customdata)
       msg += `  ·  event: +${p.customdata[0]} over baseline (z=${p.customdata[1]})`;
     $('detail').textContent = msg;
   });
   gd.on('plotly_legendclick', e => {           // click a legend name to remove that sensor
     const nm = e.data[e.curveNumber].name;
-    if (nm === 'event' || nm === 'trend') return true;
+    if (nm === 'event' || nm === 'trend' || nm === 'above axis') return true;
     const sid = [...chartSet].find(id => nameOf(id) === nm);
     if (sid) { toggleChart(sid); return false; }
     return true;
@@ -733,6 +760,10 @@ function nearMe(){
       icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
       .addTo(map).bindPopup('You are here').openPopup();
     map.setView([lat,lon], 11);
+    if (defaultPick && chartSet.size === 1 && chartSet.has(defaultPick.sensor.sensor_id)){
+      setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors, {lat, lon, label: 'you'}));
+      redrawSensors(); render();
+    }
     const near = allSensors.filter(s=>s.kind==='community' && s.lat!=null)
       .map(s=>({...s, mi:haversineMi(lat,lon,s.lat,s.lon)})).sort((a,b)=>a.mi-b.mi).slice(0,6);
     const seeAll = ` · <a href="/nearby?lat=${lat}&lon=${lon}">🔎 see everything near you →</a>`;

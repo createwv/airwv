@@ -32,7 +32,7 @@ function spillPopup(s) {
 }
 function drawSpills(list) {
   if (!spillMap) {
-    spillMap = L.map('spill-map').setView([38.9, -80.5], 7);
+    spillMap = AIRWV_WV.fitWV(L.map('spill-map'));
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(spillMap);
   }
   if (spillLayer) spillLayer.remove();
