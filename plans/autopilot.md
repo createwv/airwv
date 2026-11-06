@@ -86,4 +86,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Admin view: per-subscription record alert history (what fired, what was taken as the starting point) at `/api/admin/subscriptions` [auto:S]
 - [ ] (session with Corey) SMTP go-live: set the email settings on papa-greatness, send the waitlist confirmations, check the first record alert email. [auto]
 - [ ] Serve the glossary on the site (for example a section on `/learn`) so the footer link stays on the site instead of going to GitHub [auto:S]
+- [ ] Add a test that fails if "source" is used alone in page text, nav or popups, per the glossary [auto:S]
 
