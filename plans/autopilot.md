@@ -42,7 +42,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Neighbor cross-check + auto event candidates. [auto:M]
 - [ ] (session with Corey) Demo script + partner walkthrough S with Corey: the five-step narrative from §4, one URL per step.
 ### From job proposals
-- [ ] Add a glossary file (`docs/GLOSSARY.md`) with the six terms (sensor, monitor, gauge, sample site, facility, data source), so the nav and terms pass can link to it [auto:S]
+- [x] Add a glossary file (`docs/GLOSSARY.md`) with the six terms (sensor, monitor, gauge, sample site, facility, data source), so the nav and terms pass can link to it [auto:S]
 - [ ] Move `/api/areas` and `/api/water/near` onto `/api/query` (add an area filter and a time window for measurements), with snapshot tests like `/api/near`'s [auto:M]
 - [ ] A small sites table for AirNow reference monitors and readings-table sensors, filled at ingest, so they join the `site` view without a GROUP BY over `readings` [auto:S]
 - [ ] Remove the exact-duplicate rows from `abandoned_wells.json` in its fetch script (this changes the Nearby list, so Corey decides) [auto:S]
