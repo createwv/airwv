@@ -12,6 +12,13 @@ Checks (`test_smoke.py`), per page × width unless noted:
 - home shows a reading (number + unit) on the first screen, not covered and not in an
   overlay (390: xfail until the place view lands)
 - every visible Leaflet map has a size and is centered on West Virginia
+- accessibility (`test_a11y`, per page × width × check; the browser asks for reduced motion):
+  text contrast at WCAG AA (4.5:1; 3:1 for large text and for symbols inside a control;
+  legend dots outside a control and disabled controls are exempt; text over images/gradients
+  can't be measured and is skipped), `<img>` without `alt`, controls without an accessible
+  name, mouse-only controls (`cursor:pointer` but not focusable), infinite animations under
+  reduced motion, and the first 15 Tab stops each showing a focus ring. The report's `a11y`
+  column counts what each page fails.
 
 Output in `tests/product/out/` (gitignored): `<page>-<width>.png` (first screen),
 `<page>-<width>-full.png`, `results.json`, `report.md`.
