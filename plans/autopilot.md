@@ -36,7 +36,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Explore v1 (query builder UI): form over `/api/query`, table + CSV + API link. [auto:M]
 - [ ] (session with Corey) Postgres + Timescale migration — session with Corey, L: steps 1–6 from ROADMAP; touches prod. SQLite-ism fixes beforehand are.
 - [ ] (session with Corey) Read-only SQL role + `/explore/sql` — session (needs Postgres), M.
-- [ ] Nightly public dumps + rate limit + CORS after Postgres; S on SQLite for the dumps alone. [auto:S]
+- [x] Nightly public dumps + rate limit + CORS after Postgres; S on SQLite for the dumps alone. [auto:S]
 - [ ] Place-based alerts, any medium: subscriptions keyed to place + rule; spill/violation triggers; SMTP go-live is a session item. [auto:M]
 - [ ] (session with Corey) Land medium ingest (Superfund/RCRA/AML) — session S to fetch (network), then to model and surface.
 - [ ] Neighbor cross-check + auto event candidates. [auto:M]
