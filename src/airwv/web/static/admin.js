@@ -145,6 +145,36 @@ const EV_FORM = `<div class="acard evform">
     <input id="ev-f-srcurl" placeholder="Citation URL"></div>
   <button class="primary" onclick="evCreate()">Create event</button></div>`;
 
+// Event candidates: spikes that nearby sensors saw too (neighbor cross-check), as drafts to review.
+let EV_CANDS = [];
+function candCard(c, i){
+  const when = [c.start_ts, c.end_ts].map(s => s.slice(0,16).replace('T',' ')).join(' → ');
+  const names = c.sensor_names.map(esc).join(', ');
+  return `<div class="acard">
+    <div><b>${esc(c.draft.title)}</b> <span class="tag">${c.sensor_ids.length} sensors</span>
+      ${c.existing_event ? `<span class="tag">already event #${c.existing_event.id}</span>` : ''}</div>
+    <div class="meta">${when} UTC · peak ${c.peak.value} at ${esc(c.peak.name)} (z ${c.peak.score})</div>
+    <div class="meta">${names}</div>
+    <div class="arow">${c.existing_event ? '' : `<button onclick="candDraft(${i})">Save as draft event</button>`}</div></div>`;
+}
+async function candDraft(i){
+  const c = EV_CANDS[i]; if (!c) return;
+  await adminFetch('/api/admin/events', {method:'POST', body: JSON.stringify(c.draft)});
+  loadQueue();
+}
+async function loadCandidates(){
+  const box = $('ev-cands'); if (!box) return;
+  try {
+    const d = await (await adminFetch('/api/admin/event-candidates')).json();
+    EV_CANDS = d.candidates;
+    const n = d.counts;
+    box.innerHTML = `<p class="meta"><b>Proposed from sensors</b> (${(d.since||'').slice(0,10)} → ${(d.until||'').slice(0,10)}):
+      ${n.corroborated} spike(s) seen by nearby sensors too, ${n.single_sensor} at one sensor only
+      (local source or sensor fault), ${n.no_neighbors} with no neighbor reporting.</p>`
+      + (EV_CANDS.map(candCard).join('') || '<p class="meta">no candidates</p>');
+  } catch(e){ box.innerHTML = '<p class="meta">candidates unavailable</p>'; }
+}
+
 let ADMIN_EVENTS = [];
 async function loadQueue(){
   if (!TOKEN){ $('admin-list').innerHTML = '<p class="meta">Enter the admin token to load the queues.</p>'; return; }
@@ -154,7 +184,9 @@ async function loadQueue(){
       const d = await (await adminFetch('/api/admin/events')).json();
       ADMIN_EVENTS = d.results;
       $('admin-count').textContent = `${d.results.length} event(s)`;
-      $('admin-list').innerHTML = EV_FORM + d.results.map(eventCard).join('');
+      $('admin-list').innerHTML = EV_FORM + '<div id="ev-cands"><p class="meta">checking sensors for candidates…</p></div>'
+        + d.results.map(eventCard).join('');
+      loadCandidates();
     } else if (q === 'feedback'){
       const d = await (await adminFetch('/api/admin/feedback')).json();
       $('admin-count').textContent = `${d.results.length} feedback item(s)`;

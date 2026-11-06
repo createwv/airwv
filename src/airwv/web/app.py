@@ -19,7 +19,7 @@ import os
 import re
 import secrets
 import statistics
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
@@ -1114,6 +1114,69 @@ def create_app(store: Store) -> FastAPI:
         if not ok:
             raise HTTPException(status_code=404, detail="no such event")
         return {"ok": True}
+
+    @app.get("/api/admin/event-candidates")
+    def admin_event_candidates(field: str = "pm2_5", days: int = 30, start: str | None = None,
+                               end: str | None = None, radius_km: float = 15.0,
+                               _: bool = Depends(_require_admin)):
+        """Spikes cross-checked against neighbors; corroborated ones proposed as draft events."""
+        _check_field(field)
+        from zoneinfo import ZoneInfo
+
+        from airwv.analysis.crosscheck import matching_event
+        from airwv.ingest import run_candidates
+
+        lo, hi = _parse_date(start), _parse_date(end)
+        r = run_candidates(store=store, coords=coords, field=field, days=max(1, min(days, 120)),
+                           start=datetime.combine(lo, time.min) if lo else None,
+                           end=datetime.combine(hi, time.max) if hi else None, radius_km=radius_km)
+        curated = store.events_for_admin()
+        et = ZoneInfo("America/New_York")
+        unit = " µg/m³" if field.startswith("pm") else ""
+
+        def name(sid):
+            return names.get(sid) or airnow_names.get(sid) or sid
+
+        def local(ts):
+            return ts.replace(tzinfo=timezone.utc).astimezone(et).strftime("%b %-d %-I:%M %p ET")
+
+        out = []
+        for c in r["candidates"]:
+            near = matching_event(c, curated)
+            seen = Counter(regions[s] for s in c.sensor_ids if regions.get(s, "Other") != "Other")
+            region = seen.most_common(1)[0][0] if seen else None
+            draft = {
+                "title": f"Sensor-detected {field.upper().replace('_', '.')} rise — "
+                         f"{region or 'nearby sensors'} ({c.start:%b %-d, %Y})",
+                "medium": "air", "kind": "other", "region": region, "lat": c.lat, "lon": c.lon,
+                "start_ts": c.start.isoformat() + "Z", "end_ts": c.end.isoformat() + "Z",
+                "description": (
+                    f"{len(c.sensor_ids)} sensors within {radius_km:g} km rose above their usual "
+                    f"level for the hour of day between {local(c.start)} and {local(c.end)}; highest "
+                    f"{c.peak_value:g}{unit} at {name(c.peak_sensor)}. Proposed automatically by the "
+                    "neighbor cross-check; the cause is not yet known."),
+                "captured": True, "sensor_ids": c.sensor_ids, "status": "draft",
+            }
+            out.append({
+                "start_ts": draft["start_ts"], "end_ts": draft["end_ts"], "field": c.field,
+                "sensor_ids": c.sensor_ids, "sensor_names": [name(s) for s in c.sensor_ids],
+                "peak": {"sensor_id": c.peak_sensor, "name": name(c.peak_sensor), "value": c.peak_value,
+                         "ts": c.peak_ts.isoformat() + "Z", "score": c.peak_score},
+                "lat": c.lat, "lon": c.lon, "region": region,
+                "existing_event": {"id": near.id, "title": near.title} if near else None,
+                "draft": draft,
+            })
+        single = [{"sensor_id": c.episode.sensor_id, "name": name(c.episode.sensor_id),
+                   "ts": c.episode.peak.ts.isoformat() + "Z", "value": c.episode.peak.value,
+                   "score": c.episode.peak.score, "neighbors": c.neighbors, "neighbor_peak_z": c.peak_z}
+                  for c in sorted((c for c in r["checks"] if c.status == "single_sensor"),
+                                  key=lambda c: -c.episode.peak.score)]
+        counts = {s: sum(c.status == s for c in r["checks"])
+                  for s in ("corroborated", "single_sensor", "no_neighbors")}
+        return {"field": field, "radius_km": radius_km,
+                "since": r["since"].isoformat() + "Z" if r["since"] else None,
+                "until": r["until"].isoformat() + "Z" if r["until"] else None,
+                "counts": counts, "candidates": out, "single_sensor": single[:50]}
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page(request: Request):

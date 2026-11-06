@@ -109,8 +109,13 @@ Separate real signal from sensor noise before anyone relies on it.
 - [x] Stuck-value detection (frozen channel) — `analysis/anomaly.py`
 - [x] Sensor health scoring — dropout/offline, missing channels, degraded status
       — `analysis/health.py`
-- [ ] Neighbor cross-check — corroborate spikes against nearby sensors to
-      distinguish a real event from a single-sensor malfunction
+- [x] Neighbor cross-check — corroborate spikes against nearby sensors to
+      distinguish a real event from a single-sensor malfunction —
+      `analysis/crosscheck.py`, `ingest candidates`, `/api/admin/event-candidates`.
+      Each de-trended spike is *corroborated* (a sensor within 15 km had residual
+      z ≥ 3 within ±3 h), *single-sensor* (neighbors reporting, flat) or *unchecked*.
+      On the Jul 2026 data the Peoples Cartage fire reignition (Parkersburg 1 + 4) comes
+      out corroborated and the Jul 3/4 Vienna fireworks spikes single-sensor.
 - [x] PurpleAir A/B channel divergence as a malfunction signal — channel data
       captured + validated across the cluster (Glasgow 99.9% healthy, SC1 1.7%
       noisier). Productize into a command still to do.
@@ -264,7 +269,9 @@ Make the data visible and usable.
       **origin** (likely/suspected cause), **scope** (Local/Regional/Multi-state/Continental),
       **regions affected**, and **links to related facilities** (`source_refs` → `/sources`)
       and **community reports** (`report_ids` → `/air`). *v2: map of event locations,
-      auto-surface candidates from the algorithmic `/api/events` detection, per-event
+      auto-surface candidates from the algorithmic `/api/events` detection (**done**:
+      corroborated spikes merge into candidates in the admin Events queue, "Save as
+      draft event"; ones that overlap a curated event are marked), per-event
       permalink pages (SEO/press), and richer sensor overlays for captured events.*
 - [~] **Reported spills feed (NRC)** — BUILT: `scripts/fetch_nrc_spills.py` pulls the
       **National Response Center** annual .xlsx (US Coast Guard spill hotline, keyless),

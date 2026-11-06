@@ -200,6 +200,34 @@ def test_events_api_and_admin(tmp_path, monkeypatch):
     assert c.get("/api/events").json()["results"] == []
 
 
+def test_admin_event_candidates(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    store = Store(f"sqlite:///{tmp_path / 'cand.sqlite'}")
+    store.create_schema()
+    t0 = datetime(2024, 6, 1, tzinfo=timezone.utc)
+    # three AirNow monitors a few km apart (coords ride on the readings); two spike together
+    for sid, lat, spike in (("m1", 39.27, 300.0), ("m2", 39.29, 200.0), ("m3", 39.31, None)):
+        store.save_readings([
+            Reading(source="airnow", sensor_id=sid, ts=t0 + timedelta(hours=i), lat=lat, lon=-81.54,
+                    pm2_5=spike if (spike and i == 150) else 10.0 + (i % 3))
+            for i in range(200)])
+    c = TestClient(create_app(store))
+    hdr = {"X-Admin-Token": "secret"}
+    assert c.get("/api/admin/event-candidates").status_code == 401        # gated
+    d = c.get("/api/admin/event-candidates", headers=hdr).json()
+    assert d["counts"]["corroborated"] == 2 and len(d["candidates"]) == 1
+    cand = d["candidates"][0]
+    assert cand["sensor_ids"] == ["m1", "m2"] and cand["peak"]["value"] == 300.0
+    assert cand["existing_event"] is None
+    draft = cand["draft"]
+    assert draft["status"] == "draft" and draft["captured"] and "cause is not yet known" in draft["description"]
+    # drafting it through the existing admin route makes it match next time
+    assert c.post("/api/admin/events", json=draft, headers=hdr).status_code == 200
+    again = c.get("/api/admin/event-candidates", headers=hdr).json()["candidates"][0]
+    assert again["existing_event"]["title"] == draft["title"]
+    assert c.get("/api/events").json()["results"] == []                   # drafts stay private
+
+
 def test_water_api(tmp_path):
     c = _client(tmp_path)
     assert c.get("/api/water/sites").json() == {"sites": []}       # empty until ingested
