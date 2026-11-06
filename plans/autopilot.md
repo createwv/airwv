@@ -25,7 +25,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
       view a plain card when one is near ("what we know / what's not disclosed" for water, energy, noise and purpose,
       each with its source), and on the advanced view the full record and filings. Where the data doesn't exist,
       say so and say how people can ask (PSC dockets, DEP permit comments, public records requests) [auto:M]
-- [ ] Roadmap: a "Data centers" section (water, energy, noise, purpose, what's undisclosed) and a later
+- [x] Roadmap: a "Data centers" section (water, energy, noise, purpose, what's undisclosed) and a later
       "Noise and light pollution" medium (night-sky brightness from satellite data, community noise reports and
       sensors) in ROADMAP.md, placed after Land [auto:S]
 - [ ] Nav collapse + terms pass: six-item nav, "More" menu, glossary file, rename Sources→Facilities, emoji removed, Admin to footer. [auto:S]
