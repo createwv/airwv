@@ -60,6 +60,13 @@ def test_home_reading_above_fold(product, width):
                               f"(overlay only: {r.get('overlayReading')})")
 
 
+@pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])
+def test_place_reading_above_fold(product, width):
+    """Is my air OK, near me? /place shows a reading (number + unit) on the first screen."""
+    r = _get(product, "place", width)
+    assert r.get("reading"), f"no reading on the first {r['height']}px"
+
+
 @pytest.mark.parametrize("name,width", CASES, ids=IDS)
 def test_map_bounds(product, name, width):
     r = _get(product, name, width)

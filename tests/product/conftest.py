@@ -36,6 +36,7 @@ PW_DIR = Path(os.environ.get("AIRWV_PLAYWRIGHT_DIR", Path.home() / ".czadmin/too
 # The key pages, in nav order. Nearby deep-links to Charleston so it loads without a click.
 PAGES = [
     ("home", "/"),
+    ("place", "/place?place=rutledge&km=8"),   # "my place now" at the demo place, 5 mi
     ("air", "/air"),
     ("nearby", "/nearby?lat=38.35&lon=-81.63"),
     ("water", "/water"),
