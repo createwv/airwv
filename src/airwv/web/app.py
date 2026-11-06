@@ -23,7 +23,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -611,48 +611,60 @@ def create_app(store: Store) -> FastAPI:
                 "hazards": haz, "counts": dict(cats)}
 
     @app.get("/api/query")
-    def query(lat: float, lon: float, km: float = 8.0, kind: str | None = None,
-              medium: str | None = None, param: str | None = None, since: str | None = None,
+    def query(lat: float | None = None, lon: float | None = None, km: float = 8.0,
+              kind: str | None = None, medium: str | None = None, area: str | None = None,
+              param: str | None = None, since: str | None = None,
+              from_: str | None = Query(None, alias="from"), to: str | None = None,
               limit: int = 100, format: str = "json", show: str = "sites"):
         """One read path over the unified views: sites near a place (``kind`` is a comma
         list: well, facility, permit, spill_report, water_system, reference_monitor,
-        sensor, gauge, sample_site; ``medium`` air / water / land), each with its
-        records, its latest ``param`` value when it has measurements (``param`` may be a
-        comma list: the first one the site has wins), and the provenance of every layer
-        it came from. ``since`` (YYYY-MM-DD) adds "what changed": a ``changes`` list of
-        records dated on/after it and each measured site's ``peak`` of the first
-        ``param`` since then. ``km`` is capped at 25 mi. ``format=csv`` returns the same answer
-        as a CSV file: one row per site, or with ``show=records`` one row per record (only
-        those dated on/after ``since`` when it's given). Powers /explore. See docs/READ-MODEL.md."""
+        sensor, gauge, sample_site, data_center; ``medium`` air / water / land; ``area`` a
+        county or a WV region, with or without a point), each with its records, its latest
+        ``param`` value when it has measurements (``param`` may be a comma list: the first
+        one the site has wins; ``from`` / ``to``, YYYY-MM-DD inclusive, bound which
+        measurements count), and the provenance of every layer it came from. ``since``
+        (YYYY-MM-DD) adds "what changed": a ``changes`` list of records dated on/after it
+        and each measured site's ``peak`` of the first ``param`` since then (up to ``to``).
+        ``km`` is capped at 25 mi. ``format=csv`` returns the same answer as a CSV file: one
+        row per site, or with ``show=records`` one row per record (only those dated on/after
+        ``since`` when it's given). Powers /explore. See docs/READ-MODEL.md."""
         km = min(max(km, 1.0), 40.25)
         limit = min(max(limit, 1), 500)
         kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
         params = [p.strip() for p in param.split(",") if p.strip()] if param else []
-        if since is not None:
-            try:
-                since = date.fromisoformat(since[:10]).isoformat()
-            except ValueError:
-                raise HTTPException(status_code=400, detail="since must be YYYY-MM-DD")
+        area = (area or "").strip() or None
+        point = lat is not None and lon is not None
+        if not point and not area:
+            raise HTTPException(status_code=400, detail="give lat and lon, or an area")
+        dates = {}
+        for name, val in (("since", since), ("from", from_), ("to", to)):
+            if val is not None:
+                try:
+                    dates[name] = date.fromisoformat(val[:10]).isoformat()
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"{name} must be YYYY-MM-DD")
+        since, from_, to = dates.get("since"), dates.get("from"), dates.get("to")
         if format not in ("json", "csv") or show not in ("sites", "records"):
             raise HTTPException(status_code=400, detail="format is json or csv; show is sites or records")
         rm = store.read_model
         with rm.connect() as conn:
-            sites = rm.sites_near(conn, lat, lon, km * 0.621371, kinds=kinds, medium=medium, limit=limit)
+            sites = rm.sites_near(conn, lat if point else None, lon if point else None, km * 0.621371,
+                                  kinds=kinds, medium=medium, area=area, limit=limit)
             recs = rm.records_for(conn, [s["site_id"] for s in sites])
             latest: dict = {}
             peaks: dict = {}
             for med in ("air", "water") if params else ():
                 refs = [s["ref"] for s in sites if s["medium"] == med
                         and s["kind"] in ("sensor", "reference_monitor", "gauge", "sample_site")]
-                latest[med] = {p: rm.latest(conn, med, refs, p) for p in params}
+                latest[med] = {p: rm.latest(conn, med, refs, p, since=from_, until=to) for p in params}
                 if since:
-                    peaks[med] = rm.peak(conn, med, refs, params[0], since)
+                    peaks[med] = rm.peak(conn, med, refs, params[0], max(since, from_ or since), until=to)
             prov = rm.provenance(conn, sorted({s["layer"] for s in sites}))
         out, changes = [], []
         for s in sites:
             row = {k: s[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
                                      "lat", "lon", "county", "url")}
-            row["mi"] = round(s["d"], 2)
+            row["mi"] = round(s["d"], 2) if s["d"] is not None else None
             row["records"] = recs.get(s["site_id"], [])
             if params:
                 by_param = latest.get(s["medium"], {})
@@ -666,9 +678,9 @@ def create_app(store: Store) -> FastAPI:
                              "medium": s["medium"], "mi": row["mi"], **r}
                             for r in row["records"] if (r["effective"] or "")[:10] >= since]
             out.append(row)
-        body = {"place": {"lat": lat, "lon": lon, "km": km},
-                "filters": {"kind": kinds, "medium": medium, "param": param, "since": since,
-                            "limit": limit},
+        body = {"place": {"lat": lat, "lon": lon, "km": km} if point else None,
+                "filters": {"kind": kinds, "medium": medium, "area": area, "param": param,
+                            "since": since, "from": from_, "to": to, "limit": limit},
                 "count": len(out), "sites": out, "provenance": prov}
         if since:
             body["changes"] = sorted(changes, key=lambda c: c["effective"], reverse=True)
