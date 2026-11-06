@@ -247,6 +247,28 @@ class ReadModel:
                     {k: r[k] for k in ("kind", "value", "effective", "url", "as_of")})
         return out
 
+    def alert_records(self, conn, rules: dict) -> list[dict]:
+        """The records a record-kind alert can fire on (``alerts.RECORD_RULES``), each with
+        its site's place and name, the layer's source and the date it carries, if any."""
+        out = []
+        for rule, spec in rules.items():
+            sites = {s["site_id"]: s for s in self.sites(conn, layer=spec["layer"])}
+            source = (self.provenance(conn, [spec["layer"]]).get(spec["layer"]) or {}).get("source")
+            for site_id, recs in self.records_for(conn, list(sites)).items():
+                s = sites[site_id]
+                for r in recs:
+                    if r["kind"] not in spec["kinds"]:
+                        continue
+                    out.append({"rule": rule, "site_id": site_id, "kind": r["kind"],
+                                "value": r["value"], "effective": r["effective"],
+                                "url": r["url"] or s["url"], "name": s["name"],
+                                "lat": s["lat"], "lon": s["lon"], "county": s["county"],
+                                # on the county centroid (no exact point in the source)
+                                "county_placed": bool(spec.get("county_placed"))
+                                and s["attrs"].get("geo") != "exact",
+                                "source": source, "attrs": s["attrs"]})
+        return out
+
     def provenance(self, conn, layers: list[str]) -> dict[str, dict]:
         """Each layer file's provenance block (source, scope, disclaimer, fetched_at)."""
         out = {}

@@ -29,6 +29,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from airwv.alerts import RECORD_RULES
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import query_records_to_csv, query_sites_to_csv, readings_to_csv
 from airwv.notify.chat import chat_notifier_from_env
@@ -182,22 +183,21 @@ ALERT_LEVELS = {
 
 # Per-metric thresholds by severity level. PM2.5 mirrors ALERT_LEVELS (µg/m³).
 # VOC is the community relative gas index; ozone is EPA ppb (8-hr AQI-ish bands).
-# "water" and "spills" are proximity advisories with no numeric sensor field yet —
-# captured as intent (waitlist) and skipped by the matcher until those feeds fire.
+# "water", "spills" and "violations" are record alerts (alerts.RECORD_RULES): they fire
+# when a record is new for the place, whatever the level, so their thresholds are 0.
 METRIC_THRESHOLDS = {
     "pm2_5": {"sensitive": 35.0, "unhealthy": 55.0, "veryunhealthy": 150.0},
     "voc":   {"sensitive": 250.0, "unhealthy": 500.0, "veryunhealthy": 1000.0},
     "ozone": {"sensitive": 70.0, "unhealthy": 85.0, "veryunhealthy": 105.0},
     "water":  {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
     "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
+    "violations": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
 }
 METRIC_LABELS = {
     "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
-    "ozone": "Ozone (EPA)", "water": "Water advisories near me",
-    "spills": "Reported spills near me",
+    "ozone": "Ozone (EPA)", "water": "Drinking-water violations near me",
+    "spills": "Reported spills near me", "violations": "Facility violations near me",
 }
-# metrics that don't yet have a live matcher (delivery captured as waitlist)
-WAITLIST_METRICS = {"water", "spills"}
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -936,13 +936,16 @@ def create_app(store: Store) -> FastAPI:
         for metric in metrics:
             threshold = METRIC_THRESHOLDS[metric][body.level]
             found = store.find_subscription(target=email, field=metric, sensor_id=sensor_id)
-            fields = dict(sensor_id=sensor_id, field=metric, threshold=threshold,
+            kind = "record" if metric in RECORD_RULES else "threshold"
+            fields = dict(sensor_id=sensor_id, field=metric, threshold=threshold, kind=kind,
                           center_lat=center_lat, center_lon=center_lon, radius_km=radius_km,
                           label=area, token=token)
+            if kind == "record":
+                fields["records_checked_at"] = None   # the place may have moved: new baseline
             if found is not None:
                 store.update_subscription(found.id, **fields)
             else:
-                store.add_subscription(channel="email", target=email, kind="threshold",
+                store.add_subscription(channel="email", target=email,
                                        active=confirmed, **fields)
 
         watching = ", ".join(METRIC_LABELS.get(m, m) for m in metrics)
@@ -988,8 +991,9 @@ def create_app(store: Store) -> FastAPI:
                 "<a href='/alerts'>Sign up again →</a></p>")
         area = sub.label or "your area"
         return _alert_result_page(request, "You're all set ✅",
-            f"<p>Alerts are on. We'll email <b>{html.escape(sub.target)}</b> when PM2.5 near "
-            f"<b>{html.escape(area)}</b> crosses your threshold — with quiet hours and rate limits "
+            f"<p>Alerts are on. We'll email <b>{html.escape(sub.target)}</b> when something you "
+            f"watch near <b>{html.escape(area)}</b> crosses your level, or a new spill or violation "
+            f"you asked about shows up in the public records — with quiet hours and rate limits "
             f"so you're never spammed.</p><p><a href='/air'>See the live map →</a></p>")
 
     @app.get("/alerts/unsubscribe", response_class=HTMLResponse)
@@ -1063,7 +1067,7 @@ def create_app(store: Store) -> FastAPI:
         return {"email_delivery": email_enabled(),
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
-                             "field": s.field, "threshold": s.threshold,
+                             "field": s.field, "kind": s.kind, "threshold": s.threshold,
                              "radius_km": s.radius_km,
                              "center": ([s.center_lat, s.center_lon]
                                         if s.center_lat is not None else None),

@@ -22,11 +22,16 @@
         <label class="lvl"><input type="checkbox" class="a-metric" value="ozone">
           <span><b>Ozone</b> — EPA reference monitors <small>ground-level ozone (ppb)</small></span></label>
         <label class="lvl"><input type="checkbox" class="a-metric" value="water">
-          <span><b>Water advisories near me</b> <span class="soon">coming soon</span>
-          <small>drinking-water violations &amp; discharges</small></span></label>
+          <span><b>Drinking-water violations near me</b>
+          <small>new health-based violations EPA lists for a water system</small></span></label>
         <label class="lvl"><input type="checkbox" class="a-metric" value="spills">
-          <span><b>Reported spills near me</b> <span class="soon">coming soon</span>
-          <small>oil/chemical releases reported to the NRC</small></span></label>
+          <span><b>Reported spills near me</b>
+          <small>new oil/chemical releases reported to the National Response Center</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="violations">
+          <span><b>Facility violations near me</b>
+          <small>a facility EPA ECHO newly lists in violation</small></span></label>
+        <p class="meta" style="margin:4px 6px 0">Spills and violations alert when a new one shows up
+          in the public records for your area, whatever level you pick below.</p>
       </fieldset>
 
       <fieldset class="a-fs">
@@ -68,8 +73,9 @@
   </div>
 
   <div class="about"><p class="meta">We're finishing the email-delivery piece; sign-ups made now are
-    held and confirmed the moment it goes live. <b>Water</b> &amp; <b>spills</b> alerts are captured now
-    and switch on when those proximity feeds are wired. Want Slack/Discord or a webhook for your org
+    held and confirmed the moment it goes live. Spill and violation alerts come from the same public
+    records as the map (<a href="/data">sources</a>); a record's date can be older than the day it
+    reached us, and a listing is not a finding of harm. Want Slack/Discord or a webhook for your org
     instead? <a href="/about">Get in touch</a>.</p></div>
 </div>
 {% endblock %}

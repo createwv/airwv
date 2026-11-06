@@ -116,6 +116,22 @@ class Subscription(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # kind "record" (field = spills | water | violations, alerts.RECORD_RULES): when the
+    # place's records were first taken as the baseline. Null = not yet, so nothing fires.
+    records_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class AlertSeen(Base):
+    """A record a record-kind subscription already knows (``alerts.record_key``), so a
+    spill or violation alerts once: when it first shows up in the data for that place."""
+
+    __tablename__ = "alert_seen"
+    __table_args__ = (UniqueConstraint("subscription_id", "record_key", name="uq_alert_seen"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subscription_id: Mapped[int] = mapped_column(Integer, index=True)
+    record_key: Mapped[str] = mapped_column(String(512))
+    seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class Report(Base):

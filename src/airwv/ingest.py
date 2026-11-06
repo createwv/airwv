@@ -16,6 +16,7 @@ import argparse
 import json
 import logging
 import math
+import os
 import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -34,7 +35,7 @@ from airwv.analysis import (
     score_health,
     sensor_medians,
 )
-from airwv.alerts import evaluate
+from airwv.alerts import RECORD_RULES, evaluate, evaluate_records, is_record_sub, record_key
 from airwv.config import Config
 from airwv.export_utils import readings_to_csv, readings_to_records
 from airwv.notify import make_notifier
@@ -400,18 +401,40 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
                      if getattr(r, "lat", None) is not None and getattr(r, "lon", None) is not None}
     alerts = evaluate(subs, latest, now, trends=trends, sensor_coords=sensor_coords)
 
+    # place-based record alerts (spills, violations): records new for the place since last check
+    record_subs = [s for s in subs if is_record_sub(s)]
+    baselines = {}
+    if record_subs:
+        with store.read_model.connect() as conn:
+            records = store.read_model.alert_records(conn, RECORD_RULES)
+        seen = store.seen_records(s.id for s in record_subs)
+        rec_alerts, baselines = evaluate_records(record_subs, records, seen, now)
+        alerts += rec_alerts
+    for sub_id, keys in baselines.items():
+        log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
+                 "" if send else " (not stored in a dry run)")
+        if send:
+            store.mark_records_seen(sub_id, keys, now)
+
+    base = os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/")
+    tokens = {s.id: s.token for s in subs if getattr(s, "token", None)}
     log.info("%d subscription(s), %d alert(s) %s", len(subs), len(alerts),
              "to send" if send else "(dry run — use --send to deliver)")
     for a in alerts:
+        if base and a.subscription_id in tokens:
+            a.unsubscribe_url = f"{base}/alerts/unsubscribe?token={tokens[a.subscription_id]}"
         detail = (f"{a.field} rising +{a.value}% (>= +{a.threshold}%)" if a.kind == "trend"
+                  else f"{len(a.records)} new {a.field} record(s)" if a.kind == "record"
                   else f"{a.field}={a.value} >= {a.threshold}")
-        log.info("  ALERT sub %d %s->%s: %s at sensor %s",
-                 a.subscription_id, a.channel, a.target, detail, a.sensor_id)
+        log.info("  ALERT sub %d %s->%s: %s at %s %s", a.subscription_id, a.channel, a.target,
+                 detail, "site" if a.kind == "record" else "sensor", a.sensor_id)
         if not send:
             continue
         try:
             notifier_factory(a.channel).send(a)
             store.mark_notified(a.subscription_id, now)
+            if a.kind == "record":
+                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now)
         except Exception as exc:  # one bad channel shouldn't block the rest
             log.warning("  failed to send alert %d via %s: %s", a.subscription_id, a.channel, exc)
     return alerts
