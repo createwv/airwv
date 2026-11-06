@@ -351,8 +351,11 @@ def run_subscribe(
     quiet_start: int | None = None,
     quiet_end: int | None = None,
     store=None,
+    center: tuple[float, float] | None = None,
+    radius_km: float | None = None,
 ) -> int:
-    """Create an alert subscription. Returns its id."""
+    """Create an alert subscription. Returns its id. ``center`` + ``radius_km`` scope it
+    to a place; ``kind="record"`` (field spills | water | violations) fires on new records."""
     store = store or Store.from_config(config)
     store.create_schema()
     sensor_id = None
@@ -367,10 +370,16 @@ def run_subscribe(
         channel=channel, target=target, sensor_id=sensor_id, field=field, kind=kind,
         threshold=threshold, min_interval_seconds=min_interval_seconds,
         quiet_start=quiet_start, quiet_end=quiet_end,
+        center_lat=center[0] if center and radius_km else None,
+        center_lon=center[1] if center and radius_km else None,
+        radius_km=radius_km if center else None,
     )
-    trigger = f">= {threshold}" if kind == "threshold" else f"rising +{threshold}%"
+    trigger = {"threshold": f">= {threshold}", "record": "a new record appears"}.get(
+        kind, f"rising +{threshold}%")
+    where = (f"within {radius_km:g} km of {center[0]}, {center[1]}" if center and radius_km
+             else f"sensor {sensor_id}" if sensor_id else "anywhere in WV")
     log.info("subscription %d: %s -> %s when %s %s (%s)", sub_id, channel, target,
-             field, trigger, f"sensor {sensor_id}" if sensor_id else "any sensor")
+             field, trigger, where)
     return sub_id
 
 
@@ -1132,12 +1141,17 @@ def main(argv: list[str] | None = None) -> None:
     subscribe = sub.add_parser("subscribe", help="create an alert subscription")
     subscribe.add_argument("--channel", required=True, choices=["email", "webhook", "log"])
     subscribe.add_argument("--target", required=True, help="email address / webhook URL")
-    subscribe.add_argument("--threshold", type=float, required=True,
-                           help="threshold value, or for --kind trend the min %% rise")
-    subscribe.add_argument("--kind", default="threshold", choices=["threshold", "trend"],
-                           help="threshold (value crosses) or trend (rising over time)")
+    subscribe.add_argument("--threshold", type=float,
+                           help="threshold value, or for --kind trend the min %% rise "
+                                "(required, except for --kind record)")
+    subscribe.add_argument("--kind", default="threshold", choices=["threshold", "trend", "record"],
+                           help="threshold (value crosses), trend (rising over time) or "
+                                "record (a new spill/violation; --field spills|water|violations)")
     subscribe.add_argument("--sensor", help="sensor name (default: any sensor)")
     subscribe.add_argument("--field", default="pm2_5", help="field to watch (default pm2_5)")
+    subscribe.add_argument("--lat", type=float, help="place: center latitude (with --lon, --radius-km)")
+    subscribe.add_argument("--lon", type=float, help="place: center longitude")
+    subscribe.add_argument("--radius-km", type=float, help="place: radius in km")
     subscribe.add_argument("--min-interval", type=int, default=21600, help="min seconds between alerts")
     subscribe.add_argument("--quiet-start", type=int, help="quiet hours start (local hour 0-23)")
     subscribe.add_argument("--quiet-end", type=int, help="quiet hours end (local hour 0-23)")
@@ -1203,9 +1217,16 @@ def main(argv: list[str] | None = None) -> None:
     elif command == "export":
         run_export(config, args.out, sensor_name=args.sensor, org=args.org, fmt=args.format)
     elif command == "subscribe":
-        run_subscribe(config, args.channel, args.target, args.threshold, sensor_name=args.sensor,
+        if args.kind == "record" and args.field not in RECORD_RULES:
+            parser.error(f"--kind record needs --field {'|'.join(RECORD_RULES)}")
+        if args.kind != "record" and args.threshold is None:
+            parser.error("--threshold is required for --kind threshold/trend")
+        run_subscribe(config, args.channel, args.target, args.threshold or 0.0, sensor_name=args.sensor,
                       field=args.field, kind=args.kind, min_interval_seconds=args.min_interval,
-                      quiet_start=args.quiet_start, quiet_end=args.quiet_end)
+                      quiet_start=args.quiet_start, quiet_end=args.quiet_end,
+                      center=((args.lat, args.lon) if args.lat is not None and args.lon is not None
+                              else None),
+                      radius_km=args.radius_km)
     elif command == "alerts":
         run_alerts(config, send=args.send)
     elif command == "airnow":
