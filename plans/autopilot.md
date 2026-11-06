@@ -29,7 +29,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
       "Noise and light pollution" medium (night-sky brightness from satellite data, community noise reports and
       sensors) in ROADMAP.md, placed after Land [auto:S]
 - [x] Nav collapse + terms pass: six-item nav, "More" menu, glossary file, rename Sources→Facilities, emoji removed, Admin to footer. [auto:S]
-- [ ] Map bounds + y-axis + default sensor: items from §6. [auto:S]
+- [x] Map bounds + y-axis + default sensor: items from §6. [auto:S]
 - [ ] /sources pagination + /water heading fix + haze opt-in. [auto:S]
 - [ ] API caching, gzip, bbox for heavy layers, self-hosted libs. [auto:M]
 - [ ] Accessibility pass: alt/aria/focus on custom controls, reduced-motion, contrast check in the harness. [auto:M]
