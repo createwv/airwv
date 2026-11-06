@@ -47,6 +47,7 @@ PAGES = [
     ("alerts", "/alerts"),
     ("about", "/about"),
     ("data", "/data"),
+    ("explore", "/explore?place=rutledge&km=8&param=pm2_5"),   # query builder at the demo place
     # data centers: Near me at Point Pleasant (Monarch is ~4 mi) and a site page
     ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
     ("site-dc", "/site/data_center/monarch-compute-campus"),

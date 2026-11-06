@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <h1 class="pl-h">Explore the data</h1>
+  <p class="meta ex-lede">Pick what to show and where. The table, the CSV and the API link all give the same
+    answer, from <a href="/data">these data sources</a>.</p>
+  <form class="card ex-form" id="ex-form">
+    <div class="ex-grid">
+      <label>Show <select name="show">
+        <option value="sites">places (sites)</option>
+        <option value="records">records (violations, permits, spills…)</option>
+      </select></label>
+      <label>Near <select name="place" id="ex-place"></select></label>
+      <label>within <select name="km">
+        <option value="1.61">1 mile</option>
+        <option value="8" selected>5 miles</option>
+        <option value="16">10 miles</option>
+        <option value="40.25">25 miles</option>
+      </select></label>
+      <label>Medium <select name="medium">
+        <option value="">any</option>
+        <option value="air">air</option>
+        <option value="water">water</option>
+        <option value="land">land</option>
+      </select></label>
+      <label>Latest reading of <select name="param">
+        <option value="">(none)</option>
+        <optgroup label="Air">
+          <option value="pm2_5">PM2.5</option><option value="pm10">PM10</option>
+          <option value="voc">VOC</option><option value="ozone">ozone</option>
+        </optgroup>
+        <optgroup label="Water">
+          <option value="conductance">conductivity</option><option value="ph">pH</option>
+          <option value="do">dissolved oxygen</option><option value="turbidity">turbidity</option>
+          <option value="iron">iron</option><option value="manganese">manganese</option>
+          <option value="selenium">selenium</option><option value="sulfate">sulfate</option>
+          <option value="ecoli">E. coli</option>
+        </optgroup>
+      </select></label>
+      <label>Changed since <input type="date" name="since"></label>
+      <label>Up to <select name="limit">
+        <option value="50">50 rows</option>
+        <option value="100" selected>100 rows</option>
+        <option value="500">500 rows</option>
+      </select></label>
+    </div>
+    <fieldset class="ex-kinds">
+      <legend>Kinds <span class="meta">(none ticked = all)</span></legend>
+      <label><input type="checkbox" name="kind" value="sensor"> sensor</label>
+      <label><input type="checkbox" name="kind" value="reference_monitor"> monitor</label>
+      <label><input type="checkbox" name="kind" value="gauge"> gauge</label>
+      <label><input type="checkbox" name="kind" value="sample_site"> sample site</label>
+      <label><input type="checkbox" name="kind" value="facility"> facility</label>
+      <label><input type="checkbox" name="kind" value="permit"> permit</label>
+      <label><input type="checkbox" name="kind" value="spill_report"> spill report</label>
+      <label><input type="checkbox" name="kind" value="water_system"> water system</label>
+      <label><input type="checkbox" name="kind" value="well"> well</label>
+      <label><input type="checkbox" name="kind" value="data_center"> data center</label>
+    </fieldset>
+    <div class="ex-go"><button type="submit">Show results</button></div>
+  </form>
+
+  <div class="ex-bar">
+    <span id="ex-count" class="ex-count">Loading…</span>
+    <span class="ex-links">
+      <a id="ex-csv" href="#" download>Download CSV</a>
+      <a id="ex-api" href="#" target="_blank" rel="noopener">API link (JSON)</a>
+    </span>
+  </div>
+  <div class="card ex-out"><table class="fac-table ex-table" id="ex-table"></table></div>
+  <div class="meta pl-prov" id="ex-prov"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/explore.js?v={{ asset_v }}"></script>
+{% endblock %}

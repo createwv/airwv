@@ -186,3 +186,35 @@ def test_place_page(tmp_path, monkeypatch):
     c, _ = _client(tmp_path, monkeypatch)
     r = c.get("/place?place=rutledge&km=8")
     assert r.status_code == 200 and "place.js" in r.text and "reportmodal" in r.text
+
+
+def test_api_query_csv(tmp_path, monkeypatch):
+    import csv
+    import io
+    c, _ = _client(tmp_path, monkeypatch)
+    base = "/api/query?lat=38.3727&lon=-81.6540&km=8"
+    js = c.get(f"{base}&param=pm2_5").json()
+    r = c.get(f"{base}&param=pm2_5&format=csv")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/csv")
+    assert "attachment" in r.headers["content-disposition"]
+    rows = list(csv.DictReader(io.StringIO(r.text)))
+    assert [x["site_id"] for x in rows] == [s["site_id"] for s in js["sites"]]   # same answer, same order
+    by_id = {x["site_id"]: x for x in rows}
+    assert by_id["sensor:197127"]["value"] == "10.04" and by_id["sensor:197127"]["parameter"] == "pm2_5"
+    # show=records: one row per record; with since, only the dated "changes"
+    recs = list(csv.DictReader(io.StringIO(c.get(f"{base}&kind=facility&format=csv&show=records").text)))
+    js = c.get(f"{base}&kind=facility").json()
+    assert len(recs) == sum(len(s["records"]) for s in js["sites"]) > 0
+    assert {"site_id", "record_kind", "effective", "url"} <= set(recs[0])
+    big = "/api/query?lat=38.3727&lon=-81.6540&km=40&kind=spill_report,permit&since=2026-01-01&limit=500"
+    ch = list(csv.DictReader(io.StringIO(c.get(f"{big}&format=csv&show=records").text)))
+    assert [x["effective"] for x in ch] == [x["effective"] for x in c.get(big).json()["changes"]]
+    assert c.get(f"{base}&format=xml").status_code == 400
+    assert c.get(f"{base}&show=wells").status_code == 400
+
+
+def test_explore_page(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    r = c.get("/explore?place=rutledge&km=8&param=pm2_5")
+    assert r.status_code == 200 and "explore.js" in r.text and 'id="ex-csv"' in r.text
+    assert 'id="ex-api"' in r.text and 'name="kind"' in r.text

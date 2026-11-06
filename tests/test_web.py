@@ -176,7 +176,7 @@ def test_nav_collapsed(tmp_path):
     top = re.findall(r'^  <a href="([^"]+)"', nav, re.M) + re.findall(r"<summary", nav)
     assert len(top) <= 6, top
     assert "/admin" not in nav and 'href="/admin"' in page[page.index("<footer"):]
-    for path in ("/nearby", "/facilities", "/events", "/spills", "/learn", "/data", "/about"):
+    for path in ("/nearby", "/facilities", "/events", "/spills", "/learn", "/data", "/explore", "/about"):
         assert f'href="{path}"' in more, path
     assert not re.search(r"[\U0001F300-\U0001FAFF☀-➿]", nav)   # no emoji in labels
     r = c.get("/facilities")                                              # Sources -> Facilities

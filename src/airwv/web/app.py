@@ -30,7 +30,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from airwv.analysis import detrend_events, hour_of_day_profile
-from airwv.export_utils import readings_to_csv
+from airwv.export_utils import query_records_to_csv, query_sites_to_csv, readings_to_csv
 from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
@@ -610,7 +610,7 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/api/query")
     def query(lat: float, lon: float, km: float = 8.0, kind: str | None = None,
               medium: str | None = None, param: str | None = None, since: str | None = None,
-              limit: int = 100):
+              limit: int = 100, format: str = "json", show: str = "sites"):
         """One read path over the unified views: sites near a place (``kind`` is a comma
         list: well, facility, permit, spill_report, water_system, reference_monitor,
         sensor, gauge, sample_site; ``medium`` air / water / land), each with its
@@ -618,7 +618,9 @@ def create_app(store: Store) -> FastAPI:
         comma list: the first one the site has wins), and the provenance of every layer
         it came from. ``since`` (YYYY-MM-DD) adds "what changed": a ``changes`` list of
         records dated on/after it and each measured site's ``peak`` of the first
-        ``param`` since then. ``km`` is capped at 25 mi. See docs/READ-MODEL.md."""
+        ``param`` since then. ``km`` is capped at 25 mi. ``format=csv`` returns the same answer
+        as a CSV file: one row per site, or with ``show=records`` one row per record (only
+        those dated on/after ``since`` when it's given). Powers /explore. See docs/READ-MODEL.md."""
         km = min(max(km, 1.0), 40.25)
         limit = min(max(limit, 1), 500)
         kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
@@ -628,6 +630,8 @@ def create_app(store: Store) -> FastAPI:
                 since = date.fromisoformat(since[:10]).isoformat()
             except ValueError:
                 raise HTTPException(status_code=400, detail="since must be YYYY-MM-DD")
+        if format not in ("json", "csv") or show not in ("sites", "records"):
+            raise HTTPException(status_code=400, detail="format is json or csv; show is sites or records")
         rm = store.read_model
         with rm.connect() as conn:
             sites = rm.sites_near(conn, lat, lon, km * 0.621371, kinds=kinds, medium=medium, limit=limit)
@@ -665,6 +669,15 @@ def create_app(store: Store) -> FastAPI:
                 "count": len(out), "sites": out, "provenance": prov}
         if since:
             body["changes"] = sorted(changes, key=lambda c: c["effective"], reverse=True)
+        if format == "csv":
+            if show == "records":
+                text = query_records_to_csv(body["changes"] if since else [
+                    {"site_id": s["site_id"], "site_kind": s["kind"], "name": s["name"],
+                     "medium": s["medium"], "mi": s["mi"], **r} for s in out for r in s["records"]])
+            else:
+                text = query_sites_to_csv(out)
+            return Response(content=text, media_type="text/csv", headers={
+                "Content-Disposition": f'attachment; filename="airwv_query_{show}.csv"'})
         return body
 
     @app.get("/api/data-catalog")
@@ -1776,6 +1789,13 @@ def create_app(store: Store) -> FastAPI:
         # from its URL and builds every line from /api/query
         return TEMPLATES.TemplateResponse(request=request, name="place.html",
                                           context={"mode": "place"})
+
+    @app.get("/explore", response_class=HTMLResponse)
+    def explore_page(request: Request):
+        # query builder v1 (DIRECTION.md §5.2): a form over /api/query; the form lives in the
+        # URL, and the page shows the table, a CSV download and the API URL for the same answer
+        return TEMPLATES.TemplateResponse(request=request, name="explore.html",
+                                          context={"mode": "explore"})
 
     @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic"):
