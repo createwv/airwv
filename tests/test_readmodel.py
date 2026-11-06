@@ -295,5 +295,5 @@ def test_api_areas_matches_snapshot(tmp_path, monkeypatch):
     got |= {f"series:{r},{f}": c.get(f"/api/areas/series?region={r}&field={f}").json()
             for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"), ("Nowhere", "pm2_5")]}
     want = _check_snapshot(AREAS_SNAPSHOT, got)
-    trends = {a["trend"]["direction"] for r in want.values() for a in r["areas"]}
+    trends = {a["trend"]["direction"] for r in want.values() for a in r.get("areas", [])}
     assert len(trends) > 1 and any(a["reporting"] == 0 for a in want["pm2_5,180"]["areas"])
