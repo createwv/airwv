@@ -81,4 +81,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Add published events (`events` with status 'published') as an `events.csv.gz` dump [auto:S]
 - [ ] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
 - [ ] Show the dumps' "as of" date and file sizes on `/data` from `manifest.json` [auto:S]
+- [ ] Age cap for spill alerts (e.g. skip reports dated more than 60 days back), with the cap stated in the email [auto:S]
 
