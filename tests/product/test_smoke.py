@@ -9,7 +9,7 @@ from conftest import PAGES, VIEWPORTS  # tests/ isn't a package; pytest puts thi
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
-NAV_TARGET = 7   # six items + "More" (direction review, 2026-11-05)
+NAV_TARGET = 6   # six top-level items, "More" included (docs/DIRECTION.md §3)
 
 CASES = [(name, w) for w, _ in VIEWPORTS for name, _ in PAGES]
 IDS = [f"{n}-{w}" for n, w in CASES]
@@ -41,7 +41,6 @@ def test_nav_present(product, name, width):
     assert _get(product, name, width).get("navCount", 0) > 0
 
 
-@pytest.mark.xfail(reason="plan: 'Nav collapse + terms pass' (11 items today)", strict=False)
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])
 def test_nav_count(product, width):
     assert _get(product, "home", width)["navCount"] <= NAV_TARGET

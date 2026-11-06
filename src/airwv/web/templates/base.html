@@ -27,26 +27,43 @@
   <img class="cloud c-white" src="/static/banner-clouds-white.svg" alt="">
   <img class="logo" src="/static/logo.svg" alt="empower wv — community eco monitoring">
 </header>
-<nav class="modenav">
+<nav class="modenav" aria-label="main">
   <a href="/"         class="{{ 'on' if mode == 'overview' }}">Home</a>
-  <a href="/air" class="{{ 'on' if mode == 'air' }}">Air</a>
-  <a href="/nearby"   class="{{ 'on' if mode == 'nearby' }}">📍 Near me</a>
+  <a href="/place"    class="{{ 'on' if mode == 'place' }}">My place</a>
+  <a href="/air"      class="{{ 'on' if mode == 'air' }}">Air</a>
   <a href="/water"    class="{{ 'on' if mode == 'water' }}">Water</a>
-  <a href="/sources"  class="{{ 'on' if mode == 'sources' }}">Sources</a>
-  <a href="/events"   class="{{ 'on' if mode == 'events' }}">Events</a>
-  <a href="/spills"   class="{{ 'on' if mode == 'spills' }}">🛢️ Spills</a>
-  <a href="/learn"    class="{{ 'on' if mode == 'learn' }}">Learn</a>
-  <a href="/alerts"   class="{{ 'on' if mode == 'alerts' }}">🔔 Alerts</a>
-  <a href="/about"    class="{{ 'on' if mode == 'about' }}">About</a>
-  <a href="/admin"    class="admin {{ 'on' if mode == 'admin' }}">Admin</a>
+  <a href="/alerts"   class="{{ 'on' if mode == 'alerts' }}">Alerts</a>
+  {# "More" holds the rest (docs/DIRECTION.md §3); a <details> so it opens without JS #}
+  <details class="more">
+    <summary class="{{ 'on' if mode in ('nearby', 'sources', 'events', 'spills', 'learn', 'data', 'about') }}">More</summary>
+    <div class="more-menu">
+      <a href="/nearby"     class="{{ 'on' if mode == 'nearby' }}">Near me</a>
+      <a href="/facilities" class="{{ 'on' if mode == 'sources' }}">Facilities</a>
+      <a href="/events"     class="{{ 'on' if mode == 'events' }}">Events</a>
+      <a href="/spills"     class="{{ 'on' if mode == 'spills' }}">Spills</a>
+      <a href="/learn"      class="{{ 'on' if mode == 'learn' }}">Learn</a>
+      <a href="/data"       class="{{ 'on' if mode == 'data' }}">Data sources</a>
+      <a href="/about"      class="{{ 'on' if mode == 'about' }}">About</a>
+    </div>
+  </details>
 </nav>
+<script>
+  // close the "More" menu on an outside click or Escape
+  (function () {
+    var more = document.querySelector("nav.modenav details.more");
+    document.addEventListener("click", function (e) { if (more.open && !more.contains(e.target)) more.open = false; });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") more.open = false; });
+  })();
+</script>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
 {% block content %}{% endblock %}
 <footer>
   <a href="/">Home</a> · <a href="/air">Air</a> · <a href="/learn">Learn</a> ·
   <a href="/data">Data sources</a> · <a href="/about">About</a> ·
   <a href="#" data-open="feedback">Feedback</a> ·
-  <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a>
+  <a href="https://github.com/createwv/airwv/blob/main/docs/GLOSSARY.md" target="_blank" rel="noopener">Glossary</a> ·
+  <a href="https://github.com/createwv/airwv" target="_blank" rel="noopener">GitHub</a> ·
+  <a href="/admin" class="admin">Admin</a>
   <div class="fnote">AirWV · open-source community air-quality monitoring for West Virginia ·
     provisional data, not for regulatory use</div>
 </footer>

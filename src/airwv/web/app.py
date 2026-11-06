@@ -1752,7 +1752,8 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="spills.html",
                                           context={"mode": "spills"})
 
-    @app.get("/sources", response_class=HTMLResponse)
+    @app.get("/facilities", response_class=HTMLResponse)
+    @app.get("/sources", response_class=HTMLResponse)   # old name, kept for links / bookmarks
     def sources_page(request: Request):
         # Google Street View Static API key (optional) — front-of-business photos when set.
         return TEMPLATES.TemplateResponse(request=request, name="sources.html",

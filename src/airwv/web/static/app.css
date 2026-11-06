@@ -34,8 +34,22 @@
   .modenav a:hover { background:#eef2f6; color:var(--brand); }
   .modenav a.on { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     box-shadow:0 2px 8px rgba(74,127,176,.3); }
-  .modenav a.admin { margin-left:6px; color:#8a93a0; font-size:13px; }
-  .modenav a.admin.on { background:#5a6472; box-shadow:none; }
+  /* "More" menu: a <details> styled as a pill, its links in a dropdown */
+  .modenav details.more { position:relative; }
+  .modenav summary { list-style:none; cursor:pointer; padding:8px 20px; font-size:14px; font-weight:600;
+    color:#4a5568; border-radius:22px; transition:background .15s,color .15s; }
+  .modenav summary::-webkit-details-marker { display:none; }
+  .modenav summary::after { content:"\25BE"; margin-left:5px; font-size:11px; }
+  .modenav summary:hover { background:#eef2f6; color:var(--brand); }
+  .modenav summary.on { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
+    box-shadow:0 2px 8px rgba(74,127,176,.3); }
+  .modenav .more-menu { position:absolute; right:0; top:calc(100% + 6px); z-index:1200; min-width:170px;
+    display:flex; flex-direction:column; gap:2px; background:#fff; border:1px solid #e5e5e8;
+    border-radius:12px; padding:6px; box-shadow:0 6px 20px rgba(0,0,0,.12); }
+  .modenav .more-menu a { padding:9px 14px; border-radius:8px; }
+  @media (max-width:560px){ .modenav { gap:2px; padding:8px 6px; }
+    .modenav a, .modenav summary { padding:7px 8px; font-size:13px; } }
+  footer > a.admin { color:#8a93a0; font-weight:400; }
   .subbar { background:linear-gradient(90deg,var(--brand),var(--brand-purple)); color:#fff;
     padding:8px 20px; font-size:13px; text-align:center; }
   .betabar { background:#fff4d6; color:#7a5b12; border-bottom:1px solid #f0e0b0;
