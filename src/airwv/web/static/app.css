@@ -439,9 +439,18 @@
   .ex-count { font-weight:600; }
   .ex-links { display:flex; gap:14px; }
   .ex-out { overflow-x:auto; }
-  .ex-table td { overflow-wrap:anywhere; }
+  .ex-table td { overflow-wrap:break-word; }
+  .ex-table td:first-child { width:45%; }
   .ex-table td:nth-child(2) { white-space:nowrap; }
-  @media (max-width:560px){ .ex-table th, .ex-table td { padding:7px 8px; font-size:13px; } }
+  .ex-recs-in { display:none; font-size:12px; color:#556; margin-top:3px; }
+  @media (max-width:560px){
+    .ex-table .ex-recs { display:none; }
+    .ex-recs-in { display:block; }
+    .ex-table td:first-child { width:auto; }
+    .ex-grid { grid-template-columns:1fr 1fr; gap:8px 10px; }
+    .ex-grid select, .ex-grid input { font-size:14px; min-width:0; width:100%; }
+    .ex-table th, .ex-table td { padding:7px 6px; font-size:13px; }
+  }
 
   /* "My place now" basic view (/place) */
   .pl-pick .controls { padding:0; }

@@ -4,7 +4,8 @@ The first step of the six-noun model in [DIRECTION.md](DIRECTION.md) §1: SQL vi
 tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 (`store.read_model`). Endpoints on it: `/api/near` (unchanged output) and `/api/query`
 (parameters in [DATA-SOURCES.md](DATA-SOURCES.md#apiquery--one-read-path-over-the-unified-views)),
-which the `/place` basic view reads for every line it shows.
+which the `/place` basic view reads for every line it shows and the `/explore` query
+builder puts in a table (with `format=csv` for the download).
 
 ## How it works
 

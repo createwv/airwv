@@ -61,7 +61,7 @@ function params() {
 
 function siteTable(r) {
   const withParam = !!r.filters.param;
-  const head = `<thead><tr><th>Name</th><th>Distance</th>${withParam ? '<th>Latest</th>' : ''}<th>Records</th></tr></thead>`;
+  const head = `<thead><tr><th>Name</th><th>Distance</th>${withParam ? '<th>Latest</th>' : ''}<th class="ex-recs">Records</th></tr></thead>`;
   const rows = r.sites.map(s => {
     const l = s.latest;
     const latest = l ? `${esc(l.value)} ${esc(l.unit || '')}<div class="meta">${esc(l.parameter)} · ${day(l.ts)}</div>` : '<span class="meta">—</span>';
@@ -69,8 +69,8 @@ function siteTable(r) {
       ? s.records.slice(0, 3).map(x => esc(`${recLabel(x.kind)}${x.value != null ? ': ' + x.value : ''}`)).join('<br>')
         + (s.records.length > 3 ? `<div class="meta">+${s.records.length - 3} more</div>` : '')
       : '<span class="meta">—</span>';
-    return `<tr><td>${link(s.url, esc(s.name || s.ref))}<div class="meta">${esc(kindLabel(s.kind))} · ${esc(s.medium)}${s.county ? ' · ' + esc(s.county) : ''}</div></td>
-      <td>${mi(s.mi)}</td>${withParam ? `<td>${latest}</td>` : ''}<td>${recs}</td></tr>`;
+    return `<tr><td>${link(s.url, esc(s.name || s.ref))}<div class="meta">${esc(kindLabel(s.kind))} · ${esc(s.medium)}${s.county ? ' · ' + esc(s.county) : ''}</div>${s.records.length ? `<div class="ex-recs-in">${recs}</div>` : ''}</td>
+      <td>${mi(s.mi)}</td>${withParam ? `<td>${latest}</td>` : ''}<td class="ex-recs">${recs}</td></tr>`;
   });
   return head + `<tbody>${rows.join('')}</tbody>`;
 }

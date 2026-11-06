@@ -255,8 +255,12 @@ the `site` / `measurement` / `record` SQL views, each with its records, its late
 layer in the answer. `param` may be a comma list (the first one a site has wins; `latest`
 names it). `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
 `param` since then, and a `changes` list of records dated on/after it (spills, permit
-dates), newest first. `km` is capped at 40.25 (25 mi). Powers the **My place now** page
-(`/place`). See [READ-MODEL.md](READ-MODEL.md).
+dates), newest first. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
+as a CSV download: one row per site (latest/peak values flattened, a record count), or with
+`show=records` one row per record (only the dated `changes` when `since` is given). Powers the
+**My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
+state is in its URL, with the table, the CSV link and the API link for the same query). See
+[READ-MODEL.md](READ-MODEL.md).
 
 ---
 
