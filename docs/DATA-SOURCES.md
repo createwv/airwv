@@ -263,7 +263,13 @@ dates), newest first. `/api/areas` (+ `/series`) and `/api/water/near` read the 
 (the area filter and a measurement window), pinned by `tests/snapshots/api_areas.json` and
 `api_water_near.json`. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
 as a CSV download: one row per site (latest/peak values flattened, a record count), or with
-`show=records` one row per record (only the dated `changes` when `since` is given). Powers the
+`show=records` one row per record (only the dated `changes` when `since` is given). **Series
+mode:** `/api/query?site_id=&param=&from=&to=&limit=` (`site_id` as the answer lists it, e.g.
+`sensor:197127` or `sample_site:S1`; exactly one `param`) returns that site's `measurement`
+rows (`ts`, `value`, `unit`, `source`, `quality`), oldest first, with the site, its layer's
+provenance and a `csv` link to the same rows; the place filters don't apply. Past `limit`
+(default 5000, max 20000) the newest rows are kept and `truncated` is true; an unknown
+`site_id` is a 404. Powers the
 **My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
 state is in its URL, with the table, the CSV link and the API link for the same query). See
 [READ-MODEL.md](READ-MODEL.md).

@@ -22,6 +22,7 @@ import statistics
 from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+from urllib.parse import urlencode
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
@@ -31,7 +32,8 @@ from pydantic import BaseModel
 
 from airwv import dumps
 from airwv.analysis import detrend_events, hour_of_day_profile
-from airwv.export_utils import query_records_to_csv, query_sites_to_csv, readings_to_csv
+from airwv.export_utils import (query_records_to_csv, query_series_to_csv, query_sites_to_csv,
+                                readings_to_csv)
 from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
@@ -615,7 +617,8 @@ def create_app(store: Store) -> FastAPI:
               kind: str | None = None, medium: str | None = None, area: str | None = None,
               param: str | None = None, since: str | None = None,
               from_: str | None = Query(None, alias="from"), to: str | None = None,
-              limit: int = 100, format: str = "json", show: str = "sites"):
+              site_id: str | None = None, limit: int | None = None, format: str = "json",
+              show: str = "sites"):
         """One read path over the unified views: sites near a place (``kind`` is a comma
         list: well, facility, permit, spill_report, water_system, reference_monitor,
         sensor, gauge, sample_site, data_center; ``medium`` air / water / land; ``area`` a
@@ -627,15 +630,18 @@ def create_app(store: Store) -> FastAPI:
         and each measured site's ``peak`` of the first ``param`` since then (up to ``to``).
         ``km`` is capped at 25 mi. ``format=csv`` returns the same answer as a CSV file: one
         row per site, or with ``show=records`` one row per record (only those dated on/after
-        ``since`` when it's given). Powers /explore. See docs/READ-MODEL.md."""
+        ``since`` when it's given). Series mode: ``site_id`` (one site, ``kind:ref``) + one
+        ``param`` + optional ``from`` / ``to`` returns that site's measurement rows, oldest
+        first (the newest ``limit``, default 5000, at most 20000), and a ``csv`` link to the
+        same rows; the place filters don't apply. Powers /explore. See docs/READ-MODEL.md."""
         km = min(max(km, 1.0), 40.25)
-        limit = min(max(limit, 1), 500)
         kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
         params = [p.strip() for p in param.split(",") if p.strip()] if param else []
         area = (area or "").strip() or None
         point = lat is not None and lon is not None
-        if not point and not area:
-            raise HTTPException(status_code=400, detail="give lat and lon, or an area")
+        site_id = (site_id or "").strip() or None
+        if not point and not area and not site_id:
+            raise HTTPException(status_code=400, detail="give lat and lon, an area, or a site_id")
         dates = {}
         for name, val in (("since", since), ("from", from_), ("to", to)):
             if val is not None:
@@ -646,6 +652,9 @@ def create_app(store: Store) -> FastAPI:
         since, from_, to = dates.get("since"), dates.get("from"), dates.get("to")
         if format not in ("json", "csv") or show not in ("sites", "records"):
             raise HTTPException(status_code=400, detail="format is json or csv; show is sites or records")
+        if site_id:
+            return _query_series(site_id, params, from_, to, limit, format)
+        limit = min(max(100 if limit is None else limit, 1), 500)
         rm = store.read_model
         with rm.connect() as conn:
             sites = rm.sites_near(conn, lat if point else None, lon if point else None, km * 0.621371,
@@ -694,6 +703,33 @@ def create_app(store: Store) -> FastAPI:
             return Response(content=text, media_type="text/csv", headers={
                 "Content-Disposition": f'attachment; filename="airwv_query_{show}.csv"'})
         return body
+
+    def _query_series(site_id, params, from_, to, limit, format):
+        """/api/query series mode: one site's measurement rows of one parameter."""
+        if len(params) != 1:
+            raise HTTPException(status_code=400, detail="series mode takes exactly one param")
+        param = params[0]
+        limit = min(max(5000 if limit is None else limit, 1), 20000)
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, site_id)
+            if site is None:
+                raise HTTPException(status_code=404, detail="no site with that site_id")
+            rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
+                                        since=from_, until=to, limit=limit)
+            prov = rm.provenance(conn, [site["layer"]])
+        if format == "csv":
+            return Response(content=query_series_to_csv(site, param, rows), media_type="text/csv",
+                            headers={"Content-Disposition": 'attachment; filename="airwv_query_series.csv"'})
+        q = {"site_id": site_id, "param": param, "from": from_, "to": to}
+        csv_url = "/api/query?" + urlencode({k: v for k, v in q.items() if v is not None}
+                                            | {"limit": limit, "format": "csv"})
+        return {"mode": "series",
+                "site": {k: site[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
+                                              "lat", "lon", "county", "url")},
+                "filters": {**q, "limit": limit},
+                "count": len(rows), "truncated": truncated, "rows": rows, "csv": csv_url,
+                "provenance": prov}
 
     @app.get("/api/data-catalog")
     def data_catalog():

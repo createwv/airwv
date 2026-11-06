@@ -243,6 +243,25 @@ class ReadModel:
             {"layer": layer, **(params or {})}).mappings().all()
         return [_site(r) for r in rows]
 
+    def site(self, conn, site_id: str) -> dict | None:
+        """One site by ``site_id`` (the first row where a layer repeats it), or None."""
+        r = conn.exec_driver_sql(
+            "SELECT site_id, kind, medium, layer, ref, name, lat, lon, county, url, attrs, NULL AS d "
+            "FROM site WHERE site_id = :id ORDER BY ord LIMIT 1", {"id": site_id}).mappings().first()
+        return _site(r) if r is not None else None
+
+    def series(self, conn, medium: str, ref: str, parameter: str, since=None, until=None,
+               limit: int = 5000) -> tuple[list[dict], bool]:
+        """Measurement rows of ``parameter`` for one ref inside the window (inclusive),
+        oldest first: ``([{ts, value, unit, source, quality}], truncated)``. Past ``limit``
+        rows, the newest ``limit`` are kept and ``truncated`` is True."""
+        window, wp = _window(since, until)
+        rows = conn.exec_driver_sql(
+            "SELECT ts, value, unit, source, quality FROM measurement WHERE medium = :m "
+            f"AND parameter = :p AND ref = :r{window} ORDER BY ts DESC LIMIT :n",
+            {"m": medium, "p": parameter, "r": ref, "n": limit + 1, **wp}).mappings().all()
+        return [dict(r) for r in reversed(rows[:limit])], len(rows) > limit
+
     def records_for(self, conn, site_ids: list[str]) -> dict[str, list[dict]]:
         """Records for these sites, grouped by site_id."""
         out: dict[str, list[dict]] = {}

@@ -326,3 +326,34 @@ def test_api_query_area_and_window(tmp_path, monkeypatch):
     assert {s["site_id"]: s["peak"] and s["peak"]["value"] for s in pk["sites"]}["sample_site:S1"] == 2.4
     assert pk["filters"]["to"] == "2026-07-01"
     assert c.get(f"{base}&from=July").status_code == 400
+
+
+def test_api_query_series(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    r = c.get("/api/query?site_id=sensor:197127&param=pm2_5").json()
+    assert r["mode"] == "series" and r["site"]["name"] == "Kanawha City" and r["site"]["medium"] == "air"
+    assert [x["value"] for x in r["rows"]] == [8.04, 9.04, 10.04]          # oldest first
+    assert r["rows"][0]["unit"] == "µg/m³" and r["rows"][0]["source"] == "purpleair"
+    assert r["count"] == 3 and r["truncated"] is False
+    assert r["csv"] == "/api/query?site_id=sensor%3A197127&param=pm2_5&limit=5000&format=csv"
+    # water: from/to bound the rows (inclusive dates); limit keeps the newest
+    w = "/api/query?site_id=sample_site:S1&param=iron"
+    assert [x["value"] for x in c.get(w).json()["rows"]] == [2.4, 1.9]
+    assert [x["value"] for x in c.get(f"{w}&to=2026-07-01").json()["rows"]] == [2.4]
+    win = c.get(f"{w}&from=2026-07-02&to=2026-07-02").json()
+    assert [x["value"] for x in win["rows"]] == [1.9] and win["filters"]["from"] == "2026-07-02"
+    assert "from=2026-07-02&to=2026-07-02" in win["csv"]
+    one = c.get(f"{w}&limit=1").json()
+    assert [x["value"] for x in one["rows"]] == [1.9] and one["truncated"] is True
+    # the CSV link returns the same rows
+    csv = c.get(r["csv"])
+    assert csv.headers["content-type"].startswith("text/csv")
+    lines = csv.text.strip().splitlines()
+    assert lines[0] == "site_id,name,medium,parameter,ts,value,unit,source,quality"
+    assert len(lines) == 4 and lines[1].startswith("sensor:197127,Kanawha City,air,pm2_5,")
+    # a parameter the site never measured is empty; one param only; unknown sites are 404
+    assert c.get("/api/query?site_id=sensor:200001&param=voc").json()["rows"] == []
+    assert c.get("/api/query?site_id=sensor:197127").status_code == 400
+    assert c.get("/api/query?site_id=sensor:197127&param=pm2_5,voc").status_code == 400
+    assert c.get("/api/query?site_id=sensor:nope&param=pm2_5").status_code == 404
+    assert c.get("/api/query?site_id=sensor:197127&param=pm2_5&from=July").status_code == 400
