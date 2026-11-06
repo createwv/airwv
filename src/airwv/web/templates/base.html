@@ -5,12 +5,13 @@
 <title>Empower WV — Community Eco Monitoring</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="icon" type="image/png" href="/static/favicon.png">
-<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+{# pinned libs: self-hosted from static/vendor/ when present, else the CDN (static/vendor/README.md) #}
+<script src="{{ vendor('plotly-2.32.0.min.js', 'https://cdn.plot.ly/plotly-2.32.0.min.js') }}"></script>
+<link rel="stylesheet" href="{{ vendor('leaflet.css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css') }}"/>
+<script src="{{ vendor('leaflet.js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js') }}"></script>
+<link rel="stylesheet" href="{{ vendor('MarkerCluster.css', 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css') }}"/>
+<link rel="stylesheet" href="{{ vendor('MarkerCluster.Default.css', 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css') }}"/>
+<script src="{{ vendor('leaflet.markercluster.js', 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js') }}"></script>
 <script src="/static/wv.js?v={{ asset_v }}"></script>
 <link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
 </head>

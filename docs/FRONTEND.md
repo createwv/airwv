@@ -10,7 +10,11 @@ The dashboard has outgrown "one long scroll." This plans the restructure into
 ## Current stack (for the record)
 - **FastAPI** backend (`src/airwv/web/app.py`) — read-only JSON API + serves the page.
 - **One HTML page** (a Python string, `INDEX_HTML`) with **vanilla JS**, **Plotly**
-  (charts), **Leaflet** (map), via CDN. **No build step, no framework.** Not Django.
+  (charts), **Leaflet** (map), pinned; self-hosted from `static/vendor/` when the copies
+  are there, else the CDN (`static/vendor/README.md`). **No build step, no framework.** Not Django.
+- **API performance:** responses over 1 KB are gzipped; `/api/sensors` is cached 60 s,
+  `/api/water/sites` 5 min; `/api/abandoned-wells` and `/api/water/sites` take
+  `?bbox=west,south,east,north` (counts stay statewide) and send `Cache-Control`.
 - Virtue to preserve: zero toolchain — contributors edit HTML/JS directly.
 
 ## Modes (top-level navigation)
