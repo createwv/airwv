@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Iterable
 
 from sqlalchemy import and_, create_engine, func, insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
@@ -181,6 +182,13 @@ class Store:
             if row.get("lat") is not None and row.get("lon") is not None and (
                     s["located_ts"] is None or _ts_key(ts) >= _ts_key(s["located_ts"])):
                 s.update(lat=row["lat"], lon=row["lon"], located_ts=ts)
+        try:
+            self._merge_reading_sites(seen)
+        except IntegrityError:
+            # another writer added one of these sensors meanwhile: merge into its row
+            self._merge_reading_sites(seen)
+
+    def _merge_reading_sites(self, seen: dict[tuple, dict]) -> None:
         with self._session_factory() as session:
             for (source, sensor_id), s in seen.items():
                 site = session.get(ReadingSite, (source, sensor_id))
@@ -224,9 +232,14 @@ class Store:
                     source=source, sensor_id=sensor_id, first_ts=first_ts, last_ts=last_ts,
                     lat=loc[0] if loc else None, lon=loc[1] if loc else None,
                     located_ts=loc[2] if loc else None))
+            try:
+                session.commit()
+            except IntegrityError:
+                # another process (web app, a collector) back-filled at the same time
+                session.rollback()
+                return
             if spans:
                 log.info("reading_sites: back-filled %d sensors from readings", len(spans))
-            session.commit()
 
     def count(self) -> int:
         with self._session_factory() as session:
