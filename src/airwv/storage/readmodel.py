@@ -272,6 +272,25 @@ class ReadModel:
             {"layer": layer, **(params or {})}).mappings().all()
         return [_site(r) for r in rows]
 
+    def site(self, conn, site_id: str) -> dict | None:
+        """One site by ``site_id`` (the first row where a layer repeats it), or None."""
+        r = conn.exec_driver_sql(
+            "SELECT site_id, kind, medium, layer, ref, name, lat, lon, county, url, attrs, NULL AS d "
+            "FROM site WHERE site_id = :id ORDER BY ord LIMIT 1", {"id": site_id}).mappings().first()
+        return _site(r) if r is not None else None
+
+    def series(self, conn, medium: str, ref: str, parameter: str, since=None, until=None,
+               limit: int = 5000) -> tuple[list[dict], bool]:
+        """Measurement rows of ``parameter`` for one ref inside the window (inclusive),
+        oldest first: ``([{ts, value, unit, source, quality}], truncated)``. Past ``limit``
+        rows, the newest ``limit`` are kept and ``truncated`` is True."""
+        window, wp = _window(since, until)
+        rows = conn.exec_driver_sql(
+            "SELECT ts, value, unit, source, quality FROM measurement WHERE medium = :m "
+            f"AND parameter = :p AND ref = :r{window} ORDER BY ts DESC LIMIT :n",
+            {"m": medium, "p": parameter, "r": ref, "n": limit + 1, **wp}).mappings().all()
+        return [dict(r) for r in reversed(rows[:limit])], len(rows) > limit
+
     def records_for(self, conn, site_ids: list[str]) -> dict[str, list[dict]]:
         """Records for these sites, grouped by site_id."""
         out: dict[str, list[dict]] = {}
@@ -283,6 +302,28 @@ class ReadModel:
                     {f"s{n}": s for n, s in enumerate(chunk)}).mappings():
                 out.setdefault(r["site_id"], []).append(
                     {k: r[k] for k in ("kind", "value", "effective", "url", "as_of")})
+        return out
+
+    def alert_records(self, conn, rules: dict) -> list[dict]:
+        """The records a record-kind alert can fire on (``alerts.RECORD_RULES``), each with
+        its site's place and name, the layer's source and the date it carries, if any."""
+        out = []
+        for rule, spec in rules.items():
+            sites = {s["site_id"]: s for s in self.sites(conn, layer=spec["layer"])}
+            source = (self.provenance(conn, [spec["layer"]]).get(spec["layer"]) or {}).get("source")
+            for site_id, recs in self.records_for(conn, list(sites)).items():
+                s = sites[site_id]
+                for r in recs:
+                    if r["kind"] not in spec["kinds"]:
+                        continue
+                    out.append({"rule": rule, "site_id": site_id, "kind": r["kind"],
+                                "value": r["value"], "effective": r["effective"],
+                                "url": r["url"] or s["url"], "name": s["name"],
+                                "lat": s["lat"], "lon": s["lon"], "county": s["county"],
+                                # on the county centroid (no exact point in the source)
+                                "county_placed": bool(spec.get("county_placed"))
+                                and s["attrs"].get("geo") != "exact",
+                                "source": source, "attrs": s["attrs"]})
         return out
 
     def provenance(self, conn, layers: list[str]) -> dict[str, dict]:

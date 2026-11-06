@@ -47,6 +47,12 @@ QUERY_RECORD_COLUMNS = [
 ]
 
 
+# /api/query?site_id=&param=&format=csv: one row per measurement (series mode).
+QUERY_SERIES_COLUMNS = [
+    "site_id", "name", "medium", "parameter", "ts", "value", "unit", "source", "quality",
+]
+
+
 def _csv(columns, rows) -> str:
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
@@ -68,3 +74,9 @@ def query_sites_to_csv(sites) -> str:
 
 def query_records_to_csv(records) -> str:
     return _csv(QUERY_RECORD_COLUMNS, [{**r, "record_kind": r["kind"]} for r in records])
+
+
+def query_series_to_csv(site, parameter, rows) -> str:
+    return _csv(QUERY_SERIES_COLUMNS, [{**r, "site_id": site["site_id"], "name": site["name"],
+                                        "medium": site["medium"], "parameter": parameter}
+                                       for r in rows])

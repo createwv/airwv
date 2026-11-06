@@ -6,7 +6,8 @@ tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 `/api/water/near` (each unchanged, pinned by a snapshot in `tests/snapshots/`) and `/api/query`
 (parameters in [DATA-SOURCES.md](DATA-SOURCES.md#apiquery--one-read-path-over-the-unified-views)),
 which the `/place` basic view reads for every line it shows and the `/explore` query
-builder puts in a table (with `format=csv` for the download).
+builder puts in a table (with `format=csv` for the download). Its series mode
+(`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts.
 
 ## How it works
 
@@ -40,11 +41,15 @@ DEP mining, DEP oil & gas), `spill_report`, `water_system`, `reference_monitor`,
 have no public coordinates, so `lat`/`lon` are NULL and only county finds them; one
 `project_status` record each). Measurements join sites on (`medium`, `ref`).
 
+Place-based record alerts (`alerts.RECORD_RULES`, `ReadModel.alert_records`) read the
+`record` view joined to `site`: spill reports, SDWA health-based violations and ECHO
+violations. A record is "new" when its `site_id|kind|value` key wasn't there at the last
+check, so a status or contaminant change counts as new too.
+
 ## Known gaps
 
-- `site_id` repeats where a source file repeats a row verbatim (about 1,300 abandoned-well
-  ids) and for oil & gas permits, where one API number has several applications.
-  `/api/near` has always listed the duplicate wells; deduping them is a visible change.
+- `site_id` repeats for oil & gas permits, where one API number has several applications.
+  (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - Readings-table sensors with no coordinates in any reading aren't sites (nothing to place
   them by); AirNow names come only from the hourly file, so AirData-only monitors have none.
 - `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*

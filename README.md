@@ -224,6 +224,18 @@ python -m airwv.ingest subscribe --channel log --kind trend \
     --sensor "Glasgow" --field voc --threshold 20    # alert if VOC rising ≥ 20%
 ```
 
+A third kind, **record**, is place-based and covers more than air: it fires when a
+new record shows up for a place in the public records the map uses — `--field spills`
+(NRC spill reports), `water` (EPA health-based drinking-water violations) or
+`violations` (EPA ECHO facility violations). The first check takes what's already
+on file as the baseline, so only records that appear later alert; county-only
+records (most spills, water systems) also match a place in that county.
+
+```bash
+python -m airwv.ingest subscribe --channel webhook --target https://hooks.example/... \
+    --kind record --field spills --lat 38.35 --lon -81.63 --radius-km 16
+```
+
 Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
 (SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).
 Per-subscription rate limiting and quiet hours prevent spam. SMS is planned.

@@ -544,30 +544,6 @@
     "flag": null,
     "icon": "🛢️",
     "label": "Abandoned gas well",
-    "lat": 37.8182,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500721",
-    "lon": -81.99056,
-    "mi": 2.2,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Logan County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 37.82865,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500219",
-    "lon": -82.01996,
-    "mi": 2.2,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Logan County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
     "lat": 37.82865,
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500219",
     "lon": -82.01996,
@@ -584,6 +560,30 @@
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500488",
     "lon": -81.98431,
     "mi": 2.8,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "Logan County",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 37.81728,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500921",
+    "lon": -81.95206,
+    "mi": 3.1,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "Logan County",
+    "flag": "orphan",
+    "icon": "🛢️",
+    "label": "Orphan gas well",
+    "lat": 37.78908,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4704500852",
+    "lon": -81.97147,
+    "mi": 4.3,
     "report": true
    },
    {
@@ -1015,30 +1015,6 @@
     "flag": null,
     "icon": "🛢️",
     "label": "Abandoned gas well",
-    "lat": 38.27392,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703901069",
-    "lon": -81.61649,
-    "mi": 2.0,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Kanawha County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 38.26985,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703905821",
-    "lon": -81.62312,
-    "mi": 2.4,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Kanawha County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
     "lat": 38.26985,
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703905821",
     "lon": -81.62312,
@@ -1115,6 +1091,30 @@
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703905402",
     "lon": -81.55145,
     "mi": 3.2,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "Kanawha County",
+    "flag": "orphan",
+    "icon": "🛢️",
+    "label": "Orphan gas well",
+    "lat": 38.2893,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703901835",
+    "lon": -81.65724,
+    "mi": 3.2,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "Kanawha County",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 38.33889,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703902764",
+    "lon": -81.5641,
+    "mi": 3.3,
     "report": true
    },
    {
@@ -2155,18 +2155,6 @@
    },
    {
     "category": "gas",
-    "detail": "Kanawha County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 38.42679,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703901665",
-    "lon": -81.57968,
-    "mi": 3.0,
-    "report": true
-   },
-   {
-    "category": "gas",
     "detail": "89 m from a building",
     "flag": null,
     "icon": "🛢️",
@@ -2186,6 +2174,18 @@
     "lat": 38.34188,
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703902771",
     "lon": -81.60651,
+    "mi": 3.1,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "Kanawha County",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 38.41851,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703905674",
+    "lon": -81.62006,
     "mi": 3.1,
     "report": true
    },
@@ -2405,18 +2405,6 @@
    },
    {
     "category": "gas",
-    "detail": "141 m from a building",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.26853,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303388",
-    "lon": -80.34584,
-    "mi": 0.8,
-    "report": true
-   },
-   {
-    "category": "gas",
     "detail": "Harrison County",
     "flag": null,
     "icon": "🛢️",
@@ -2425,42 +2413,6 @@
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303404",
     "lon": -80.34024,
     "mi": 0.9,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Harrison County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.26926,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303404",
-    "lon": -80.34024,
-    "mi": 0.9,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Harrison County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.27739,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303483",
-    "lon": -80.36861,
-    "mi": 1.0,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "Harrison County",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.27739,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303483",
-    "lon": -80.36861,
-    "mi": 1.0,
     "report": true
    },
    {
@@ -2501,30 +2453,6 @@
    },
    {
     "category": "gas",
-    "detail": "126 m from a building",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.26519,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303452",
-    "lon": -80.338,
-    "mi": 1.2,
-    "report": true
-   },
-   {
-    "category": "gas",
-    "detail": "126 m from a building",
-    "flag": null,
-    "icon": "🛢️",
-    "label": "Abandoned gas well",
-    "lat": 39.26519,
-    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303452",
-    "lon": -80.338,
-    "mi": 1.2,
-    "report": true
-   },
-   {
-    "category": "gas",
     "detail": "16 m from a building",
     "flag": null,
     "icon": "🛢️",
@@ -2533,6 +2461,78 @@
     "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703304261",
     "lon": -80.3673,
     "mi": 1.3,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "68 m from a building",
+    "flag": "orphan",
+    "icon": "🛢️",
+    "label": "Orphan gas well",
+    "lat": 39.25925,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703306034",
+    "lon": -80.3621,
+    "mi": 1.6,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "53 m from a building",
+    "flag": "orphan",
+    "icon": "🛢️",
+    "label": "Orphan gas well",
+    "lat": 39.30333,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703306030",
+    "lon": -80.34595,
+    "mi": 1.6,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "83 m from a building",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 39.30526,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703302574",
+    "lon": -80.35106,
+    "mi": 1.7,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "68 m from a building",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 39.30643,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703304094",
+    "lon": -80.34621,
+    "mi": 1.8,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "24 m from a building",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 39.30918,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303650",
+    "lon": -80.34901,
+    "mi": 2.0,
+    "report": true
+   },
+   {
+    "category": "gas",
+    "detail": "24 m from a building",
+    "flag": null,
+    "icon": "🛢️",
+    "label": "Abandoned gas well",
+    "lat": 39.28116,
+    "link": "http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=4703303440",
+    "lon": -80.31145,
+    "mi": 2.1,
     "report": true
    },
    {

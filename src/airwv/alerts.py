@@ -1,19 +1,35 @@
-"""Evaluate subscriptions against the latest readings.
+"""Evaluate subscriptions against the latest readings and the public records.
 
 Pure logic (no I/O): given active subscriptions and the newest reading per
 sensor, decide which should fire — respecting the threshold, per-subscription
-rate limiting, and local quiet hours. Delivery is handled separately by the
-notify channels.
+rate limiting, and local quiet hours. Record subscriptions (spills, violations)
+fire on records that are new for their place since the last check
+(:func:`evaluate_records`). Delivery is handled separately by the notify channels.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dc_field
 from datetime import datetime, timezone
 from math import asin, cos, radians, sin, sqrt
 from zoneinfo import ZoneInfo
 
+from airwv.wvgeo import WV_COUNTY_CENTROID, canon_county
+
 EASTERN = "America/New_York"
+
+# Record subscriptions: the subscription's ``field`` names a rule over the ``record``
+# view (storage/readmodel.py). ``county_placed`` layers mostly carry only a county, so
+# those sites sit on the county centroid; such a record also matches a place inside
+# that county (each record says whether it is county-placed).
+RECORD_RULES = {
+    "spills":     {"layer": "nrc_spills", "kinds": ("spill",), "county_placed": True,
+                   "label": "reported spills"},
+    "water":      {"layer": "sdwa_systems", "kinds": ("health_violation",), "county_placed": True,
+                   "label": "drinking-water violations"},
+    "violations": {"layer": "echo_facilities", "kinds": ("violation",), "county_placed": False,
+                   "label": "facility violations"},
+}
 
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -33,7 +49,10 @@ class Alert:
     value: float
     threshold: float
     ts: datetime
-    kind: str = "threshold"  # "threshold" | "trend"
+    kind: str = "threshold"  # "threshold" | "trend" | "record"
+    label: str | None = None                                # the subscription's place
+    records: list[dict] = dc_field(default_factory=list)     # record alerts: what's new
+    unsubscribe_url: str | None = None
 
 
 def _local_hour(now: datetime, tzname: str) -> int:
@@ -86,6 +105,8 @@ def evaluate(subscriptions, latest_by_sensor, now: datetime, tzname: str = EASTE
             if elapsed < sub.min_interval_seconds:
                 continue
 
+        if is_record_sub(sub):
+            continue  # handled by evaluate_records
         kind = getattr(sub, "kind", "threshold")
         sensor_ids = [sub.sensor_id] if sub.sensor_id else list(latest_by_sensor)
         for sid in sensor_ids:
@@ -114,4 +135,80 @@ def evaluate(subscriptions, latest_by_sensor, now: datetime, tzname: str = EASTE
     return alerts
 
 
-__all__ = ["Alert", "evaluate"]
+def is_record_sub(sub) -> bool:
+    """Spill / violation subscriptions. Older sign-ups stored these as
+    ``kind="threshold"`` with ``field="spills"|"water"`` (the waitlist), so the field decides."""
+    return getattr(sub, "kind", None) == "record" or getattr(sub, "field", None) in RECORD_RULES
+
+
+def record_key(rec: dict) -> str:
+    """What makes a record "the same" across runs: a status or contaminant change is new."""
+    return f"{rec['site_id']}|{rec['kind']}|{rec.get('value') or ''}"
+
+
+def nearest_county(lat: float, lon: float) -> str:
+    """The county whose centroid is nearest — a stand-in for "the county this point is in"."""
+    return min(WV_COUNTY_CENTROID, key=lambda c: _haversine_km(lat, lon, *WV_COUNTY_CENTROID[c]))
+
+
+def _record_in_place(sub, rec: dict, home_county: str | None) -> bool:
+    center = (getattr(sub, "center_lat", None), getattr(sub, "center_lon", None))
+    radius = getattr(sub, "radius_km", None)
+    if center[0] is None or center[1] is None or not radius:
+        return True  # anywhere in WV
+    if rec.get("lat") is not None and rec.get("lon") is not None \
+            and _haversine_km(center[0], center[1], rec["lat"], rec["lon"]) <= radius:
+        return True
+    return bool(rec.get("county_placed") and home_county
+                and canon_county(rec.get("county")) == home_county)
+
+
+def evaluate_records(subscriptions, records, seen, now: datetime, tzname: str = EASTERN):
+    """Record alerts that should fire now, and the baselines to store.
+
+    ``records`` are dicts with ``rule`` (a :data:`RECORD_RULES` key), ``site_id``, ``kind``,
+    ``value``, ``lat``/``lon``/``county`` and display fields. ``seen`` maps a subscription
+    id to the record keys it already knows. A subscription that has never been checked
+    (``records_checked_at`` is None) doesn't fire: what's already on file for its place
+    becomes its baseline, so only records that appear later alert.
+
+    Returns ``(alerts, baselines)``; ``baselines`` maps subscription id -> keys.
+    """
+    hour = _local_hour(now, tzname)
+    alerts: list[Alert] = []
+    baselines: dict[int, set[str]] = {}
+    for sub in subscriptions:
+        if not sub.active or not is_record_sub(sub) or sub.field not in RECORD_RULES:
+            continue
+        lat, lon = getattr(sub, "center_lat", None), getattr(sub, "center_lon", None)
+        home = nearest_county(lat, lon) if lat is not None and lon is not None else None
+        here = [r for r in records if r["rule"] == sub.field and _record_in_place(sub, r, home)]
+        if getattr(sub, "records_checked_at", None) is None:
+            baselines[sub.id] = {record_key(r) for r in here}
+            continue
+        if _in_quiet_hours(hour, sub.quiet_start, sub.quiet_end):
+            continue  # held, not lost: still unseen next run
+        if sub.last_notified_at is not None \
+                and (now - sub.last_notified_at).total_seconds() < sub.min_interval_seconds:
+            continue
+        known = seen.get(sub.id, set())
+        new, keys = [], set()
+        for r in here:
+            k = record_key(r)
+            if k not in known and k not in keys:
+                keys.add(k)
+                new.append(r)
+        if not new:
+            continue
+        new.sort(key=lambda r: r.get("effective") or "", reverse=True)
+        alerts.append(Alert(
+            subscription_id=sub.id, channel=sub.channel, target=sub.target,
+            sensor_id=new[0]["site_id"], field=sub.field, value=float(len(new)),
+            threshold=0.0, ts=now, kind="record", label=getattr(sub, "label", None),
+            records=new,
+        ))
+    return alerts, baselines
+
+
+__all__ = ["Alert", "RECORD_RULES", "evaluate", "evaluate_records", "is_record_sub",
+           "nearest_county", "record_key"]
