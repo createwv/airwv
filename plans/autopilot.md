@@ -33,7 +33,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] /sources pagination + /water heading fix + haze opt-in. [auto:S]
 - [ ] API caching, gzip, bbox for heavy layers, self-hosted libs. [auto:M]
 - [x] Accessibility pass: alt/aria/focus on custom controls, reduced-motion, contrast check in the harness. [auto:M]
-- [ ] Explore v1 (query builder UI): form over `/api/query`, table + CSV + API link. [auto:M]
+- [x] Explore v1 (query builder UI): form over `/api/query`, table + CSV + API link. [auto:M]
 - [ ] (session with Corey) Postgres + Timescale migration — session with Corey, L: steps 1–6 from ROADMAP; touches prod. SQLite-ism fixes beforehand are.
 - [ ] (session with Corey) Read-only SQL role + `/explore/sql` — session (needs Postgres), M.
 - [ ] Nightly public dumps + rate limit + CORS after Postgres; S on SQLite for the dumps alone. [auto:S]
