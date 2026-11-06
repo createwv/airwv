@@ -71,4 +71,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Tighten the harness map check to "the map's first view contains West Virginia and is at most about 2× its size", at every screen size. [auto:S]
 - [ ] Show sensor names on the local database copy, not bare IDs, so screenshots read like production. [auto:S]
 - [ ] Move /air's controls on phone below the map into a collapsed "Filters" sheet (the next §6 item). [auto:S]
+- [ ] Harness: run the a11y checks with a dialog open and a map popup open (report modal, facility detail, a sensor popup) [auto:S]
 
