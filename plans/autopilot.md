@@ -39,7 +39,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Nightly public dumps + rate limit + CORS after Postgres; S on SQLite for the dumps alone. [auto:S]
 - [ ] Place-based alerts, any medium: subscriptions keyed to place + rule; spill/violation triggers; SMTP go-live is a session item. [auto:M]
 - [ ] (session with Corey) Land medium ingest (Superfund/RCRA/AML) — session S to fetch (network), then to model and surface.
-- [ ] Neighbor cross-check + auto event candidates. [auto:M]
+- [x] Neighbor cross-check + auto event candidates. [auto:M]
 - [ ] (session with Corey) Demo script + partner walkthrough S with Corey: the five-step narrative from §4, one URL per step.
 ### From job proposals
 - [ ] Add a glossary file (`docs/GLOSSARY.md`) with the six terms (sensor, monitor, gauge, sample site, facility, data source), so the nav and terms pass can link to it [auto:S]
