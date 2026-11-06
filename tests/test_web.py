@@ -166,6 +166,24 @@ def test_mode_pages_render(tmp_path):
     assert c.get("/analysis", follow_redirects=False).status_code == 301  # old link redirects to /air
 
 
+def test_nav_collapsed(tmp_path):
+    # docs/DIRECTION.md §3: <= 6 top-level items, the rest under "More", no emoji, Admin in the footer
+    import re
+    c = _client(tmp_path)
+    page = c.get("/").text
+    nav = page[page.index('<nav class="modenav"'):page.index("</nav>")]
+    more = nav[nav.index('<details class="more">'):]
+    top = re.findall(r'^  <a href="([^"]+)"', nav, re.M) + re.findall(r"<summary", nav)
+    assert len(top) <= 6, top
+    assert "/admin" not in nav and 'href="/admin"' in page[page.index("<footer"):]
+    for path in ("/nearby", "/facilities", "/events", "/spills", "/learn", "/data", "/about"):
+        assert f'href="{path}"' in more, path
+    assert not re.search(r"[\U0001F300-\U0001FAFF☀-➿]", nav)   # no emoji in labels
+    r = c.get("/facilities")                                              # Sources -> Facilities
+    assert r.status_code == 200 and "<h1>Facilities</h1>" in r.text and "sources.js" in r.text
+    assert c.get("/sources").status_code == 200                           # old URL still works
+
+
 def test_events_api_and_admin(tmp_path, monkeypatch):
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
     c = _client(tmp_path)

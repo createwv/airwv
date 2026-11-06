@@ -1,4 +1,4 @@
-// Sources & Facilities browse page. Carousel of featured facilities + a filterable
+// Facilities browse page (/facilities, formerly /sources). Carousel of featured facilities + a filterable
 // grid; click any card for a detail view with a Street View photo (when a Google Maps
 // key is configured), the facts we cite, and the nearest air sensors. No map on this
 // page — the "nearby sensors" list is computed from /api/sensors client-side.

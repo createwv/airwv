@@ -55,7 +55,8 @@ function probe() {
                south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() }; });
   return {
     title: document.title,
-    navCount: document.querySelectorAll("nav.modenav a").length,
+    // top-level items only: links in the "More" menu are one item
+    navCount: document.querySelectorAll("nav.modenav > a, nav.modenav > details > summary").length,
     reading, overlayReading, maps,
     scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth,
   };
