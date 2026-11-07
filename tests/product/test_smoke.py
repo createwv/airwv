@@ -6,7 +6,7 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import DEVICES, PAGES, SITE_PAGES, VIEWPORTS
+from conftest import DEVICES, MORE_PAGE, PAGES, SITE_PAGES, VIEWPORTS
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
@@ -51,6 +51,22 @@ def test_site_no_sideways_scroll(product, name, width):
     r = _get(product, name, width)
     assert r.get("scrollWidth", 0) <= r.get("innerWidth", 0), \
         f"page is {r.get('scrollWidth')}px wide in a {r.get('innerWidth')}px viewport"
+
+
+@pytest.mark.parametrize("width", [d["viewport"]["width"] for d in DEVICES.values()])
+def test_more_menu_not_cut_off(product, width):
+    """The "More" dropdown opens and each of its links can be reached at every screen size:
+    on screen once scrolled to, not clipped sideways, not under anything (charter rule 6)."""
+    r = _get(product, MORE_PAGE[0], width)
+    assert r["error"] is None, r["error"]
+    m = r.get("more") or {}
+    assert "error" not in m, m.get("error")
+    assert m.get("open"), "tapping More didn't open the menu"
+    assert m.get("links", 0) > 0, "More menu has no links"
+    assert m.get("cut") == [], \
+        f"More menu cut off in a {m['innerWidth']}x{m['innerHeight']} screen: {m['cut']}"
+    assert m["scrollWidth"] <= m["innerWidth"], \
+        f"open menu makes the page {m['scrollWidth']}px wide in a {m['innerWidth']}px viewport"
 
 
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])
