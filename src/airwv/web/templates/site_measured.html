@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+{% set kl = label %}
+<div class="page">
+  <div class="ov-intro"><h1>{{ site.name or site.ref }}</h1>
+    <p><span class="rbadge">{{ kl[0] }}</span> <span class="meta">{{ kl[1] }}</span><br>
+      <span class="meta">{% if site.county %}{{ site.county }} County · {% endif %}{% if site.lat is not none %}{{ '%.4f' % site.lat }}, {{ '%.4f' % site.lon }}{% else %}location not listed{% endif %}
+      · ID {{ site.ref }}</span></p>
+    <p class="meta"><a href="/data">Where this comes from</a></p>
+  </div>
+
+  <div class="card"><h2>Recent readings</h2>
+    {% if chosen %}
+    {% if names | length > 1 %}
+    <nav class="nb-chips" aria-label="What to chart" style="padding:8px 14px 0">{% for m in measured %}
+      {% if m.parameter == chosen.parameter %}<span class="nb-chip on" aria-current="true">{{ plabel(m.parameter) }}</span>
+      {% else %}<a class="nb-chip" href="?param={{ m.parameter | urlencode }}">{{ plabel(m.parameter) }}</a>{% endif %}
+    {% endfor %}</nav>
+    {% endif %}
+    <div id="site-chart" class="site-chart" data-api="{{ window.api }}" data-label="{{ plabel(chosen.parameter) }}"
+         data-unit="{{ chosen.unit or '' }}" style="min-height:300px"><p class="meta" style="padding:14px">Loading…</p></div>
+    <p class="meta" id="site-latest" style="padding:0 14px"></p>
+    <p class="meta" style="padding:6px 14px 12px">{{ plabel(chosen.parameter) }}, the {{ window.days }} days up to this
+      {{ kl[0] | lower }}'s latest reading ({{ window['from'] }} to {{ window.to }}).
+      <a href="{{ window.csv }}">Download CSV</a> · <a href="{{ window.api }}">API</a></p>
+    {% else %}
+    <p class="meta" style="padding:14px">No readings stored for this {{ kl[0] | lower }} yet; they accumulate as our collector runs.</p>
+    {% endif %}
+  </div>
+
+  <div class="card"><p class="meta" style="padding:10px 14px">Data source: {{ kl[2] }}{% if prov.source %} ({{ prov.source }}){% endif %}.
+    {% if prov.fetched_at %}Listing as of {{ prov.fetched_at }}.{% endif %}
+    {% if prov.disclaimer %}<br>{{ prov.disclaimer }}{% endif %}
+    <br><a href="/data">All data sources</a></p></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/site.js?v={{ asset_v }}"></script>
+{% endblock %}

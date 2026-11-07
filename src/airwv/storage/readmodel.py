@@ -367,6 +367,14 @@ class ReadModel:
             {"m": medium, "p": parameter, "r": ref, **wp}).all()
         return {date.fromisoformat(str(d)[:10]): float(v) for d, v in rows if v is not None}
 
+    def parameters(self, conn, medium: str, ref: str) -> list[dict]:
+        """What one ref has measured: ``[{parameter, unit, count, last}]``, most rows first."""
+        rows = conn.exec_driver_sql(
+            "SELECT parameter, unit, count(*) AS count, max(ts) AS last FROM measurement "
+            "WHERE medium = :m AND ref = :r GROUP BY parameter ORDER BY count DESC, parameter",
+            {"m": medium, "r": ref}).mappings().all()
+        return [dict(r) for r in rows]
+
 
 def _ts(t) -> str:
     """A bound for ``ts``: date strings pass through; datetimes take the stored text form

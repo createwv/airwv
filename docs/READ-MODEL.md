@@ -7,7 +7,12 @@ tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 (parameters in [DATA-SOURCES.md](DATA-SOURCES.md#apiquery--one-read-path-over-the-unified-views)),
 which the `/place` basic view reads for every line it shows and the `/explore` query
 builder puts in a table (with `format=csv` for the download). Its series mode
-(`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts.
+(`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts: the
+site pages `/site/<kind>/<ref>` for `sensor`, `reference_monitor`, `gauge` and `sample_site`
+chart the last 7 days (monitors 30, sample sites 365) up to the site's latest reading from
+it, with the same URL as their CSV and API links (`?param=` picks what to chart; the
+choices come from `ReadModel.parameters`). Monitors match their AirData history
+(`54-003-0003`); AirNow's hourly rows use a 9-digit AQSID and aren't on the page yet.
 
 ## How it works
 
