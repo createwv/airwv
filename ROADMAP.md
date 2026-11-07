@@ -798,6 +798,9 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
       The air and water lines name and link the nearest sensor / monitor / gauge / sample site
       to its `/site/<kind>/<ref>` page ("data behind this →").
+      Home (`/`) is this view when a place is in the URL (`/?place=` or `/?lat=&lon=`) or saved
+      in the browser (`localStorage.airwv_place`, set when a place is chosen); `/?statewide=1`
+      keeps the statewide overview.
 - [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
       permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
       discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"

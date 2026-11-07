@@ -1998,7 +1998,14 @@ def create_app(store: Store) -> FastAPI:
                                           context={"mode": "field"})
 
     @app.get("/", response_class=HTMLResponse)
-    def index(request: Request):
+    def index(request: Request, place: str | None = None, lat: str | None = None,
+              lon: str | None = None, statewide: str | None = None):
+        # a place in the URL (?place= or ?lat=&lon=) makes Home "my place now" (place.js keeps
+        # it in the URL); otherwise statewide. overview.html sends a browser with a saved place
+        # here with it, unless ?statewide=1 asks for the statewide view.
+        if not statewide and (place or (lat and lon)):
+            return TEMPLATES.TemplateResponse(request=request, name="place.html",
+                                              context={"mode": "place", "home": True})
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 

@@ -46,3 +46,9 @@ def test_water_line_links_the_gauge_or_sample_site_page():
     assert 'nearest reading <a href="/site/sample_site/S1">Elk River</a>' in html
     assert '<a href="/site/sample_site/S1">data behind this →</a>' in html
     assert '<a href="/water">data behind this →</a>' in _js("S.waterLine({sites: []}, P)")
+
+
+def test_place_query_is_what_home_reopens():
+    assert _js("S.placeQuery({id: 'rutledge', km: 8})") == "place=rutledge&km=8"
+    assert _js("S.placeQuery({id: '', name: 'My home', lat: 38.38, lon: -81.585, km: 16})") \
+        == "lat=38.3800&lon=-81.5850&name=My%20home&km=16"

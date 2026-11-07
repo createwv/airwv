@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+{# a place saved by /place (place.js) makes Home "my place now"; ?statewide=1 keeps this view #}
+<script>
+try {
+  const saved = localStorage.getItem('airwv_place');
+  if (saved && /(^|&)(place|lat)=/.test(saved) && !new URLSearchParams(location.search).has('statewide'))
+    location.replace('/?' + saved);
+} catch (e) {}
+</script>
 <div class="ov-wrap">
 
   <section class="hero">
