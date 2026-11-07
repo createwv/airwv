@@ -85,7 +85,7 @@ function renderDataCenters() {
   const all = DC.near.concat(DC.in_county);
   if (!all.length) return;
   $('nb-results').insertAdjacentHTML('afterbegin', `<div class="card" id="nb-dc">
-    <h2>🏢 Data centers near here <span class="meta">${all.length} · within ${Math.round(DC.place.km * 0.621371)} mi${DC.county ? ' or in ' + esc(DC.county) + ' County' : ''}</span></h2>
+    <h2>Data centers near here <span class="meta">${all.length} · within ${Math.round(DC.place.km * 0.621371)} mi${DC.county ? ' or in ' + esc(DC.county) + ' County' : ''}</span></h2>
     <p class="meta" style="padding:6px 14px 0">What the public record says about water, energy, noise and what it's for, and what nobody has disclosed. Hand-compiled ${esc(DC.fetched_at)}; <a href="/data">where this comes from</a>.</p>
     ${all.map(AIRWV_DC.card).join('')}
     <div class="dc-card">${AIRWV_DC.ask(DC.how_to_ask)}</div>

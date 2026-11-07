@@ -46,11 +46,11 @@ function reportCard(r){
     ${meas}${photo}
     <div class="meta">${when} · ${(r.lat||0).toFixed(4)}, ${(r.lon||0).toFixed(4)}${r.area_label ? ' · ' + esc(r.area_label) : ''}${priv ? ' · ' + priv : ''}${r.mod_note ? ' · note: ' + esc(r.mod_note) : ''}</div>
     <div class="arow">
-      ${r.stage !== 'confirmed' ? `<button onclick="act(${r.id},'confirm')">✓ Verify</button>` : ''}
+      ${r.stage !== 'confirmed' ? `<button onclick="act(${r.id},'confirm')">Verify</button>` : ''}
       ${r.stage === 'held' ? `<button onclick="act(${r.id},'publish')">Publish (unverified)</button>` : ''}
       ${r.suspected_org && !r.org_public ? `<button onclick="act(${r.id},'approve_org')">Show org publicly</button>` : ''}
-      ${r.photo && !r.photo_ok ? `<button onclick="act(${r.id},'approve_photo')">📷 Show photo publicly</button>` : ''}
-      ${r.photo && r.photo_ok ? `<button onclick="act(${r.id},'reject_photo')">📷 Hide photo</button>` : ''}
+      ${r.photo && !r.photo_ok ? `<button onclick="act(${r.id},'approve_photo')">Show photo publicly</button>` : ''}
+      ${r.photo && r.photo_ok ? `<button onclick="act(${r.id},'reject_photo')">Hide photo</button>` : ''}
       <button class="danger" onclick="act(${r.id},'remove')">Remove</button>
     </div></div>`;
 }
@@ -119,7 +119,7 @@ async function evCreate(){
   loadQueue();
 }
 const EV_FORM = `<div class="acard evform">
-  <b>➕ New event</b>
+  <b>New event</b>
   <input id="ev-f-title" placeholder="Title *">
   <div class="evrow">
     <select id="ev-f-medium"><option value="air">air</option><option value="water">water</option>
@@ -139,7 +139,7 @@ const EV_FORM = `<div class="acard evform">
     <input id="ev-f-regions" placeholder="Regions affected (free text)"></div>
   <label class="evchk"><input type="checkbox" id="ev-f-captured"> Our sensors captured this</label>
   <input id="ev-f-sensors" placeholder="Sensor ids, comma-separated (e.g. 214373,214357)">
-  <input id="ev-f-srcrefs" placeholder="Related facility names (comma-sep, must match Sources)">
+  <input id="ev-f-srcrefs" placeholder="Related facility names (comma-sep, must match Facilities)">
   <input id="ev-f-reports" placeholder="Related report ids (comma-sep)">
   <div class="evrow"><input id="ev-f-srclabel" placeholder="Citation label">
     <input id="ev-f-srcurl" placeholder="Citation URL"></div>
