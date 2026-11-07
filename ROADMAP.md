@@ -801,6 +801,8 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       Home (`/`) is this view when a place is in the URL (`/?place=` or `/?lat=&lon=`) or saved
       in the browser (`localStorage.airwv_place`, set when a place is chosen); `/?statewide=1`
       keeps the statewide overview.
+      Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
+      25 mi, from `/api/query`), each linking to its site page or its own record.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
