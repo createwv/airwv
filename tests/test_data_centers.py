@@ -7,6 +7,7 @@ someone skipped a question, so these tests fail on it. Only lat/lon may be null
 
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -114,6 +115,25 @@ def test_card_keeps_the_note_on_a_qualified_gap():
     dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}}
     energy = next(t for t in dcs.card(dc)["topics"] if t["topic"] == "energy")
     assert {"label": "Backup generators", "value": "none found (federal facility)"} in energy["gaps"]
+
+
+def test_card_shows_open_comment_periods_until_the_deadline():
+    open_ = dcs.card(MONARCH, today=date(2026, 11, 13))["comment_periods"]
+    assert [(p["permit"], p["due"]) for p in open_] == [("R14-0042", "2026-11-13")]
+    assert open_[0]["source"]["kind"] == "primary" and "R14-0042" in open_[0]["source"]["title"]
+    assert dcs.card(MONARCH, today=date(2026, 11, 14))["comment_periods"] == []
+    no_deadline = next(s for s in SITES if s["id"] != MONARCH["id"] and "R13-" in s["air_permits"]["permits"])
+    assert dcs.card(no_deadline, today=date(2000, 1, 1))["comment_periods"] == []
+
+
+def test_card_template_shows_the_comment_period():
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader(Path(dcs.__file__).parent / "web" / "templates"), autoescape=True)
+    macro = env.get_template("_dc_card.html").module.dc_card
+    html = str(macro(dcs.card(MONARCH, today=date(2026, 11, 7))))
+    assert "Open for public comment" in html and "R14-0042" in html and "2026-11-13" in html
+    assert "Public-Comment-Period" in html
+    assert "Open for public comment" not in str(macro(dcs.card(MONARCH, today=date(2026, 12, 1))))
 
 
 def test_how_to_ask_covers_psc_dep_and_records():

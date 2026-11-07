@@ -1,5 +1,10 @@
 {# Basic-view data-center card (what we know / what's not disclosed); near_me.js renders the same shape. #}
 {% macro dc_card(c) %}
+{% for p in c.comment_periods %}
+<div class="dc-due"><b>Open for public comment:</b> air permit <b>{{ p.permit }}</b>, written comments due <b>{{ p.due }}</b>.
+  {% if p.source %}<a href="{{ p.source.url }}" target="_blank" rel="noopener">How to comment (DEP notice) →</a>{% endif %}
+  <span class="meta">Deadlines can change; check the notice.</span></div>
+{% endfor %}
 <div class="dc-grid">
   {% for t in c.topics %}
   <div class="dc-topic">

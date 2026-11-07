@@ -428,6 +428,7 @@
   .dc-sub { font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:#2a7a2a; margin-top:4px; }
   .dc-sub.dc-gap { color:#a35a00; }
   .dc-sources, .dc-ask { font-size:13px; margin-top:8px; overflow-wrap:anywhere; }
+  .dc-due { background:#eef5ff; border-left:4px solid #1f5fa8; padding:8px 10px; margin:6px 0; font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
   .dc-ask { background:#fff8f0; border-left:4px solid #e07b00; padding:8px 10px; }
   .dc-files { padding:8px 14px 8px 30px; }
   .dc-files li { margin:4px 0; }

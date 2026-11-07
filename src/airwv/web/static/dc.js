@@ -24,12 +24,20 @@
       <span class="rbadge">${esc(c.status_label)}</span><span class="nb-meta">${where(c)} · ${esc(c.operator)}</span></div>`;
   }
 
+  // open air-permit comment periods (data_centers.comment_periods), same as _dc_card.html
+  function comments(c) {
+    return (c.comment_periods || []).map(p => `<div class="dc-due"><b>Open for public comment:</b> air permit
+      <b>${esc(p.permit)}</b>, written comments due <b>${esc(p.due)}</b>.
+      ${p.source ? `<a ${ext(p.source.url)}>How to comment (DEP notice) →</a>` : ''}
+      <span class="meta">Deadlines can change; check the notice.</span></div>`).join('');
+  }
+
   function card(c) {
     const topics = c.topics.map(t => `<div class="dc-topic"><h3>${esc(t.label)}</h3>
     ${t.known.length ? `<div class="dc-sub">What we know</div><ul>${list(t.known)}</ul>` : ''}
     ${t.gaps.length ? `<div class="dc-sub dc-gap">Not disclosed or not found</div><ul>${list(t.gaps)}</ul>` : ''}
     ${!t.known.length && !t.gaps.length ? '<p class="meta">Nothing in the public record we found.</p>' : ''}</div>`).join('');
-    return `<div class="dc-card">${head(c)}
+    return `<div class="dc-card">${head(c)}${comments(c)}
     <div class="dc-grid">${topics}</div>
     <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ul>${sources(c)}</ul></details>
     <div class="nb-actions" style="margin-top:6px"><a href="${esc(c.url)}">plain summary →</a><a href="${esc(c.url)}?view=adv">full record and filings →</a></div>
@@ -52,7 +60,7 @@
       Object.entries(d[sec] || {}).forEach(([k, v]) => rows.push(tr(`${label} · ${words(k)}`, esc(v)))));
     (d.use || []).forEach(u => rows.push(tr(`Use · ${words(u.category)}`, `${esc(u.confidence)} confidence — ${esc(u.evidence)}`)));
     rows.push(tr('Not disclosed', esc((d.not_disclosed || []).join('; '))));
-    return `<div class="dc-card">${head(c)}<p class="meta">${esc(d.status_detail)}</p></div>
+    return `<div class="dc-card">${head(c)}${comments(c)}<p class="meta">${esc(d.status_detail)}</p></div>
     <table class="dc-rec">${rows.join('')}</table>
     <div class="dc-card"><b>Filings and sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
   }
@@ -67,7 +75,7 @@
       ${d.url ? `<a ${ext(d.url)}>${esc(d.title)}</a>` : esc(d.title)}<div class="meta">${esc(d.detail)}</div></li>`).join('')}</ul>`;
   }
 
-  const api = {card, record, ask, dockets};
+  const api = {card, record, comments, ask, dockets};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.AIRWV_DC = api;
 })(this);

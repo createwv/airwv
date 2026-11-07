@@ -40,6 +40,18 @@ def test_card_is_the_plain_summary(api):
     assert "/site/data_center/monarch-compute-campus?view=adv" in html
 
 
+def test_card_and_record_show_open_comment_periods(api):
+    from datetime import date
+
+    from airwv import data_centers as dcs
+    row = {**api["near"][0], "comment_periods": dcs.comment_periods(MONARCH, date(2026, 11, 7))}
+    for fn in ("card", "record"):
+        html = _js(f"D.{fn}(X)", row)
+        assert "Open for public comment" in html and "R14-0042" in html and "2026-11-13" in html
+        assert "Public-Comment-Period" in html
+    assert "Open for public comment" not in _js("D.card(X)", {**row, "comment_periods": []})
+
+
 def test_record_has_every_field_and_filing(api):
     html = _js("D.record(X)", api["near"][0])
     assert "R14-0042" in html and "Not disclosed" in html and "HB 2014 certification" in html
