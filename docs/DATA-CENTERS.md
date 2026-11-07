@@ -34,7 +34,9 @@ API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
   only where the record itself ties the fact to one source: a permit number in the source's
   title, an attribution tag ("DEP notice", "state release", "company", "SEC filing", "a
   tracker") with one source of that kind, or a site with a single source. Lines without a
-  key fall back to the site's source list. Bare "not disclosed" / "none found" lines get no
+  key fall back to the site's source list. A line that mixes facts from several sources
+  (e.g. a DEP figure plus a news or tracker figure) gets no key unless every source behind
+  it is in the list, even on a single-source site. Bare "not disclosed" / "none found" lines get no
   key. `tests/test_data_centers.py` checks every key names a real fact and source.
 
 ---
