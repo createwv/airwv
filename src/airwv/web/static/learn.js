@@ -18,6 +18,13 @@
   const h = location.hash.slice(1);
   if (h) show(h);
 
+  // opt-in haze tint (haze.js loads first, from base.html)
+  const hz = document.getElementById('haze-toggle');
+  if (hz && window.AIRWV_HAZE) {
+    hz.checked = AIRWV_HAZE.enabled();
+    hz.addEventListener('change', () => AIRWV_HAZE.set(hz.checked));
+  }
+
   // ---- live "right now" snapshot (Health & AQI tab) ----
   const PM_BANDS = [
     {max: 12, label: 'Good', color: '#00e400', dark: '#1a7a1a'},

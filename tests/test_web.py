@@ -433,6 +433,19 @@ def test_sdwa_endpoint(tmp_path):
     # water page wires the drinking-water map + table in
     page = c.get("/water").text
     assert "sdwa-map" in page and "Drinking-water systems" in page
+    # drinking water is its own section with its own anchor, linked from the intro
+    assert 'id="drinking-water"' in page and 'href="#drinking-water"' in page
+
+
+def test_sources_grid_paginates_and_haze_is_opt_in(tmp_path):
+    c = _client(tmp_path)
+    page = c.get("/sources").text
+    assert 'id="src-more"' in page                 # "show more" instead of all ~500 cards
+    js = c.get("/static/sources.js").text
+    assert "GRID_PAGE = 24" in js and "photo coming soon" not in js
+    haze = c.get("/static/haze.js").text
+    assert "airwv_haze_on" in haze and "airwv_haze_off" not in haze   # off unless turned on
+    assert 'id="haze-toggle"' in c.get("/learn").text
 
 
 def test_nrc_spills_endpoint(tmp_path):

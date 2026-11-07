@@ -135,7 +135,8 @@ function draw() {
       .on('click', () => showSite(s)).addTo(layer);
   });
   layer.addTo(map);
-  $('w-count').textContent = `· ${withVal} sites report ${meta.label.toLowerCase()}`;
+  const total = SITES.filter(s => s.lat != null && s.lon != null).length;
+  $('w-count').textContent = `· ${withVal.toLocaleString()} of ${total.toLocaleString()} sites have ${meta.label.toLowerCase()} data`;
   // freshness: latest-sample dates vary by site, so state the span plainly
   $('w-asof').textContent = newest
     ? ` · latest samples ${oldest && oldest !== newest ? fmtDate(oldest) + '–' : ''}${fmtDate(newest)}`
