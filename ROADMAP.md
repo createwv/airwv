@@ -798,6 +798,9 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
       The air and water lines name and link the nearest sensor / monitor / gauge / sample site
       to its `/site/<kind>/<ref>` page ("data behind this →").
+      Home (`/`) is this view when a place is in the URL (`/?place=` or `/?lat=&lon=`) or saved
+      in the browser (`localStorage.airwv_place`, set when a place is chosen); `/?statewide=1`
+      keeps the statewide overview.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
