@@ -1770,12 +1770,14 @@ def create_app(store: Store) -> FastAPI:
             return {"note": "", "monitors": []}
 
     @app.get("/api/data-centers")
-    def data_centers_layer(lat: float | None = None, lon: float | None = None, km: float = 16.0):
+    def data_centers_layer(lat: float | None = None, lon: float | None = None, km: float = 16.0,
+                           full: bool = False):
         """Data centers and crypto-mining sites (hand-researched, data/data_centers.json),
         each with its basic-view card (what we know / what's not disclosed for water,
         energy, noise and purpose). With lat/lon: ``near`` = mapped sites within ``km``,
         nearest first, and ``in_county`` = sites in the nearest county with no public
-        coordinates. Without: every site in ``near``. Plus how to ask for what's missing."""
+        coordinates. Without: every site in ``near``. Plus how to ask for what's missing.
+        ``full=true`` adds each site's whole record (``record``) for the advanced view."""
         import json
 
         from airwv import data_centers as dcs
@@ -1801,6 +1803,8 @@ def create_app(store: Store) -> FastAPI:
         def row(s):
             out = dcs.card(s["attrs"])
             out.update(lat=s["lat"], lon=s["lon"], mi=round(s["d"], 1) if s["d"] is not None else None)
+            if full:
+                out["record"] = s["attrs"]
             return out
 
         return {"place": {"lat": lat, "lon": lon, "km": km} if lat is not None and lon is not None else None,

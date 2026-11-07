@@ -19,6 +19,8 @@
   <h2 class="pl-h2">What changed <span class="meta" id="pl-since"></span></h2>
   <div class="card"><div id="pl-changes" class="pl-status"><div class="pl-line meta">Loading…</div></div></div>
 
+  <div id="pl-dc" hidden></div>
+
   <div class="pl-actions">
     <a id="pl-nearby" href="/nearby">What's near me →</a>
     <a id="pl-watch" href="/alerts">Watch this place →</a>
@@ -29,6 +31,7 @@
 {% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
+<script src="/static/dc.js?v={{ asset_v }}"></script>
 <script src="/static/place.js?v={{ asset_v }}"></script>
 <script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

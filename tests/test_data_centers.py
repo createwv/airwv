@@ -161,3 +161,19 @@ def test_site_page_basic_and_advanced(tmp_path):
     assert page.status_code == 200 and "exact location not public" in page.text
     assert c.get("/site/data_center/no-such-site").status_code == 404
     assert c.get("/site/well/anything").status_code == 404   # other kinds come with the site-pages item
+
+
+def test_api_full_record_for_the_advanced_view(tmp_path):
+    c = _client(tmp_path)
+    q = f"/api/data-centers?lat={MONARCH['lat']}&lon={MONARCH['lon']}&km=16"
+    assert "record" not in c.get(q).json()["near"][0]   # the basic view stays small
+    full = c.get(f"{q}&full=true").json()["near"][0]
+    assert full["record"]["id"] == MONARCH["id"] and full["record"]["air_permits"] == MONARCH["air_permits"]
+
+
+def test_place_page_loads_the_data_center_renderer(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/place?place=rutledge&km=8&view=adv")
+    assert r.status_code == 200 and r.text.index("/static/dc.js") < r.text.index("/static/place.js")
+    assert 'id="pl-dc"' in r.text
+    assert "/static/dc.js" in c.get("/nearby").text

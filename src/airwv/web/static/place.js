@@ -1,6 +1,7 @@
 // "My place now" (basic view, docs/DIRECTION.md §2): one status line per medium and
 // "what changed (7 days)" for a place. Place lives in the URL (?lat=&lon=&km=&place=);
 // every line comes from /api/query, so each number keeps its time, distance and source.
+// Data centers come from /api/data-centers: a plain card here, the full record under view=adv.
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
@@ -43,7 +44,7 @@ function readPlace() {
   const custom = isFinite(lat) && isFinite(lon) && !(q.get('place') && known.id === q.get('place'));
   return {id: custom ? '' : known.id, name: custom ? (q.get('name') || 'Your location') : known.name,
           lat: custom ? lat : known.lat, lon: custom ? lon : known.lon,
-          km: parseFloat(q.get('km')) || 8};
+          km: parseFloat(q.get('km')) || 8, view: q.get('view') === 'adv' ? 'adv' : 'basic'};
 }
 
 function writePlace(p) {
@@ -57,6 +58,10 @@ function writePlace(p) {
 
 const api = (p, extra) => fetch(`/api/query?lat=${p.lat}&lon=${p.lon}&km=${p.km}&${extra}`)
   .then(r => r.ok ? r.json() : Promise.reject(r.status));
+
+// data centers are big neighbors (water, power, generator noise): look at least 10 mi out
+const dcApi = p => fetch(`/api/data-centers?lat=${p.lat}&lon=${p.lon}&km=${Math.max(16, p.km)}`
+  + (p.view === 'adv' ? '&full=true' : '')).then(r => r.ok ? r.json() : null).catch(() => null);
 
 const line = (medium, color, html, more) => `<div class="pl-line">
   <span class="pl-dot" style="background:${color || '#cfd6dc'}"></span>
@@ -112,6 +117,42 @@ function landLine(wells, p) {
     + ' No cleanup-site data yet.', '<a href="/nearby">see them →</a>');
 }
 
+function dcLine(dc) {
+  if (!dc) return '';
+  const all = dc.near.concat(dc.in_county), r = Math.round(dc.place.km * 0.621371);
+  if (!all.length) return line('Data centers', null,
+    `none we know of within ${r} mi${dc.county ? ` or in ${esc(dc.county)} County` : ''}.`);
+  const c = all[0];
+  return line('Data centers', '#5b6b7a',
+    `${all.length} near here: nearest ${esc(c.name)} (${esc(c.status_label.toLowerCase())}), `
+    + (c.mi != null ? `${c.mi} mi` : `${esc(c.county)} County, exact location not public`) + '.',
+    '<a href="#pl-dc">what we know →</a>');
+}
+
+function viewHref(view) {
+  const q = new URLSearchParams(location.search);
+  if (view === 'adv') q.set('view', 'adv'); else q.delete('view');
+  return `${location.pathname}?${q}#pl-dc`;
+}
+
+function dcSection(dc, p) {
+  const all = dc ? dc.near.concat(dc.in_county) : [];
+  if (!all.length) return '';
+  const adv = p.view === 'adv', D = window.AIRWV_DC;
+  const toggle = adv ? `<a href="${viewHref('basic')}">← plain summary</a> · full record and filings`
+                     : `plain summary · <a href="${viewHref('adv')}">full record and filings →</a>`;
+  return `<h2 class="pl-h2">Data centers near here <span class="meta">${all.length} · within ${Math.round(dc.place.km * 0.621371)} mi`
+    + `${dc.county ? ' or in ' + esc(dc.county) + ' County' : ''}</span></h2>
+  <div class="card"><p class="meta" style="padding:8px 14px 0">${adv ? 'Every field in the record, with filings.'
+    : "What the public record says about water, energy, noise and what it's for, and what nobody has disclosed."}
+    Hand-compiled ${fmtDay(dc.fetched_at)}; <a href="/data">where this comes from</a>. ${toggle}</p>
+    ${all.map(adv ? D.record : D.card).join('')}
+    <div class="dc-card">${D.ask(dc.how_to_ask)}</div>
+    ${adv && dc.dockets.length ? `<div class="dc-card"><b>Statewide dockets and cases about data centers</b>
+      <p class="meta">Not all of these are about these sites; they set the rules for all of them.</p>${D.dockets(dc.dockets)}</div>` : ''}
+  </div>`;
+}
+
 function changeItems(air, recs) {
   const out = [];
   air.sites.filter(s => s.peak && bandIx(s.peak.value) > 0)
@@ -148,14 +189,18 @@ async function load(p) {
   const since = new Date(Date.now() - CHANGE_DAYS * 864e5).toISOString().slice(0, 10);
   $('pl-since').textContent = `since ${fmtDay(since)}`;
   try {
-    const [air, water, systems, wells, recs] = await Promise.all([
+    const [air, water, systems, wells, recs, dc] = await Promise.all([
       api(p, `kind=sensor,reference_monitor&param=pm2_5&since=${since}&limit=50`),
       api(p, `kind=gauge,sample_site&param=${WATER_PARAMS.join(',')}&limit=50`),
       api(p, 'kind=water_system&limit=100'),
       api(p, 'kind=well&limit=500'),
       api(p, `kind=spill_report,permit,facility&since=${since}&limit=500`),
+      dcApi(p),
     ]);
-    $('pl-status').innerHTML = airLine(air, p) + waterLine(water, p) + drinkingLine(systems) + landLine(wells, p);
+    $('pl-status').innerHTML = airLine(air, p) + waterLine(water, p) + drinkingLine(systems) + landLine(wells, p)
+      + dcLine(dc);
+    $('pl-dc').innerHTML = dcSection(dc, p);
+    $('pl-dc').hidden = !$('pl-dc').innerHTML;
     const items = changeItems(air, recs);
     $('pl-changes').innerHTML = items.length
       ? items.map(i => line(fmtDay(i.when), i.color, i.html)).join('')
@@ -175,13 +220,13 @@ function init() {
     + '<option value="">Your location</option>';
   $('pl-place').addEventListener('change', () => {
     const k = PLACES.find(x => x.id === $('pl-place').value);
-    if (k) { p = {...k, km: p.km}; load(p); } else $('pl-loc').click();
+    if (k) { p = {...k, km: p.km, view: p.view}; load(p); } else $('pl-loc').click();
   });
   $('pl-km').addEventListener('change', () => { p = {...p, km: parseFloat($('pl-km').value)}; load(p); });
   $('pl-loc').addEventListener('click', () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(pos => {
-      p = {id: '', name: 'Your location', lat: pos.coords.latitude, lon: pos.coords.longitude, km: p.km};
+      p = {id: '', name: 'Your location', lat: pos.coords.latitude, lon: pos.coords.longitude, km: p.km, view: p.view};
       load(p);
     }, () => { $('pl-place').value = p.id; });
   });
