@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_related.html" import related %}
 {% block content %}
 {% set kl = label %}
 <div class="page">
@@ -27,6 +28,8 @@
     <p class="meta" style="padding:14px">No readings stored for this {{ kl[0] | lower }} yet; they accumulate as our collector runs.</p>
     {% endif %}
   </div>
+
+  {{ related(kind, site.site_id, site.lat, site.lon) }}
 
   <div class="card"><p class="meta" style="padding:10px 14px">Data source: {{ kl[2] }}{% if prov.source %} ({{ prov.source }}){% endif %}.
     {% if prov.fetched_at %}Listing as of {{ prov.fetched_at }}.{% endif %}

@@ -387,3 +387,14 @@ def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):
     assert "No readings stored" in empty and "data-api" not in empty
     assert c.get("/site/sensor/nope").status_code == 404
     assert c.get("/site/gauge/S1").status_code == 404
+
+
+def test_site_pages_have_related_nearby(tmp_path, monkeypatch):
+    # site.js fills #site-related from /api/query, one kind at a time (not this page's kind)
+    c, _ = _client(tmp_path, monkeypatch)
+    p = c.get("/site/sensor/197127").text
+    assert "Related nearby" in p and 'id="site-related" data-kind="sensor" data-site="sensor:197127"' in p
+    box = p.split('id="site-related"')[1].split(">")[0]
+    lat, lon = (box.split(f'data-{k}="')[1].split('"')[0] for k in ("lat", "lon"))
+    near = c.get(f"/api/query?lat={lat}&lon={lon}&km=40.25&kind=gauge&limit=1").json()["sites"]
+    assert [s["kind"] for s in near] == ["gauge"] and near[0]["mi"] is not None
