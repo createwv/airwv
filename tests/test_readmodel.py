@@ -357,3 +357,33 @@ def test_api_query_series(tmp_path, monkeypatch):
     assert c.get("/api/query?site_id=sensor:197127&param=pm2_5,voc").status_code == 400
     assert c.get("/api/query?site_id=sensor:nope&param=pm2_5").status_code == 404
     assert c.get("/api/query?site_id=sensor:197127&param=pm2_5&from=July").status_code == 400
+
+
+def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):
+    c, store = _client(tmp_path, monkeypatch)
+    store.save_readings([Reading(source="epa_airdata", sensor_id="54-003-0003",
+                                 ts=datetime(2024, 5, d, tzinfo=timezone.utc), pm2_5=7.0 + d)
+                         for d in (1, 2)])
+    # a sensor: PM2.5 by default, its other parameters as links, the series-mode window
+    p = c.get("/site/sensor/197127")
+    assert p.status_code == 200 and "Kanawha City" in p.text and "Recent readings" in p.text
+    api = "/api/query?site_id=sensor%3A197127&amp;param=pm2_5&amp;from=2026-06-24&amp;to=2026-07-01"
+    assert f'data-api="{api}"' in p.text and f'href="{api}&amp;format=csv"' in p.text
+    assert 'href="?param=voc"' in p.text and "/static/site.js" in p.text
+    # the page's URL is the series mode, so the chart, CSV and API link show the same rows
+    rows = c.get(api.replace("&amp;", "&")).json()["rows"]
+    assert [r["value"] for r in rows] == [8.04, 9.04, 10.04]
+    assert "param=voc" in c.get("/site/sensor/197127?param=voc").text.split("data-api")[1][:80]
+    assert "param=pm2_5" in c.get("/site/sensor/197127?param=nope").text.split("data-api")[1][:80]
+    # a sample site charts the year up to its latest visit; a gauge its last week
+    s = c.get("/site/sample_site/S1?param=iron").text
+    assert "Elk River at Clendenin" in s and "from=2025-07-02&amp;to=2026-07-02" in s
+    g = c.get("/site/gauge/03198000").text
+    assert "Kanawha River at Charleston" in g and "param=conductance" in g and "USGS" in g
+    # a monitor reads its AirData history; one with nothing stored says so
+    m = c.get("/site/reference_monitor/54-003-0003").text
+    assert "MARTINSBURG BALL FIELD" in m and "from=2024-04-02&amp;to=2024-05-02" in m
+    empty = c.get("/site/reference_monitor/54-009-0005").text
+    assert "No readings stored" in empty and "data-api" not in empty
+    assert c.get("/site/sensor/nope").status_code == 404
+    assert c.get("/site/gauge/S1").status_code == 404

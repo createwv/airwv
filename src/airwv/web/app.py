@@ -239,6 +239,20 @@ METRIC_LABELS = {
     "spills": "Reported spills near me", "violations": "Facility violations near me",
 }
 
+# Site kinds with measurements: /site/<kind>/<ref> charts the last N days up to the site's
+# latest reading (monitors' AirData history is daily, so a month; sample sites are visited
+# weeks apart, so a year); label and data source per kind, in docs/GLOSSARY.md's words.
+SERIES_KINDS = {"sensor": 7, "reference_monitor": 30, "gauge": 7, "sample_site": 365}
+SERIES_KIND_LABELS = {
+    "sensor": ("Sensor", "a community air device; provisional readings, corrected where we can",
+               "PurpleAir"),
+    "reference_monitor": ("Monitor", "an EPA / WV DEP reference air monitor",
+                          "EPA AirData / AQS"),
+    "gauge": ("Gauge", "a USGS stream gauge, near real time", "USGS Water Services"),
+    "sample_site": ("Sample site", "water samples taken and lab-tested at intervals, not live",
+                    "Water Quality Portal (WQP)"),
+}
+
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -2032,11 +2046,14 @@ def create_app(store: Store) -> FastAPI:
                                           context={"mode": "explore"})
 
     @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
-    def site_page(request: Request, kind: str, ref: str, view: str = "basic"):
-        """The single home of one site (docs/DIRECTION.md). Data centers for now; the
-        other kinds come with the site-pages plan item. ``view=adv`` is the full record."""
+    def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
+        """The single home of one site (docs/DIRECTION.md). Data centers (``view=adv`` is the
+        full record) and the measured kinds (a recent-readings chart from the /api/query
+        series mode); the other kinds come with the site-pages plan items."""
         from airwv import data_centers as dcs
 
+        if kind in SERIES_KINDS:
+            return _measured_site_page(request, kind, ref, param)
         if kind != "data_center":
             raise HTTPException(status_code=404, detail="no site page for this kind yet")
         api = data_centers_layer()
@@ -2050,6 +2067,33 @@ def create_app(store: Store) -> FastAPI:
             "mode": "site", "kind": kind, "view": "adv" if view == "adv" else "basic",
             "dc": dc, "card": dcs.card(dc), "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
             "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
+
+    def _measured_site_page(request, kind, ref, param):
+        """A sensor, monitor, gauge or sample site: what it measures, its latest reading and a
+        chart of the last ``SERIES_KINDS[kind]`` days up to that reading (site.js fetches
+        the rows from /api/query series mode, so the chart, CSV and API link agree)."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"{kind}:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no site with that id")
+            measured = rm.parameters(conn, site["medium"], site["ref"])
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        names = [m["parameter"] for m in measured]
+        chosen = next((m for m in measured if m["parameter"] == param), None) \
+            or next((m for m in measured if m["parameter"] == "pm2_5"), None) \
+            or (measured[0] if measured else None)
+        window = None
+        if chosen:
+            last = date.fromisoformat(str(chosen["last"])[:10])
+            q = {"site_id": site["site_id"], "param": chosen["parameter"],
+                 "from": (last - timedelta(days=SERIES_KINDS[kind])).isoformat(), "to": last.isoformat()}
+            window = {**q, "days": SERIES_KINDS[kind], "api": "/api/query?" + urlencode(q),
+                      "csv": "/api/query?" + urlencode(q | {"format": "csv"})}
+        return TEMPLATES.TemplateResponse(request=request, name="site_measured.html", context={
+            "mode": "site", "kind": kind, "site": site, "measured": measured, "names": names,
+            "chosen": chosen, "window": window, "label": SERIES_KIND_LABELS[kind],
+            "plabel": lambda p: METRIC_LABELS.get(p, p.replace("_", " ")), "prov": prov})
 
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
