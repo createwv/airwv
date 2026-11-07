@@ -912,6 +912,7 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       top-anchored "horizon smog" gradient otherwise, with an explainer chip (band + value → Learn).
       Above content + maps, below modals, `pointer-events:none`; honors reduced-motion + print.
       Uses a **WV-level signal**; local-per-user tint is a future refinement.
+      Not shown on `/place`, whose own place-scoped air line it could contradict.
 
 ## Documentation & open-source education (ongoing)
 
