@@ -1,8 +1,9 @@
 // Product harness driver: acts as a user against a running AirWV server, headless Chromium.
 // Usage: node tests/product/harness.mjs <config.json>   → prints one JSON result to stdout.
-// Config: {base, out, pages:[{name, path, viewports?}], viewports:[{w, h}], vendorDirs:[...],
-//          geo:{lat, lon}}. A page with its own viewports ({w, h, device, scale, mobile, touch},
-//          from devices.json) is visited at those instead of the shared list.
+// Config: {base, out, pages:[{name, path, viewports?, openMore?}], viewports:[{w, h}],
+//          vendorDirs:[...], geo:{lat, lon}}. A page with its own viewports ({w, h, device, scale,
+//          mobile, touch}, from devices.json) is visited at those instead of the shared list; one
+//          with openMore taps the nav's "More" menu open before the screenshots (see moreProbe).
 // Offline by design: only the local server is reachable. CDN libraries (Leaflet, Plotly…) are
 // served from a vendor dir when a copy is there, else replaced by a no-op shim (and reported).
 import { createRequire } from "node:module";
@@ -62,6 +63,38 @@ function probe() {
     reading, overlayReading, maps,
     scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth,
   };
+}
+
+// In-page "More" menu probe, run once the menu is open: where the dropdown sits, and which of
+// its links a user can't get to. A link is cut off if, scrolled into view, it still isn't
+// wholly on screen (sideways overflow, a clipping parent) or something else covers its middle.
+// `belowFold` lists links past the first screen before any scrolling (info, not a failure).
+function moreProbe() {
+  const det = document.querySelector("nav.modenav details.more");
+  const menu = det && det.querySelector(".more-menu");
+  if (!det || !menu) return { error: "no nav.modenav details.more .more-menu" };
+  const vh = window.innerHeight, vw = window.innerWidth;
+  const box = r => ({ top: Math.round(r.top), left: Math.round(r.left),
+                      right: Math.round(r.right), bottom: Math.round(r.bottom) });
+  const rect = box(menu.getBoundingClientRect());
+  const links = [...menu.querySelectorAll("a")];
+  const belowFold = links.filter(a => a.getBoundingClientRect().bottom > vh)
+    .map(a => a.textContent.trim());
+  const cut = [];
+  for (const a of links) {
+    a.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const r = a.getBoundingClientRect(), label = a.textContent.trim();
+    if (!r.width || !r.height) { cut.push(`${label} (no size)`); continue; }
+    if (r.left < 0 || r.right > vw || r.top < 0 || r.bottom > vh) {
+      cut.push(`${label} (${JSON.stringify(box(r))} in ${vw}x${vh})`); continue; }
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    if (!hit || !(a === hit || a.contains(hit)))
+      cut.push(`${label} (covered by ${hit ? hit.tagName.toLowerCase()
+        + (hit.classList[0] ? "." + hit.classList[0] : "") : "nothing"})`);
+  }
+  window.scrollTo(0, 0);
+  return { open: det.open, rect, links: links.length, belowFold, cut,
+           scrollWidth: document.documentElement.scrollWidth, innerWidth: vw, innerHeight: vh };
 }
 
 // In-page accessibility probe (WCAG 2.1 AA, the checks a script can make reliably):
@@ -218,6 +251,11 @@ async function visit(vp, pg) {
     await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
     await page.waitForTimeout(300);   // let fitBounds / late renders settle
     info = await page.evaluate(probe);
+    if (pg.openMore) {
+      await page.click("nav.modenav details.more > summary");
+      await page.waitForTimeout(200);
+      info.more = await page.evaluate(moreProbe);
+    }
   } catch (e) { err = String(e.message || e).split("\n")[0]; }
   const ms = Date.now() - t0;
   const shot = join(cfg.out, `${pg.name}-${vp.w}.png`);

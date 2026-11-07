@@ -60,6 +60,8 @@ SITE_PAGES = [
     ("site-dc", "/site/data_center/monarch-compute-campus"),
     ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
 ]
+# The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
+MORE_PAGE = ("more", "/")
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {
     "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
@@ -199,7 +201,9 @@ def product(tmp_path_factory):
         cfg.write_text(json.dumps({
             "base": base, "out": str(OUT), "geo": GEO,
             "pages": [{"name": n, "path": p} for n, p in PAGES]
-            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES],
+            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES]
+            + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
+                "openMore": True}],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))
@@ -235,6 +239,20 @@ def _report(data) -> str:
                          if isinstance(v, list) and v) or "ok"
         rows.append(f"| {r['page']} | {r['width']} | {r['status']} | {r['ms']} | "
                     f"{r.get('navCount', '—')} | {reading} | {maps} | {errs} | {a11y} |")
+    more = [r for r in data["results"] if "more" in r]
+    if more:
+        rows += ["", '## "More" menu, open', "",
+                 "| device | width | menu box (top,left–right,bottom) | links | cut off "
+                 "| past first screen |", "|---|---|---|---|---|---|"]
+        for r in more:
+            m = r["more"]
+            if "error" in m:
+                rows.append(f"| {r.get('device')} | {r['width']} | {m['error']} | | | |")
+                continue
+            b = m["rect"]
+            rows.append(f"| {r.get('device')} | {r['width']} | {b['top']},{b['left']}–"
+                        f"{b['right']},{b['bottom']} | {m['links']} | "
+                        f"{', '.join(m['cut']) or 'none'} | {', '.join(m['belowFold']) or '—'} |")
     shimmed = sorted({s for r in data["results"] for s in r.get("shimmed", [])})
     if shimmed:
         rows += ["", (f"Shimmed (no local copy, no network): {', '.join(shimmed)}. Map/chart "
