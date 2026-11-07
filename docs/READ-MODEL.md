@@ -8,6 +8,8 @@ tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 which the `/place` basic view reads for every line it shows and the `/explore` query
 builder puts in a table (with `format=csv` for the download). Its series mode
 (`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts.
+Every site has a page at `/site/<kind>/<ref>` (`site_page_url` in `web/app.py`), read
+from `ReadModel.site`; `/api/near` gives each hazard its `page`.
 
 ## How it works
 
@@ -43,6 +45,8 @@ check, so a status or contaminant change counts as new too.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
+  So a monitor's site page shows its AirData summary, not live readings.
+- Where `site_id` repeats (oil & gas permits), `/site/<kind>/<ref>` shows the first row.
 - `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*
   rollup, not from its daily trend (pinned as-is by the snapshot).
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
