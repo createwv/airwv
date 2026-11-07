@@ -565,3 +565,16 @@ def test_vendor_falls_back_to_cdn(tmp_path, monkeypatch):
     assert web._vendor("leaflet.js", "https://cdn/x.js") == "/static/vendor/leaflet.js"
     html = _client(tmp_path).get("/").text
     assert "/static/vendor/leaflet.js" in html and "unpkg.com/leaflet@1.9.4/dist/leaflet.js" not in html
+
+
+def test_home_is_my_place_when_a_place_is_set(tmp_path):
+    c = _client(tmp_path)
+    for url in ("/?place=rutledge&km=8", "/?lat=38.38&lon=-81.58&name=Home"):
+        page = c.get(url).text
+        assert 'id="pl-status"' in page and 'href="/?statewide=1"' in page
+        assert 'id="haze-chip"' not in page          # the place's own air line, not statewide
+    statewide = c.get("/").text
+    assert 'id="ov-stats"' in statewide and 'id="pl-status"' not in statewide
+    assert "localStorage.getItem('airwv_place')" in statewide   # a saved place opens here
+    assert 'id="pl-status"' not in c.get("/?place=rutledge&statewide=1").text
+    assert 'href="/?statewide=1"' not in c.get("/place").text

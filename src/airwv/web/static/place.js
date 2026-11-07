@@ -37,14 +37,23 @@ const mi = m => `${m < 1 ? m.toFixed(1) : Math.round(m)} mi`;
 const miles = km => Math.round(km * 0.621371);
 const isLive = ts => { const d = toDate(ts); return d && (Date.now() - d) < LIVE_HOURS * 3600e3; };
 
+// the last place chosen is kept in the browser, so Home (/) and /place open on it
+const SAVED = 'airwv_place';
+const placeQuery = p => p.id ? `place=${p.id}&km=${p.km}`
+  : `lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}&name=${encodeURIComponent(p.name)}&km=${p.km}`;
+const savePlace = p => { try { localStorage.setItem(SAVED, placeQuery(p)); } catch (e) {} };
+const savedPlace = () => { try { return localStorage.getItem(SAVED) || ''; } catch (e) { return ''; } };
+
 function readPlace() {
-  const q = new URLSearchParams(location.search);
+  let q = new URLSearchParams(location.search);
+  const given = q.has('place') || (q.has('lat') && q.has('lon'));
+  if (!given && savedPlace()) q = new URLSearchParams(`${savedPlace()}&${q}`);
   const known = PLACES.find(p => p.id === q.get('place')) || PLACES[0];
   const lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
   const custom = isFinite(lat) && isFinite(lon) && !(q.get('place') && known.id === q.get('place'));
   return {id: custom ? '' : known.id, name: custom ? (q.get('name') || 'Your location') : known.name,
           lat: custom ? lat : known.lat, lon: custom ? lon : known.lon,
-          km: parseFloat(q.get('km')) || 8, view: q.get('view') === 'adv' ? 'adv' : 'basic'};
+          km: parseFloat(q.get('km')) || 8, view: q.get('view') === 'adv' ? 'adv' : 'basic', given};
 }
 
 function writePlace(p) {
@@ -186,8 +195,9 @@ function provLine(results) {
     + 'Sensor and gauge times are shown on each line. <a href="/data">All data sources →</a>';
 }
 
-async function load(p) {
+async function load(p, save = true) {
   writePlace(p);
+  if (save) savePlace(p);
   $('pl-title').textContent = `${p.name}, now`;
   $('pl-km').value = String(p.km);
   $('pl-place').value = p.id;
@@ -242,7 +252,7 @@ function init() {
     if (window.AIRWV_REPORT_AT) window.AIRWV_REPORT_AT({lat: p.lat, lon: p.lon, domain: 'other',
       description: `Reporting something near ${p.name}. What did you notice? `});
   });
-  load(p);
+  load(p, p.given);   // a bare /place shows the demo place without saving it
 }
-if (typeof module !== 'undefined' && module.exports) module.exports = {siteHref, airLine, waterLine};
+if (typeof module !== 'undefined' && module.exports) module.exports = {siteHref, airLine, waterLine, placeQuery};
 else init();
