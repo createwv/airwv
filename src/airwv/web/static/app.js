@@ -461,7 +461,8 @@ function redrawSources(){
       .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}`+
         `<br><b style="color:#7a5b12">${SRC_LABEL[cat]||'Facility'}</b> · ${s.type}<br><i>${s.operator||''}</i>`+
         `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
-        `<br><small style="color:#a00">${srcDisclaimer}</small>`)
+        `<br><small style="color:#a00">${srcDisclaimer}</small>`+
+        (s.id ? `<br><a href="/site/facility/${encodeURIComponent(s.id)}">Facility details →</a>` : ''))
       .addTo(sourceLayer);
   });
   sourceLayer.addTo(map);

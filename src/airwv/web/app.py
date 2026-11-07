@@ -2061,6 +2061,14 @@ def create_app(store: Store) -> FastAPI:
 
         if kind in SERIES_KINDS:
             return _measured_site_page(request, kind, ref, param)
+        if kind == "facility":
+            # no facility page yet: send the stable id on to where the facility lives now
+            # (curated sources: /sources#facility=<name>; ECHO: its EPA page)
+            with store.read_model.connect() as conn:
+                site = store.read_model.site(conn, f"facility:{ref}")
+            if site is None or not site["url"]:
+                raise HTTPException(status_code=404, detail="no facility with that id")
+            return RedirectResponse(site["url"], status_code=307)
         if kind != "data_center":
             raise HTTPException(status_code=404, detail="no site page for this kind yet")
         api = data_centers_layer()

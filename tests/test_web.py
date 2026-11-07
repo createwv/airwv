@@ -128,6 +128,26 @@ def test_sources_endpoint(tmp_path):
     assert body["disclaimer"]
 
 
+def test_sources_have_stable_site_ids(tmp_path):
+    # each /api/sources row carries the read model's facility ref (tri-<index in
+    # sources.json>), so the Air-map marker can link /site/facility/<id>
+    import json
+    from pathlib import Path
+
+    import airwv
+    raw = json.loads((Path(airwv.__file__).parent / "data" / "sources.json").read_text())["sources"]
+    c = _client(tmp_path)
+    rows = c.get("/api/sources").json()["sources"]
+    assert all(s["id"] and s["id"].startswith("tri-") for s in rows)
+    assert len({s["id"] for s in rows}) == len(rows)
+    for s in rows:
+        assert raw[int(s["id"][4:])]["name"] in s["names"]
+    amos = next(s for s in rows if s["name"] == "John Amos Power Plant")
+    r = c.get(f"/site/facility/{amos['id']}", follow_redirects=False)
+    assert r.status_code == 307 and r.headers["location"].startswith("/sources#facility=")
+    assert c.get("/site/facility/tri-99999", follow_redirects=False).status_code == 404
+
+
 def test_guide_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/guide")
     assert r.status_code == 200

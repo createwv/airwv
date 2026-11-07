@@ -894,7 +894,10 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       *distinctive* name token (place names excluded, data-driven, so a shared town like "nitro"
       can't fuse two different plants). 530 → 505; the 3 Amos records are now one facility carrying
       all categories/records. Applied (cached) in `/api/sources`; detail view shows merged-record
-      count + "also recorded as" names.
+      count + "also recorded as" names. Each merged row has a stable `id` (`tri-<n>`, its first
+      record's index in `sources.json`, the read model's facility ref); the Air-map marker popup
+      links `/site/facility/<id>`, which redirects to the facility on `/sources` until facility
+      site pages land.
 - [x] **Retain former company names** — cautious curated `former_name_note` (Chemours←DuPont,
       Solutia←Monsanto, Union Carbide→Dow, Bayer/Institute…), shown as "Formerly:" with precise
       triggers (no false positives — the Nitro WWTP no longer gets Monsanto history).
