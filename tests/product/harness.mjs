@@ -1,6 +1,8 @@
 // Product harness driver: acts as a user against a running AirWV server, headless Chromium.
 // Usage: node tests/product/harness.mjs <config.json>   → prints one JSON result to stdout.
-// Config: {base, out, pages:[{name, path}], viewports:[{w, h}], vendorDirs:[...], geo:{lat, lon}}
+// Config: {base, out, pages:[{name, path, viewports?}], viewports:[{w, h}], vendorDirs:[...],
+//          geo:{lat, lon}}. A page with its own viewports ({w, h, device, scale, mobile, touch},
+//          from devices.json) is visited at those instead of the shared list.
 // Offline by design: only the local server is reachable. CDN libraries (Leaflet, Plotly…) are
 // served from a vendor dir when a copy is there, else replaced by a no-op shim (and reported).
 import { createRequire } from "node:module";
@@ -177,7 +179,8 @@ const launch = () => chromium.launch().catch(() =>
 async function visit(vp, pg) {
   const browser = await launch();
   const ctx = await browser.newContext({
-    viewport: { width: vp.w, height: vp.h }, isMobile: vp.w < 600, hasTouch: vp.w < 600,
+    viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: vp.scale || 1,
+    isMobile: vp.mobile ?? vp.w < 600, hasTouch: vp.touch ?? vp.w < 600,
     geolocation: { latitude: cfg.geo.lat, longitude: cfg.geo.lon }, permissions: ["geolocation"],
     reducedMotion: "reduce",   // the a11y probe checks the page honors it (screenshots hold still too)
   });
@@ -229,11 +232,14 @@ async function visit(vp, pg) {
     a11y.noFocus = await focusProbe(page);
   } catch (e) { a11y = { error: String(e.message || e).split("\n")[0] }; }
   await browser.close().catch(() => {});
-  return { page: pg.name, path: pg.path, width: vp.w, height: vp.h, status, error: err, ms,
+  return { page: pg.name, path: pg.path, width: vp.w, height: vp.h, device: vp.device, status, error: err, ms,
            consoleErrors, pageErrors, failed, shot, shimmed: [...shimmed], a11y, ...info };
 }
 
 mkdirSync(cfg.out, { recursive: true });
 const results = [];
-for (const vp of cfg.viewports) for (const pg of cfg.pages) results.push(await visit(vp, pg));
+for (const vp of cfg.viewports) for (const pg of cfg.pages.filter(p => !p.viewports))
+  results.push(await visit(vp, pg));
+for (const pg of cfg.pages.filter(p => p.viewports))
+  for (const vp of pg.viewports) results.push(await visit(vp, pg));
 process.stdout.write(JSON.stringify(results));
