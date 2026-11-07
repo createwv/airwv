@@ -5,13 +5,17 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 """
 
 import pytest
-from conftest import PAGES, VIEWPORTS  # tests/ isn't a package; pytest puts this dir on sys.path
+# tests/ isn't a package; pytest puts this dir on sys.path
+from conftest import DEVICES, PAGES, SITE_PAGES, VIEWPORTS
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
 NAV_TARGET = 6   # six top-level items, "More" included (docs/DIRECTION.md §3)
 
 CASES = [(name, w) for w, _ in VIEWPORTS for name, _ in PAGES]
+# site pages at every standard screen size (devices.json)
+SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in SITE_PAGES for d in DEVICES.values()]
+CASES += SITE_CASES
 IDS = [f"{n}-{w}" for n, w in CASES]
 
 
@@ -39,6 +43,14 @@ def test_no_console_errors(product, name, width):
 @pytest.mark.parametrize("name,width", CASES, ids=IDS)
 def test_nav_present(product, name, width):
     assert _get(product, name, width).get("navCount", 0) > 0
+
+
+@pytest.mark.parametrize("name,width", SITE_CASES, ids=[f"{n}-{w}" for n, w in SITE_CASES])
+def test_site_no_sideways_scroll(product, name, width):
+    """Site pages fit every screen size: nothing wider than the viewport (charter rule 6)."""
+    r = _get(product, name, width)
+    assert r.get("scrollWidth", 0) <= r.get("innerWidth", 0), \
+        f"page is {r.get('scrollWidth')}px wide in a {r.get('innerWidth')}px viewport"
 
 
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])

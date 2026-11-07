@@ -48,16 +48,47 @@ PAGES = [
     ("about", "/about"),
     ("data", "/data"),
     ("explore", "/explore?place=rutledge&km=8&param=pm2_5"),   # query builder at the demo place
-    # data centers: Near me at Point Pleasant (Monarch is ~4 mi) and a site page
+    # data centers: Near me at Point Pleasant (Monarch is ~4 mi); its site page is in SITE_PAGES
     ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
-    ("site-dc", "/site/data_center/monarch-compute-campus"),
     ("place-dc", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8"),
     ("place-dc-adv", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8&view=adv"),
 ]
 VIEWPORTS = [(390, 844), (1280, 800)]   # phone (iPhone 12–15), laptop
+# `/site/<kind>/<id>`: one page per kind the route serves, shot at every DEVICES size. Add a
+# line here as each kind lands (sensor, monitor, gauge, facility, water system, well, spill).
+SITE_PAGES = [
+    ("site-dc", "/site/data_center/monarch-compute-campus"),
+    ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
+]
+# The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
+DEVICES = {
+    "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
+                    "isMobile": True, "hasTouch": True},
+    "phone": {"viewport": {"width": 390, "height": 844}, "deviceScaleFactor": 3,
+              "isMobile": True, "hasTouch": True},
+    "phone-landscape": {"viewport": {"width": 844, "height": 390}, "deviceScaleFactor": 3,
+                        "isMobile": True, "hasTouch": True},
+    "tablet": {"viewport": {"width": 820, "height": 1180}, "deviceScaleFactor": 2,
+               "isMobile": True, "hasTouch": True},
+    "desktop": {"viewport": {"width": 1280, "height": 800}, "deviceScaleFactor": 1,
+                "isMobile": False, "hasTouch": False},
+    "desktop-wide": {"viewport": {"width": 1920, "height": 1080}, "deviceScaleFactor": 1,
+                     "isMobile": False, "hasTouch": False},
+}
+try:
+    DEVICES = {k: v for k, v in json.loads((PW_DIR / "devices.json").read_text()).items()
+               if isinstance(v, dict) and "viewport" in v} or DEVICES
+except (OSError, ValueError):
+    pass
 GEO = {"lat": 38.35, "lon": -81.63}     # Charleston
 VENDOR_DIRS = [os.environ.get("AIRWV_VENDOR_DIR", ""), str(REPO / "src/airwv/web/static/vendor"),
                str(HERE / "vendor")]
+
+
+def _device_viewports() -> list[dict]:
+    return [{"w": d["viewport"]["width"], "h": d["viewport"]["height"], "device": name,
+             "scale": d.get("deviceScaleFactor", 1), "mobile": bool(d.get("isMobile")),
+             "touch": bool(d.get("hasTouch"))} for name, d in DEVICES.items()]
 
 
 def _main_checkout() -> Path | None:
@@ -167,7 +198,8 @@ def product(tmp_path_factory):
         cfg = tmp / "harness.json"
         cfg.write_text(json.dumps({
             "base": base, "out": str(OUT), "geo": GEO,
-            "pages": [{"name": n, "path": p} for n, p in PAGES],
+            "pages": [{"name": n, "path": p} for n, p in PAGES]
+            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))
