@@ -56,7 +56,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] When the Place picker and Depth toggle merge, show the data-center card on `/place` and the full record under `view=adv` [auto:S]
 - [ ] Move `/api/near` and the other site kinds onto `/site/<kind>/<id>` (the existing "Site pages" item can use `site.html`) [auto:M]
 - [x] Show dated open comment periods (e.g. R14-0042 comments due 2026-11-13) on the data-center card once the watch-list item lands [auto:S]
-- [ ] Harness: add the `/site/<kind>/<id>` pages (one per kind, all screen sizes) to `tests/product/run.sh` once the harness exists. [auto]
+- [x] Harness: add the `/site/<kind>/<id>` pages (one per kind, all screen sizes) to `tests/product/run.sh` once the harness exists. [auto]
 - [ ] Site pages: a recent-readings chart for sensors, monitors and gauges, using the `/api/query` series mode. [auto]
 - [ ] Hide the statewide haze pop-up on `/place`, or scope it to the chosen place, so it doesn't contradict the air line [auto:S]
 - [ ] Point the status lines at `/site/<kind>/<id>` once site pages cover sensors, gauges and sample sites [auto:S]
