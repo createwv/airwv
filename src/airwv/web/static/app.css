@@ -29,7 +29,7 @@
   /* Keyboard focus: one visible ring on every control (mouse clicks don't show it). */
   :focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
   /* date inputs focus an inner field, so the input itself never matches :focus-visible */
-  input[type=date]:focus, input[type=time]:focus { outline:3px solid var(--brand); outline-offset:2px; }
+  input[type=date]:focus-within, input[type=time]:focus-within { outline:3px solid var(--brand); outline-offset:2px; }
   .modenav a:focus-visible, .modenav summary:focus-visible { outline-offset:1px; }
   /* Logo: floors ~165px on narrow screens (≈30vw near 570px), scales at 20vw
      through desktop, capped so it stays in the banner on big monitors. */
