@@ -16,6 +16,8 @@
 <link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
 </head>
 <body>
+{# /place has its own place-scoped air line; a statewide haze toast there would contradict it #}
+{% if mode != 'place' %}
 <div id="haze" class="haze" aria-hidden="true"></div>
 <div id="haze-chip" class="haze-chip" role="status">
   <span class="dot"></span>
@@ -23,6 +25,7 @@
   <a href="/learn#health" class="haze-why">what this means</a>
   <button class="haze-off" type="button" title="turn off the haze tint">dismiss</button>
 </div>
+{% endif %}
 <header>
   <img class="cloud c-gold"  src="/static/banner-clouds-gold.svg"  alt="">
   <img class="cloud c-blue"  src="/static/banner-clouds-blue.svg"  alt="">

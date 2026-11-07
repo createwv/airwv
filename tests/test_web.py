@@ -446,6 +446,9 @@ def test_sources_grid_paginates_and_haze_is_opt_in(tmp_path):
     haze = c.get("/static/haze.js").text
     assert "airwv_haze_on" in haze and "airwv_haze_off" not in haze   # off unless turned on
     assert 'id="haze-toggle"' in c.get("/learn").text
+    # the statewide haze toast stays off /place, which shows the chosen place's own air line
+    assert 'id="haze-chip"' in c.get("/learn").text
+    assert 'id="haze-chip"' not in c.get("/place").text
 
 
 def test_nrc_spills_endpoint(tmp_path):
