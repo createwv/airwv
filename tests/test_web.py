@@ -204,6 +204,19 @@ def test_nav_collapsed(tmp_path):
     assert c.get("/sources").status_code == 200                           # old URL still works
 
 
+def test_glossary_on_site(tmp_path):
+    # footer Glossary stays on the site: /learn#glossary carries docs/GLOSSARY.md's six terms
+    c = _client(tmp_path)
+    foot = c.get("/").text
+    foot = foot[foot.index("<footer"):]
+    assert 'href="/learn#glossary">Glossary</a>' in foot
+    learn = c.get("/learn").text
+    assert 'id="glossary"' in learn
+    gloss = learn[learn.index('id="glossary"'):]
+    for term in ("Sensor", "Monitor", "Gauge", "Sample site", "Facility", "Data source", "Criteria pollutant"):
+        assert f"<b>{term}</b>" in gloss, term
+
+
 def test_events_api_and_admin(tmp_path, monkeypatch):
     monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
     c = _client(tmp_path)
