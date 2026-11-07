@@ -71,6 +71,10 @@ def _near_all(c):
 def test_api_near_matches_snapshot(tmp_path, monkeypatch):
     c, _ = _client(tmp_path, monkeypatch)
     got = _near_all(c)
+    # `page` (each hazard's /site/<kind>/<id>) came after the snapshot; everything else is pinned
+    for r in got.values():
+        for h in r["hazards"]:
+            h.pop("page")
     if os.environ.get("AIRWV_UPDATE_SNAPSHOTS") or not SNAPSHOT.exists():
         SNAPSHOT.parent.mkdir(exist_ok=True)
         SNAPSHOT.write_text(json.dumps(got, indent=1, ensure_ascii=False, sort_keys=True) + "\n",
@@ -82,6 +86,42 @@ def test_api_near_matches_snapshot(tmp_path, monkeypatch):
     # the snapshot actually exercises every hazard category
     cats = {h["category"] for r in want.values() for h in r["hazards"]}
     assert cats == {"gas", "air", "water", "chemical", "sensor"}
+
+
+def test_api_near_hazards_have_site_pages(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    pages = {h["page"] for r in _near_all(c).values() for h in r["hazards"]}
+    kinds = {p.split("/")[2] for p in pages}
+    assert {"well", "facility", "permit", "spill_report", "water_system", "sensor",
+            "gauge", "sample_site"} <= kinds
+    for p in sorted(pages):
+        r = c.get(p)
+        assert r.status_code == 200, p
+        assert "Plain summary" in r.text and "Full record" in r.text, p
+        assert c.get(p + "?view=adv").status_code == 200, p
+
+
+def test_site_pages_for_every_kind(tmp_path, monkeypatch):
+    c, store = _client(tmp_path, monkeypatch)
+    with store.read_model.connect() as conn:
+        firsts = conn.exec_driver_sql(
+            "SELECT kind, min(ref) FROM site WHERE ref IS NOT NULL GROUP BY kind").all()
+    from airwv.web.app import SITE_KINDS, site_page_url
+    assert {k for k, _ in firsts} <= set(SITE_KINDS)
+    for kind, ref in firsts:
+        assert c.get(site_page_url(kind, ref)).status_code == 200, (kind, ref)
+    # a sensor shows its latest readings, with series + CSV links in the full record
+    basic = c.get("/site/sensor/197127").text
+    assert "Kanawha City" in basic and "Latest readings" in basic and "10.04" in basic
+    adv = c.get("/site/sensor/197127?view=adv").text
+    assert "/api/query?site_id=sensor%3A197127&amp;param=pm2_5" in adv
+    # a water system's health-based violation is listed in plain words
+    sy = next(s for s in json.loads((webapp.Path(webapp.__file__).parent.parent / "data" / "sdwa_systems.json")
+                                    .read_text(encoding="utf-8"))["systems"] if s.get("health_violation"))
+    page = c.get(site_page_url("water_system", sy["pws_id"])).text
+    assert "Health-based drinking-water violation" in page
+    assert c.get("/site/well/no-such-well").status_code == 404
+    assert c.get("/site/nonsense/1").status_code == 404
 
 
 def test_views_cover_tables_and_layers(tmp_path, monkeypatch):

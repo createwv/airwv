@@ -42,7 +42,9 @@ function renderSymptoms() {
 function hazardRow(h, relevant) {
   const flag = h.flag ? `<span class="nb-flag nb-${h.flag}">${h.flag.replace('_', ' ')}</span>` : '';
   const dist = h.mi != null ? `${h.mi} mi` : 'in your county';
-  const link = h.link ? `<a href="${esc(h.link)}" ${h.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
+  // each hazard's own site page (/site/<kind>/<id>), which links on to the data source's record
+  const href = h.page || h.link;
+  const link = href ? `<a href="${esc(href)}" ${href.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
   const report = h.report ? `<a href="#" class="nb-report" data-lat="${h.lat}" data-lon="${h.lon}" data-cat="${h.category}" data-label="${esc(h.label)}">report →</a>` : '';
   return `<div class="nb-item${relevant ? ' rel' : ''}">
     <span class="nb-ic">${h.icon || '•'}</span>

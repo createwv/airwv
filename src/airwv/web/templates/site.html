@@ -1,6 +1,61 @@
 {% extends "base.html" %}
 {% from "_dc_card.html" import dc_card, how_to_ask, cite %}
 {% block content %}
+{% if kind != 'data_center' %}
+{% set s = site %}{% set a = site.attrs %}
+<div class="page">
+  <div class="ov-intro"><h1>{{ s.name or (label ~ ' ' ~ s.ref) }}</h1>
+    <p><span class="rbadge">{{ label }}</span>{% if s.medium %} · {{ s.medium | capitalize }}{% endif %}<br>
+      <span class="meta">{% if s.county %}{{ s.county }} County{% endif %}{% if s.lat is not none %}{% if s.county %} · {% endif %}{{ '%.4f' % s.lat }}, {{ '%.4f' % s.lon }}{% else %}{% if s.county %} · {% endif %}exact location not public{% endif %}</span></p>
+    <p class="meta">
+      {% if view == 'adv' %}<a href="?view=basic">← Plain summary</a> · Full record
+      {% else %}Plain summary · <a href="?view=adv">Full record →</a>{% endif %}
+      · <a href="/data">Where this comes from</a></p>
+  </div>
+
+  {% if view != 'adv' %}
+  <div class="card"><h2>Public records</h2>
+    {% if records %}<ul class="dc-files">{% for r in records %}<li><b>{{ record_labels.get(r.kind, r.kind.replace('_', ' ')) }}</b>{% if r.value and r.value != r.kind %}: {{ r.value | string | replace('_', ' ') }}{% endif %}{% if r.effective %} <span class="meta">({{ r.effective }})</span>{% endif %}</li>{% endfor %}</ul>
+    {% else %}<p class="meta" style="padding:8px 14px">No violations, listings or reports on file for this site in the data we track.</p>{% endif %}
+  </div>
+  {% if latest %}
+  <div class="card"><h2>Latest readings</h2>
+    <table class="dc-rec">{% for p, m in latest.items() %}
+      <tr><th>{{ p.replace('_', '.') if p.startswith('pm') else p.replace('_', ' ') }}</th><td>{{ m.value }} {{ m.unit or '' }} <span class="meta">{{ (m.ts | string)[:16] }} UTC</span></td></tr>{% endfor %}
+    </table>
+  </div>
+  {% endif %}
+  <div class="card"><p class="meta" style="padding:10px 14px">
+    {% if s.lat is not none %}<a href="/nearby?lat={{ s.lat }}&amp;lon={{ s.lon }}">What else is near here →</a>{% endif %}
+    {% if s.url %}{% if s.lat is not none %} · {% endif %}<a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>The data source's own record →</a>{% endif %}</p></div>
+  {% else %}
+  <div class="card"><h2>Full record</h2>
+    <table class="dc-rec">
+      <tr><th>Site id</th><td><code>{{ s.site_id }}</code></td></tr>
+      <tr><th>Layer</th><td>{{ s.layer }}</td></tr>
+      {% for k, v in a.items() %}<tr><th>{{ k.replace('_', ' ') }}</th><td>{{ v }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  <div class="card"><h2>Records</h2>
+    {% if records %}<table class="dc-rec">{% for r in records %}
+      <tr><th>{{ r.kind }}</th><td>{{ r.value }}{% if r.effective %} · effective {{ r.effective }}{% endif %}{% if r.as_of %} · as of {{ r.as_of }}{% endif %}{% if r.url %} · <a href="{{ r.url }}" target="_blank" rel="noopener">record</a>{% endif %}</td></tr>{% endfor %}
+    </table>{% else %}<p class="meta" style="padding:8px 14px">None in the record view.</p>{% endif %}
+  </div>
+  {% if latest %}
+  <div class="card"><h2>Readings (API)</h2>
+    <table class="dc-rec">{% for p, m in latest.items() %}
+      <tr><th>{{ p }}</th><td>latest {{ m.value }} {{ m.unit or '' }} at {{ m.ts }} · <a href="{{ series[p] }}">series</a> · <a href="{{ series[p] }}&amp;format=csv">CSV</a></td></tr>{% endfor %}
+    </table>
+  </div>
+  {% endif %}
+  {% if s.url %}<div class="card"><p class="meta" style="padding:10px 14px">Data source record: <a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ s.url }}</a></p></div>{% endif %}
+  {% endif %}
+
+  <div class="card"><p class="meta" style="padding:10px 14px">{% if prov.disclaimer %}{{ prov.disclaimer }}<br>{% endif %}
+    {% if prov.source %}Source: {{ prov.source }}.{% endif %}{% if prov.fetched_at %} Fetched {{ prov.fetched_at }}.{% endif %}
+    <a href="/data">All data sources</a></p></div>
+</div>
+{% else %}
 {% set c = card %}
 <div class="page">
   <div class="ov-intro"><h1>{{ c.name }}</h1>
@@ -56,4 +111,5 @@
     <br>Source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
     Raw record: <a href="/api/data-centers">/api/data-centers</a> · <a href="/data">all data sources</a></p></div>
 </div>
+{% endif %}
 {% endblock %}
