@@ -796,6 +796,8 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       medium (air band + PM2.5 + time + nearest sensor; water gauge or latest sample; drinking-water
       health violations; wells) and "what changed (7 days)" (PM2.5 band peaks, spills, permit
       dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
+      The air and water lines name and link the nearest sensor / monitor / gauge / sample site
+      to its `/site/<kind>/<ref>` page ("data behind this →").
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
