@@ -63,7 +63,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Make `/` show "my place now" when a place is set (in the URL or saved in the browser), otherwise statewide as now [auto:S]
 - [ ] Site pages for permits (coal discharge, DEP mining, oil & gas): `/site/permit/<id>`, with the permit stage and 303(d) impaired-stream records. [auto:S]
 - [x] Link the Air-map curated-source markers to `/site/facility/tri-<n>` by giving `/api/sources` rows a stable id. [auto:S]
-- [ ] "Related nearby" on site pages: the 5 nearest sites of other kinds from `/api/query`, each linking to its page. [auto:S]
+- [x] "Related nearby" on site pages: the 5 nearest sites of other kinds from `/api/query`, each linking to its page. [auto:S]
 - [ ] Harness: open the "More" menu and screenshot it at every device size; flag it if the dropdown is cut off. [auto]
 - [ ] Terms pass, part 2: apply `docs/GLOSSARY.md` wording across the page text (sensor vs monitor vs gauge; never "source" alone) and remove emoji from headings and buttons if you want that. [S] [auto]
 - [ ] Link the footer Glossary to an on-site `/learn#glossary` that merges the six terms with Learn's existing glossary. [S] [auto]
