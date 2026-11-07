@@ -63,6 +63,11 @@ const api = (p, extra) => fetch(`/api/query?lat=${p.lat}&lon=${p.lon}&km=${p.km}
 const dcApi = p => fetch(`/api/data-centers?lat=${p.lat}&lon=${p.lon}&km=${Math.max(16, p.km)}`
   + (p.view === 'adv' ? '&full=true' : '')).then(r => r.ok ? r.json() : null).catch(() => null);
 
+// the measured kinds have a /site/<kind>/<ref> page (latest reading + recent-readings chart)
+const SITE_KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site'];
+const siteHref = s => SITE_KINDS.includes(s.kind) ? `/site/${s.kind}/${encodeURIComponent(s.ref)}` : null;
+const siteName = s => siteHref(s) ? `<a href="${siteHref(s)}">${esc(s.name)}</a>` : esc(s.name);
+
 const line = (medium, color, html, more) => `<div class="pl-line">
   <span class="pl-dot" style="background:${color || '#cfd6dc'}"></span>
   <div class="pl-body"><b>${medium}:</b> ${html}${more ? ` <span class="pl-more">${more}</span>` : ''}</div></div>`;
@@ -77,8 +82,8 @@ function airLine(air, p) {
   const who = s.kind === 'reference_monitor' ? 'nearest EPA monitor' : 'nearest sensor';
   const when = live.length ? `as of ${fmtTime(s.latest.ts)}` : `no live reading; last one ${fmtTime(s.latest.ts)}`;
   return line('Air', live.length ? b.color : null,
-    `${b.label}, ${v.toFixed(0)} µg/m³ PM2.5, ${when}, ${who} ${esc(s.name)} ${mi(s.mi)}`,
-    '<a href="/air">data behind this →</a>');
+    `${b.label}, ${v.toFixed(0)} µg/m³ PM2.5, ${when}, ${who} ${siteName(s)} ${mi(s.mi)}`,
+    `<a href="${siteHref(s) || '/air'}">data behind this →</a>`);
 }
 
 function waterLine(water, p) {
@@ -87,14 +92,16 @@ function waterLine(water, p) {
   const fmt = l => `${WATER_LABEL[l.parameter] || l.parameter} ${+l.value.toFixed(2)} ${esc(l.unit || '')}`.trim();
   let html;
   if (gauge) {
-    html = `live gauge ${esc(gauge.name)} ${mi(gauge.mi)}: ${fmt(gauge.latest)}, as of ${fmtTime(gauge.latest.ts)}`;
+    html = `live gauge ${siteName(gauge)} ${mi(gauge.mi)}: ${fmt(gauge.latest)}, as of ${fmtTime(gauge.latest.ts)}`;
   } else {
     const sample = withVal[0];
     html = `no live gauge within ${miles(p.km)} mi`
-      + (sample ? `; nearest reading ${esc(sample.name)} ${mi(sample.mi)}: ${fmt(sample.latest)}, ${fmtDay(sample.latest.ts)}`
+      + (sample ? `; nearest reading ${siteName(sample)} ${mi(sample.mi)}: ${fmt(sample.latest)}, ${fmtDay(sample.latest.ts)}`
                 : '; no water samples on file nearby');
   }
-  return line('Water', gauge ? '#2c7fb8' : null, html + '.', '<a href="/water">data behind this →</a>');
+  const site = gauge || withVal[0];
+  return line('Water', gauge ? '#2c7fb8' : null, html + '.',
+              `<a href="${(site && siteHref(site)) || '/water'}">data behind this →</a>`);
 }
 
 function drinkingLine(systems) {
@@ -237,4 +244,5 @@ function init() {
   });
   load(p);
 }
-init();
+if (typeof module !== 'undefined' && module.exports) module.exports = {siteHref, airLine, waterLine};
+else init();
