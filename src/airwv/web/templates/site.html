@@ -40,7 +40,7 @@
       <tr><th>Not disclosed</th><td>{{ dc.not_disclosed | join('; ') }}</td></tr>
     </table>
   </div>
-  <div class="card"><h2>Filings and sources for this site</h2>
+  <div class="card"><h2>Filings and data sources for this site</h2>
     <ul class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
       <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ul>
   </div>

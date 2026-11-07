@@ -233,7 +233,7 @@ const prevailing = rose => Object.keys(rose).reduce((a,b)=> rose[b]>rose[a]?b:a)
 function showProximity(name){
   const src = allSources_.find(s => s.name === name && s.lat != null);
   const tb = document.querySelector('#proxtable tbody');
-  if (!src){ tb.innerHTML='<tr><td colspan="6" class="meta">Pick a pollution source above.</td></tr>';
+  if (!src){ tb.innerHTML='<tr><td colspan="6" class="meta">Pick a facility above.</td></tr>';
     $('chartnear').disabled=true; $('proxsector').textContent=''; if(proxRings){proxRings.remove();proxRings=null;} return; }
   const weighted = $('windweight').checked && windRoses.length;
   const station = weighted ? nearestStation(src.lat, src.lon) : null;
@@ -494,7 +494,7 @@ function buildLayers(){
   // ⭐ pinned follow-list at the top
   const followed = comm.filter(s => mySensors.has(s.sensor_id)).sort((a,b)=>a.name.localeCompare(b.name));
   const myBlock = followed.length
-    ? `<details open><summary>⭐ My Sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
+    ? `<details open><summary>My sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
     : '';
   const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
   // ⚖️ EPA ECHO compliance — WV major facilities, colored by status
@@ -530,7 +530,7 @@ function buildLayers(){
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
-    `<details class="ctxgroup"><summary>🔎 Context layers <span class="cnt">advanced · sources, violations, permits &amp; wells</span></summary><div class="children">`+
+    `<details class="ctxgroup"><summary>Context layers <span class="cnt">advanced · facilities, violations, permits &amp; wells</span></summary><div class="children">`+
       `<p class="ctx-intro">What's <b>permitted, monitored, or reported</b> around the sensors — context for a reading, <b>not</b> proof of what caused it. <a href="/learn#law">How the rules work →</a></p>`+
       `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children"><p class="ctx-help">Industrial facilities that report toxic releases (EPA TRI) — <b>who is permitted to emit</b> near you.</p>${catRows}</div></details>`+
       (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children"><p class="ctx-help">Whether a regulated facility is currently <b>meeting its clean-air/water permits</b>. Red = a <b>significant violation</b> on record — a legal state, not a measurement. <a href="/learn#law">what a violation is →</a></p>${echoRows}</div></details>`:'')+

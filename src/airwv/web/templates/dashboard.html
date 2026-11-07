@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="controls" style="gap:10px">
-  <button id="nearme">📍 Near me</button>
-  <button class="primary" data-open="report">📣 Report a concern</button>
-  <button data-open="feedback">💬 Site feedback</button>
+  <button id="nearme">Near me</button>
+  <button class="primary" data-open="report">Report a concern</button>
+  <button data-open="feedback">Site feedback</button>
   <span class="meta" id="nearme-note">See something? Add it to the map. Something broken? Tell us.</span>
 </div>
 <div class="controls">
@@ -53,11 +53,11 @@
   <p class="meta" style="padding:0 14px 12px">New to this? <a href="/learn">Learn what these levels mean for your health →</a></p>
 </div>
 <details class="explore" id="explore">
-  <summary>🔎 Explore the data — make connections &amp; hold sources accountable</summary>
-  <p class="meta explore-intro">These tools tie your air readings to what's around them — nearby pollution sources, abandoned gas wells, and how our community sensors stack up against EPA's regulatory monitors. This is <b>context and a place to look, not proof</b> any one source caused a reading.</p>
-<div class="card"><h2>Around a pollution source — nearest sensors by distance &amp; direction</h2>
+  <summary>Explore the data — make connections &amp; hold facilities accountable</summary>
+  <p class="meta explore-intro">These tools tie your air readings to what's around them — nearby facilities, abandoned gas wells, and how our community sensors stack up against EPA's regulatory monitors. This is <b>context and a place to look, not proof</b> any one facility caused a reading.</p>
+<div class="card"><h2>Around a facility — nearest sensors by distance &amp; direction</h2>
   <div style="padding:10px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
-    <label>Source <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
+    <label>Facility <input id="srcpick" list="srclist" placeholder="type a facility name…" style="padding:6px 10px; min-width:280px"></label>
     <datalist id="srclist"></datalist>
     <button id="chartnear" disabled>⬈ Chart nearest community sensors</button>
     <label title="Rank by how often the wind carries the plume toward each sensor, not just distance"><input type="checkbox" id="windweight"> 🌀 weight by wind</label>
@@ -69,9 +69,9 @@
     tall stacks (power plants) can peak <b>1–10 mi downwind</b>, so wind direction matters as much as distance
     (<a href="https://github.com/createwv/airwv/blob/main/docs/WIND-AND-DISPERSION.md" target="_blank" rel="noopener">how we handle this</a>).</div>
   <table id="proxtable"><thead><tr><th>Sensor</th><th>Type</th><th>Distance</th><th>Direction</th><th>Downwind</th><th>Zone</th></tr></thead><tbody>
-    <tr><td colspan="6" class="meta">Pick a pollution source above to see the sensors around it.</td></tr></tbody></table>
+    <tr><td colspan="6" class="meta">Pick a facility above to see the sensors around it.</td></tr></tbody></table>
 </div>
-<div class="card"><h2>🛢️ Abandoned wells near our VOC sensors <span class="meta" id="wv-note"></span></h2>
+<div class="card"><h2>Abandoned wells near our VOC sensors <span class="meta" id="wv-note"></span></h2>
   <p class="meta" style="padding:0 14px 6px">Abandoned &amp; orphaned gas wells can vent natural gas and
     hydrogen sulfide (H2S). Our community sensors' <b>VOC</b> reading is a <b>relative gas-response index</b>
     (it responds to hydrocarbons and H2S, but it is <b>not</b> an H2S monitor). This lines up each sensor's
@@ -81,7 +81,7 @@
     <th>Wells ≤2&nbsp;km (orphans)</th><th>Wells ≤5&nbsp;km</th></tr></thead>
     <tbody id="wv-body"><tr><td colspan="5" style="color:#999">Loading…</td></tr></tbody></table>
 </div>
-<div class="card"><h2>🕳️ The orphan-well plugging backlog <span class="meta" id="bl-note"></span></h2>
+<div class="card"><h2>The orphan-well plugging backlog <span class="meta" id="bl-note"></span></h2>
   <div id="bl-summary" class="fac-summary" style="padding:8px 14px 0"></div>
   <p class="meta" id="bl-math" style="padding:6px 14px"></p>
   <div style="padding:0 14px 6px"><b class="meta">Most orphan wells (county backlog)</b></div>

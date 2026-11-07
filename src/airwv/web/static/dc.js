@@ -62,7 +62,7 @@
     rows.push(tr('Not disclosed', esc((d.not_disclosed || []).join('; '))));
     return `<div class="dc-card">${head(c)}${comments(c)}<p class="meta">${esc(d.status_detail)}</p></div>
     <table class="dc-rec">${rows.join('')}</table>
-    <div class="dc-card"><b>Filings and sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
+    <div class="dc-card"><b>Filings and data sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
   }
 
   function ask(items) {

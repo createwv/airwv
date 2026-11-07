@@ -33,7 +33,7 @@
       }).join('');
       return `<div class="card"><h2>${esc(cat)}</h2>
         <table class="fac-table">
-          <thead><tr><th>Source</th><th>Provider</th><th>Access</th><th>Freshness</th><th>Our API</th></tr></thead>
+          <thead><tr><th>Data source</th><th>Provider</th><th>Access</th><th>Freshness</th><th>Our API</th></tr></thead>
           <tbody>${rows}</tbody></table></div>`;
     }).join('');
   }
