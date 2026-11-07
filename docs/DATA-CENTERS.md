@@ -15,6 +15,9 @@ what it's for: what we know / what's not disclosed, with sources, and where to a
 `?view=adv` for the full record, its filings and the statewide dockets. **Near me** shows
 the same card for sites within 10 miles (or the chosen radius, if larger) and for sites in
 the nearest county that have no public coordinates, and puts mapped ones on its map.
+**My place** (`/place`) adds a "Data centers" status line and the same cards for the same
+sites; with `view=adv` it shows each one's full record and filings, plus the statewide
+dockets (`/api/data-centers?full=true` carries the record; `static/dc.js` renders both).
 API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 
 **How to read the values**
