@@ -31,6 +31,41 @@ API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 
 ---
 
+## Watch list: open comment periods and hearings
+
+**Last checked: 2026-11-07**, against the DEP notices and dockets already cited in the data
+file. Dates are as the notice states them. Agencies can extend a deadline or add a hearing, so
+check the notice before you rely on a date.
+
+**Open now**
+
+| Date | What | Site | How to take part | Source |
+|---|---|---|---|---|
+| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. The same notice covers state waters permits SWP-26-0002/0003; their deadline isn't recorded here | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
+
+**Other dates to watch** (not comment periods)
+
+| Date | What | Site | Source |
+|---|---|---|---|
+| 2026-11-15 | Listed start date for 148 acres of grading under stormwater permit WVR113565 | Bedington, Berkeley | the site's sources in the data file |
+| ~March 2027 | PSC decision expected on 26-0108-E-CN (Mon Power 1,200 MW gas plant at Fort Martin); the hearing was July 2026 | statewide | [docket entry](#energy-the-psc-dockets) |
+| 2027 session | PSC's HB 2014 power rules (26-0633-E-GI) go to the Legislative Rule-Making Review Committee, then the Legislature | statewide | [docket entry](#energy-the-psc-dockets) |
+| no date found | Ridgeline permit opponents say they'll go to the WV Supreme Court after the 2026-08-26 dismissals | Ridgeline, Tucker | WV Highlands Conservancy, 2026-08-28 |
+
+**Recently closed:** Adams Fork R13-3714/R13-3715 (DEP public meeting August 2025; permits
+issued 2025-10-02 after 119 comments). Ridgeline R13-3713 (issued 2025-08-15; upheld by the
+Air Quality Board 2026-02-05).
+
+**How to refresh it:** check DEP's DAQ permit applications and notices page
+(<https://dep.wv.gov/daq/permitting/Pages/NSR-Permit-Applications.aspx>), DEP news
+(<https://dep.wv.gov/news/>) and events (<https://dep.wv.gov/events/>) for any permit
+number or operator on this page, plus the Air Quality Board and PSC links under *Where to look
+next*. Add each new comment period or hearing with its notice date and link (and the notice to
+that site's `sources`), move past dates to *Recently closed*, and update *Last checked*.
+`tests/test_data_centers.py` fails if a comment deadline in the data file is missing here.
+
+---
+
 ## Why so much is missing: HB 2014
 
 The 2025 Power Generation and Consumption Act (HB 2014) and its rule 145 CSR 20 (authorized

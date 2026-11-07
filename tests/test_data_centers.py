@@ -6,6 +6,8 @@ someone skipped a question, so these tests fail on it. Only lat/lon may be null
 """
 
 import json
+import re
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -70,6 +72,19 @@ def test_every_site_is_sourced():
         assert s["sources"], f"{s['id']} has no source"
         for src in s["sources"]:
             assert src["url"].startswith("https://"), s["id"]
+
+
+def test_watch_list_has_every_comment_deadline():
+    md = (Path(__file__).parents[1] / "docs" / "DATA-CENTERS.md").read_text()
+    watch = md.split("## Watch list", 1)[1].split("\n## ", 1)[0]
+    assert re.search(r"Last checked: \d{4}-\d{2}-\d{2}", watch)
+    deadlines = [(s["id"], permit, due) for s in SITES
+                 for permit, due in re.findall(r"\b(R1\d-\d{4})\b[^)]*comments to (\d{4}-\d{2}-\d{2})",
+                                               s.get("air_permits", {}).get("permits", ""))]
+    assert ("monarch-compute-campus", "R14-0042", "2026-11-13") in deadlines
+    for site, permit, due in deadlines:
+        row = next((ln for ln in watch.splitlines() if permit in ln), "")
+        assert due in row, f"{site}: {permit} comments due {due} not on the watch list"
 
 
 # ---- on the site: the data_center kind, /api/data-centers, /site/data_center/<id> ----
