@@ -387,3 +387,25 @@ def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):
     assert "No readings stored" in empty and "data-api" not in empty
     assert c.get("/site/sensor/nope").status_code == 404
     assert c.get("/site/gauge/S1").status_code == 404
+
+
+def test_site_pages_for_permits(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    # a coal discharge on an impaired stream: the 303(d) causes and the caveat, in plain words
+    p = c.get("/site/permit/WV1012487")
+    assert p.status_code == 200 and "Nicholas Contura" in p.text and "Active discharge permit" in p.text
+    assert "Aluminum (trout), Biological, Iron, Selenium, Fecal coliform" in p.text
+    assert "Austin Hollow" in p.text and "does not mean this permit caused" in p.text
+    assert "effluent-charts/WV1012487" in p.text and "/api/coal-npdes" in p.text
+    # a mining permit and an oil & gas permit: the stage, with DEP's own status word
+    m = c.get("/site/permit/S100495").text
+    assert "Chaplin Hill No. 2" in m and "New / not yet started" in m and '"New"' in m
+    assert "Issued 1995-08-04" in m and "no 303(d) record" in m
+    g = c.get("/site/permit/051-02423")
+    assert "Approved (permit issued)" in g.text and '"Future Use"' in g.text
+    # the full record lists every field and each record once (this API number has two rows)
+    adv = c.get("/site/permit/051-02423?view=adv").text
+    assert "Point Pleasant" in adv and "Full record" in adv
+    assert adv.count("Permit stage</th>") == 1
+    assert "Impaired stream (303(d)) causes" in c.get("/site/permit/WV1012487?view=adv").text
+    assert c.get("/site/permit/nope").status_code == 404

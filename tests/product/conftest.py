@@ -59,6 +59,8 @@ VIEWPORTS = [(390, 844), (1280, 800)]   # phone (iPhone 12–15), laptop
 SITE_PAGES = [
     ("site-dc", "/site/data_center/monarch-compute-campus"),
     ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
+    ("site-permit-coal", "/site/permit/WV1012487"),        # coal discharge on 303(d) streams
+    ("site-permit-og", "/site/permit/051-02423"),          # oil & gas permit stage
 ]
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {

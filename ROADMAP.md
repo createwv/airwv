@@ -798,6 +798,10 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
       The air and water lines name and link the nearest sensor / monitor / gauge / sample site
       to its `/site/<kind>/<ref>` page ("data behind this →").
+- [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
+      permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
+      discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
+      caveat; `?view=adv` is the full record. Popups don't link to them yet.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
