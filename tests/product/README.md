@@ -9,6 +9,11 @@ basic and `view=adv`) are shot at every size in `~/.czadmin/tools/devices.json` 
 phone 390, phone-landscape 844, tablet 820, desktop 1280, desktop-wide 1920, with each device's
 pixel ratio and touch) and get the same checks, plus no sideways scroll at any size.
 
+The nav's "More" dropdown is tapped open on Home at every devices.json size (`more-<width>.png`,
+the menu open in the shot). `test_more_menu_not_cut_off` fails if any of its links, scrolled to,
+is still off screen, clipped sideways or under something, or the open menu adds sideways scroll;
+the report's "More" table lists the menu box and the links past the first screen (info only).
+
 Checks (`test_smoke.py`), per page × width unless noted:
 
 - page loads (200, no failed local requests)
