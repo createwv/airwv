@@ -28,6 +28,14 @@ API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 - **Use** labels (generative AI / cloud / crypto mining / storage / government or
   surveillance / enterprise / unknown) are our read of the evidence, with a confidence. They
   aren't findings. A site can have more than one.
+- **Per-fact sources** (`cite`): a map from a field (`"water.permits"`, `"power.mw"`,
+  `"use.0"`) to indexes (0-based) into that site's `sources`. The card shows them as
+  numbered links (`[1]`) after the line, matching the numbered source list. A key is added
+  only where the record itself ties the fact to one source: a permit number in the source's
+  title, an attribution tag ("DEP notice", "state release", "company", "SEC filing", "a
+  tracker") with one source of that kind, or a site with a single source. Lines without a
+  key fall back to the site's source list. Bare "not disclosed" / "none found" lines get no
+  key. `tests/test_data_centers.py` checks every key names a real fact and source.
 
 ---
 
