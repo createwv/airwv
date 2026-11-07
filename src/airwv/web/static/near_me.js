@@ -81,8 +81,10 @@ function renderResults() {
 // Data centers (/api/data-centers): a plain card per site near this place, the same shape
 // as templates/_dc_card.html — what we know / what's not disclosed, with sources.
 const ext = u => `href="${esc(u)}" target="_blank" rel="noopener"`;
+const dcCite = srcs => srcs && srcs.length ? ` <span class="dc-cite">${srcs.map(s =>
+  `<a ${ext(s.url)} title="${esc(s.kind)}: ${esc(s.title)}" aria-label="Source ${s.n}: ${esc(s.title)}">[${s.n}]</a>`).join('')}</span>` : '';
 function dcList(items) {
-  return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}` : esc(k.label)}</li>`).join('');
+  return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}${dcCite(k.sources)}` : esc(k.label)}</li>`).join('');
 }
 function dcCard(c) {
   const where = c.mi != null ? `${c.mi} mi away` : `in ${esc(c.county)} County · exact location not public`;
@@ -96,7 +98,7 @@ function dcCard(c) {
       <span class="nb-title"><a href="${esc(c.url)}">${esc(c.name)}</a></span>
       <span class="rbadge">${esc(c.status_label)}</span><span class="nb-meta">${where} · ${esc(c.operator)}</span></div>
     <div class="dc-grid">${topics}</div>
-    <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ul>${srcs}</ul></details>
+    <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ol>${srcs}</ol></details>
     <div class="nb-actions" style="margin-top:6px"><a href="${esc(c.url)}">plain summary →</a><a href="${esc(c.url)}?view=adv">full record and filings →</a></div>
   </div>`;
 }

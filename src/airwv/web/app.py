@@ -2044,7 +2044,7 @@ def create_app(store: Store) -> FastAPI:
         dc = found[0]["attrs"]
         return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
             "mode": "site", "kind": kind, "view": "adv" if view == "adv" else "basic",
-            "dc": dc, "card": dcs.card(dc), "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
+            "dc": dc, "card": dcs.card(dc), "cited": dcs.cited, "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
             "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
 
     @app.get("/data", response_class=HTMLResponse)

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_dc_card.html" import dc_card, how_to_ask %}
+{% from "_dc_card.html" import dc_card, how_to_ask, cite %}
 {% block content %}
 {% set c = card %}
 <div class="page">
@@ -31,17 +31,17 @@
       <tr><th>HB 2014 certification</th><td>{{ dc.hb2014 }}</td></tr>
       {% for section, label in [('power', 'Power'), ('water', 'Water'), ('air_permits', 'Air permits'), ('noise', 'Noise')] %}
       {% for k, v in (dc[section] or {}).items() %}
-      <tr><th>{{ label }} · {{ k.replace('_', ' ') }}</th><td>{{ v }}</td></tr>
+      <tr><th>{{ label }} · {{ k.replace('_', ' ') }}</th><td>{{ v }}{{ cite(cited(dc, section ~ '.' ~ k)) }}</td></tr>
       {% endfor %}{% endfor %}
       {% for u in dc.use %}
-      <tr><th>Use · {{ u.category.replace('_', ' ') }}</th><td>{{ u.confidence }} confidence — {{ u.evidence }}</td></tr>
+      <tr><th>Use · {{ u.category.replace('_', ' ') }}</th><td>{{ u.confidence }} confidence — {{ u.evidence }}{{ cite(cited(dc, 'use.' ~ loop.index0)) }}</td></tr>
       {% endfor %}
       <tr><th>Not disclosed</th><td>{{ dc.not_disclosed | join('; ') }}</td></tr>
     </table>
   </div>
   <div class="card"><h2>Filings and sources for this site</h2>
-    <ul class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
-      <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ul>
+    <ol class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
+      <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
   </div>
   <div class="card"><h2>Statewide dockets and cases about data centers</h2>
     <p class="meta" style="padding:8px 14px 0">Not all of these are about this site; they set the rules for all of them.</p>
