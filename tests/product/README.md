@@ -4,12 +4,12 @@ Acts as a user: boots the app (uvicorn) on a clone of the local SQLite copy, ope
 pages in headless Chromium at 390×844 (phone) and 1280×800 (laptop), screenshots them and
 checks what a resident would see. Runs as part of `pytest`; `tests/product/run.sh` runs it alone.
 
-Checks (`test_smoke.py`), per page × width unless noted:
-
 Site pages (`/site/<kind>/<id>`, `SITE_PAGES` in `conftest.py`: one per kind the route serves,
 basic and `view=adv`) are shot at every size in `~/.czadmin/tools/devices.json` (phone-small 360,
 phone 390, phone-landscape 844, tablet 820, desktop 1280, desktop-wide 1920, with each device's
 pixel ratio and touch) and get the same checks, plus no sideways scroll at any size.
+
+Checks (`test_smoke.py`), per page × width unless noted:
 
 - page loads (200, no failed local requests)
 - no console errors or uncaught page errors
