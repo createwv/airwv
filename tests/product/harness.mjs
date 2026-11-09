@@ -114,6 +114,20 @@ function markerPoint({ map: id, text }) {
 }
 
 // In-page /air "Filters" probe: where the sheet sits relative to the map and what shows.
+function seriesProbe() {
+  const f = document.getElementById("ex-form"), q = new URLSearchParams(location.search);
+  const shown = n => f.elements[n].checkVisibility();
+  return { site: f.elements.site_id.value, urlSite: q.get("site_id"), urlShow: q.get("show"),
+           siteShown: shown("site_id"), fromShown: shown("from"), sinceShown: shown("since"),
+           kindsShown: f.querySelector("input[name=kind]").checkVisibility(),
+           linksShown: document.getElementById("ex-links").checkVisibility(),
+           rows: document.querySelectorAll("#ex-table tbody tr").length,
+           count: document.getElementById("ex-count").textContent,
+           csv: document.getElementById("ex-csv").getAttribute("href"),
+           api: document.getElementById("ex-api").getAttribute("href"),
+           scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth };
+}
+
 function filtersProbe() {
   const det = document.getElementById("air-filters"), map = document.getElementById("map-card");
   if (!det || !map) return { error: "no #air-filters / #map-card" };
@@ -314,6 +328,36 @@ async function visit(vp, pg) {
         await page.waitForTimeout(200);
         info.filters.tapped = await page.evaluate(filtersProbe);
       }
+    }
+    if (pg.driveSeries) {
+      const submit = async () => {
+        await page.click(".ex-go button");
+        await page.waitForFunction(() => !/Loading/.test(document.getElementById("ex-count").textContent), null, { timeout: 30000 });
+        return page.evaluate(seriesProbe);
+      };
+      info.series = { first: await page.evaluate(seriesProbe) };
+      const shared = page.url();
+      await page.selectOption("select[name=show]", "sites");
+      info.series.list = await submit();
+      await page.selectOption("select[name=show]", "measurements");
+      info.series.back = await submit();
+      await page.selectOption("#ex-place", "parkersburg");
+      info.series.moved = await submit();
+      await page.goto(shared, { waitUntil: "load", timeout: 60000 });   // leaves the shots on the table
+      await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+      info.series.link = await page.evaluate(seriesProbe);
+    }
+    if (pg.probeExFilters) {
+      await page.waitForFunction(() => !/Loading/.test(document.getElementById("ex-count").textContent), null, { timeout: 30000 });
+      info.exFilters = await page.evaluate(() => {
+        const f = document.getElementById("ex-form");
+        return { county: f.elements.county.value, over: f.elements.over.value,
+                 countyShown: f.elements.county.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+                 count: document.getElementById("ex-count").textContent,
+                 prov: document.getElementById("ex-prov").textContent,
+                 api: document.getElementById("ex-api").getAttribute("href"),
+                 csv: document.getElementById("ex-csv").getAttribute("href") };
+      });
     }
   } catch (e) { err = String(e.message || e).split("\n")[0]; }
   const ms = Date.now() - t0;

@@ -167,7 +167,9 @@ Get warnings to the people who need them.
       NRC spill reports, `water` = SDWA health-based violations, `violations` = ECHO facility
       violations), read from the `record` view. Fires on records new for the place since the
       last check (`alert_seen` table; first check = silent baseline); county-only records also
-      match a place in that county. The `/alerts` form's water/spills waitlist rows went live
+      match a place in that county; spill reports dated over 60 days back are skipped
+      (`max_age_days`, stated in the email). `/api/admin/subscriptions` shows each record
+      subscription's history (`record_history`: what fired, per send, and the baseline). The `/alerts` form's water/spills waitlist rows went live
       (old rows are matched by field, no migration) and gained facility violations; `/place`'s
       *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
       *Email delivery still waits on SMTP go-live (a session with Corey).*
@@ -564,7 +566,7 @@ Grow the network and secure the record.
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
-      views + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
+      views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
       `deploy/systemd/airwv-dumps.*`). *Parquet, CORS and rate limiting after Postgres.*
 - [ ] Public API documentation and rate limiting
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but

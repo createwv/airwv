@@ -101,17 +101,17 @@ function drawMap() {
   nbMap.setView([DATA.lat, DATA.lon], 12);
   if (nbLayer) nbLayer.remove();
   nbLayer = L.layerGroup();
-  L.marker([DATA.lat, DATA.lon], {icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+  L.marker([DATA.lat, DATA.lon], {title: 'You are here', icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
     .bindPopup('You are here').addTo(nbLayer);
   (DATA.hazards || []).forEach(h => {
     if (h.lat == null || h.lon == null) return;
-    L.circleMarker([h.lat, h.lon], {radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
+    L.circleMarker([h.lat, h.lon], {title: h.label, radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
       .bindPopup(`<b>${esc(h.label)}</b><br><small>${h.mi != null ? h.mi + ' mi · ' : ''}${esc(h.detail || '')}</small>`)
       .addTo(nbLayer);
   });
   ((DC && DC.near) || []).forEach(c => {
     if (c.lat == null || c.lon == null) return;
-    L.marker([c.lat, c.lon], {icon: L.divIcon({className: '', html: '🏢', iconSize: [24, 24], iconAnchor: [12, 12]})})
+    L.marker([c.lat, c.lon], {title: `${c.name}, data center`, icon: L.divIcon({className: '', html: '🏢', iconSize: [24, 24], iconAnchor: [12, 12]})})
       .bindPopup(`<b>${esc(c.name)}</b><br><small>Data center · ${esc(c.status_label)} · ${c.mi} mi</small><br><a href="${esc(c.url)}">what we know →</a>`)
       .addTo(nbLayer);
   });

@@ -151,7 +151,7 @@ function redrawSensors(){
   // ozone monitors (EPA reference) as square markers, colored by ozone AQI band
   if (layerState.ozone) allSensors.forEach(x => {
     if (x.latest_ozone == null || x.lat == null) return;
-    L.marker([x.lat, x.lon], {icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
+    L.marker([x.lat, x.lon], {title: `${x.name}, ozone monitor`, icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
       html:`<div class="o3mk" style="background:${x.ozone_color||'#9e9e9e'}"></div>`})})
       .bindPopup(`<b>${x.name}</b><br><i>EPA ozone monitor</i><br>latest O₃: <b>${x.latest_ozone} ppb</b>`
         + `<br><small>select the Ozone metric, then click to chart</small>`)
@@ -174,11 +174,11 @@ function redrawSensors(){
       `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
-      L.circleMarker([x.lat, x.lon], {radius:8, color:(ring?ring.color:'#111'), weight:(ring?ring.weight:3), fillColor:x.color, fillOpacity:0.85})
+      L.circleMarker([x.lat, x.lon], {title: `${x.name}, reference monitor`, radius:8, color:(ring?ring.color:'#111'), weight:(ring?ring.weight:3), fillColor:x.color, fillOpacity:0.85})
         .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(refLayer);
     } else {
       if (!layerState.community || layerState.regions[x.region] === false) return;
-      L.circleMarker([x.lat, x.lon], {radius:9, color:(ring?ring.color:'#333'), weight:(ring?ring.weight:1), fillColor:x.color, fillOpacity:0.9})
+      L.circleMarker([x.lat, x.lon], {title: `${x.name}, community sensor`, radius:9, color:(ring?ring.color:'#333'), weight:(ring?ring.weight:1), fillColor:x.color, fillOpacity:0.9})
         .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(sensorLayer);
     }
   });
@@ -264,7 +264,7 @@ function showProximity(name){
   if (proxRings) proxRings.remove();
   proxRings = L.layerGroup();
   [1,3].forEach(mi => L.circle([src.lat,src.lon], {radius:mi*1609.34, color:'#a00', weight:1, fill:false, dashArray:'4'}).addTo(proxRings));
-  L.marker([src.lat,src.lon], {icon:L.divIcon({className:'', html:'🎯', iconSize:[24,24], iconAnchor:[12,12]})})
+  L.marker([src.lat,src.lon], {title: `${src.name}, proximity center`, icon:L.divIcon({className:'', html:'🎯', iconSize:[24,24], iconAnchor:[12,12]})})
     .bindPopup(`<b>${src.name}</b><br>proximity center`).addTo(proxRings);
   proxRings.addTo(map);
   if (map) map.setView([src.lat, src.lon], 10);
@@ -339,7 +339,7 @@ function redrawEcho(){
     // water/drinking-water dischargers get a lazily-loaded measured-water block
     const water = (f.programs||[]).some(p=>p==='water'||p==='drinking-water')
       ? `<div class="fac-wq" data-pending data-lat="${f.lat}" data-lon="${f.lon}"></div>` : '';
-    L.circleMarker([f.lat, f.lon], {radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([f.lat, f.lon], {title: f.name, radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${f.name}</b><br><span style="color:${col};font-weight:600">⚖️ ${ECHO_LABEL[f.status]||''}</span>`+
         `<br><small>${[f.city, f.county && f.county+' Co.'].filter(Boolean).join(', ')}</small>`+
         (progs?`<br><small>${progs}</small>`:'')+
@@ -368,7 +368,7 @@ function redrawDep(){
     if (layerState.depStage[p.stage] === false) return;
     const col = DEP_COLOR[p.stage] || DEP_COLOR.other;
     const when = p.issue_date || p.received_date;
-    L.circleMarker([p.lat, p.lon], {radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([p.lat, p.lon], {title: `Oil and gas permit: ${p.operator||'operator unknown'}`, radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${p.operator||'Operator unknown'}</b>`+
         `<br><span style="color:${col};font-weight:600">🛢️ ${DEP_LABEL[p.stage]||''}</span>`+
         `<br><small>${[p.county && p.county+' Co.', p.well_type].filter(Boolean).join(' · ')}</small>`+
@@ -396,7 +396,7 @@ function redrawMines(){
     if (layerState.mineStage[m.stage] === false) return;
     const col = MINE_COLOR[m.stage] || MINE_COLOR.other;
     const acres = m.acres_disturbed ? `<br><small>${m.acres_disturbed} acres disturbed${m.acres_reclaimed?` · ${m.acres_reclaimed} reclaimed`:''}</small>` : '';
-    L.circleMarker([m.lat, m.lon], {radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([m.lat, m.lon], {title: `Mine permit: ${m.operator||'operator unknown'}`, radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${m.operator||'Operator unknown'}</b>`+
         `<br><span style="color:${col};font-weight:600">⛏️ ${MINE_LABEL[m.stage]||''}</span>`+
         `<br><small>${[m.type, m.facility].filter(Boolean).join(' · ')}</small>`+
@@ -433,7 +433,7 @@ function redrawWells(){
     // near-homes wells pop (bigger, opaque, dark ring); remote ones fade back
     const prox = w.near_homes ? `🏠 <b>within ${w.nearest_building_m} m of a building</b>`
       : (w.nearest_building_m != null ? `~${w.nearest_building_m} m to nearest building` : 'remote (no building within ~1 km)');
-    L.circleMarker([w.lat, w.lon], {radius: near?6:3.5, color: near?'#400':'#333',
+    L.circleMarker([w.lat, w.lon], {title: `Abandoned gas well ${w.id||''}`.trim(), radius: near?6:3.5, color: near?'#400':'#333',
       weight: near?1.2:0.5, fillColor:col, fillOpacity: near?0.95:0.55})
       .bindPopup(`<b>Abandoned gas well</b> <small>${w.id||''}</small>`+
         `<br><span style="color:${col};font-weight:600">${w.orphan?'🚱 Orphan — no known operator (state to plug)':'⚠️ Abandoned'}</span>`+
@@ -456,7 +456,7 @@ function redrawSources(){
     if (s.lat == null || s.lon == null) return;
     const cat = s.category || 'other';
     if (layerState.cats[cat] === false) return;
-    L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
+    L.marker([s.lat, s.lon], {title: s.name, icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
       iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}`+
         `<br><b style="color:#7a5b12">${SRC_LABEL[cat]||'Facility'}</b> · ${s.type}<br><i>${s.operator||''}</i>`+
@@ -752,7 +752,7 @@ function redrawReports(){
       ? `<br><small>📊 measured: ${r.readings.map(x=>`${x.parameter} ${x.value}${x.unit?' '+x.unit:''}`).join(', ')} <i>(community, unverified)</i></small>`
       : '';
     const photo = r.photo ? `<br><a href="${r.photo}" target="_blank" rel="noopener"><img src="${r.photo}" style="max-width:200px;max-height:150px;border-radius:5px;margin-top:4px"></a>` : '';
-    L.marker([r.lat, r.lon], {icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
+    L.marker([r.lat, r.lon], {title: `Community report: ${r.category || r.domain}`, icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${R_ICON[r.domain]||'📣'} ${r.category || r.domain}</b>`+
         (r.description ? `<br>${r.description}` : '')+
         (r.area_label ? `<br><small>📍 ${r.area_label}</small>` : '')+
@@ -771,7 +771,7 @@ function nearMe(){
   navigator.geolocation.getCurrentPosition(p=>{
     const lat=p.coords.latitude, lon=p.coords.longitude;
     if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat,lon], {zIndexOffset:1000,
+    userMarker = L.marker([lat,lon], {title: 'You are here', zIndexOffset:1000,
       icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
       .addTo(map).bindPopup('You are here').openPopup();
     map.setView([lat,lon], 11);
