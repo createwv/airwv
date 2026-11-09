@@ -48,6 +48,7 @@ PAGES = [
     ("about", "/about"),
     ("data", "/data"),
     ("explore", "/explore?place=rutledge&km=8&param=pm2_5"),   # query builder at the demo place
+    ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5"),   # one site's readings
     # data centers: Near me at Point Pleasant (Monarch is ~4 mi); its site page is in SITE_PAGES
     ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
     ("place-dc", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8"),

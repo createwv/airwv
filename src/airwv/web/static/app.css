@@ -457,6 +457,7 @@
   .ex-kinds { border:0; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px 14px; }
   .ex-kinds legend { font-size:13px; color:#556; padding:0; margin-bottom:4px; }
   .ex-kinds label { font-size:14px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; min-height:32px; }
+  .ex-form [hidden], .ex-links[hidden] { display:none; }
   .ex-go { margin-top:12px; }
   .ex-go button { font-size:15px; padding:8px 16px; }
   .ex-bar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 14px; margin:14px 2px 8px; font-size:14px; }

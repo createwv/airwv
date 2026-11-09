@@ -271,7 +271,8 @@ provenance and a `csv` link to the same rows; the place filters don't apply. Pas
 (default 5000, max 20000) the newest rows are kept and `truncated` is true; an unknown
 `site_id` is a 404. Powers the
 **My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
-state is in its URL, with the table, the CSV link and the API link for the same query). See
+state is in its URL, with the table, the CSV link and the API link for the same query; its
+"measurements" option picks a site near the place and reads this series mode). See
 [READ-MODEL.md](READ-MODEL.md).
 
 ---
