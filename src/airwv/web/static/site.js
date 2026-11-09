@@ -40,10 +40,8 @@
   function relatedHtml(sites) {
     if (!sites.length) return '<p class="meta" style="padding:14px">No other kinds of site within 25 mi.</p>';
     return '<ul class="dc-files">' + sites.map(s => {
-      const h = href(s), name = esc(s.name || s.ref);
-      const ext = h && !h.startsWith('/') ? ' target="_blank" rel="noopener"' : '';
       return `<li><span class="rbadge">${esc(KIND_LABEL[s.kind] || s.kind)}</span> `
-        + (h ? `<a href="${esc(h)}"${ext}>${name}</a>` : name)
+        + `<a href="${esc(href(s))}">${esc(s.name || s.ref)}</a>`
         + ` <span class="meta">${mi(s.mi)}${s.county ? ' · ' + esc(s.county) + ' County' : ''}</span></li>`;
     }).join('') + '</ul>';
   }
