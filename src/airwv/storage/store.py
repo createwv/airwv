@@ -117,6 +117,7 @@ class Store:
             "reports": {"contact_name": "VARCHAR(160)"},
             "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT",
                               "records_checked_at": "TIMESTAMP"},
+            "alert_seen": {"origin": "VARCHAR(16)"},
         }
         insp = _inspect(self._engine)
         with self._engine.begin() as conn:
@@ -400,12 +401,29 @@ class Store:
                 out[sid].add(key)
         return out
 
-    def mark_records_seen(self, subscription_id: int, keys, when) -> None:
-        """Remember these records for the subscription and stamp ``records_checked_at``."""
+    def record_history(self, subscription_ids) -> dict[int, list[tuple]]:
+        """Each subscription's known records as ``(record_key, origin, seen_at)``, newest first."""
+        ids = list(subscription_ids)
+        out: dict[int, list[tuple]] = {i: [] for i in ids}
+        if not ids:
+            return out
+        with self._session_factory() as session:
+            for sid, key, origin, at in session.execute(
+                    select(AlertSeen.subscription_id, AlertSeen.record_key,
+                           AlertSeen.origin, AlertSeen.seen_at)
+                    .where(AlertSeen.subscription_id.in_(ids))
+                    .order_by(AlertSeen.seen_at.desc(), AlertSeen.record_key)):
+                out[sid].append((key, origin, at))
+        return out
+
+    def mark_records_seen(self, subscription_id: int, keys, when, origin: str) -> None:
+        """Remember these records for the subscription and stamp ``records_checked_at``.
+        ``origin`` says how they became known: ``"baseline"`` or ``"alert"``."""
         with self._session_factory() as session:
             have = set(session.scalars(select(AlertSeen.record_key)
                                        .where(AlertSeen.subscription_id == subscription_id)))
-            session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when)
+            session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when,
+                                      origin=origin)
                             for k in sorted(set(keys) - have))
             sub = session.get(Subscription, subscription_id)
             if sub is not None:
