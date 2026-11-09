@@ -14,6 +14,10 @@ the menu open in the shot). `test_more_menu_not_cut_off` fails if any of its lin
 is still off screen, clipped sideways or under something, or the open menu adds sideways scroll;
 the report's "More" table lists the menu box and the links past the first screen (info only).
 
+`/air`'s "Filters" sheet is shot at every devices.json size (`filters-<width>.png`, tapped open
+where it's collapsed). `test_air_filters_sheet` wants it collapsed under the map on phones (width
+≤ 560 or height ≤ 480), opening with a tap without sideways scroll, and open above the map elsewhere.
+
 Pages with a statewide map (`MAP_PAGES` in `conftest.py`, `map-<page>-<width>.png`) are shot at
 every devices.json size for the map check below; the report's `maps` column shows each one's `×` size.
 

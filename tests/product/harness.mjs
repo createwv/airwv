@@ -3,7 +3,8 @@
 // Config: {base, out, pages:[{name, path, viewports?, openMore?}], viewports:[{w, h}],
 //          vendorDirs:[...], geo:{lat, lon}}. A page with its own viewports ({w, h, device, scale,
 //          mobile, touch}, from devices.json) is visited at those instead of the shared list; one
-//          with openMore taps the nav's "More" menu open before the screenshots (see moreProbe).
+//          with openMore taps the nav's "More" menu open before the screenshots (see moreProbe),
+//          one with openFilters does the same for /air's "Filters" sheet (see filtersProbe).
 // Offline by design: only the local server is reachable. CDN libraries (Leaflet, Plotly…) are
 // served from a vendor dir when a copy is there, else replaced by a no-op shim (and reported).
 import { createRequire } from "node:module";
@@ -95,6 +96,16 @@ function moreProbe() {
   window.scrollTo(0, 0);
   return { open: det.open, rect, links: links.length, belowFold, cut,
            scrollWidth: document.documentElement.scrollWidth, innerWidth: vw, innerHeight: vh };
+}
+
+// In-page /air "Filters" probe: where the sheet sits relative to the map and what shows.
+function filtersProbe() {
+  const det = document.getElementById("air-filters"), map = document.getElementById("map-card");
+  if (!det || !map) return { error: "no #air-filters / #map-card" };
+  return { open: det.open, belowMap: !!(map.compareDocumentPosition(det) & Node.DOCUMENT_POSITION_FOLLOWING),
+           summary: getComputedStyle(det.querySelector("summary")).display !== "none",
+           metricVisible: document.getElementById("field").getBoundingClientRect().height > 0,
+           scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth };
 }
 
 // In-page accessibility probe (WCAG 2.1 AA, the checks a script can make reliably):
@@ -255,6 +266,14 @@ async function visit(vp, pg) {
       await page.click("nav.modenav details.more > summary");
       await page.waitForTimeout(200);
       info.more = await page.evaluate(moreProbe);
+    }
+    if (pg.openFilters) {
+      info.filters = { first: await page.evaluate(filtersProbe) };
+      if (info.filters.first.summary) {   // only phones have something to tap
+        await page.click("#air-filters > summary");
+        await page.waitForTimeout(200);
+        info.filters.tapped = await page.evaluate(filtersProbe);
+      }
     }
   } catch (e) { err = String(e.message || e).split("\n")[0]; }
   const ms = Date.now() - t0;
