@@ -1,0 +1,14 @@
+{# "Related nearby" on every site page: site.js fills #site-related with the nearest site of
+   each other kind from /api/query (one fetch per kind, limit 1), the 5 closest. #}
+{% macro related(kind, site_id, lat, lon) %}
+<div class="card"><h2>Related nearby</h2>
+  {% if lat is not none and lon is not none %}
+  <div id="site-related" data-kind="{{ kind }}" data-site="{{ site_id }}" data-lat="{{ lat }}" data-lon="{{ lon }}">
+    <p class="meta" style="padding:14px">Loading…</p></div>
+  <p class="meta" style="padding:0 14px 12px">The nearest site of each other kind within 25 mi, closest first,
+    from <a href="/api/query?lat={{ lat }}&amp;lon={{ lon }}&amp;km=40.25">/api/query</a>.</p>
+  {% else %}
+  <p class="meta" style="padding:14px">This site's location isn't listed, so we can't show what's near it.</p>
+  {% endif %}
+</div>
+{% endmacro %}

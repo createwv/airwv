@@ -92,7 +92,7 @@ ones PurpleAir already publishes.
 ## Nightly public dumps
 
 `python -m airwv.dumps` writes gzipped CSV of the public read views (`site`, `measurement`,
-`record`) plus `manifest.json` (row counts, columns, each layer's provenance) into
+`record`) and published `events`, plus `manifest.json` (row counts, columns, each layer's provenance) into
 `AIRWV_DUMPS_DIR` (default `data/dumps`, gitignored). The dashboard serves them at
 `/data/dumps/<name>` and links them from `/data`; until the first run they 404.
 

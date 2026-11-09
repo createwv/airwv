@@ -130,6 +130,7 @@ def merge_sources(sources: list[dict], max_km: float = 0.9, place_tokens=None) -
         echo = next((r.get("echo") for r in recs if r.get("echo")), None)
         permit = next((r.get("permit") for r in recs if r.get("permit")), None)
         fac = {
+            "id": next((r.get("id") for r in recs if r.get("id")), None),
             "name": name,
             "type": next((r.get("type") for r in recs if r.get("type")), ""),
             "operator": operator,
@@ -199,7 +200,10 @@ def _place_tokens(echo_facilities: list[dict] | None) -> set[str]:
 
 
 def enrich_sources(sources: list[dict], echo_facilities: list[dict] | None = None) -> list[dict]:
-    """Full pipeline: dedupe (place-aware), then attach ECHO compliance (if provided)."""
+    """Full pipeline: dedupe (place-aware), then attach ECHO compliance (if provided).
+    Each raw record gets the stable id ``tri-<index in sources.json>`` (the read model's
+    facility ref, so ``/site/facility/<id>``); a merged facility keeps its first record's."""
+    sources = [{**s, "id": s.get("id") or f"tri-{i}"} for i, s in enumerate(sources)]
     merged = merge_sources(sources, place_tokens=_place_tokens(echo_facilities))
     if echo_facilities:
         attach_compliance(merged, echo_facilities)

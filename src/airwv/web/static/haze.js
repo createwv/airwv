@@ -1,14 +1,16 @@
 // Ambient haze (experiment): tint the whole site to reflect West Virginia's air
 // *right now*. The worse the typical community PM2.5, the browner/denser the veil —
-// awareness you feel, not a number you have to read. Dismissible; off for good air.
+// awareness you feel, not a number you have to read. Opt-in (Learn → Health & AQI has the
+// switch); dismissible; clear for good air.
 (function () {
   const el = document.getElementById('haze');
   const chip = document.getElementById('haze-chip');
   if (!el || !chip) return;
   // Preview/demo override: ?haze=<pm2.5> forces a value so the effect can be seen even
-  // when the real air is good (it usually is). Bypasses a prior dismiss. Handy for testing.
+  // when the real air is good (it usually is). Works without opting in. Handy for testing.
   const override = parseFloat(new URLSearchParams(location.search).get('haze'));
-  if (isNaN(override) && localStorage.getItem('airwv_haze_off') === '1') return;   // user turned it off
+  const KEY = 'airwv_haze_on';
+  const enabled = () => !isNaN(override) || localStorage.getItem(KEY) === '1';
 
   // PM2.5 bands → tint color + strength. "o" is the veil strength (0 = clear).
   const BANDS = [
@@ -41,7 +43,10 @@
     chip.classList.add('on');
   }
 
+  function clear() { el.style.opacity = 0; chip.classList.remove('on'); }
+
   async function tick() {
+    if (!enabled()) { clear(); return; }
     if (!isNaN(override)) { apply(override); return; }
     try {
       const sensors = await (await fetch('/api/sensors')).json();
@@ -53,9 +58,14 @@
   }
 
   chip.querySelector('.haze-off').addEventListener('click', () => {
-    localStorage.setItem('airwv_haze_off', '1');
-    el.style.opacity = 0; chip.classList.remove('on');
+    localStorage.removeItem(KEY);
+    clear();
   });
+  // the Learn page's switch turns it on/off without a reload
+  window.AIRWV_HAZE = {
+    enabled: () => localStorage.getItem(KEY) === '1',
+    set(on) { if (on) localStorage.setItem(KEY, '1'); else localStorage.removeItem(KEY); tick(); },
+  };
 
   tick();
   setInterval(tick, 10 * 60 * 1000);   // refresh every 10 minutes

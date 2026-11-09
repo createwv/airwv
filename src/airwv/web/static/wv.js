@@ -87,6 +87,41 @@
     return {open, close};
   }
 
+  // Map markers for keyboard and screen-reader users: any L.marker or L.circleMarker given a
+  // `title` option gets a tab stop and that name (a circleMarker is a bare SVG path, and a
+  // divIcon's emoji would otherwise be read out as its name). Enter/Space act like a click, so
+  // popups and chart toggles both work; Escape closes the popup. Redrawing the layer on a click
+  // replaces the element, so focus moves to the marker of the same name.
+  function accessibleMarkers(L) {
+    function wire() {
+      const name = this.options.title;
+      if (!name) return;
+      this.on('add', () => {
+        const el = this.getElement();
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', name);
+        if (this instanceof L.CircleMarker)   // L.marker already has autoPanOnFocus
+          el.addEventListener('focus', () => { if (this._map) this._map.panInside(this.getLatLng()); });
+      });
+      this.on('keydown', e => {
+        const ev = e.originalEvent;
+        if (ev.key === 'Escape') { this.closePopup(); return; }
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        const box = this._map.getContainer();
+        this.fire('click', {originalEvent: ev});
+        if (!ev.target.isConnected) {
+          const same = [...box.querySelectorAll('[aria-label]')].find(n => n.getAttribute('aria-label') === name);
+          if (same) same.focus();
+        }
+      });
+    }
+    L.Marker.addInitHook(wire);
+    L.CircleMarker.addInitHook(wire);
+  }
+  if (root.L) accessibleMarkers(root.L);
+
   // 'smooth' for scrollIntoView/scrollTo, unless the visitor asked for reduced motion
   // (CSS scroll-behavior doesn't override a script's explicit 'smooth').
   function scrollBehavior() {
@@ -94,7 +129,7 @@
     return m && m.matches ? 'auto' : 'smooth';
   }
 
-  const api = {WV_BBOX, fitWV, haversineMi, pickDefaultSensor, clampY, ink, dialog, scrollBehavior};
+  const api = {WV_BBOX, fitWV, haversineMi, pickDefaultSensor, clampY, ink, dialog, accessibleMarkers, scrollBehavior};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.AIRWV_WV = api;
 })(this);

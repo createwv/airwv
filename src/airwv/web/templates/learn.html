@@ -163,7 +163,15 @@
     </div></div>
 
     <div class="card"><div class="prose">
-      <p style="background:#eef2fb; border-radius:8px; padding:12px 14px"><b>🔍 Not feeling right and wondering what's around you?</b>
+      <h3>Haze tint (optional)</h3>
+      <p>An experiment: when West Virginia's typical community PM2.5 reading is above "Good", the
+        whole site takes on a faint brown haze, darker as the air gets worse, with a small note
+        in the corner saying why. It's off unless you turn it on, and it stays on this device only.</p>
+      <label><input type="checkbox" id="haze-toggle"> Show the haze tint when WV's air is worse than Good</label>
+    </div></div>
+
+    <div class="card"><div class="prose">
+      <p style="background:#eef2fb; border-radius:8px; padding:12px 14px"><b>Not feeling right and wondering what's around you?</b>
         Try <a href="/nearby"><b>What's near me?</b></a>: share your location and any symptoms, and it maps the
         wells, facilities, discharges, and spills nearby, flagging the ones that fit how you feel. <span class="meta">(Not medical advice — for emergencies call 911.)</span></p>
       <h3>Who's most at risk</h3>
@@ -197,7 +205,7 @@
     </div></div>
 
     <div class="card"><div class="prose">
-      <h3>🕳️ Gas wells &amp; hydrogen sulfide (H2S) — the rotten-egg hazard</h3>
+      <h3>Gas wells &amp; hydrogen sulfide (H2S) — the rotten-egg hazard</h3>
       <p>West Virginia's thousands of <b>abandoned and orphaned gas wells</b> can leak raw natural gas
         and <b>hydrogen sulfide (H2S)</b>, a toxic gas with a <b>rotten-egg smell</b>. This is the issue
         behind the Rutledge neighborhood in Charleston, and a founding reason communities here started
@@ -227,7 +235,7 @@
     </div></div>
 
     <div class="card"><div class="prose">
-      <h3>💧 In your water — what the contaminants do</h3>
+      <h3>In your water — what the contaminants do</h3>
       <p>The <a href="/water">Water</a> page tracks measured stream chemistry, coal-mine discharges, and
         <b>Safe Drinking Water Act violations</b> by system. Here's why those numbers matter for your body:</p>
       <ul>
@@ -241,7 +249,7 @@
           fish</b> (a fish-consumption concern); manganese at high levels is a neurodevelopment concern for kids.</li>
       </ul>
       <p>If your water looks, smells, or tastes off, contact your water system and <a href="#" data-open="report">
-        report it →</a>. For a boil-water advisory, follow your utility's guidance. <span class="meta">Sources:
+        report it →</a>. For a boil-water advisory, follow your utility's guidance. <span class="meta">Data sources:
         EPA drinking-water standards; CDC; WV DHHR.</span></p>
     </div></div>
   </div>
@@ -257,8 +265,8 @@
         <b>whatever happens upstream reaches your tap</b>. That's exactly what the 2014
         <a href="/events">Freedom Industries spill</a> exposed: the leak was barely a mile and a
         half above the intake, and 300,000 people lost usable water within hours. Knowing your
-        source, and what sits upstream of the intake, is the first step in protecting it.</p>
-      <p class="meta">Find your own system's source and test results in its annual <b>Consumer
+        water source, and what sits upstream of the intake, is the first step in protecting it.</p>
+      <p class="meta">Find your own system's water source and test results in its annual <b>Consumer
         Confidence Report</b> (every water utility must publish one), or in WV's source-water
         assessments.</p>
     </div></div>
@@ -460,8 +468,16 @@
       <p class="rnote">This is plain-language education, <b>not legal advice</b>. For your situation,
         talk to WV DEP/EPA and, for private claims, a licensed attorney.</p>
 
-      <h3>Quick glossary</h3>
+      <h3 id="glossary">Quick glossary</h3>
+      <p class="meta">The first six are the words this site uses for one thing only
+        (<a href="https://github.com/createwv/airwv/blob/main/docs/GLOSSARY.md" target="_blank" rel="noopener">docs/GLOSSARY.md</a>).</p>
       <div class="deflist">
+        <div><b>Sensor</b><p>A community air device (PurpleAir and similar), set up by residents or partners; provisional, corrected where we can.</p></div>
+        <div><b>Monitor</b><p>An EPA / WV DEP reference air monitor, the regulatory-grade instrument the sensors are checked against.</p></div>
+        <div><b>Gauge</b><p>A USGS stream gauge reporting water conditions (pH, oxygen, conductance, flow) in near real time.</p></div>
+        <div><b>Sample site</b><p>A place where water samples were taken and lab-tested, at intervals rather than live.</p></div>
+        <div><b>Facility</b><p>A regulated place with public records: permits, reported releases, inspections, violations (power plants, plants, mines, discharges, data centers, …).</p></div>
+        <div><b>Data source</b><p>Where we got a piece of data (an agency, a feed, a file); see <a href="/data">Data</a>. Never "source" alone, which reads as a pollution source.</p></div>
         <div><b>Criteria pollutant</b><p>One of the six pollutants with a national health-based limit (NAAQS).</p></div>
         <div><b>HAP / air toxic</b><p>A hazardous air pollutant (e.g., benzene) on EPA's separate 180+ list.</p></div>
         <div><b>Point source</b><p>A single identifiable source of pollution — a smokestack or a discharge pipe.</p></div>
@@ -473,7 +489,7 @@
         <div><b>Citizen suit</b><p>A lawsuit the Clean Air/Water Acts let ordinary people file against a violator (after notice).</p></div>
       </div>
       <div class="depbox">
-        <b>📞 How to report pollution to WV DEP</b>
+        <b>How to report pollution to WV DEP</b>
         <ul>
           <li><b>Spills &amp; environmental emergencies (24/7):</b>
             <a href="tel:18006423074">1-800-642-3074</a></li>
@@ -495,7 +511,7 @@
   <!-- ============ CLIMATE ============ -->
   <div class="lpanel" id="lp-climate" hidden>
     <div class="card"><div class="prose">
-      <h3>📈 The trend in our own West Virginia data</h3>
+      <h3>The trend in our own West Virginia data</h3>
       <p>Climate isn't only a global story — it shows up in the records we keep right here. Below is
         the <b>year-by-year ground-level ozone</b> from the EPA reference monitors we archive for WV.
         Ozone <b>forms faster in heat and sunlight</b>, so it's a local fingerprint of hotter summers
@@ -561,7 +577,7 @@
         when drought-driven fires swept the southern coalfields in November 2024 (see our
         <a href="/events">Events</a> page). Tracking local air makes these trade-offs visible and
         holds the improvements accountable.</p>
-      <p class="meta">Educational summary of mainstream climate science and policy; sources linked
+      <p class="meta">Educational summary of mainstream climate science and policy; data sources linked
         above (UNFCCC, IPCC).</p>
     </div></div>
   </div>

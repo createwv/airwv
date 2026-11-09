@@ -81,6 +81,35 @@ def test_rule_quiet_hours_and_rate_limit_hold_the_alert():
     assert evaluate_records([recent], [rec], {1: set()}, _NOW)[0] == []
 
 
+def test_spill_age_cap_skips_old_reports_only():
+    def rec(ref, effective):
+        return _rec(ref, 38.36, -81.64, effective=effective)
+
+    edge, old = rec(1, "2024-04-02"), rec(2, "2024-04-01")           # 60 and 61 days before _NOW
+    undated, garbled = rec(3, None), rec(4, "unknown")
+    alerts, _ = evaluate_records([_Sub()], [edge, old, undated, garbled], {1: set()}, _NOW)
+    assert {r["site_id"] for r in alerts[0].records} == {
+        "spill_report:1", "spill_report:3", "spill_report:4"}
+    # only an old report: nothing to send
+    assert evaluate_records([_Sub()], [old], {1: set()}, _NOW)[0] == []
+    # the cap is for spills; an old violation still alerts
+    viol = _rec(9, 38.36, -81.64, rule="violations", kind="violation", value="violation",
+                effective="2020-01-01")
+    assert len(evaluate_records([_Sub(field="violations")], [viol], {1: set()}, _NOW)[0]) == 1
+
+
+def test_email_states_the_spill_age_cap():
+    def body(field, rec):
+        return alert_body(Alert(subscription_id=1, channel="log", target="x", sensor_id=rec["site_id"],
+                                field=field, value=1.0, threshold=0.0, ts=_NOW, kind="record",
+                                label="Charleston", records=[rec]))
+
+    assert "leaves out reported spills dated more than 60 days back" in body(
+        "spills", _rec(1, 38.36, -81.64))
+    assert "days back" not in body(
+        "violations", _rec(9, 38.36, -81.64, rule="violations", kind="violation", value="violation"))
+
+
 def test_waitlist_rows_are_record_subs_and_skip_the_reading_matcher():
     legacy = _Sub(kind="threshold", field="spills")       # how the old waitlist stored them
     assert evaluate([legacy], {}, _NOW) == []
@@ -149,6 +178,56 @@ def test_run_alerts_baselines_then_fires_on_a_new_spill(tmp_path, monkeypatch):
     assert sent[0].unsubscribe_url == "https://air.example/alerts/unsubscribe?token=tok"
     assert "Diesel Fuel" in alert_body(sent[0])
     assert run(later + timedelta(days=1)) == []              # seen: no repeat
+
+    # the admin view tells the starting point from what fired
+    from fastapi.testclient import TestClient
+
+    from airwv.web.app import create_app
+
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = TestClient(create_app(store))
+    assert c.get("/api/admin/subscriptions").status_code in (401, 403)
+    (row,) = c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"]
+    hist = row["record_history"]
+    assert (hist["baseline"]["taken_at"], hist["baseline"]["count"]) == (_NOW.isoformat(), 1)
+    assert [r["site_id"] for r in hist["baseline"]["records"]] == ["spill_report:1"]
+    assert hist["sends"] == 1 and hist["unlabeled"] == 0
+    assert hist["fired"][0]["at"] == later.isoformat()
+    assert [r["site_id"] for r in hist["fired"][0]["records"]] == ["spill_report:2"]
+
+
+def test_admin_history_is_null_for_reading_alerts_and_flags_unlabeled_rows(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from airwv.storage.models import AlertSeen
+    from airwv.web.app import create_app
+
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    store = Store(f"sqlite:///{tmp_path / 'h.sqlite'}")
+    store.create_schema()
+    air = store.add_subscription(channel="email", target="a@x.org", field="pm2_5", threshold=35.0)
+    rec = store.add_subscription(channel="email", target="b@x.org", kind="record", field="water",
+                                 threshold=0.0)
+    with store._session_factory() as session:   # a row from before origin was tracked
+        session.add(AlertSeen(subscription_id=rec, record_key="site|health_violation|", seen_at=_NOW))
+        session.commit()
+    rows = TestClient(create_app(store)).get("/api/admin/subscriptions",
+                                             headers={"X-Admin-Token": "secret"}).json()["results"]
+    by_id = {r["id"]: r["record_history"] for r in rows}
+    assert by_id[air] is None
+    assert by_id[rec]["unlabeled"] == 1 and by_id[rec]["baseline"]["count"] == 0
+    assert by_id[rec]["checked_at"] is None and by_id[rec]["fired"] == []
+
+
+def test_ensure_columns_adds_origin_to_an_older_alert_seen(tmp_path):
+    from sqlalchemy import inspect, text
+
+    store = Store(f"sqlite:///{tmp_path / 'o.sqlite'}")
+    with store._engine.begin() as conn:
+        conn.execute(text("CREATE TABLE alert_seen (id INTEGER PRIMARY KEY, subscription_id INTEGER, "
+                          "record_key VARCHAR(512), seen_at TIMESTAMP)"))
+    store.create_schema()
+    assert "origin" in {c["name"] for c in inspect(store._engine).get_columns("alert_seen")}
 
 
 def test_signup_stores_record_metrics_as_record_kind(tmp_path):

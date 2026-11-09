@@ -10,7 +10,7 @@ fire on records that are new for their place since the last check
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dc_field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from math import asin, cos, radians, sin, sqrt
 from zoneinfo import ZoneInfo
 
@@ -21,10 +21,11 @@ EASTERN = "America/New_York"
 # Record subscriptions: the subscription's ``field`` names a rule over the ``record``
 # view (storage/readmodel.py). ``county_placed`` layers mostly carry only a county, so
 # those sites sit on the county centroid; such a record also matches a place inside
-# that county (each record says whether it is county-placed).
+# that county (each record says whether it is county-placed). ``max_age_days`` skips
+# records dated further back than that, so a late-arriving old report doesn't read as news.
 RECORD_RULES = {
     "spills":     {"layer": "nrc_spills", "kinds": ("spill",), "county_placed": True,
-                   "label": "reported spills"},
+                   "label": "reported spills", "max_age_days": 60},
     "water":      {"layer": "sdwa_systems", "kinds": ("health_violation",), "county_placed": True,
                    "label": "drinking-water violations"},
     "violations": {"layer": "echo_facilities", "kinds": ("violation",), "county_placed": False,
@@ -163,6 +164,18 @@ def _record_in_place(sub, rec: dict, home_county: str | None) -> bool:
                 and canon_county(rec.get("county")) == home_county)
 
 
+def _too_old(rec: dict, now: datetime) -> bool:
+    """Past its rule's age cap. A record with no readable date stays in: its age is unknown."""
+    cap = RECORD_RULES[rec["rule"]].get("max_age_days")
+    if cap is None:
+        return False
+    try:
+        when = date.fromisoformat(str(rec.get("effective") or "")[:10])
+    except ValueError:
+        return False
+    return (now.date() - when).days > cap
+
+
 def evaluate_records(subscriptions, records, seen, now: datetime, tzname: str = EASTERN):
     """Record alerts that should fire now, and the baselines to store.
 
@@ -195,7 +208,7 @@ def evaluate_records(subscriptions, records, seen, now: datetime, tzname: str = 
         new, keys = [], set()
         for r in here:
             k = record_key(r)
-            if k not in known and k not in keys:
+            if k not in known and k not in keys and not _too_old(r, now):
                 keys.add(k)
                 new.append(r)
         if not new:
