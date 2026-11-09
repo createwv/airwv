@@ -153,6 +153,49 @@ def test_views_cover_tables_and_layers(tmp_path, monkeypatch):
         assert dangling == 0
 
 
+def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
+    _, store = _client(tmp_path, monkeypatch)
+    t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    store.save_readings([
+        # the monitor moves: the site follows its latest located reading, not an older one
+        Reading(source="airnow", sensor_id="540250003", ts=t0 + timedelta(hours=2), pm2_5=7.0,
+                lat=38.36, lon=-81.64),
+        Reading(source="airnow", sensor_id="540250003", ts=t0 - timedelta(hours=5), pm2_5=5.0,
+                lat=38.0, lon=-81.0),
+        # a located PurpleAir sensor the resolved listing doesn't carry, and an AirData
+        # monitor reference_monitors.json already lists (left to that layer)
+        Reading(source="purpleair", sensor_id="999001", ts=t0, pm2_5=4.0, lat=38.4, lon=-81.6),
+        Reading(source="epa_airdata", sensor_id="54-003-0003", ts=t0, pm2_5=8.0, lat=39.4481, lon=-77.9638),
+        # AirData's copy of the AirNow monitor above (left to AirNow), and one AirNow lacks
+        Reading(source="epa_airdata", sensor_id="54-025-0003", ts=t0, pm2_5=7.5, lat=38.36, lon=-81.64),
+        Reading(source="epa_airdata", sensor_id="54-099-0001", ts=t0, pm2_5=6.5, lat=38.2, lon=-82.5)])
+    store.name_reading_sites("airnow", {"540250003": "Test monitor", "nope": "unknown monitor"})
+    with store.read_model.connect() as conn:
+        rows = conn.exec_driver_sql(
+            "SELECT site_id, kind, name, lat, lon, attrs FROM site WHERE layer = 'reading_sites' "
+            "ORDER BY site_id").all()
+        # Charleston is AirNow 540390020 in `readings` and 54-039-0020 in
+        # reference_monitors.json: one site, not two
+        charleston = conn.exec_driver_sql(
+            "SELECT site_id FROM site WHERE site_id IN "
+            "('reference_monitor:540390020', 'reference_monitor:54-039-0020')").scalars().all()
+    assert charleston == ["reference_monitor:54-039-0020"]
+    assert [r[0] for r in rows] == ["reference_monitor:54-099-0001", "reference_monitor:540250003",
+                                    "sensor:999001"]
+    site_id, kind, name, lat, lon, attrs = rows[1]
+    assert (kind, name, lat, lon) == ("reference_monitor", "Test monitor", 38.36, -81.64)
+    attrs = json.loads(attrs)
+    assert attrs["source"] == "airnow" and attrs["first_ts"][:13] == "2026-06-30 19"
+    assert attrs["last_ts"][:13] == "2026-07-01 02"
+    # a database with readings from before the table existed is back-filled once
+    with store._engine.begin() as conn:
+        conn.exec_driver_sql("DELETE FROM reading_sites")
+    store.create_schema()
+    with store._engine.connect() as conn:
+        got = dict(conn.exec_driver_sql("SELECT sensor_id, lat FROM reading_sites").all())
+    assert got["540250003"] == 38.36 and got["197127"] is None and len(got) == 8
+
+
 def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
     from airwv.storage.readmodel import ReadModel
     _, store = _client(tmp_path, monkeypatch)
@@ -172,7 +215,9 @@ def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
 
 
 def test_api_query(tmp_path, monkeypatch):
-    c, _ = _client(tmp_path, monkeypatch)
+    c, store = _client(tmp_path, monkeypatch)
+    store.save_readings([Reading(source="airnow", sensor_id="540250003", pm2_5=5.5, lat=38.36,
+                                 lon=-81.64, ts=datetime(2026, 7, 1, tzinfo=timezone.utc))])
     r = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&param=pm2_5").json()
     assert r["count"] == len(r["sites"]) > 0 and r["place"]["km"] == 8
     mis = [s["mi"] for s in r["sites"]]
@@ -182,7 +227,12 @@ def test_api_query(tmp_path, monkeypatch):
     assert by_id["sensor:197127"]["name"] == "Kanawha City"
     # provenance travels with the answer
     assert all(layer in r["provenance"] for layer in {s["layer"] for s in r["sites"]}
-               if layer not in ("water_readings",))
+               if layer not in ("water_readings", "reading_sites"))
+    # an AirNow monitor in `readings` is a site too, with its latest value; one
+    # reference_monitors.json carries (Charleston, 54-039-0020) isn't listed twice
+    assert by_id["reference_monitor:540250003"]["layer"] == "reading_sites"
+    assert by_id["reference_monitor:540250003"]["latest"]["value"] == 5.5
+    assert "reference_monitor:54-039-0020" in by_id and "reference_monitor:540390020" not in by_id
     # filters
     water = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&medium=water").json()["sites"]
     assert water and all(s["medium"] == "water" for s in water)
@@ -495,6 +545,28 @@ def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):
     assert "No readings stored" in empty and "data-api" not in empty
     assert c.get("/site/sensor/nope").status_code == 404
     assert c.get("/site/gauge/S1").status_code == 404
+
+
+def test_site_pages_for_permits(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    # a coal discharge on an impaired stream: the 303(d) causes and the caveat, in plain words
+    p = c.get("/site/permit/WV1012487")
+    assert p.status_code == 200 and "Nicholas Contura" in p.text and "Active discharge permit" in p.text
+    assert "Aluminum (trout), Biological, Iron, Selenium, Fecal coliform" in p.text
+    assert "Austin Hollow" in p.text and "does not mean this permit caused" in p.text
+    assert "effluent-charts/WV1012487" in p.text and "/api/coal-npdes" in p.text
+    # a mining permit and an oil & gas permit: the stage, with DEP's own status word
+    m = c.get("/site/permit/S100495").text
+    assert "Chaplin Hill No. 2" in m and "New / not yet started" in m and '"New"' in m
+    assert "Issued 1995-08-04" in m and "no 303(d) record" in m
+    g = c.get("/site/permit/051-02423")
+    assert "Approved (permit issued)" in g.text and '"Future Use"' in g.text
+    # the full record lists every field and each record once (this API number has two rows)
+    adv = c.get("/site/permit/051-02423?view=adv").text
+    assert "Point Pleasant" in adv and "Full record" in adv
+    assert adv.count("Permit stage</th>") == 1
+    assert "Impaired stream (303(d)) causes" in c.get("/site/permit/WV1012487?view=adv").text
+    assert c.get("/site/permit/nope").status_code == 404
 
 
 def test_site_pages_have_related_nearby(tmp_path, monkeypatch):

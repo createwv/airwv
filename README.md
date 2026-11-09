@@ -199,7 +199,8 @@ python -m airwv.web           # open http://127.0.0.1:8000
 
 Pick a sensor and metric to see an hourly time series and a time-of-day (local
 Eastern) profile. Read API: `/api/sensors`, `/api/series/{id}?field=`,
-`/api/diurnal/{id}?field=`.
+`/api/diurnal/{id}?field=`. Reads on `/api/*` and `/data/dumps/*` allow any origin (CORS)
+and are rate limited per client (see `deploy/README.md`).
 
 ## Alerts
 
@@ -236,6 +237,11 @@ dated more than 60 days back don't alert, and the message says so.
 python -m airwv.ingest subscribe --channel webhook --target https://hooks.example/... \
     --kind record --field spills --lat 38.35 --lon -81.63 --radius-km 16
 ```
+
+A `water` or `violations` record that was off the list for at least 30 days and is
+listed again alerts too, marked as back on the list with the date it was last seen.
+Dropping off a list doesn't by itself mean a problem was fixed, so the alert doesn't
+say that.
 
 Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
 (SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).

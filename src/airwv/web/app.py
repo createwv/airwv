@@ -41,6 +41,7 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.web.public_api import PublicDataMiddleware
 from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -277,6 +278,19 @@ SERIES_KIND_LABELS = {
                     "Water Quality Portal (WQP)"),
 }
 
+# /site/permit/<ref>: the three permit layers -> (what it is, data source, raw API); the stage
+# words match the map legends (app.js DEP_LABEL / MINE_LABEL)
+PERMIT_LAYERS = {
+    "coal_npdes": ("Coal-mine water discharge permit (NPDES)", "WV DEP Coal NPDES", "/api/coal-npdes"),
+    "dep_mining": ("Mining permit", "WV DEP Division of Mining & Reclamation", "/api/dep-mining"),
+    "dep_permits": ("Oil & gas well permit", "WV DEP Office of Oil & Gas", "/api/dep-permits"),
+}
+PERMIT_STAGE_LABELS = {
+    "requested": "Requested (pending)", "approved": "Approved (permit issued)",
+    "construction": "Under construction", "new": "New / not yet started",
+    "active": "Active / renewed", "inactive": "Inactive (idle)",
+}
+
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -476,6 +490,10 @@ def create_app(store: Store) -> FastAPI:
     # gzip JSON/HTML/JS/CSS: the big layers (/api/abandoned-wells, /api/water/sites) are
     # mostly repeated keys and shrink ~8-10×
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # added last so it runs first: a 429 costs no route work (limits are requests/minute per client)
+    app.add_middleware(PublicDataMiddleware, limits={
+        "api": int(os.environ.get("AIRWV_RATE_LIMIT_API", "").strip() or "300"),
+        "dumps": int(os.environ.get("AIRWV_RATE_LIMIT_DUMPS", "").strip() or "30")})
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()
@@ -2164,7 +2182,8 @@ def create_app(store: Store) -> FastAPI:
         """The single home of one site (docs/DIRECTION.md), for every kind in the read
         model's ``site`` view (``SITE_KINDS``). Measured kinds get a recent-readings chart from
         the /api/query series mode; data centers keep their own card ("what we know / what's
-        not disclosed"); the rest show their public records. ``view=adv`` is the full record."""
+        not disclosed"); permits show their stage and 303(d) records; the rest their public
+        records. ``view=adv`` is the full record."""
         from airwv import data_centers as dcs
 
         if kind not in SITE_KINDS:
@@ -2172,6 +2191,8 @@ def create_app(store: Store) -> FastAPI:
         view = "adv" if view == "adv" else "basic"
         if kind in SERIES_KINDS:
             return _measured_site_page(request, kind, ref, param)
+        if kind == "permit":
+            return _permit_site_page(request, ref, view)
         if kind != "data_center":
             return _generic_site_page(request, kind, ref, view)
         api = data_centers_layer()
@@ -2224,6 +2245,27 @@ def create_app(store: Store) -> FastAPI:
             "mode": "site", "kind": kind, "site": site, "measured": measured, "names": names,
             "chosen": chosen, "window": window, "label": SERIES_KIND_LABELS[kind],
             "plabel": lambda p: METRIC_LABELS.get(p, p.replace("_", " ")), "prov": prov})
+
+    def _permit_site_page(request, ref, view):
+        """A coal discharge, DEP mining or oil & gas permit: what it is, its permit stage and,
+        for coal discharges, the 303(d) impaired streams its outlets sit on (the read model's
+        ``record`` rows), with the layer's caveat. ``view=adv`` lists every field."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"permit:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no permit with that id")
+            # an oil & gas API number can list identical rows; keep each record once
+            records = list({tuple(r.values()): r for r in
+                            rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])}.values())
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        a = site["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site_permit.html", context={
+            "mode": "site", "kind": "permit", "view": view, "site": site, "a": a,
+            "what": PERMIT_LAYERS[site["layer"]], "stage": PERMIT_STAGE_LABELS.get(a.get("stage")),
+            "stage_rec": next((r for r in records if r["kind"] == "permit_stage"), None),
+            "impaired": next((r for r in records if r["kind"] == "impaired_303d"), None),
+            "records": records, "prov": prov})
 
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):

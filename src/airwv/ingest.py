@@ -412,18 +412,23 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
 
     # place-based record alerts (spills, violations): records new for the place since last check
     record_subs = [s for s in subs if is_record_sub(s)]
-    baselines = {}
+    baselines, present = {}, {}
     if record_subs:
         with store.read_model.connect() as conn:
             records = store.read_model.alert_records(conn, RECORD_RULES)
         seen = store.seen_records(s.id for s in record_subs)
-        rec_alerts, baselines = evaluate_records(record_subs, records, seen, now)
+        last_present = store.records_last_present(s.id for s in record_subs)
+        rec_alerts, baselines, present = evaluate_records(record_subs, records, seen, now,
+                                                          last_present=last_present)
         alerts += rec_alerts
     for sub_id, keys in baselines.items():
         log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
                  "" if send else " (not stored in a dry run)")
         if send:
             store.mark_records_seen(sub_id, keys, now, origin="baseline")
+    if send:
+        for sub_id, keys in present.items():
+            store.mark_records_present(sub_id, keys, now)
 
     base = os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/")
     tokens = {s.id: s.token for s in subs if getattr(s, "token", None)}
@@ -697,6 +702,7 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         return 0
     readings, monitors = _parse_airnow(content)
     n = store.save_readings(readings)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors.items()})
     total = _airnow_save_monitors(config, monitors)
     log.info("airnow: %d readings from %d monitors (HourlyAQObs_%s; %d monitors known total)",
              n, len(monitors), stamp, total)
@@ -729,6 +735,7 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
                 readings, monitors = _parse_airnow(got)
                 total += store.save_readings(readings)
                 monitors_all.update(monitors)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow backfill: %d readings across %d days", total, days)
     return total
@@ -774,6 +781,7 @@ def run_airnow_hourly(config: Config, year: int, store=None, workers: int = 10) 
     if batch:
         total += store.save_readings(batch)
     client.close()
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow hourly %d: %d readings from %d files", year, total, len(hours))
     return total

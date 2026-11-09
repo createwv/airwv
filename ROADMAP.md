@@ -173,6 +173,8 @@ Get warnings to the people who need them.
       (old rows are matched by field, no migration) and gained facility violations; `/place`'s
       *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
       *Email delivery still waits on SMTP go-live (a session with Corey).*
+      Violations that return after 30+ days off the list alert as "back on the list"
+      (`alert_seen.last_present_at`; spills don't).
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)
@@ -567,8 +569,10 @@ Grow the network and secure the record.
       environmental data store) for long-term preservation
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
       views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
-      `deploy/systemd/airwv-dumps.*`). *Parquet, CORS and rate limiting after Postgres.*
-- [ ] Public API documentation and rate limiting
+      `deploy/systemd/airwv-dumps.*`). *Parquet after Postgres.*
+- [x] CORS (read-only, any origin) and a per-client rate limit on `/api/*` and
+      `/data/dumps/*` (`web/public_api.py`; in-memory, one process)
+- [ ] Public API documentation
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)
 
@@ -806,6 +810,10 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       keeps the statewide overview.
       Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
       25 mi, from `/api/query`), each linking to its site page or its own record.
+- [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
+      permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
+      discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
+      caveat; `?view=adv` is the full record. Popups don't link to them yet.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`

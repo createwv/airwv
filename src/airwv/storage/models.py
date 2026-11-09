@@ -76,6 +76,25 @@ class ReadingRow(Base):
     )
 
 
+class ReadingSite(Base):
+    """One row per (source, sensor_id) in ``readings``, kept current at ingest by
+    ``Store.save_readings``: where the sensor is (coords of its latest located
+    reading), its name when the source gives one (AirNow), and the span of its data.
+    Lets the read model's ``site`` view list AirNow / AirData reference monitors and
+    readings-table sensors without a GROUP BY over ``readings``."""
+
+    __tablename__ = "reading_sites"
+
+    source: Mapped[str] = mapped_column(String(64), primary_key=True)
+    sensor_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    located_ts: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    first_ts: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_ts: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class Subscription(Base):
     """A person/system asking to be alerted when a field crosses a threshold."""
 
@@ -117,13 +136,17 @@ class Subscription(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_notified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # kind "record" (field = spills | water | violations, alerts.RECORD_RULES): when the
-    # place's records were first taken as the baseline. Null = not yet, so nothing fires.
+    # place's records were last checked (the first check takes the baseline). Null = not
+    # yet, so nothing fires.
     records_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class AlertSeen(Base):
     """A record a record-kind subscription already knows (``alerts.record_key``), so a
-    spill or violation alerts once: when it first shows up in the data for that place."""
+    spill or violation alerts once: when it first shows up in the data for that place.
+    ``last_present_at`` is the last check that found it, so a violation that drops off the
+    data and comes back can be told from one that never left (null: not found by a check
+    since this column was added)."""
 
     __tablename__ = "alert_seen"
     __table_args__ = (UniqueConstraint("subscription_id", "record_key", name="uq_alert_seen"),)
@@ -132,6 +155,7 @@ class AlertSeen(Base):
     subscription_id: Mapped[int] = mapped_column(Integer, index=True)
     record_key: Mapped[str] = mapped_column(String(512))
     seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_present_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # How it became known: "baseline" (on file at the first check) | "alert" (fired).
     # Null = stored before this was tracked.
     origin: Mapped[str | None] = mapped_column(String(16), nullable=True)
