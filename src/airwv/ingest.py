@@ -412,18 +412,23 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
 
     # place-based record alerts (spills, violations): records new for the place since last check
     record_subs = [s for s in subs if is_record_sub(s)]
-    baselines = {}
+    baselines, present = {}, {}
     if record_subs:
         with store.read_model.connect() as conn:
             records = store.read_model.alert_records(conn, RECORD_RULES)
         seen = store.seen_records(s.id for s in record_subs)
-        rec_alerts, baselines = evaluate_records(record_subs, records, seen, now)
+        last_present = store.records_last_present(s.id for s in record_subs)
+        rec_alerts, baselines, present = evaluate_records(record_subs, records, seen, now,
+                                                          last_present=last_present)
         alerts += rec_alerts
     for sub_id, keys in baselines.items():
         log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
                  "" if send else " (not stored in a dry run)")
         if send:
             store.mark_records_seen(sub_id, keys, now, origin="baseline")
+    if send:
+        for sub_id, keys in present.items():
+            store.mark_records_present(sub_id, keys, now)
 
     base = os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/")
     tokens = {s.id: s.token for s in subs if getattr(s, "token", None)}

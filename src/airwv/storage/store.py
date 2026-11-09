@@ -118,7 +118,7 @@ class Store:
             "reports": {"contact_name": "VARCHAR(160)"},
             "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT",
                               "records_checked_at": "TIMESTAMP"},
-            "alert_seen": {"origin": "VARCHAR(16)"},
+            "alert_seen": {"last_present_at": "TIMESTAMP", "origin": "VARCHAR(16)"},
         }
         insp = _inspect(self._engine)
         with self._engine.begin() as conn:
@@ -476,6 +476,32 @@ class Store:
                 out[sid].add(key)
         return out
 
+    def records_last_present(self, subscription_ids) -> dict[int, dict]:
+        """When each record a subscription knows was last found in the data (or None)."""
+        ids = list(subscription_ids)
+        out: dict[int, dict] = {i: {} for i in ids}
+        if not ids:
+            return out
+        with self._session_factory() as session:
+            for sid, key, last in session.execute(
+                    select(AlertSeen.subscription_id, AlertSeen.record_key, AlertSeen.last_present_at)
+                    .where(AlertSeen.subscription_id.in_(ids))):
+                out[sid][key] = last
+        return out
+
+    def mark_records_present(self, subscription_id: int, keys, when) -> None:
+        """Stamp known records as still listed, and ``records_checked_at`` as this check."""
+        wanted = set(keys)
+        with self._session_factory() as session:
+            for row in session.scalars(select(AlertSeen)
+                                       .where(AlertSeen.subscription_id == subscription_id)):
+                if row.record_key in wanted:
+                    row.last_present_at = when
+            sub = session.get(Subscription, subscription_id)
+            if sub is not None:
+                sub.records_checked_at = when
+            session.commit()
+
     def record_history(self, subscription_ids) -> dict[int, list[tuple]]:
         """Each subscription's known records as ``(record_key, origin, seen_at)``, newest first."""
         ids = list(subscription_ids)
@@ -492,14 +518,17 @@ class Store:
         return out
 
     def mark_records_seen(self, subscription_id: int, keys, when, origin: str) -> None:
-        """Remember these records for the subscription and stamp ``records_checked_at``.
-        ``origin`` says how they became known: ``"baseline"`` or ``"alert"``."""
+        """Remember these records as present now and stamp ``records_checked_at``.
+        ``origin`` says how new ones became known: ``"baseline"`` or ``"alert"``."""
+        wanted = set(keys)
         with self._session_factory() as session:
-            have = set(session.scalars(select(AlertSeen.record_key)
-                                       .where(AlertSeen.subscription_id == subscription_id)))
+            have = {row.record_key: row for row in session.scalars(
+                select(AlertSeen).where(AlertSeen.subscription_id == subscription_id))}
             session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when,
-                                      origin=origin)
-                            for k in sorted(set(keys) - have))
+                                      last_present_at=when, origin=origin)
+                            for k in sorted(wanted - set(have)))
+            for k in wanted & set(have):
+                have[k].last_present_at = when
             sub = session.get(Subscription, subscription_id)
             if sub is not None:
                 sub.records_checked_at = when
