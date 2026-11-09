@@ -737,6 +737,7 @@ filings, news), not a measurement, like Soil/Land above.
       `data_centers`, `/site/data_center/<id>` (plain card: water · energy · noise · purpose, each
       *what we know* / *what's not disclosed*, with where to ask; `?view=adv` for filings and the
       statewide dockets), `/api/data-centers`, `/api/query?kind=data_center`, and a card on **Near me**.
+      Per-fact `cite` keys link a card line to its own numbered source where the record ties it to one.
 - [ ] **Keep it current** — re-check the sources DATA-CENTERS.md lists (DEP DAQ applications, PSC
       dockets, Air Quality Board, Commerce's Data Economy Office) on a schedule; show each site's
       "last checked" date. Any new fetcher needs Corey's OK (charter data rule 2).
