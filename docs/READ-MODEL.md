@@ -16,6 +16,9 @@ choices come from `ReadModel.parameters`). Monitors match their AirData history
 `/site/permit/<ref>` (coal discharge, DEP mining, oil & gas) reads one `site` row and its
 `record` rows: the `permit_stage` (DEP mining, oil & gas) and, for coal discharges, the
 `impaired_303d` causes, with the layer's disclaimer; `?view=adv` lists every field.
+Every site page (data centers too) also shows "Related nearby": `site.js` asks `/api/query`
+for the nearest site of each other kind (`kind=<k>&limit=1`, 25 mi) and lists the 5 closest,
+linking each to its site page or, for kinds without one yet, to its own record (`url`).
 
 ## How it works
 
@@ -51,8 +54,6 @@ check, so a status or contaminant change counts as new too.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
-- `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*
-  rollup, not from its daily trend (pinned as-is by the snapshot).
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting
   DEP site a few metres.

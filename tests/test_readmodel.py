@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 from airwv.sources.base import Reading
 from airwv.storage import Store
 from airwv.web import app as webapp
+from airwv.wvgeo import county_names
 
 SNAPSHOT = Path(__file__).parent / "snapshots" / "api_near.json"
 
@@ -217,6 +218,11 @@ def test_explore_page(tmp_path, monkeypatch):
     r = c.get("/explore?place=rutledge&km=8&param=pm2_5")
     assert r.status_code == 200 and "explore.js" in r.text and 'id="ex-csv"' in r.text
     assert 'id="ex-api"' in r.text and 'name="kind"' in r.text
+    # the measurements option (series mode): its site and window fields
+    assert 'value="measurements"' in r.text and 'name="site_id"' in r.text
+    assert 'name="from"' in r.text and 'name="to"' in r.text
+    # the county and value filters; McDowell keeps its capital D
+    assert 'name="county"' in r.text and '<option value="McDowell">' in r.text and 'name="over"' in r.text
 
 
 # /api/water/near and /api/areas moved onto the read model too; these snapshots were
@@ -268,7 +274,8 @@ def _areas_client(tmp_path, monkeypatch):
         "197127": "Kanawha Valley", "200001": "Kanawha Valley", "300003": "Mid-Ohio Valley",
         "400004": "Other"})
     # a month of daily readings: Kanawha City climbs (40-70 days ago), the Mid-Ohio sensor
-    # eases off; its latest reading is a PM spike over 1000 µg/m³, which /api/areas drops
+    # eases off; its latest reading and one more the day before are PM spikes over
+    # 1000 µg/m³, which /api/areas drops from the current value and the daily trend
     days = [NOW - timedelta(days=d) for d in range(30, 0, -1)]
     utc = timezone.utc
     store.save_readings(
@@ -277,7 +284,9 @@ def _areas_client(tmp_path, monkeypatch):
         + [Reading(source="purpleair", sensor_id="300003", ts=t.replace(tzinfo=utc),
                    pm2_5=20.0 - i * 0.3, voc=150.0 - i, humidity=55.0 + i % 3) for i, t in enumerate(days)]
         + [Reading(source="purpleair", sensor_id="300003", ts=NOW.replace(tzinfo=utc),
-                   pm2_5=4000.0, voc=120.0)])
+                   pm2_5=4000.0, voc=120.0),
+           Reading(source="purpleair", sensor_id="300003", ts=(days[-1] + timedelta(hours=1)).replace(tzinfo=utc),
+                   pm2_5=3000.0)])
 
     class Frozen(datetime):
         @classmethod
@@ -292,10 +301,16 @@ def test_api_areas_matches_snapshot(tmp_path, monkeypatch):
     got = {f"{f},{d}": c.get(f"/api/areas?field={f}&days={d}").json()
            for f, d in [("pm2_5", 180), ("voc", 180), ("humidity", 180), ("pm2_5", 20)]}
     got |= {f"series:{r},{f}": c.get(f"/api/areas/series?region={r}&field={f}").json()
-            for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"), ("Nowhere", "pm2_5")]}
+            for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"),
+                         ("Nowhere", "pm2_5")]}
     want = _check_snapshot(AREAS_SNAPSHOT, got)
     trends = {a["trend"]["direction"] for r in want.values() for a in r.get("areas", [])}
     assert len(trends) > 1 and any(a["reporting"] == 0 for a in want["pm2_5,180"]["areas"])
+    # the spike-only day is gone from the PM series, the mixed day keeps its real reading
+    pm = want["series:Mid-Ohio Valley,pm2_5"]
+    assert len(pm["points"]) == 30 and pm["points"][-1] == {"date": "2026-07-30", "n": 1, "value": 11.3}
+    assert pm["trend"]["direction"] == "falling"
+    assert len(want["series:Mid-Ohio Valley,voc"]["points"]) == 31   # only PM is capped
 
 
 def test_api_query_area_and_window(tmp_path, monkeypatch):
@@ -326,6 +341,63 @@ def test_api_query_area_and_window(tmp_path, monkeypatch):
     assert {s["site_id"]: s["peak"] and s["peak"]["value"] for s in pk["sites"]}["sample_site:S1"] == 2.4
     assert pk["filters"]["to"] == "2026-07-01"
     assert c.get(f"{base}&from=July").status_code == 400
+
+
+def test_county_names():
+    assert county_names("Marshall County") == ["Marshall"]
+    assert county_names("Mc Dowell") == county_names("MCDOWELL") == ["McDowell"]
+    assert county_names("Berkeley / Jefferson") == ["Berkeley", "Jefferson"]
+    assert county_names("not disclosed") == county_names("") == county_names(None) == []
+
+
+def test_api_query_county(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    # no point needed; any spelling asks; every spelling in the layers answers
+    r = c.get("/api/query?county=kanawha county&kind=facility&limit=500").json()
+    assert r["place"] is None and r["filters"]["county"] == ["Kanawha"] and r["count"]
+    assert {s["county"] for s in r["sites"]} == {"Kanawha", "Kanawha County"}
+    # a comma list, and a project listed under several counties counts in each
+    both = c.get("/api/query?county=Kanawha,Mason&kind=data_center&limit=500").json()
+    assert both["filters"]["county"] == ["Kanawha", "Mason"]
+    assert any("/" in s["county"] for s in both["sites"])
+    assert all({"Kanawha", "Mason"} & set(county_names(s["county"])) for s in both["sites"])
+    # with a point it narrows the radius search; a region name is not a county
+    near = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&county=Kanawha&kind=facility").json()
+    assert near["place"] and all(county_names(s["county"]) == ["Kanawha"] for s in near["sites"])
+    assert c.get("/api/query?county=Kanawha Valley").status_code == 400
+    assert c.get("/api/query?county=Kanawha,Nowhere").status_code == 400
+    # sites with no county listed (sensors) drop out rather than being guessed from a point
+    assert c.get("/api/query?county=Kanawha&kind=sensor").json()["sites"] == []
+
+
+def test_api_query_over(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    base = "/api/query?lat=38.3727&lon=-81.6540&km=8&param=iron,pm2_5"
+    ids = lambda r: [s["site_id"] for s in r["sites"]]
+    # strictly above, on each site's latest value (iron 1.9, pm2_5 10.04 and 12.35)
+    r = c.get(f"{base}&over=10").json()
+    assert ids(r) == ["sensor:197127", "sensor:200001"] and r["filters"]["over"] == 10
+    assert ids(c.get(f"{base}&over=10.04").json()) == ["sensor:200001"]
+    assert "sample_site:S1" in ids(c.get(f"{base}&over=0&kind=sample_site").json())
+    # the answer's provenance covers only what's left
+    assert set(r["provenance"]) == {"community_sensors"}
+    # limit counts sites that pass: the nearest site overall (197127) doesn't
+    assert ids(c.get(f"{base}&over=11&limit=1").json()) == ["sensor:200001"]
+    # sites that can't have a value never pass, and the from/to window decides "latest"
+    assert c.get(f"{base}&over=0&kind=facility").json()["sites"] == []
+    assert ids(c.get(f"{base}&over=2&kind=sample_site&to=2026-07-01").json()) == ["sample_site:S1"]
+    assert ids(c.get(f"{base}&over=2&kind=sample_site").json()) == []
+    # CSV is the same answer
+    assert len(c.get(f"{base}&over=10&format=csv").text.strip().splitlines()) == 3
+    # needs a param and a real number
+    assert c.get("/api/query?lat=38.3727&lon=-81.6540&over=10").status_code == 400
+    assert c.get(f"{base}&over=nan").status_code == 400
+    assert c.get(f"{base}&over=inf").status_code == 400
+    assert c.get(f"{base}&over=lots").status_code == 422
+    # series mode: only the rows above it, and the CSV link keeps the filter
+    w = c.get("/api/query?site_id=sample_site:S1&param=iron&over=2").json()
+    assert [x["value"] for x in w["rows"]] == [2.4] and w["filters"]["over"] == 2
+    assert "over=2.0" in w["csv"] and len(c.get(w["csv"]).text.strip().splitlines()) == 2
 
 
 def test_api_query_series(tmp_path, monkeypatch):
@@ -409,3 +481,14 @@ def test_site_pages_for_permits(tmp_path, monkeypatch):
     assert adv.count("Permit stage</th>") == 1
     assert "Impaired stream (303(d)) causes" in c.get("/site/permit/WV1012487?view=adv").text
     assert c.get("/site/permit/nope").status_code == 404
+
+
+def test_site_pages_have_related_nearby(tmp_path, monkeypatch):
+    # site.js fills #site-related from /api/query, one kind at a time (not this page's kind)
+    c, _ = _client(tmp_path, monkeypatch)
+    p = c.get("/site/sensor/197127").text
+    assert "Related nearby" in p and 'id="site-related" data-kind="sensor" data-site="sensor:197127"' in p
+    box = p.split('id="site-related"')[1].split(">")[0]
+    lat, lon = (box.split(f'data-{k}="')[1].split('"')[0] for k in ("lat", "lon"))
+    near = c.get(f"/api/query?lat={lat}&lon={lon}&km=40.25&kind=gauge&limit=1").json()["sites"]
+    assert [s["kind"] for s in near] == ["gauge"] and near[0]["mi"] is not None

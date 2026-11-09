@@ -39,7 +39,7 @@
     ${!t.known.length && !t.gaps.length ? '<p class="meta">Nothing in the public record we found.</p>' : ''}</div>`).join('');
     return `<div class="dc-card">${head(c)}${comments(c)}
     <div class="dc-grid">${topics}</div>
-    <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ul>${sources(c)}</ul></details>
+    <details class="dc-sources"><summary><b>Data sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ul>${sources(c)}</ul></details>
     <div class="nb-actions" style="margin-top:6px"><a href="${esc(c.url)}">plain summary →</a><a href="${esc(c.url)}?view=adv">full record and filings →</a></div>
   </div>`;
   }
@@ -62,7 +62,7 @@
     rows.push(tr('Not disclosed', esc((d.not_disclosed || []).join('; '))));
     return `<div class="dc-card">${head(c)}${comments(c)}<p class="meta">${esc(d.status_detail)}</p></div>
     <table class="dc-rec">${rows.join('')}</table>
-    <div class="dc-card"><b>Filings and sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
+    <div class="dc-card"><b>Filings and data sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
   }
 
   function ask(items) {

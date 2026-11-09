@@ -1,11 +1,14 @@
 """Tests for the dashboard read API (FastAPI TestClient, no server/network)."""
 
+import json
 from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
+from airwv.registry import SensorInfo
 from airwv.sources.base import Reading
 from airwv.storage import Store
+from airwv.web import app as webapp
 from airwv.web.app import create_app
 
 
@@ -128,6 +131,26 @@ def test_sources_endpoint(tmp_path):
     assert body["disclaimer"]
 
 
+def test_sources_have_stable_site_ids(tmp_path):
+    # each /api/sources row carries the read model's facility ref (tri-<index in
+    # sources.json>), so the Air-map marker can link /site/facility/<id>
+    import json
+    from pathlib import Path
+
+    import airwv
+    raw = json.loads((Path(airwv.__file__).parent / "data" / "sources.json").read_text())["sources"]
+    c = _client(tmp_path)
+    rows = c.get("/api/sources").json()["sources"]
+    assert all(s["id"] and s["id"].startswith("tri-") for s in rows)
+    assert len({s["id"] for s in rows}) == len(rows)
+    for s in rows:
+        assert raw[int(s["id"][4:])]["name"] in s["names"]
+    amos = next(s for s in rows if s["name"] == "John Amos Power Plant")
+    r = c.get(f"/site/facility/{amos['id']}", follow_redirects=False)
+    assert r.status_code == 307 and r.headers["location"].startswith("/sources#facility=")
+    assert c.get("/site/facility/tri-99999", follow_redirects=False).status_code == 404
+
+
 def test_guide_endpoint(tmp_path):
     r = _client(tmp_path).get("/api/guide")
     assert r.status_code == 200
@@ -166,6 +189,15 @@ def test_mode_pages_render(tmp_path):
     assert c.get("/analysis", follow_redirects=False).status_code == 301  # old link redirects to /air
 
 
+def test_air_filters_sheet(tmp_path):
+    # /air's controls sit in one "Filters" disclosure that phones move under the map
+    page = _client(tmp_path).get("/air").text
+    sheet = page[page.index('id="air-filters"'):page.index("</details>", page.index('id="air-filters"'))]
+    assert "<summary>Filters" in sheet
+    assert all(hook in sheet for hook in ['id="field"', 'id="start"', 'id="end"', 'id="dl"', 'id="layers"'])
+    assert 'card.after(filters)' in page and 'id="map-card"' in page
+
+
 def test_nav_collapsed(tmp_path):
     # docs/DIRECTION.md §3: <= 6 top-level items, the rest under "More", no emoji, Admin in the footer
     import re
@@ -182,6 +214,30 @@ def test_nav_collapsed(tmp_path):
     r = c.get("/facilities")                                              # Sources -> Facilities
     assert r.status_code == 200 and "<h1>Facilities</h1>" in r.text and "sources.js" in r.text
     assert c.get("/sources").status_code == 200                           # old URL still works
+
+
+def test_skip_link_and_main_landmark(tmp_path):
+    # the skip link is the first thing in <body>; every page's content sits in the one <main> it points at
+    c = _client(tmp_path)
+    for path in ("/", "/place", "/air", "/water", "/alerts", "/learn", "/data", "/explore", "/about"):
+        page = c.get(path).text
+        body = page[page.index("<body>") + len("<body>"):]
+        assert body.lstrip().startswith('<a class="skip-link" href="#main">Skip to content</a>'), path
+        assert page.count("<main") == 1 and page.count("</main>") == 1, path
+        assert page.index("</nav>") < page.index('<main id="main"') < page.index("</main>") < page.index("<footer"), path
+
+
+def test_glossary_on_site(tmp_path):
+    # footer Glossary stays on the site: /learn#glossary carries docs/GLOSSARY.md's six terms
+    c = _client(tmp_path)
+    foot = c.get("/").text
+    foot = foot[foot.index("<footer"):]
+    assert 'href="/learn#glossary">Glossary</a>' in foot
+    learn = c.get("/learn").text
+    assert 'id="glossary"' in learn
+    gloss = learn[learn.index('id="glossary"'):]
+    for term in ("Sensor", "Monitor", "Gauge", "Sample site", "Facility", "Data source", "Criteria pollutant"):
+        assert f"<b>{term}</b>" in gloss, term
 
 
 def test_events_api_and_admin(tmp_path, monkeypatch):
@@ -578,3 +634,15 @@ def test_home_is_my_place_when_a_place_is_set(tmp_path):
     assert "localStorage.getItem('airwv_place')" in statewide   # a saved place opens here
     assert 'id="pl-status"' not in c.get("/?place=rutledge&statewide=1").text
     assert 'href="/?statewide=1"' not in c.get("/place").text
+
+
+def test_sensor_names_fall_back_to_public_listing(tmp_path, monkeypatch):
+    # no private registry (worktree / fresh clone): the listing names the mapped sensors
+    (tmp_path / "sensor_index_map.json").write_text(json.dumps({"AA": 197127, "BB": 200001, "CC": 300003}))
+    (tmp_path / "wv_public_sensors.json").write_text(json.dumps([
+        {"name": "Listed Belle", "sensor_index": 197127}, {"name": "Listed Rutledge", "sensor_index": 200001},
+        {"name": "Someone Else", "sensor_index": 999}]))
+    monkeypatch.setenv("AIRWV_INDEX_CACHE", str(tmp_path / "sensor_index_map.json"))
+    monkeypatch.setattr("airwv.registry.load_wv_sensors",
+                        lambda: [SensorInfo(name="Registry Belle", device_id="AA", source="purpleair")])
+    assert webapp._index_to_name() == {"197127": "Registry Belle", "200001": "Listed Rutledge", "300003": "300003"}

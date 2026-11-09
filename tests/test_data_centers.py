@@ -197,3 +197,12 @@ def test_place_page_loads_the_data_center_renderer(tmp_path):
     assert r.status_code == 200 and r.text.index("/static/dc.js") < r.text.index("/static/place.js")
     assert 'id="pl-dc"' in r.text
     assert "/static/dc.js" in c.get("/nearby").text
+
+
+def test_site_page_related_nearby(tmp_path):
+    c = _client(tmp_path)
+    page = c.get("/site/data_center/monarch-compute-campus").text
+    assert 'id="site-related" data-kind="data_center" data-site="data_center:monarch-compute-campus"' in page
+    assert "/static/site.js" in page
+    unmapped = next(s for s in SITES if s["lat"] is None)
+    assert "location isn't listed" in c.get(f"/site/data_center/{unmapped['id']}").text

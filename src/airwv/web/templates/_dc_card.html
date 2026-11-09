@@ -17,7 +17,7 @@
   </div>
   {% endfor %}
 </div>
-<div class="dc-sources"><b>Sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
+<div class="dc-sources"><b>Data sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
   <ul>{% for s in c.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
     <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ul>
 </div>

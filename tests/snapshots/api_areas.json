@@ -78,10 +78,10 @@
     "reporting": 0,
     "sensor_count": 1,
     "trend": {
-     "direction": "rising",
-     "n_days": 31,
-     "pct_change": -335.2,
-     "r": 0.3,
+     "direction": "falling",
+     "n_days": 30,
+     "pct_change": -43.5,
+     "r": -1.0,
      "watch": false
     },
     "value": null
@@ -131,10 +131,10 @@
     "reporting": 0,
     "sensor_count": 1,
     "trend": {
-     "direction": "rising",
-     "n_days": 21,
-     "pct_change": -331.1,
-     "r": 0.37,
+     "direction": "falling",
+     "n_days": 20,
+     "pct_change": -33.5,
+     "r": -1.0,
      "watch": false
     },
     "value": null
@@ -326,6 +326,171 @@
    "n_days": 31,
    "pct_change": 235.2,
    "r": 0.85
+  }
+ },
+ "series:Mid-Ohio Valley,pm2_5": {
+  "field": "pm2_5",
+  "points": [
+   {
+    "date": "2026-07-01",
+    "n": 1,
+    "value": 20.0
+   },
+   {
+    "date": "2026-07-02",
+    "n": 1,
+    "value": 19.7
+   },
+   {
+    "date": "2026-07-03",
+    "n": 1,
+    "value": 19.4
+   },
+   {
+    "date": "2026-07-04",
+    "n": 1,
+    "value": 19.1
+   },
+   {
+    "date": "2026-07-05",
+    "n": 1,
+    "value": 18.8
+   },
+   {
+    "date": "2026-07-06",
+    "n": 1,
+    "value": 18.5
+   },
+   {
+    "date": "2026-07-07",
+    "n": 1,
+    "value": 18.2
+   },
+   {
+    "date": "2026-07-08",
+    "n": 1,
+    "value": 17.9
+   },
+   {
+    "date": "2026-07-09",
+    "n": 1,
+    "value": 17.6
+   },
+   {
+    "date": "2026-07-10",
+    "n": 1,
+    "value": 17.3
+   },
+   {
+    "date": "2026-07-11",
+    "n": 1,
+    "value": 17.0
+   },
+   {
+    "date": "2026-07-12",
+    "n": 1,
+    "value": 16.7
+   },
+   {
+    "date": "2026-07-13",
+    "n": 1,
+    "value": 16.4
+   },
+   {
+    "date": "2026-07-14",
+    "n": 1,
+    "value": 16.1
+   },
+   {
+    "date": "2026-07-15",
+    "n": 1,
+    "value": 15.8
+   },
+   {
+    "date": "2026-07-16",
+    "n": 1,
+    "value": 15.5
+   },
+   {
+    "date": "2026-07-17",
+    "n": 1,
+    "value": 15.2
+   },
+   {
+    "date": "2026-07-18",
+    "n": 1,
+    "value": 14.9
+   },
+   {
+    "date": "2026-07-19",
+    "n": 1,
+    "value": 14.6
+   },
+   {
+    "date": "2026-07-20",
+    "n": 1,
+    "value": 14.3
+   },
+   {
+    "date": "2026-07-21",
+    "n": 1,
+    "value": 14.0
+   },
+   {
+    "date": "2026-07-22",
+    "n": 1,
+    "value": 13.7
+   },
+   {
+    "date": "2026-07-23",
+    "n": 1,
+    "value": 13.4
+   },
+   {
+    "date": "2026-07-24",
+    "n": 1,
+    "value": 13.1
+   },
+   {
+    "date": "2026-07-25",
+    "n": 1,
+    "value": 12.8
+   },
+   {
+    "date": "2026-07-26",
+    "n": 1,
+    "value": 12.5
+   },
+   {
+    "date": "2026-07-27",
+    "n": 1,
+    "value": 12.2
+   },
+   {
+    "date": "2026-07-28",
+    "n": 1,
+    "value": 11.9
+   },
+   {
+    "date": "2026-07-29",
+    "n": 1,
+    "value": 11.6
+   },
+   {
+    "date": "2026-07-30",
+    "n": 1,
+    "value": 11.3
+   }
+  ],
+  "region": "Mid-Ohio Valley",
+  "sensor_count": 1,
+  "trend": {
+   "direction": "falling",
+   "first": 20.0,
+   "last": 11.3,
+   "n_days": 30,
+   "pct_change": -43.5,
+   "r": -1.0
   }
  },
  "series:Mid-Ohio Valley,voc": {

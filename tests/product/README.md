@@ -9,6 +9,18 @@ basic and `view=adv`) are shot at every size in `~/.czadmin/tools/devices.json` 
 phone 390, phone-landscape 844, tablet 820, desktop 1280, desktop-wide 1920, with each device's
 pixel ratio and touch) and get the same checks, plus no sideways scroll at any size.
 
+The nav's "More" dropdown is tapped open on Home at every devices.json size (`more-<width>.png`,
+the menu open in the shot). `test_more_menu_not_cut_off` fails if any of its links, scrolled to,
+is still off screen, clipped sideways or under something, or the open menu adds sideways scroll;
+the report's "More" table lists the menu box and the links past the first screen (info only).
+
+`/air`'s "Filters" sheet is shot at every devices.json size (`filters-<width>.png`, tapped open
+where it's collapsed). `test_air_filters_sheet` wants it collapsed under the map on phones (width
+≤ 560 or height ≤ 480), opening with a tap without sideways scroll, and open above the map elsewhere.
+
+Pages with a statewide map (`MAP_PAGES` in `conftest.py`, `map-<page>-<width>.png`) are shot at
+every devices.json size for the map check below; the report's `maps` column shows each one's `×` size.
+
 Checks (`test_smoke.py`), per page × width unless noted:
 
 - page loads (200, no failed local requests)
@@ -16,7 +28,10 @@ Checks (`test_smoke.py`), per page × width unless noted:
 - nav present; nav count ≤ 7 (xfail until the nav-collapse item)
 - home shows a reading (number + unit) on the first screen, not covered and not in an
   overlay (390: xfail until the place view lands)
-- every visible Leaflet map has a size and is centered on West Virginia
+- every visible Leaflet map has a size. Statewide maps' first view contains West Virginia and is
+  at most about 2× its size (limit ×2.25, measured along the tighter-fitting side, since a wide
+  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`) are only
+  checked to be centered on West Virginia
 - accessibility (`test_a11y`, per page × width × check; the browser asks for reduced motion):
   text contrast at WCAG AA (4.5:1; 3:1 for large text and for symbols inside a control;
   legend dots outside a control and disabled controls are exempt; text over images/gradients

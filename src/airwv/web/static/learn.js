@@ -4,9 +4,14 @@
   const tabs = [...document.querySelectorAll('.ltab')];
   const panels = [...document.querySelectorAll('.lpanel')];
   function show(name) {
+    // #glossary (or any id inside a panel) opens that panel and scrolls to it
+    const el = name && !document.getElementById('lp-' + name) && document.getElementById(name);
+    const panel = el && el.closest('.lpanel');
+    if (panel) name = panel.id.slice(3);
     if (!document.getElementById('lp-' + name)) return;
     tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
     panels.forEach(p => { p.hidden = p.id !== 'lp-' + name; });
+    if (panel) el.scrollIntoView({ behavior: AIRWV_WV.scrollBehavior() });
   }
   tabs.forEach(t => t.addEventListener('click', () => {
     show(t.dataset.tab);

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import base64
 import html
+import math
 import os
 import re
 import secrets
@@ -32,7 +33,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from airwv import dumps
-from airwv.alerts import RECORD_RULES
+from airwv.alerts import RECORD_RULES, is_record_sub
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import (query_records_to_csv, query_series_to_csv, query_sites_to_csv,
                                 readings_to_csv)
@@ -40,6 +41,7 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -233,6 +235,7 @@ METRIC_THRESHOLDS = {
     "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
     "violations": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
 }
+ADMIN_HISTORY_CAP = 50   # records/sends listed per subscription in the admin view
 METRIC_LABELS = {
     "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
     "ozone": "Ozone (EPA)", "water": "Drinking-water violations near me",
@@ -289,6 +292,7 @@ def _IN_WV_REGION(lat: float, lon: float) -> bool:
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+AREA_PM_MAX = 1000.0    # µg/m³; PM readings over this stay out of the per-area rollups
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -371,8 +375,25 @@ def _ozone_color(value: float | None) -> str:
     return "#7e0023"
 
 
+def _listing_names() -> dict[str, str]:
+    """Map sensor id -> name from the resolved public listing, best-effort."""
+    try:
+        import json
+
+        cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+        listing = Path(cache).with_name("wv_public_sensors.json")
+        return {str(r["sensor_index"]): r["name"] for r in json.loads(listing.read_text(encoding="utf-8"))
+                if r.get("sensor_index") is not None and r.get("name")}
+    except Exception:
+        return {}
+
+
 def _index_to_name() -> dict[str, str]:
-    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort."""
+    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort.
+
+    Registry names first. The private registry is absent from worktrees and fresh clones,
+    so the public listing it was matched against (same names) covers those.
+    """
     try:
         from airwv.registry import load_wv_sensors
         from airwv.resolve import load_index_map
@@ -380,7 +401,9 @@ def _index_to_name() -> dict[str, str]:
         cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
         index_map = load_index_map(Path(cache))
         name_by_device = {s.device_id: s.name for s in load_wv_sensors()}
-        return {str(idx): name_by_device.get(dev, str(idx)) for dev, idx in index_map.items()}
+        listed = _listing_names()
+        return {str(idx): name_by_device.get(dev) or listed.get(str(idx), str(idx))
+                for dev, idx in index_map.items()}
     except Exception:
         return {}
 
@@ -697,19 +720,23 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/api/query")
     def query(lat: float | None = None, lon: float | None = None, km: float = 8.0,
               kind: str | None = None, medium: str | None = None, area: str | None = None,
-              param: str | None = None, since: str | None = None,
+              county: str | None = None, param: str | None = None, since: str | None = None,
               from_: str | None = Query(None, alias="from"), to: str | None = None,
-              site_id: str | None = None, limit: int | None = None, format: str = "json",
-              show: str = "sites"):
+              over: float | None = None, site_id: str | None = None, limit: int | None = None,
+              format: str = "json", show: str = "sites"):
         """One read path over the unified views: sites near a place (``kind`` is a comma
         list: well, facility, permit, spill_report, water_system, reference_monitor,
         sensor, gauge, sample_site, data_center; ``medium`` air / water / land; ``area`` a
-        county or a WV region, with or without a point), each with its records, its latest
+        county or a WV region, with or without a point; ``county`` a comma list of WV
+        counties, matching the county a site's own data lists, so sites with none listed,
+        like sensors and gauges, drop out), each with its records, its latest
         ``param`` value when it has measurements (``param`` may be a comma list: the first
         one the site has wins; ``from`` / ``to``, YYYY-MM-DD inclusive, bound which
         measurements count), and the provenance of every layer it came from. ``since``
         (YYYY-MM-DD) adds "what changed": a ``changes`` list of records dated on/after it
         and each measured site's ``peak`` of the first ``param`` since then (up to ``to``).
+        ``over`` (needs ``param``) keeps only sites whose latest value is above it, before
+        ``limit`` applies; in series mode, only the rows above it.
         ``km`` is capped at 25 mi. ``format=csv`` returns the same answer as a CSV file: one
         row per site, or with ``show=records`` one row per record (only those dated on/after
         ``since`` when it's given). Series mode: ``site_id`` (one site, ``kind:ref``) + one
@@ -722,8 +749,16 @@ def create_app(store: Store) -> FastAPI:
         area = (area or "").strip() or None
         point = lat is not None and lon is not None
         site_id = (site_id or "").strip() or None
-        if not point and not area and not site_id:
-            raise HTTPException(status_code=400, detail="give lat and lon, an area, or a site_id")
+        counties = []
+        for c in (county or "").split(","):
+            if c.strip():
+                if not county_names(c):
+                    raise HTTPException(status_code=400, detail=f"not a WV county: {c.strip()}")
+                counties += county_names(c)
+        if not point and not area and not counties and not site_id:
+            raise HTTPException(status_code=400, detail="give lat and lon, an area, a county, or a site_id")
+        if over is not None and (not params or not math.isfinite(over)):
+            raise HTTPException(status_code=400, detail="over needs a param and a finite number")
         dates = {}
         for name, val in (("since", since), ("from", from_), ("to", to)):
             if val is not None:
@@ -735,21 +770,38 @@ def create_app(store: Store) -> FastAPI:
         if format not in ("json", "csv") or show not in ("sites", "records"):
             raise HTTPException(status_code=400, detail="format is json or csv; show is sites or records")
         if site_id:
-            return _query_series(site_id, params, from_, to, limit, format)
+            return _query_series(site_id, params, from_, to, limit, format, over)
         limit = min(max(100 if limit is None else limit, 1), 500)
         rm = store.read_model
         with rm.connect() as conn:
+            # `over` is decided on values, so it reads every measured site and limits afterwards
+            measured = ["sensor", "reference_monitor", "gauge", "sample_site"]
             sites = rm.sites_near(conn, lat if point else None, lon if point else None, km * 0.621371,
-                                  kinds=kinds, medium=medium, area=area, limit=limit)
-            recs = rm.records_for(conn, [s["site_id"] for s in sites])
+                                  kinds=(kinds or measured) if over is not None else kinds,
+                                  medium=medium, area=area, county=counties,
+                                  limit=-1 if over is not None else limit)
+
+            def refs(med):
+                return [s["ref"] for s in sites if s["medium"] == med and s["kind"] in measured]
+
+            def newest(s):
+                by_param = latest.get(s["medium"], {})
+                return next(({**by_param[p][s["ref"]][p], "parameter": p} for p in params
+                             if s["ref"] in by_param.get(p, {})), None)
+
+            def is_over(s):
+                value = (newest(s) or {}).get("value")
+                return value is not None and value > over
+
             latest: dict = {}
             peaks: dict = {}
             for med in ("air", "water") if params else ():
-                refs = [s["ref"] for s in sites if s["medium"] == med
-                        and s["kind"] in ("sensor", "reference_monitor", "gauge", "sample_site")]
-                latest[med] = {p: rm.latest(conn, med, refs, p, since=from_, until=to) for p in params}
-                if since:
-                    peaks[med] = rm.peak(conn, med, refs, params[0], max(since, from_ or since), until=to)
+                latest[med] = {p: rm.latest(conn, med, refs(med), p, since=from_, until=to) for p in params}
+            if over is not None:
+                sites = [s for s in sites if is_over(s)][:limit]
+            for med in ("air", "water") if params and since else ():
+                peaks[med] = rm.peak(conn, med, refs(med), params[0], max(since, from_ or since), until=to)
+            recs = rm.records_for(conn, [s["site_id"] for s in sites])
             prov = rm.provenance(conn, sorted({s["layer"] for s in sites}))
         out, changes = [], []
         for s in sites:
@@ -758,9 +810,7 @@ def create_app(store: Store) -> FastAPI:
             row["mi"] = round(s["d"], 2) if s["d"] is not None else None
             row["records"] = recs.get(s["site_id"], [])
             if params:
-                by_param = latest.get(s["medium"], {})
-                row["latest"] = next(({**by_param[p][s["ref"]][p], "parameter": p} for p in params
-                                      if s["ref"] in by_param.get(p, {})), None)
+                row["latest"] = newest(s)
             if since:
                 pk = peaks.get(s["medium"], {}).get(s["ref"])
                 if params:
@@ -770,8 +820,9 @@ def create_app(store: Store) -> FastAPI:
                             for r in row["records"] if (r["effective"] or "")[:10] >= since]
             out.append(row)
         body = {"place": {"lat": lat, "lon": lon, "km": km} if point else None,
-                "filters": {"kind": kinds, "medium": medium, "area": area, "param": param,
-                            "since": since, "from": from_, "to": to, "limit": limit},
+                "filters": {"kind": kinds, "medium": medium, "area": area, "county": counties or None,
+                            "param": param, "over": over, "since": since, "from": from_, "to": to,
+                            "limit": limit},
                 "count": len(out), "sites": out, "provenance": prov}
         if since:
             body["changes"] = sorted(changes, key=lambda c: c["effective"], reverse=True)
@@ -786,7 +837,7 @@ def create_app(store: Store) -> FastAPI:
                 "Content-Disposition": f'attachment; filename="airwv_query_{show}.csv"'})
         return body
 
-    def _query_series(site_id, params, from_, to, limit, format):
+    def _query_series(site_id, params, from_, to, limit, format, over):
         """/api/query series mode: one site's measurement rows of one parameter."""
         if len(params) != 1:
             raise HTTPException(status_code=400, detail="series mode takes exactly one param")
@@ -798,12 +849,12 @@ def create_app(store: Store) -> FastAPI:
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that site_id")
             rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
-                                        since=from_, until=to, limit=limit)
+                                        since=from_, until=to, limit=limit, over=over)
             prov = rm.provenance(conn, [site["layer"]])
         if format == "csv":
             return Response(content=query_series_to_csv(site, param, rows), media_type="text/csv",
                             headers={"Content-Disposition": 'attachment; filename="airwv_query_series.csv"'})
-        q = {"site_id": site_id, "param": param, "from": from_, "to": to}
+        q = {"site_id": site_id, "param": param, "from": from_, "to": to, "over": over}
         csv_url = "/api/query?" + urlencode({k: v for k, v in q.items() if v is not None}
                                             | {"limit": limit, "format": "csv"})
         return {"mode": "series",
@@ -1193,10 +1244,38 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
 
+    def _record_history(sub, rows) -> dict:
+        """What a record subscription fired on (one entry per send, newest first) and what
+        was taken as its starting point. Lists stop at ADMIN_HISTORY_CAP; the counts don't."""
+        def record(key):
+            site_id, kind, value = key.split("|", 2)
+            return {"site_id": site_id, "kind": kind, "value": value or None}
+
+        sends: dict = {}
+        baseline = []
+        for key, origin, at in rows:
+            if origin == "alert":
+                sends.setdefault(at, []).append(record(key))
+            elif origin == "baseline":
+                baseline.append((key, at))
+        return {
+            "checked_at": sub.records_checked_at.isoformat() if sub.records_checked_at else None,
+            "sends": len(sends),
+            "fired": [{"at": at.isoformat(), "records": recs}
+                      for at, recs in list(sends.items())[:ADMIN_HISTORY_CAP]],
+            "baseline": {"taken_at": baseline[0][1].isoformat() if baseline else None,
+                         "count": len(baseline),
+                         "records": [record(k) for k, _at in baseline[:ADMIN_HISTORY_CAP]]},
+            # alert_seen rows stored before origin was tracked: can't say which they were
+            "unlabeled": sum(1 for _k, origin, _at in rows if origin is None),
+        }
+
     @app.get("/api/admin/subscriptions")
     def admin_subscriptions(_: bool = Depends(_require_admin)):
-        """Alert sign-ups — including the pending/unconfirmed waitlist."""
+        """Alert sign-ups — including the pending/unconfirmed waitlist — and, for record
+        subscriptions, their alert history."""
         subs = store.list_subscriptions(active_only=False)
+        history = store.record_history(s.id for s in subs if is_record_sub(s))
         return {"email_delivery": email_enabled(),
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
@@ -1206,7 +1285,9 @@ def create_app(store: Store) -> FastAPI:
                                         if s.center_lat is not None else None),
                              "active": s.active,
                              "confirmed": s.confirmed_at is not None,
-                             "created_at": s.created_at.isoformat() if s.created_at else None}
+                             "created_at": s.created_at.isoformat() if s.created_at else None,
+                             "record_history": (_record_history(s, history[s.id])
+                                                if s.id in history else None)}
                             for s in subs]}
 
     @app.post("/api/admin/notify-test")
@@ -1414,10 +1495,11 @@ def create_app(store: Store) -> FastAPI:
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
         Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
         then takes the median across the sensors reporting each day so one noisy unit
-        can't swing the area."""
+        can't swing the area. PM readings over AREA_PM_MAX are left out of the averages."""
+        cap = AREA_PM_MAX if field.startswith("pm") else None
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.read_model.daily(conn, "air", sid, field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since, max_value=cap).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1459,7 +1541,7 @@ def create_app(store: Store) -> FastAPI:
             dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
         for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
-                   if sid in latest and not (is_pm and latest[sid] > 1000)]
+                   if sid in latest and not (is_pm and latest[sid] > AREA_PM_MAX)]
             daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
@@ -2063,7 +2145,8 @@ def create_app(store: Store) -> FastAPI:
         # query builder v1 (DIRECTION.md §5.2): a form over /api/query; the form lives in the
         # URL, and the page shows the table, a CSV download and the API URL for the same answer
         return TEMPLATES.TemplateResponse(request=request, name="explore.html",
-                                          context={"mode": "explore"})
+                                          context={"mode": "explore",
+                                                   "counties": sorted(WV_COUNTY_CENTROID)})
 
     @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
@@ -2077,6 +2160,14 @@ def create_app(store: Store) -> FastAPI:
             return _measured_site_page(request, kind, ref, param)
         if kind == "permit":
             return _permit_site_page(request, ref, "adv" if view == "adv" else "basic")
+        if kind == "facility":
+            # no facility page yet: send the stable id on to where the facility lives now
+            # (curated sources: /sources#facility=<name>; ECHO: its EPA page)
+            with store.read_model.connect() as conn:
+                site = store.read_model.site(conn, f"facility:{ref}")
+            if site is None or not site["url"]:
+                raise HTTPException(status_code=404, detail="no facility with that id")
+            return RedirectResponse(site["url"], status_code=307)
         if kind != "data_center":
             raise HTTPException(status_code=404, detail="no site page for this kind yet")
         api = data_centers_layer()
@@ -2142,7 +2233,7 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
-                                          context={"mode": "data"})
+                                          context={"mode": "data", "dump_info": dumps.summary()})
 
     @app.get("/data/dumps/{name}")
     def data_dump(name: str):

@@ -167,7 +167,9 @@ Get warnings to the people who need them.
       NRC spill reports, `water` = SDWA health-based violations, `violations` = ECHO facility
       violations), read from the `record` view. Fires on records new for the place since the
       last check (`alert_seen` table; first check = silent baseline); county-only records also
-      match a place in that county. The `/alerts` form's water/spills waitlist rows went live
+      match a place in that county; spill reports dated over 60 days back are skipped
+      (`max_age_days`, stated in the email). `/api/admin/subscriptions` shows each record
+      subscription's history (`record_history`: what fired, per send, and the baseline). The `/alerts` form's water/spills waitlist rows went live
       (old rows are matched by field, no migration) and gained facility violations; `/place`'s
       *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
       *Email delivery still waits on SMTP go-live (a session with Corey).*
@@ -564,7 +566,7 @@ Grow the network and secure the record.
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
-      views + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
+      views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
       `deploy/systemd/airwv-dumps.*`). *Parquet, CORS and rate limiting after Postgres.*
 - [ ] Public API documentation and rate limiting
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
@@ -801,6 +803,8 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       Home (`/`) is this view when a place is in the URL (`/?place=` or `/?lat=&lon=`) or saved
       in the browser (`localStorage.airwv_place`, set when a place is chosen); `/?statewide=1`
       keeps the statewide overview.
+      Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
+      25 mi, from `/api/query`), each linking to its site page or its own record.
 - [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
       permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
       discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
@@ -898,7 +902,10 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       *distinctive* name token (place names excluded, data-driven, so a shared town like "nitro"
       can't fuse two different plants). 530 → 505; the 3 Amos records are now one facility carrying
       all categories/records. Applied (cached) in `/api/sources`; detail view shows merged-record
-      count + "also recorded as" names.
+      count + "also recorded as" names. Each merged row has a stable `id` (`tri-<n>`, its first
+      record's index in `sources.json`, the read model's facility ref); the Air-map marker popup
+      links `/site/facility/<id>`, which redirects to the facility on `/sources` until facility
+      site pages land.
 - [x] **Retain former company names** — cautious curated `former_name_note` (Chemours←DuPont,
       Solutia←Monsanto, Union Carbide→Dow, Bayer/Institute…), shown as "Formerly:" with precise
       triggers (no false positives — the Nitro WWTP no longer gets Monsanto history).

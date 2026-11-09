@@ -76,7 +76,7 @@ function drawMap(sensors){
     const ref = s.kind === 'reference';
     const val = s.latest_pm2_5 != null ? `${s.latest_pm2_5.toFixed(1)} µg/m³ PM2.5` : 'no current reading';
     const m = L.circleMarker([s.lat, s.lon], {
-      radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
+      title: `${s.name}, ${ref ? 'reference monitor' : 'community sensor'}`, radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
       fillColor: s.color, fillOpacity: ref ? 0.7 : 0.85})
       .bindPopup(`<b>${esc(s.name)}</b><br>${val}${ref ? '<br><i>EPA reference monitor</i>' : ''}`);
     m.addTo(map);

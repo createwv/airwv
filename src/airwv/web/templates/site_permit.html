@@ -57,7 +57,7 @@
       {% for r in records %}
       <tr><th>{{ 'Permit stage' if r.kind == 'permit_stage' else 'Impaired stream (303(d)) causes' if r.kind == 'impaired_303d' else r.kind }}</th>
         <td>{{ r.value or '—' }}{% if r.effective %} · effective {{ r.effective }}{% endif %} · as of {{ r.as_of }}
-          {% if r.url %}· <a href="{{ r.url }}" target="_blank" rel="noopener">source</a>{% endif %}</td></tr>
+          {% if r.url %}· <a href="{{ r.url }}" target="_blank" rel="noopener">data source</a>{% endif %}</td></tr>
       {% endfor %}
     </table>
     {% else %}<p class="meta" style="padding:8px 14px 12px">No records for this permit.</p>{% endif %}
