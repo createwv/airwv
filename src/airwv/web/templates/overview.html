@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+{# a place saved by /place (place.js) makes Home "my place now"; ?statewide=1 keeps this view #}
+<script>
+try {
+  const saved = localStorage.getItem('airwv_place');
+  if (saved && /(^|&)(place|lat)=/.test(saved) && !new URLSearchParams(location.search).has('statewide'))
+    location.replace('/?' + saved);
+} catch (e) {}
+</script>
 <div class="ov-wrap">
 
   <section class="hero">
@@ -29,7 +37,7 @@
   <section class="ov-cards">
     <a class="navcard" href="/air">
       <span class="ico">📊</span><b>Air — maps &amp; trends</b>
-      <small>Sensor maps, trends, pollution sources, and reference-monitor validation.</small></a>
+      <small>Sensor maps, trends, facilities, and reference-monitor validation.</small></a>
     <a class="navcard accent" href="#" data-open="report">
       <span class="ico">📣</span><b>Report a concern</b>
       <small>Air, water, soil, wildlife, or a suspected violation — put it on the map.</small></a>

@@ -104,7 +104,7 @@ function openEvent(e) {
     + `<div class="ev-body">${esc(e.description || '')}</div>` + links;
   const srcs = (e.sources || []).filter(s => s && (s.url || s.label));
   $('ev-sources').innerHTML = srcs.length
-    ? '<b class="ev-sub">Sources</b><ul>' + srcs.map(s =>
+    ? '<b class="ev-sub">Data sources</b><ul>' + srcs.map(s =>
         `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label || s.url)}</a>` : esc(s.label)}</li>`).join('') + '</ul>'
     : '';
   const cap = e.captured && (e.sensor_ids || []).length;

@@ -7,8 +7,16 @@ tables and JSON layers we already have. Code: `src/airwv/storage/readmodel.py`
 (parameters in [DATA-SOURCES.md](DATA-SOURCES.md#apiquery--one-read-path-over-the-unified-views)),
 which the `/place` basic view reads for every line it shows and the `/explore` query
 builder puts in a table (with `format=csv` for the download). Its series mode
-(`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts.
-Every site has a page at `/site/<kind>/<ref>` (`site_page_url` in `web/app.py`), read
+(`site_id` + `param` + `from`/`to`) reads one site's `measurement` rows, for charts: the
+site pages `/site/<kind>/<ref>` for `sensor`, `reference_monitor`, `gauge` and `sample_site`
+chart the last 7 days (monitors 30, sample sites 365) up to the site's latest reading from
+it, with the same URL as their CSV and API links (`?param=` picks what to chart; the
+choices come from `ReadModel.parameters`). Monitors match their AirData history
+(`54-003-0003`); AirNow's hourly rows use a 9-digit AQSID and aren't on the page yet.
+Every site page (data centers too) also shows "Related nearby": `site.js` asks `/api/query`
+for the nearest site of each other kind (`kind=<k>&limit=1`, 25 mi) and lists the 5 closest,
+linking each to its site page.
+Every other site has a page at `/site/<kind>/<ref>` too (`site_page_url` in `web/app.py`), read
 from `ReadModel.site`; `/api/near` gives each hazard its `page`.
 
 ## How it works
@@ -45,10 +53,7 @@ check, so a status or contaminant change counts as new too.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
-  So a monitor's site page shows its AirData summary, not live readings.
 - Where `site_id` repeats (oil & gas permits), `/site/<kind>/<ref>` shows the first row.
-- `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*
-  rollup, not from its daily trend (pinned as-is by the snapshot).
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting
   DEP site a few metres.

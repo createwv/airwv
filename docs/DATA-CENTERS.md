@@ -15,6 +15,13 @@ what it's for: what we know / what's not disclosed, with sources, and where to a
 `?view=adv` for the full record, its filings and the statewide dockets. **Near me** shows
 the same card for sites within 10 miles (or the chosen radius, if larger) and for sites in
 the nearest county that have no public coordinates, and puts mapped ones on its map.
+**My place** (`/place`) adds a "Data centers" status line and the same cards for the same
+sites; with `view=adv` it shows each one's full record and filings, plus the statewide
+dockets (`/api/data-centers?full=true` carries the record; `static/dc.js` renders both).
+An air-permit comment period written into `air_permits.permits` as "comments to YYYY-MM-DD"
+shows at the top of the card and the full record (permit, due date, link to the DEP notice
+among the site's primary sources) until the day after the deadline (`comment_periods` in
+the API row).
 API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 
 **How to read the values**
@@ -73,6 +80,9 @@ number or operator on this page, plus the Air Quality Board and PSC links under 
 next*. Add each new comment period or hearing with its notice date and link (and the notice to
 that site's `sources`), move past dates to *Recently closed*, and update *Last checked*.
 `tests/test_data_centers.py` fails if a comment deadline in the data file is missing here.
+To put a new deadline on the site's cards too, write it into that permit's
+`air_permits.permits` text as "comments to YYYY-MM-DD" and cite the notice (with the permit
+number in its title) as a primary source.
 
 ---
 

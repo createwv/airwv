@@ -9,6 +9,7 @@
       <label>Show <select name="show">
         <option value="sites">places (sites)</option>
         <option value="records">records (violations, permits, spills…)</option>
+        <option value="measurements">measurements (one site's readings)</option>
       </select></label>
       <label>Near <select name="place" id="ex-place"></select></label>
       <label>within <select name="km">
@@ -17,13 +18,17 @@
         <option value="16">10 miles</option>
         <option value="40.25">25 miles</option>
       </select></label>
+      <label data-for="list">County <select name="county">
+        <option value="">any</option>
+        {% for c in counties %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select></label>
       <label>Medium <select name="medium">
         <option value="">any</option>
         <option value="air">air</option>
         <option value="water">water</option>
         <option value="land">land</option>
       </select></label>
-      <label>Latest reading of <select name="param">
+      <label><span id="ex-param-label">Latest reading of</span> <select name="param">
         <option value="">(none)</option>
         <optgroup label="Air">
           <option value="pm2_5">PM2.5</option><option value="pm10">PM10</option>
@@ -37,14 +42,19 @@
           <option value="ecoli">E. coli</option>
         </optgroup>
       </select></label>
-      <label>Changed since <input type="date" name="since"></label>
+      <label>Over <input type="number" step="any" name="over" placeholder="any value"></label>
+      <label data-for="series" hidden>Site <select name="site_id"></select></label>
+      <label data-for="list">Changed since <input type="date" name="since"></label>
+      <label data-for="series" hidden>From <input type="date" name="from"></label>
+      <label data-for="series" hidden>To <input type="date" name="to"></label>
       <label>Up to <select name="limit">
         <option value="50">50 rows</option>
         <option value="100" selected>100 rows</option>
         <option value="500">500 rows</option>
+        <option value="5000" id="ex-limit-series" disabled>5000 rows</option>
       </select></label>
     </div>
-    <fieldset class="ex-kinds">
+    <fieldset class="ex-kinds" data-for="list">
       <legend>Kinds <span class="meta">(none ticked = all)</span></legend>
       <label><input type="checkbox" name="kind" value="sensor"> sensor</label>
       <label><input type="checkbox" name="kind" value="reference_monitor"> monitor</label>
@@ -62,7 +72,7 @@
 
   <div class="ex-bar">
     <span id="ex-count" class="ex-count">Loading…</span>
-    <span class="ex-links">
+    <span class="ex-links" id="ex-links">
       <a id="ex-csv" href="#" download>Download CSV</a>
       <a id="ex-api" href="#" target="_blank" rel="noopener">API link (JSON)</a>
     </span>

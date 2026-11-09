@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_dc_card.html" import dc_card, how_to_ask, cite %}
+{% from "_related.html" import related %}
 {% block content %}
 {% if kind != 'data_center' %}
 {% set s = site %}{% set a = site.attrs %}
@@ -18,13 +19,6 @@
     {% if records %}<ul class="dc-files">{% for r in records %}<li><b>{{ record_labels.get(r.kind, r.kind.replace('_', ' ')) }}</b>{% if r.value and r.value != r.kind %}: {{ r.value | string | replace('_', ' ') }}{% endif %}{% if r.effective %} <span class="meta">({{ r.effective }})</span>{% endif %}</li>{% endfor %}</ul>
     {% else %}<p class="meta" style="padding:8px 14px">No violations, listings or reports on file for this site in the data we track.</p>{% endif %}
   </div>
-  {% if latest %}
-  <div class="card"><h2>Latest readings</h2>
-    <table class="dc-rec">{% for p, m in latest.items() %}
-      <tr><th>{{ p.replace('_', '.') if p.startswith('pm') else p.replace('_', ' ') }}</th><td>{{ m.value }} {{ m.unit or '' }} <span class="meta">{{ (m.ts | string)[:16] }} UTC</span></td></tr>{% endfor %}
-    </table>
-  </div>
-  {% endif %}
   <div class="card"><p class="meta" style="padding:10px 14px">
     {% if s.lat is not none %}<a href="/nearby?lat={{ s.lat }}&amp;lon={{ s.lon }}">What else is near here →</a>{% endif %}
     {% if s.url %}{% if s.lat is not none %} · {% endif %}<a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>The data source's own record →</a>{% endif %}</p></div>
@@ -41,18 +35,13 @@
       <tr><th>{{ r.kind }}</th><td>{{ r.value }}{% if r.effective %} · effective {{ r.effective }}{% endif %}{% if r.as_of %} · as of {{ r.as_of }}{% endif %}{% if r.url %} · <a href="{{ r.url }}" target="_blank" rel="noopener">record</a>{% endif %}</td></tr>{% endfor %}
     </table>{% else %}<p class="meta" style="padding:8px 14px">None in the record view.</p>{% endif %}
   </div>
-  {% if latest %}
-  <div class="card"><h2>Readings (API)</h2>
-    <table class="dc-rec">{% for p, m in latest.items() %}
-      <tr><th>{{ p }}</th><td>latest {{ m.value }} {{ m.unit or '' }} at {{ m.ts }} · <a href="{{ series[p] }}">series</a> · <a href="{{ series[p] }}&amp;format=csv">CSV</a></td></tr>{% endfor %}
-    </table>
-  </div>
-  {% endif %}
   {% if s.url %}<div class="card"><p class="meta" style="padding:10px 14px">Data source record: <a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ s.url }}</a></p></div>{% endif %}
   {% endif %}
 
+  {{ related(kind, s.site_id, s.lat, s.lon) }}
+
   <div class="card"><p class="meta" style="padding:10px 14px">{% if prov.disclaimer %}{{ prov.disclaimer }}<br>{% endif %}
-    {% if prov.source %}Source: {{ prov.source }}.{% endif %}{% if prov.fetched_at %} Fetched {{ prov.fetched_at }}.{% endif %}
+    {% if prov.source %}Data source: {{ prov.source }}.{% endif %}{% if prov.fetched_at %} Fetched {{ prov.fetched_at }}.{% endif %}
     <a href="/data">All data sources</a></p></div>
 </div>
 {% else %}
@@ -94,7 +83,7 @@
       <tr><th>Not disclosed</th><td>{{ dc.not_disclosed | join('; ') }}</td></tr>
     </table>
   </div>
-  <div class="card"><h2>Filings and sources for this site</h2>
+  <div class="card"><h2>Filings and data sources for this site</h2>
     <ol class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
       <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
   </div>
@@ -107,9 +96,14 @@
   <div class="card dc-card">{{ how_to_ask(ask) }}</div>
   {% endif %}
 
+  {{ related(kind, 'data_center:' ~ dc.id, dc.lat, dc.lon) }}
+
   <div class="card"><p class="meta" style="padding:10px 14px">{{ prov.disclaimer }}
-    <br>Source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
+    <br>Data source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
     Raw record: <a href="/api/data-centers">/api/data-centers</a> · <a href="/data">all data sources</a></p></div>
 </div>
 {% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/site.js?v={{ asset_v }}"></script>
 {% endblock %}

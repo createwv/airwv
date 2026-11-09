@@ -259,13 +259,19 @@ near here" and the data source's own record; `?view=adv` shows the full source r
 records and series / CSV links into `/api/query`. Data centers keep their own card.
 
 ### `/api/query` — one read path over the unified views
-`/api/query?lat=&lon=&km=&kind=&medium=&area=&param=&from=&to=&since=&limit=` returns sites near
+`/api/query?lat=&lon=&km=&kind=&medium=&area=&county=&param=&over=&from=&to=&since=&limit=` returns sites near
 a place from the `site` / `measurement` / `record` SQL views, each with its records, its latest
 `param` value (sensors, monitors, gauges, sample sites) and the provenance block of every
 layer in the answer. `param` may be a comma list (the first one a site has wins; `latest`
 names it). `area` is a county (`Kanawha`) or a WV sensor region (`Kanawha Valley`); with
 an area, `lat`/`lon` are optional (then `place` is null, `mi` is null and sites without
-coordinates count). `from` / `to` (YYYY-MM-DD, inclusive) bound which measurements count
+coordinates count). `county` is a comma list of WV counties, with or without a point; it
+reads each layer's county field in any spelling (`Kanawha County`, `Mc Dowell`, a project
+listed under several counties counts in each), and an unknown name is a 400. Sites whose
+source lists no county (community sensors, gauges, sample sites, coal permits, mines, TRI
+facilities) drop out rather than being placed by guesswork. `over=N` (needs `param`) keeps
+only sites whose `latest` value is above N, checked before `limit`, and `from` / `to` decide
+which value is latest. `from` / `to` (YYYY-MM-DD, inclusive) bound which measurements count
 for `latest` and `peak`. `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
 `param` since then, and a `changes` list of records dated on/after it (spills, permit
 dates), newest first. `/api/areas` (+ `/series`) and `/api/water/near` read the same views
@@ -273,14 +279,15 @@ dates), newest first. `/api/areas` (+ `/series`) and `/api/water/near` read the 
 `api_water_near.json`. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
 as a CSV download: one row per site (latest/peak values flattened, a record count), or with
 `show=records` one row per record (only the dated `changes` when `since` is given). **Series
-mode:** `/api/query?site_id=&param=&from=&to=&limit=` (`site_id` as the answer lists it, e.g.
+mode:** `/api/query?site_id=&param=&from=&to=&over=&limit=` (`site_id` as the answer lists it, e.g.
 `sensor:197127` or `sample_site:S1`; exactly one `param`) returns that site's `measurement`
-rows (`ts`, `value`, `unit`, `source`, `quality`), oldest first, with the site, its layer's
+rows (`ts`, `value`, `unit`, `source`, `quality`; only those above `over` when given), oldest first, with the site, its layer's
 provenance and a `csv` link to the same rows; the place filters don't apply. Past `limit`
 (default 5000, max 20000) the newest rows are kept and `truncated` is true; an unknown
 `site_id` is a 404. Powers the
 **My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
-state is in its URL, with the table, the CSV link and the API link for the same query). See
+state is in its URL, with the table, the CSV link and the API link for the same query; its
+"measurements" option picks a site near the place and reads this series mode). See
 [READ-MODEL.md](READ-MODEL.md).
 
 ---

@@ -76,7 +76,7 @@ async function loadRecent() {
   layer = L.layerGroup();
   rows.forEach(r => {
     if (r.lat == null) return;
-    L.circleMarker([r.lat, r.lon], {radius: 7, color: '#333', weight: 1, fillColor: MEDCOLOR[r.medium] || '#555', fillOpacity: 0.9})
+    L.circleMarker([r.lat, r.lon], {title: `${r.parameter}: ${r.value} ${r.unit || ''}`.trim(), radius: 7, color: '#333', weight: 1, fillColor: MEDCOLOR[r.medium] || '#555', fillOpacity: 0.9})
       .bindPopup(`<b>${MED[r.medium] || ''} ${esc(r.parameter)}: ${r.value} ${esc(r.unit || '')}</b>`
         + `<br><small>${esc(r.submitter)} · ${fmt(r.observed_at || r.created_at)}</small>`
         + (r.method ? `<br><small>${esc(r.method)}</small>` : '')

@@ -40,7 +40,7 @@ function drawSpills(list) {
   list.forEach(s => {
     if (s.lat == null || s.lon == null) return;
     const col = s.reached_water ? '#2c7fb8' : '#8a94a0', exact = s.geo === 'exact';
-    L.circleMarker([s.lat, s.lon], { radius: 6, color: col, weight: exact ? 1 : 2,
+    L.circleMarker([s.lat, s.lon], { title: `Spill: ${spillMats(s)[0] || 'reported release'}`, radius: 6, color: col, weight: exact ? 1 : 2,
       fillColor: col, fillOpacity: exact ? 0.85 : 0.15, dashArray: exact ? null : '3' })
       .bindPopup(spillPopup(s)).addTo(spillLayer);
   });
