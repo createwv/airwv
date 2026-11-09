@@ -217,6 +217,9 @@ def test_explore_page(tmp_path, monkeypatch):
     r = c.get("/explore?place=rutledge&km=8&param=pm2_5")
     assert r.status_code == 200 and "explore.js" in r.text and 'id="ex-csv"' in r.text
     assert 'id="ex-api"' in r.text and 'name="kind"' in r.text
+    # the measurements option (series mode): its site and window fields
+    assert 'value="measurements"' in r.text and 'name="site_id"' in r.text
+    assert 'name="from"' in r.text and 'name="to"' in r.text
 
 
 # /api/water/near and /api/areas moved onto the read model too; these snapshots were
