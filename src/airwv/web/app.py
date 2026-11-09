@@ -33,7 +33,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from airwv import dumps
-from airwv.alerts import RECORD_RULES
+from airwv.alerts import RECORD_RULES, is_record_sub
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import (query_records_to_csv, query_series_to_csv, query_sites_to_csv,
                                 readings_to_csv)
@@ -236,6 +236,7 @@ METRIC_THRESHOLDS = {
     "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
     "violations": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
 }
+ADMIN_HISTORY_CAP = 50   # records/sends listed per subscription in the admin view
 METRIC_LABELS = {
     "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
     "ozone": "Ozone (EPA)", "water": "Drinking-water violations near me",
@@ -279,6 +280,7 @@ def _IN_WV_REGION(lat: float, lon: float) -> bool:
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+AREA_PM_MAX = 1000.0    # µg/m³; PM readings over this stay out of the per-area rollups
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -1234,10 +1236,38 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
 
+    def _record_history(sub, rows) -> dict:
+        """What a record subscription fired on (one entry per send, newest first) and what
+        was taken as its starting point. Lists stop at ADMIN_HISTORY_CAP; the counts don't."""
+        def record(key):
+            site_id, kind, value = key.split("|", 2)
+            return {"site_id": site_id, "kind": kind, "value": value or None}
+
+        sends: dict = {}
+        baseline = []
+        for key, origin, at in rows:
+            if origin == "alert":
+                sends.setdefault(at, []).append(record(key))
+            elif origin == "baseline":
+                baseline.append((key, at))
+        return {
+            "checked_at": sub.records_checked_at.isoformat() if sub.records_checked_at else None,
+            "sends": len(sends),
+            "fired": [{"at": at.isoformat(), "records": recs}
+                      for at, recs in list(sends.items())[:ADMIN_HISTORY_CAP]],
+            "baseline": {"taken_at": baseline[0][1].isoformat() if baseline else None,
+                         "count": len(baseline),
+                         "records": [record(k) for k, _at in baseline[:ADMIN_HISTORY_CAP]]},
+            # alert_seen rows stored before origin was tracked: can't say which they were
+            "unlabeled": sum(1 for _k, origin, _at in rows if origin is None),
+        }
+
     @app.get("/api/admin/subscriptions")
     def admin_subscriptions(_: bool = Depends(_require_admin)):
-        """Alert sign-ups — including the pending/unconfirmed waitlist."""
+        """Alert sign-ups — including the pending/unconfirmed waitlist — and, for record
+        subscriptions, their alert history."""
         subs = store.list_subscriptions(active_only=False)
+        history = store.record_history(s.id for s in subs if is_record_sub(s))
         return {"email_delivery": email_enabled(),
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
@@ -1247,7 +1277,9 @@ def create_app(store: Store) -> FastAPI:
                                         if s.center_lat is not None else None),
                              "active": s.active,
                              "confirmed": s.confirmed_at is not None,
-                             "created_at": s.created_at.isoformat() if s.created_at else None}
+                             "created_at": s.created_at.isoformat() if s.created_at else None,
+                             "record_history": (_record_history(s, history[s.id])
+                                                if s.id in history else None)}
                             for s in subs]}
 
     @app.post("/api/admin/notify-test")
@@ -1455,10 +1487,11 @@ def create_app(store: Store) -> FastAPI:
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
         Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
         then takes the median across the sensors reporting each day so one noisy unit
-        can't swing the area."""
+        can't swing the area. PM readings over AREA_PM_MAX are left out of the averages."""
+        cap = AREA_PM_MAX if field.startswith("pm") else None
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.read_model.daily(conn, "air", sid, field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since, max_value=cap).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1500,7 +1533,7 @@ def create_app(store: Store) -> FastAPI:
             dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
         for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
-                   if sid in latest and not (is_pm and latest[sid] > 1000)]
+                   if sid in latest and not (is_pm and latest[sid] > AREA_PM_MAX)]
             daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
@@ -2168,7 +2201,7 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
-                                          context={"mode": "data"})
+                                          context={"mode": "data", "dump_info": dumps.summary()})
 
     @app.get("/data/dumps/{name}")
     def data_dump(name: str):
