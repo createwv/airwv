@@ -257,6 +257,19 @@ SERIES_KIND_LABELS = {
                     "Water Quality Portal (WQP)"),
 }
 
+# /site/permit/<ref>: the three permit layers -> (what it is, data source, raw API); the stage
+# words match the map legends (app.js DEP_LABEL / MINE_LABEL)
+PERMIT_LAYERS = {
+    "coal_npdes": ("Coal-mine water discharge permit (NPDES)", "WV DEP Coal NPDES", "/api/coal-npdes"),
+    "dep_mining": ("Mining permit", "WV DEP Division of Mining & Reclamation", "/api/dep-mining"),
+    "dep_permits": ("Oil & gas well permit", "WV DEP Office of Oil & Gas", "/api/dep-permits"),
+}
+PERMIT_STAGE_LABELS = {
+    "requested": "Requested (pending)", "approved": "Approved (permit issued)",
+    "construction": "Under construction", "new": "New / not yet started",
+    "active": "Active / renewed", "inactive": "Inactive (idle)",
+}
+
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -2144,11 +2157,14 @@ def create_app(store: Store) -> FastAPI:
     def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
         """The single home of one site (docs/DIRECTION.md). Data centers (``view=adv`` is the
         full record) and the measured kinds (a recent-readings chart from the /api/query
-        series mode); the other kinds come with the site-pages plan items."""
+        series mode), permits (stage and 303(d) records); the other kinds come with the
+        site-pages plan items."""
         from airwv import data_centers as dcs
 
         if kind in SERIES_KINDS:
             return _measured_site_page(request, kind, ref, param)
+        if kind == "permit":
+            return _permit_site_page(request, ref, "adv" if view == "adv" else "basic")
         if kind == "facility":
             # no facility page yet: send the stable id on to where the facility lives now
             # (curated sources: /sources#facility=<name>; ECHO: its EPA page)
@@ -2197,6 +2213,27 @@ def create_app(store: Store) -> FastAPI:
             "mode": "site", "kind": kind, "site": site, "measured": measured, "names": names,
             "chosen": chosen, "window": window, "label": SERIES_KIND_LABELS[kind],
             "plabel": lambda p: METRIC_LABELS.get(p, p.replace("_", " ")), "prov": prov})
+
+    def _permit_site_page(request, ref, view):
+        """A coal discharge, DEP mining or oil & gas permit: what it is, its permit stage and,
+        for coal discharges, the 303(d) impaired streams its outlets sit on (the read model's
+        ``record`` rows), with the layer's caveat. ``view=adv`` lists every field."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"permit:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no permit with that id")
+            # an oil & gas API number can list identical rows; keep each record once
+            records = list({tuple(r.values()): r for r in
+                            rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])}.values())
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        a = site["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site_permit.html", context={
+            "mode": "site", "kind": "permit", "view": view, "site": site, "a": a,
+            "what": PERMIT_LAYERS[site["layer"]], "stage": PERMIT_STAGE_LABELS.get(a.get("stage")),
+            "stage_rec": next((r for r in records if r["kind"] == "permit_stage"), None),
+            "impaired": next((r for r in records if r["kind"] == "impaired_303d"), None),
+            "records": records, "prov": prov})
 
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):

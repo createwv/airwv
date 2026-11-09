@@ -13,6 +13,9 @@ chart the last 7 days (monitors 30, sample sites 365) up to the site's latest re
 it, with the same URL as their CSV and API links (`?param=` picks what to chart; the
 choices come from `ReadModel.parameters`). Monitors match their AirData history
 (`54-003-0003`); AirNow's hourly rows use a 9-digit AQSID and aren't on the page yet.
+`/site/permit/<ref>` (coal discharge, DEP mining, oil & gas) reads one `site` row and its
+`record` rows: the `permit_stage` (DEP mining, oil & gas) and, for coal discharges, the
+`impaired_303d` causes, with the layer's disclaimer; `?view=adv` lists every field.
 Every site page (data centers too) also shows "Related nearby": `site.js` asks `/api/query`
 for the nearest site of each other kind (`kind=<k>&limit=1`, 25 mi) and lists the 5 closest,
 linking each to its site page or, for kinds without one yet, to its own record (`url`).

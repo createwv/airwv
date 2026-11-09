@@ -809,6 +809,10 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       keeps the statewide overview.
       Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
       25 mi, from `/api/query`), each linking to its site page or its own record.
+- [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
+      permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
+      discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
+      caveat; `?view=adv` is the full record. Popups don't link to them yet.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`

@@ -19,7 +19,7 @@
   // rest to their own record (the url /api/query gives them), as on /explore
   const KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site', 'data_center', 'facility',
                  'permit', 'spill_report', 'water_system', 'well'];
-  const PAGE_KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site', 'data_center'];
+  const PAGE_KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site', 'data_center', 'permit'];
   const KIND_LABEL = {sensor: 'Sensor', reference_monitor: 'Monitor', gauge: 'Gauge',
                       sample_site: 'Sample site', data_center: 'Data center', facility: 'Facility',
                       permit: 'Permit', spill_report: 'Spill report', water_system: 'Water system',

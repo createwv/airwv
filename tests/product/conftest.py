@@ -59,6 +59,8 @@ VIEWPORTS = [(390, 844), (1280, 800)]   # phone (iPhone 12–15), laptop
 SITE_PAGES = [
     ("site-dc", "/site/data_center/monarch-compute-campus"),
     ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
+    ("site-permit-coal", "/site/permit/WV1012487"),        # coal discharge on 303(d) streams
+    ("site-permit-og", "/site/permit/051-02423"),          # oil & gas permit stage
 ]
 # Pages whose maps open on the whole state, shot at every DEVICES size for the map check.
 MAP_PAGES = [("map-home", "/"), ("map-air", "/air"), ("map-water", "/water"),
