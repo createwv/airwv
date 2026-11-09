@@ -6,17 +6,21 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import DEVICES, MORE_PAGE, PAGES, SITE_PAGES, VIEWPORTS
+from conftest import (DEVICES, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES, SITE_PAGES, VIEWPORTS,
+                      WV_LINE, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
-NAV_TARGET = 6   # six top-level items, "More" included (docs/DIRECTION.md §3)
+MAP_MAX_SPAN = 2.25   # "about 2×": whole zoom levels are 2× apart, plus fitBounds padding
+NAV_TARGET = 6  # six top-level items, "More" included (docs/DIRECTION.md §3)
 
 CASES = [(name, w) for w, _ in VIEWPORTS for name, _ in PAGES]
 # site pages at every standard screen size (devices.json)
 SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in SITE_PAGES for d in DEVICES.values()]
 CASES += SITE_CASES
 IDS = [f"{n}-{w}" for n, w in CASES]
+# statewide maps at every standard screen size; these pages only feed test_map_bounds
+MAP_CASES = [(name, d["viewport"]["width"]) for name, _ in MAP_PAGES for d in DEVICES.values()]
 
 
 def _get(product, name, width):
@@ -94,19 +98,50 @@ def test_place_reading_above_fold(product, width):
     assert r.get("reading"), f"no reading on the first {r['height']}px"
 
 
-@pytest.mark.parametrize("name,width", CASES, ids=IDS)
+def _first_view_problem(m):
+    """Why a statewide map's first view is wrong: must hold the state line, at most ~2× its size."""
+    if not (m["south"] <= WV_LINE["south"] and m["north"] >= WV_LINE["north"]
+            and m["west"] <= WV_LINE["west"] and m["east"] >= WV_LINE["east"]):
+        return (f"cuts off West Virginia: view {m['south']:.2f},{m['west']:.2f} to "
+                f"{m['north']:.2f},{m['east']:.2f}")
+    if map_span(m) > MAP_MAX_SPAN:
+        return f"opens at {map_span(m):.2f}× West Virginia's size (limit {MAP_MAX_SPAN})"
+    return None
+
+
+@pytest.mark.parametrize("view,problem", [
+    ({"south": 35.44, "north": 42.28, "west": -84.00, "east": -76.35}, None),        # phone, z6
+    ({"south": 35.44, "north": 42.28, "west": -90.70, "east": -69.65}, None),        # wide map, z6
+    ({"south": 37.30, "north": 40.60, "west": -82.60, "east": -77.80}, "cuts off"),
+    ({"south": 32.00, "north": 45.00, "west": -96.00, "east": -64.00}, "opens at"),  # z5
+])
+def test_first_view_rule(view, problem):
+    found = _first_view_problem(view)
+    assert (found is None) if problem is None else (problem in found), found
+
+
+@pytest.mark.parametrize("name,width", CASES + MAP_CASES,
+                         ids=IDS + [f"{n}-{w}" for n, w in MAP_CASES])
 def test_map_bounds(product, name, width):
     r = _get(product, name, width)
     if "leaflet.js" in r.get("shimmed", []):
         pytest.skip("Leaflet not vendored locally (no network); see tests/product/README.md")
+    sized = 0
     for m in r.get("maps", []):
         assert m["width"] > 0 and m["height"] > 0, f"#{m['id']} has no size"
         if m["width"] < 50 or m["height"] < 50:
             continue   # hidden/collapsed map (e.g. a tab not open yet)
+        sized += 1
+        if m["id"] not in LOCAL_MAPS:
+            problem = _first_view_problem(m)
+            assert problem is None, f"#{m['id']} {problem}"
+            continue
         lat, lon = (m["south"] + m["north"]) / 2, (m["west"] + m["east"]) / 2
         assert WV["south"] < lat < WV["north"] and WV["west"] < lon < WV["east"], \
             f"#{m['id']} centered off West Virginia: {lat:.2f},{lon:.2f}"
         assert m["north"] - m["south"] < 12, f"#{m['id']} zoomed out to a continent"
+    if (name, width) in MAP_CASES:
+        assert sized, f"no map to check ({r['error'] or 'page loaded'})"
 
 
 # Accessibility (harness.mjs a11yProbe/focusProbe; the browser asks for reduced motion).

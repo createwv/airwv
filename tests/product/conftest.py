@@ -60,6 +60,13 @@ SITE_PAGES = [
     ("site-dc", "/site/data_center/monarch-compute-campus"),
     ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
 ]
+# Pages whose maps open on the whole state, shot at every DEVICES size for the map check.
+MAP_PAGES = [("map-home", "/"), ("map-air", "/air"), ("map-water", "/water"),
+             ("map-spills", "/spills")]
+# Maps that open on one place by design, so they aren't held to the statewide first view.
+LOCAL_MAPS = {"nb-map"}
+# The state line (WV_BBOX in static/wv.js).
+WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 # The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
 MORE_PAGE = ("more", "/")
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
@@ -91,6 +98,13 @@ def _device_viewports() -> list[dict]:
     return [{"w": d["viewport"]["width"], "h": d["viewport"]["height"], "device": name,
              "scale": d.get("deviceScaleFactor", 1), "mobile": bool(d.get("isMobile")),
              "touch": bool(d.get("hasTouch"))} for name, d in DEVICES.items()]
+
+
+def map_span(m: dict) -> float:
+    """How many times West Virginia's size a map's view is, along its tighter-fitting side.
+    The other side is set by the map's shape: a 958x400 map shows ~4x the state's width at best."""
+    return min((m["north"] - m["south"]) / (WV_LINE["north"] - WV_LINE["south"]),
+               (m["east"] - m["west"]) / (WV_LINE["east"] - WV_LINE["west"]))
 
 
 def _main_checkout() -> Path | None:
@@ -202,6 +216,7 @@ def product(tmp_path_factory):
             "base": base, "out": str(OUT), "geo": GEO,
             "pages": [{"name": n, "path": p} for n, p in PAGES]
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES]
+            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in MAP_PAGES]
             + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
                 "openMore": True}],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
@@ -233,7 +248,9 @@ def _report(data) -> str:
             "|---|---|---|---|---|---|---|---|---|"]
     for r in data["results"]:
         reading = (r.get("reading") or {}).get("text", "—").replace("|", "/")[:60]
-        maps = ", ".join(f"{m['id']} z{m['zoom']}" for m in r.get("maps", [])) or "—"
+        maps = ", ".join(f"{m['id']} z{m['zoom']}"
+                         + ("" if m["id"] in LOCAL_MAPS else f" ×{map_span(m):.2f}")
+                         for m in r.get("maps", [])) or "—"
         errs = len(r["consoleErrors"]) + len(r["pageErrors"])
         a11y = ", ".join(f"{k} {len(v)}" for k, v in (r.get("a11y") or {}).items()
                          if isinstance(v, list) and v) or "ok"
