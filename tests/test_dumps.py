@@ -91,3 +91,26 @@ def test_dump_route(tmp_path, monkeypatch):
     assert c.get("/data/dumps/events.csv.gz").status_code == 200
     page = c.get("/data").text
     assert 'href="/data/dumps/site.csv.gz"' in page and 'href="/data/dumps/events.csv.gz"' in page
+
+
+def test_data_page_shows_as_of_and_sizes(tmp_path, monkeypatch):
+    store, out = _store(tmp_path), tmp_path / "dumps"
+    monkeypatch.setenv("AIRWV_DUMPS_DIR", str(out))
+    c = TestClient(webapp.create_app(store))
+    r = c.get("/data")   # before the first run: no date, no sizes, no error
+    assert r.status_code == 200 and "These files are as of" not in r.text and "well;" not in r.text
+
+    m = dumps.write_dumps(store, now=T0)
+    page = c.get("/data").text
+    assert "These files are as of Jun 30, 2026, 8:00 PM ET." in page   # T0 is midnight UTC
+    for info in m["files"].values():
+        assert f"; {dumps.human_size(info['bytes'])})" in page
+
+    (out / "manifest.json").write_text("{not json")   # a bad manifest never takes the page down
+    r = c.get("/data")
+    assert r.status_code == 200 and "These files are as of" not in r.text
+
+
+def test_human_size():
+    assert [dumps.human_size(n) for n in (0, 999, 1000, 41_900, 999_499, 999_500, 2_345_678, 3_100_000_000)] == [
+        "0 bytes", "999 bytes", "1 KB", "42 KB", "999 KB", "1.0 MB", "2.3 MB", "3.1 GB"]

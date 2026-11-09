@@ -2163,7 +2163,7 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
-                                          context={"mode": "data"})
+                                          context={"mode": "data", "dump_info": dumps.summary()})
 
     @app.get("/data/dumps/{name}")
     def data_dump(name: str):
