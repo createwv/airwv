@@ -80,7 +80,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] CORS + rate limit on `/api/*` and `/data/dumps/*` (after Postgres) [auto:S]
 - [x] Add published events (`events` with status 'published') as an `events.csv.gz` dump [auto:S]
 - [ ] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
-- [ ] Show the dumps' "as of" date and file sizes on `/data` from `manifest.json` [auto:S]
+- [x] Show the dumps' "as of" date and file sizes on `/data` from `manifest.json` [auto:S]
 - [ ] Age cap for spill alerts (e.g. skip reports dated more than 60 days back), with the cap stated in the email [auto:S]
 - [ ] Tell a cleared violation that comes back apart from one already seen (remember when each record was last present) [auto:S]
 - [ ] Admin view: per-subscription record alert history (what fired, what was taken as the starting point) at `/api/admin/subscriptions` [auto:S]
