@@ -69,6 +69,15 @@ LOCAL_MAPS = {"nb-map"}
 WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 # The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
 MORE_PAGE = ("more", "/")
+# A dialog or map popup opened as a user would, shot at every DEVICES size; the a11y checks run
+# on what opens (`scope`), since the pages under them are already checked in PAGES.
+OPEN_PAGES = [
+    ("open-report", "/air", {"click": '[data-open="report"]', "scope": "#reportmodal.on"}),
+    ("open-facility", "/sources", {"click": ".srccard", "scope": "#srcdetail.on"}),
+    # Home's map, not /air's: clicking an /air sensor redraws the markers, closing its popup at once
+    ("open-sensor", "/", {"marker": {"map": "ov-map", "text": "µg/m³ PM2.5"},
+                          "scope": "#ov-map .leaflet-popup"}),
+]
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {
     "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
@@ -218,7 +227,9 @@ def product(tmp_path_factory):
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES]
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in MAP_PAGES]
             + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
-                "openMore": True}],
+                "openMore": True}]
+            + [{"name": n, "path": p, "viewports": _device_viewports(), "open": o}
+               for n, p, o in OPEN_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))
