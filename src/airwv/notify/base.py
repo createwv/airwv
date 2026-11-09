@@ -11,7 +11,9 @@ from __future__ import annotations
 import abc
 import logging
 
-log = logging.getLogger("airwv.notify")
+from airwv.alerts import RECORD_RULES
+
+log =logging.getLogger("airwv.notify")
 
 
 RECORD_LABELS = {"spills": ("reported spill", "reported spills"),
@@ -74,10 +76,13 @@ def alert_body(alert) -> str:
         if len(recs) > MAX_RECORD_LINES:
             lines.append(f"…and {len(recs) - MAX_RECORD_LINES} more.")
         sources = sorted({r["source"] for r in recs if r.get("source")})
+        cap = RECORD_RULES.get(alert.field, {}).get("max_age_days")
+        noun = RECORD_LABELS.get(alert.field, (alert.field, alert.field))[1]
         return (f"New in the public records AirWV follows, near {alert.label or 'your place'}:\n\n"
                 + "\n".join(lines)
                 + "\n\nThese are public records, not findings of harm; the date is the record's own, "
                 "and it can be older than the day it reached us. Check the linked source for the details."
+                + (f"\nThis alert leaves out {noun} dated more than {cap} days back." if cap else "")
                 + (f"\nSource: {'; '.join(sources)}." if sources else "")
                 + footer)
     if getattr(alert, "kind", "threshold") == "trend":

@@ -81,6 +81,35 @@ def test_rule_quiet_hours_and_rate_limit_hold_the_alert():
     assert evaluate_records([recent], [rec], {1: set()}, _NOW)[0] == []
 
 
+def test_spill_age_cap_skips_old_reports_only():
+    def rec(ref, effective):
+        return _rec(ref, 38.36, -81.64, effective=effective)
+
+    edge, old = rec(1, "2024-04-02"), rec(2, "2024-04-01")           # 60 and 61 days before _NOW
+    undated, garbled = rec(3, None), rec(4, "unknown")
+    alerts, _ = evaluate_records([_Sub()], [edge, old, undated, garbled], {1: set()}, _NOW)
+    assert {r["site_id"] for r in alerts[0].records} == {
+        "spill_report:1", "spill_report:3", "spill_report:4"}
+    # only an old report: nothing to send
+    assert evaluate_records([_Sub()], [old], {1: set()}, _NOW)[0] == []
+    # the cap is for spills; an old violation still alerts
+    viol = _rec(9, 38.36, -81.64, rule="violations", kind="violation", value="violation",
+                effective="2020-01-01")
+    assert len(evaluate_records([_Sub(field="violations")], [viol], {1: set()}, _NOW)[0]) == 1
+
+
+def test_email_states_the_spill_age_cap():
+    def body(field, rec):
+        return alert_body(Alert(subscription_id=1, channel="log", target="x", sensor_id=rec["site_id"],
+                                field=field, value=1.0, threshold=0.0, ts=_NOW, kind="record",
+                                label="Charleston", records=[rec]))
+
+    assert "leaves out reported spills dated more than 60 days back" in body(
+        "spills", _rec(1, 38.36, -81.64))
+    assert "days back" not in body(
+        "violations", _rec(9, 38.36, -81.64, rule="violations", kind="violation", value="violation"))
+
+
 def test_waitlist_rows_are_record_subs_and_skip_the_reading_matcher():
     legacy = _Sub(kind="threshold", field="spills")       # how the old waitlist stored them
     assert evaluate([legacy], {}, _NOW) == []

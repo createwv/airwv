@@ -229,7 +229,8 @@ new record shows up for a place in the public records the map uses — `--field 
 (NRC spill reports), `water` (EPA health-based drinking-water violations) or
 `violations` (EPA ECHO facility violations). The first check takes what's already
 on file as the baseline, so only records that appear later alert; county-only
-records (most spills, water systems) also match a place in that county.
+records (most spills, water systems) also match a place in that county. Spill reports
+dated more than 60 days back don't alert, and the message says so.
 
 ```bash
 python -m airwv.ingest subscribe --channel webhook --target https://hooks.example/... \
