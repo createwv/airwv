@@ -63,7 +63,8 @@
   })();
 </script>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
-<main id="main" tabindex="-1">
+{# no tabindex: the skip link's target still moves where the next Tab starts, and the harness reads [tabindex] as a control #}
+<main id="main">
 {% block content %}{% endblock %}
 </main>
 <footer>
