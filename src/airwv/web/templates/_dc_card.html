@@ -1,6 +1,6 @@
 {# Basic-view data-center card (what we know / what's not disclosed); near_me.js renders the same shape. #}
 {# A line's own sources, numbered as in the list below (record field "cite"). #}
-{% macro cite(srcs) %}{% if srcs %} <span class="dc-cite">{% for s in srcs %}<a href="{{ s.url }}" target="_blank" rel="noopener" title="{{ s.kind }}: {{ s.title }}" aria-label="Source {{ s.n }}: {{ s.title }}">[{{ s.n }}]</a>{% endfor %}</span>{% endif %}{% endmacro %}
+{% macro cite(srcs) %}{% if srcs %} <span class="dc-cite">{% for s in srcs %}<a href="{{ s.url }}" target="_blank" rel="noopener" title="{{ s.kind }}: {{ s.title }}" aria-label="Data source {{ s.n }}: {{ s.title }}">[{{ s.n }}]</a>{% endfor %}</span>{% endif %}{% endmacro %}
 
 {% macro dc_card(c) %}
 {% for p in c.comment_periods %}

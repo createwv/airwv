@@ -94,9 +94,9 @@ def test_card_line_links_its_own_source(tmp_path):
     assert lines["Water permits"]["sources"] == [{**dep, "n": 1}]
     assert lines["Water source"]["sources"] == []   # no key: falls back to the site's source list
     page = _client(tmp_path).get("/site/data_center/monarch-compute-campus").text
-    assert f'aria-label="Source 1: {dep["title"]}">[1]</a>' in page
+    assert f'aria-label="Data source 1: {dep["title"]}">[1]</a>' in page
     adv = _client(tmp_path).get("/site/data_center/monarch-compute-campus?view=adv").text
-    assert 'aria-label="Source 3:' in adv   # Nscale, on the cooling row
+    assert 'aria-label="Data source 3:' in adv   # Nscale, on the cooling row
 
 
 def test_watch_list_has_every_comment_deadline():
