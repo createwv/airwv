@@ -40,6 +40,7 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.web.public_api import PublicDataMiddleware
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -451,6 +452,10 @@ def create_app(store: Store) -> FastAPI:
     # gzip JSON/HTML/JS/CSS: the big layers (/api/abandoned-wells, /api/water/sites) are
     # mostly repeated keys and shrink ~8-10×
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # added last so it runs first: a 429 costs no route work (limits are requests/minute per client)
+    app.add_middleware(PublicDataMiddleware, limits={
+        "api": int(os.environ.get("AIRWV_RATE_LIMIT_API", "").strip() or "300"),
+        "dumps": int(os.environ.get("AIRWV_RATE_LIMIT_DUMPS", "").strip() or "30")})
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()

@@ -199,7 +199,8 @@ python -m airwv.web           # open http://127.0.0.1:8000
 
 Pick a sensor and metric to see an hourly time series and a time-of-day (local
 Eastern) profile. Read API: `/api/sensors`, `/api/series/{id}?field=`,
-`/api/diurnal/{id}?field=`.
+`/api/diurnal/{id}?field=`. Reads on `/api/*` and `/data/dumps/*` allow any origin (CORS)
+and are rate limited per client (see `deploy/README.md`).
 
 ## Alerts
 
