@@ -171,6 +171,8 @@ Get warnings to the people who need them.
       (old rows are matched by field, no migration) and gained facility violations; `/place`'s
       *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
       *Email delivery still waits on SMTP go-live (a session with Corey).*
+      Violations that return after 30+ days off the list alert as "back on the list"
+      (`alert_seen.last_present_at`; spills don't).
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)

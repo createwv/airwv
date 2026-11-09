@@ -236,6 +236,11 @@ python -m airwv.ingest subscribe --channel webhook --target https://hooks.exampl
     --kind record --field spills --lat 38.35 --lon -81.63 --radius-km 16
 ```
 
+A `water` or `violations` record that was off the list for at least 30 days and is
+listed again alerts too, marked as back on the list with the date it was last seen.
+Dropping off a list doesn't by itself mean a problem was fixed, so the alert doesn't
+say that.
+
 Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
 (SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).
 Per-subscription rate limiting and quiet hours prevent spam. SMS is planned.

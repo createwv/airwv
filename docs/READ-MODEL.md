@@ -43,7 +43,10 @@ have no public coordinates, so `lat`/`lon` are NULL and only county finds them; 
 Place-based record alerts (`alerts.RECORD_RULES`, `ReadModel.alert_records`) read the
 `record` view joined to `site`: spill reports, SDWA health-based violations and ECHO
 violations. A record is "new" when its `site_id|kind|value` key wasn't there at the last
-check, so a status or contaminant change counts as new too.
+check, so a status or contaminant change counts as new too. `alert_seen.last_present_at`
+remembers the last check that found each record: an ECHO or SDWA violation (not a spill)
+that was off the list for at least 30 days and is listed again alerts as back on the list,
+with the date it was last seen.
 
 ## Known gaps
 
