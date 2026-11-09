@@ -1,12 +1,27 @@
 """Tests for the dashboard read API (FastAPI TestClient, no server/network)."""
 
+import json
 from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
+from airwv.registry import SensorInfo
 from airwv.sources.base import Reading
 from airwv.storage import Store
+from airwv.web import app as webapp
 from airwv.web.app import create_app
+
+
+def test_sensor_names_fall_back_to_public_listing(tmp_path, monkeypatch):
+    # no private registry (worktree / fresh clone): the listing names the mapped sensors
+    (tmp_path / "sensor_index_map.json").write_text(json.dumps({"AA": 197127, "BB": 200001, "CC": 300003}))
+    (tmp_path / "wv_public_sensors.json").write_text(json.dumps([
+        {"name": "Listed Belle", "sensor_index": 197127}, {"name": "Listed Rutledge", "sensor_index": 200001},
+        {"name": "Someone Else", "sensor_index": 999}]))
+    monkeypatch.setenv("AIRWV_INDEX_CACHE", str(tmp_path / "sensor_index_map.json"))
+    monkeypatch.setattr("airwv.registry.load_wv_sensors",
+                        lambda: [SensorInfo(name="Registry Belle", device_id="AA", source="purpleair")])
+    assert webapp._index_to_name() == {"197127": "Registry Belle", "200001": "Listed Rutledge", "300003": "300003"}
 
 
 def _client(tmp_path):
