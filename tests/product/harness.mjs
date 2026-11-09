@@ -104,7 +104,7 @@ function filtersProbe() {
   if (!det || !map) return { error: "no #air-filters / #map-card" };
   return { open: det.open, belowMap: !!(map.compareDocumentPosition(det) & Node.DOCUMENT_POSITION_FOLLOWING),
            summary: getComputedStyle(det.querySelector("summary")).display !== "none",
-           metricVisible: document.getElementById("field").getBoundingClientRect().height > 0,
+           metricVisible: document.getElementById("field").checkVisibility(),   // a closed <details> keeps its boxes
            scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth };
 }
 
