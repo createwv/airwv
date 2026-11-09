@@ -2,7 +2,7 @@
 
 The site uses each of these words for one thing only ([DIRECTION.md](DIRECTION.md) §3). Pages,
 nav, popups, API docs and plan items should use them the same way. Add a term here before using a
-new one on the site.
+new one on the site. `tests/test_terms.py` fails if "source" appears alone in page text, nav or popups.
 
 | Term | Means | Where it comes from |
 |---|---|---|
