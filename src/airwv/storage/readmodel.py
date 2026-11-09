@@ -373,16 +373,19 @@ class ReadModel:
                 out[ref] = {"value": row[0], "unit": row[1], "ts": row[2]}
         return out
 
-    def daily(self, conn, medium: str, ref: str, parameter: str, since=None, until=None) -> dict:
+    def daily(self, conn, medium: str, ref: str, parameter: str, since=None, until=None,
+              max_value: float | None = None) -> dict:
         """Daily mean of ``parameter`` for one ref inside the window: ``{date: value}``
-        (aggregated in SQL, like ``Store.daily_avg``)."""
+        (aggregated in SQL, like ``Store.daily_avg``). Readings over ``max_value`` are
+        left out of the mean."""
         from datetime import date
 
         window, wp = _window(since, until)
+        cap = " AND value <= :cap" if max_value is not None else ""
         rows = conn.exec_driver_sql(
             "SELECT date(ts), avg(value) FROM measurement WHERE medium = :m AND parameter = :p "
-            f"AND ref = :r{window} GROUP BY date(ts)",
-            {"m": medium, "p": parameter, "r": ref, **wp}).all()
+            f"AND ref = :r{window}{cap} GROUP BY date(ts)",
+            {"m": medium, "p": parameter, "r": ref, **wp, **({"cap": max_value} if cap else {})}).all()
         return {date.fromisoformat(str(d)[:10]): float(v) for d, v in rows if v is not None}
 
     def parameters(self, conn, medium: str, ref: str) -> list[dict]:
