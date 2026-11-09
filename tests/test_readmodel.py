@@ -351,7 +351,6 @@ def test_api_query_county(tmp_path, monkeypatch):
     both = c.get("/api/query?county=Kanawha,Mason&kind=data_center&limit=500").json()
     assert both["filters"]["county"] == ["Kanawha", "Mason"]
     assert any("/" in s["county"] for s in both["sites"])
-    assert {"Kanawha", "Mason"} & {n for s in both["sites"] for n in county_names(s["county"])}
     assert all({"Kanawha", "Mason"} & set(county_names(s["county"])) for s in both["sites"])
     # with a point it narrows the radius search; a region name is not a county
     near = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&county=Kanawha&kind=facility").json()

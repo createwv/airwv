@@ -6,7 +6,7 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES,
+from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES,
                       SITE_PAGES, VIEWPORTS, WV_LINE, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
@@ -16,7 +16,7 @@ NAV_TARGET = 6  # six top-level items, "More" included (docs/DIRECTION.md §3)
 
 CASES = [(name, w) for w, _ in VIEWPORTS for name, _ in PAGES]
 # site pages at every standard screen size (devices.json)
-SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in [*SITE_PAGES, EXPLORE_SERIES]
+SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in [*SITE_PAGES, EXPLORE_SERIES, EXPLORE_FILTERS]
               for d in DEVICES.values()]
 CASES += SITE_CASES
 IDS = [f"{n}-{w}" for n, w in CASES]
@@ -113,6 +113,19 @@ def test_explore_measurements(product, width):
     assert back["site"] == first["site"] and back["rows"] > 0, back
     assert moved["site"] != first["site"], moved
     assert link["site"] == first["site"] and link["rows"] == first["rows"], link
+
+
+@pytest.mark.parametrize("width", [d["viewport"]["width"] for d in DEVICES.values()])
+def test_explore_filters(product, width):
+    """Explore's county and value filters: a shared URL fills the form, reaches /api/query and
+    the CSV, and the page says what's filtered and which sites a county can't find."""
+    r = _get(product, EXPLORE_FILTERS[0], width)
+    assert r["error"] is None, r["error"]
+    f = r["exFilters"]
+    assert f["county"] == "Kanawha" and f["over"] == "1" and f["countyShown"] and f["overShown"], f
+    assert "county=Kanawha" in f["api"] and "over=1" in f["api"] and f["csv"] == f["api"] + "&format=csv", f
+    assert "in Kanawha County" in f["count"] and "over 1" in f["count"], f
+    assert "lists a county" in f["prov"], f
 
 
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])
