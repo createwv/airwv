@@ -56,7 +56,7 @@
   {{ related(kind, 'data_center:' ~ dc.id, dc.lat, dc.lon) }}
 
   <div class="card"><p class="meta" style="padding:10px 14px">{{ prov.disclaimer }}
-    <br>Source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
+    <br>Data source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
     Raw record: <a href="/api/data-centers">/api/data-centers</a> · <a href="/data">all data sources</a></p></div>
 </div>
 {% endblock %}
