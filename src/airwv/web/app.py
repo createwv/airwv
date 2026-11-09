@@ -358,8 +358,25 @@ def _ozone_color(value: float | None) -> str:
     return "#7e0023"
 
 
+def _listing_names() -> dict[str, str]:
+    """Map sensor id -> name from the resolved public listing, best-effort."""
+    try:
+        import json
+
+        cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+        listing = Path(cache).with_name("wv_public_sensors.json")
+        return {str(r["sensor_index"]): r["name"] for r in json.loads(listing.read_text(encoding="utf-8"))
+                if r.get("sensor_index") is not None and r.get("name")}
+    except Exception:
+        return {}
+
+
 def _index_to_name() -> dict[str, str]:
-    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort."""
+    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort.
+
+    Registry names first. The private registry is absent from worktrees and fresh clones,
+    so the public listing it was matched against (same names) covers those.
+    """
     try:
         from airwv.registry import load_wv_sensors
         from airwv.resolve import load_index_map
@@ -367,7 +384,9 @@ def _index_to_name() -> dict[str, str]:
         cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
         index_map = load_index_map(Path(cache))
         name_by_device = {s.device_id: s.name for s in load_wv_sensors()}
-        return {str(idx): name_by_device.get(dev, str(idx)) for dev, idx in index_map.items()}
+        listed = _listing_names()
+        return {str(idx): name_by_device.get(dev) or listed.get(str(idx), str(idx))
+                for dev, idx in index_map.items()}
     except Exception:
         return {}
 
