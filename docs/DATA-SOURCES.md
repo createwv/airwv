@@ -247,7 +247,16 @@ follow-up sampling never becomes public. → `/api/nrc-spills`, Events page.
 categorized list (gas/air/water/chemical/sensor). It's the clearest example of the
 payoff: once every source carries coordinates + provenance, joining them by location
 is easy. Powers the **What's near me?** page. Reads the unified views below; output is
-pinned by `tests/snapshots/api_near.json`.
+pinned by `tests/snapshots/api_near.json`. Each hazard's `page` is its site page,
+`/site/<kind>/<id>` (the Nearby "details →" link); `link` stays the data source's own record.
+
+### `/site/<kind>/<id>` — one page per site
+Every kind in the `site` view (`well`, `facility`, `permit`, `spill_report`, `water_system`,
+`reference_monitor`, `sensor`, `gauge`, `sample_site`, `data_center`) has a page; `<id>` is the
+site's `ref` (the part of `site_id` after `kind:`). The plain view shows what and where, its
+public records in words, the latest readings (sensors, gauges, sample sites), "what else is
+near here" and the data source's own record; `?view=adv` shows the full source row, the raw
+records and series / CSV links into `/api/query`. Data centers keep their own card.
 
 ### `/api/query` — one read path over the unified views
 `/api/query?lat=&lon=&km=&kind=&medium=&area=&county=&param=&over=&from=&to=&since=&limit=` returns sites near

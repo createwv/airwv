@@ -204,7 +204,7 @@ def test_site_page_basic_and_advanced(tmp_path):
     page = c.get(f"/site/data_center/{unmapped['id']}")
     assert page.status_code == 200 and "exact location not public" in page.text
     assert c.get("/site/data_center/no-such-site").status_code == 404
-    assert c.get("/site/well/anything").status_code == 404   # other kinds come with the site-pages item
+    assert c.get("/site/well/anything").status_code == 404   # an unknown well
 
 
 def test_api_full_record_for_the_advanced_view(tmp_path):

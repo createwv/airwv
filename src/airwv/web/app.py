@@ -23,7 +23,7 @@ import statistics
 from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
@@ -95,6 +95,27 @@ def _in_bbox(lat, lon, box: tuple[float, float, float, float]) -> bool:
 # Cloudflare reuse it briefly instead of refetching megabytes on every page view.
 _SHORT_CACHE = {"Cache-Control": "public, max-age=60"}
 _LAYER_CACHE = {"Cache-Control": "public, max-age=600"}
+
+# site kinds of the read model's `site` view -> the plain label a site page shows
+# (docs/GLOSSARY.md); each has a page at /site/<kind>/<ref>
+SITE_KINDS = {
+    "well": "Gas well", "facility": "Facility", "permit": "Permit", "spill_report": "Reported spill",
+    "water_system": "Water system", "reference_monitor": "Monitor", "sensor": "Sensor",
+    "gauge": "Gauge", "sample_site": "Sample site", "data_center": "Data center",
+}
+
+# record kinds of the `record` view -> what a site page calls them
+SITE_RECORD_LABELS = {
+    "orphan": "Orphan well (state list)", "violation": "EPA ECHO violation status",
+    "compliance_status": "EPA ECHO compliance status", "impaired_303d": "Receiving stream impaired (303(d) list) for",
+    "permit_stage": "Permit stage", "spill": "Reported to the National Response Center",
+    "health_violation": "Health-based drinking-water violation", "project_status": "Project status",
+}
+
+
+def site_page_url(kind: str, ref) -> str:
+    """The site page of one site: ``/site/<kind>/<ref>`` (ref URL-quoted)."""
+    return f"/site/{kind}/{quote(str(ref), safe='')}"
 
 
 class ReportReadingIn(BaseModel):
@@ -611,7 +632,8 @@ def create_app(store: Store) -> FastAPI:
         and could it explain how I feel?' aggregation across all our layers. Each hazard
         carries a broad category (gas / air / water / chemical / sensor) the UI matches
         to symptoms. Not medical advice. Reads the unified views (site / measurement /
-        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output."""
+        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output.
+        ``link`` is the data source's own record; ``page`` is the site's /site/<kind>/<ref>."""
         km = min(max(km, 1.0), 25.0)
         radius_mi = km * 0.621371
         rm = store.read_model
@@ -623,7 +645,8 @@ def create_app(store: Store) -> FastAPI:
         with rm.connect() as conn:
             def near_pts(layer, cap, make):
                 sites = rm.sites_near(conn, lat, lon, radius_mi, layer=layer, limit=cap)
-                return [make(s, s["attrs"], f, round(s["d"], 1)) for s, f in flags(conn, sites)]
+                return [{**make(s, s["attrs"], f, round(s["d"], 1)), "page": site_page_url(s["kind"], s["ref"])}
+                        for s, f in flags(conn, sites)]
 
             haz: list[dict] = []
 
@@ -687,7 +710,7 @@ def create_app(store: Store) -> FastAPI:
                         (pm is not None and f"PM2.5 {round(pm, 1)}"),
                         (voc is not None and f"VOC {round(voc, 0):g}")] if x) or "community sensor",
                     "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
-                    "link": "/air", "report": False})
+                    "link": "/air", "report": False, "page": site_page_url(s["kind"], s["ref"])})
 
             # measured water sample sites → water
             wsites = rm.sites_near(conn, lat, lon, radius_mi, layer="water_readings", limit=10_000, bbox_km=km)
@@ -700,7 +723,7 @@ def create_app(store: Store) -> FastAPI:
                 haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
                             "detail": ", ".join(f"{k} {latest[k]['value']}" for k in keys[:3]) or "sample site",
                             "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
-                            "link": "/water", "report": False})
+                            "link": "/water", "report": False, "page": site_page_url(s["kind"], s["ref"])})
 
             # drinking-water systems with a health-based violation in the nearest county → water
             from airwv.wvgeo import WV_COUNTY_CENTROID
@@ -714,7 +737,8 @@ def create_app(store: Store) -> FastAPI:
                                     "label": f"{sy['name']} (water system)",
                                     "detail": f"health-based SDWA violation · serves {sy['attrs'].get('population')}",
                                     "flag": "violation", "mi": None, "lat": sy["lat"], "lon": sy["lon"],
-                                    "link": sy["url"], "report": False})
+                                    "link": sy["url"], "report": False,
+                                    "page": site_page_url(sy["kind"], sy["ref"])})
 
         cats: dict = defaultdict(int)
         for h in haz:
@@ -2153,28 +2177,24 @@ def create_app(store: Store) -> FastAPI:
                                           context={"mode": "explore",
                                                    "counties": sorted(WV_COUNTY_CENTROID)})
 
-    @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
+    @app.get("/site/{kind}/{ref:path}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
-        """The single home of one site (docs/DIRECTION.md). Data centers (``view=adv`` is the
-        full record) and the measured kinds (a recent-readings chart from the /api/query
-        series mode), permits (stage and 303(d) records); the other kinds come with the
-        site-pages plan items."""
+        """The single home of one site (docs/DIRECTION.md), for every kind in the read
+        model's ``site`` view (``SITE_KINDS``). Measured kinds get a recent-readings chart from
+        the /api/query series mode; data centers keep their own card ("what we know / what's
+        not disclosed"); permits show their stage and 303(d) records; the rest their public
+        records. ``view=adv`` is the full record."""
         from airwv import data_centers as dcs
 
+        if kind not in SITE_KINDS:
+            raise HTTPException(status_code=404, detail="no such site kind")
+        view = "adv" if view == "adv" else "basic"
         if kind in SERIES_KINDS:
             return _measured_site_page(request, kind, ref, param)
         if kind == "permit":
-            return _permit_site_page(request, ref, "adv" if view == "adv" else "basic")
-        if kind == "facility":
-            # no facility page yet: send the stable id on to where the facility lives now
-            # (curated sources: /sources#facility=<name>; ECHO: its EPA page)
-            with store.read_model.connect() as conn:
-                site = store.read_model.site(conn, f"facility:{ref}")
-            if site is None or not site["url"]:
-                raise HTTPException(status_code=404, detail="no facility with that id")
-            return RedirectResponse(site["url"], status_code=307)
+            return _permit_site_page(request, ref, view)
         if kind != "data_center":
-            raise HTTPException(status_code=404, detail="no site page for this kind yet")
+            return _generic_site_page(request, kind, ref, view)
         api = data_centers_layer()
         rm = store.read_model
         with rm.connect() as conn:
@@ -2183,9 +2203,21 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="unknown data center")
         dc = found[0]["attrs"]
         return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
-            "mode": "site", "kind": kind, "view": "adv" if view == "adv" else "basic",
+            "mode": "site", "kind": kind, "view": view,
             "dc": dc, "card": dcs.card(dc), "cited": dcs.cited, "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
             "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
+
+    def _generic_site_page(request: Request, kind: str, ref: str, view: str):
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"{kind}:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="unknown site")
+            records = rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"], {})
+        return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
+            "mode": "site", "kind": kind, "view": view, "site": site, "label": SITE_KINDS[kind],
+            "records": records, "record_labels": SITE_RECORD_LABELS, "prov": prov})
 
     def _measured_site_page(request, kind, ref, param):
         """A sensor, monitor, gauge or sample site: what it measures, its latest reading and a
