@@ -216,6 +216,17 @@ def test_nav_collapsed(tmp_path):
     assert c.get("/sources").status_code == 200                           # old URL still works
 
 
+def test_skip_link_and_main_landmark(tmp_path):
+    # the skip link is the first thing in <body>; every page's content sits in the one <main> it points at
+    c = _client(tmp_path)
+    for path in ("/", "/place", "/air", "/water", "/alerts", "/learn", "/data", "/explore", "/about"):
+        page = c.get(path).text
+        body = page[page.index("<body>") + len("<body>"):]
+        assert body.lstrip().startswith('<a class="skip-link" href="#main">Skip to content</a>'), path
+        assert page.count("<main") == 1 and page.count("</main>") == 1, path
+        assert page.index("</nav>") < page.index('<main id="main"') < page.index("</main>") < page.index("<footer"), path
+
+
 def test_glossary_on_site(tmp_path):
     # footer Glossary stays on the site: /learn#glossary carries docs/GLOSSARY.md's six terms
     c = _client(tmp_path)

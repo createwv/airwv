@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 {# /place has its own place-scoped air line; a statewide haze toast there would contradict it #}
 {% if mode != 'place' %}
 <div id="haze" class="haze" aria-hidden="true"></div>
@@ -62,7 +63,9 @@
   })();
 </script>
 <div class="betabar">🚧 <b>Beta — under construction.</b> Readings are provisional and shown for community awareness, not regulatory use.</div>
+<main id="main" tabindex="-1">
 {% block content %}{% endblock %}
+</main>
 <footer>
   <a href="/">Home</a> · <a href="/air">Air</a> · <a href="/learn">Learn</a> ·
   <a href="/data">Data sources</a> · <a href="/about">About</a> ·
