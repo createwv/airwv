@@ -69,6 +69,8 @@ LOCAL_MAPS = {"nb-map"}
 WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 # The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
 MORE_PAGE = ("more", "/")
+# /air's "Filters" sheet, tapped open where it's collapsed and shot at every DEVICES size.
+FILTERS_PAGE = ("filters", "/air")
 # A dialog or map popup opened as a user would, shot at every DEVICES size; the a11y checks run
 # on what opens (`scope`), since the pages under them are already checked in PAGES.
 OPEN_PAGES = [
@@ -228,6 +230,8 @@ def product(tmp_path_factory):
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in MAP_PAGES]
             + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
                 "openMore": True}]
+            + [{"name": FILTERS_PAGE[0], "path": FILTERS_PAGE[1], "viewports": _device_viewports(),
+                "openFilters": True}]
             + [{"name": n, "path": p, "viewports": _device_viewports(), "open": o}
                for n, p, o in OPEN_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],

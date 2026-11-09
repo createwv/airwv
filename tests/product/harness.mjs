@@ -3,7 +3,8 @@
 // Config: {base, out, pages:[{name, path, viewports?, openMore?, open?}], viewports:[{w, h}],
 //          vendorDirs:[...], geo:{lat, lon}}. A page with its own viewports ({w, h, device, scale,
 //          mobile, touch}, from devices.json) is visited at those instead of the shared list; one
-//          with openMore taps the nav's "More" menu open before the screenshots (see moreProbe);
+//          with openMore taps the nav's "More" menu open before the screenshots (see moreProbe),
+//          one with openFilters does the same for /air's "Filters" sheet (see filtersProbe);
 //          one with open ({click: selector} or {marker: {map, text}}, plus scope: the selector of
 //          what opens) opens a dialog or map popup first and runs the a11y checks on just that.
 // Offline by design: only the local server is reachable. CDN libraries (Leaflet, Plotly…) are
@@ -110,6 +111,16 @@ function markerPoint({ map: id, text }) {
     if (document.elementFromPoint(x, y) === l._path) return { x, y };
   }
   throw new Error(`no marker on #${id} with "${text}" to click`);
+}
+
+// In-page /air "Filters" probe: where the sheet sits relative to the map and what shows.
+function filtersProbe() {
+  const det = document.getElementById("air-filters"), map = document.getElementById("map-card");
+  if (!det || !map) return { error: "no #air-filters / #map-card" };
+  return { open: det.open, belowMap: !!(map.compareDocumentPosition(det) & Node.DOCUMENT_POSITION_FOLLOWING),
+           summary: getComputedStyle(det.querySelector("summary")).display !== "none",
+           metricVisible: document.getElementById("field").checkVisibility(),   // a closed <details> keeps its boxes
+           scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth };
 }
 
 // In-page accessibility probe (WCAG 2.1 AA, the checks a script can make reliably):
@@ -295,6 +306,14 @@ async function visit(vp, pg) {
       await page.waitForSelector(pg.open.scope, { state: "visible", timeout: 5000 });
       info.opened = await page.evaluate(s => document.querySelector(s).textContent.trim()
         .replace(/\s+/g, " ").slice(0, 80), pg.open.scope);
+    }
+    if (pg.openFilters) {
+      info.filters = { first: await page.evaluate(filtersProbe) };
+      if (info.filters.first.summary) {   // only phones have something to tap
+        await page.click("#air-filters > summary");
+        await page.waitForTimeout(200);
+        info.filters.tapped = await page.evaluate(filtersProbe);
+      }
     }
   } catch (e) { err = String(e.message || e).split("\n")[0]; }
   const ms = Date.now() - t0;

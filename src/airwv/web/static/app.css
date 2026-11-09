@@ -83,6 +83,17 @@
   details.explore > summary:hover { background:#eef3f8; }
   details.explore .explore-intro { padding:10px 14px 2px; max-width:74ch; }
   details.explore > .card { margin-left:0; margin-right:0; }
+  /* /air's controls: open above the map, except on phones (same media query as dashboard.html) */
+  details.filters > summary { display:none; }
+  @media (max-width:560px), (max-height:480px){
+    details.filters { margin:16px 20px; }
+    details.filters > summary { display:block; cursor:pointer; user-select:none; font-size:14px; font-weight:700; color:var(--brand);
+      padding:10px 14px; background:#f4f7fa; border:1px solid #dde5ec; border-radius:8px; }
+    details.filters > summary .meta { font-weight:400; }
+    details.filters[open] > summary { border-radius:8px 8px 0 0; }
+    details.filters .controls { padding:12px 2px; gap:12px; }
+    details.filters .layerbar { padding:2px 2px 4px; }
+  }
   .chart { height:320px; }
   #map { height:360px; border-radius:0 0 8px 8px; }
   #w-map { height:440px; border-radius:0 0 8px 8px; }
