@@ -279,6 +279,7 @@ def _IN_WV_REGION(lat: float, lon: float) -> bool:
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+AREA_PM_MAX = 1000.0    # µg/m³; PM readings over this stay out of the per-area rollups
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -1481,10 +1482,11 @@ def create_app(store: Store) -> FastAPI:
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
         Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
         then takes the median across the sensors reporting each day so one noisy unit
-        can't swing the area."""
+        can't swing the area. PM readings over AREA_PM_MAX are left out of the averages."""
+        cap = AREA_PM_MAX if field.startswith("pm") else None
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.read_model.daily(conn, "air", sid, field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since, max_value=cap).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1526,7 +1528,7 @@ def create_app(store: Store) -> FastAPI:
             dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
         for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
-                   if sid in latest and not (is_pm and latest[sid] > 1000)]
+                   if sid in latest and not (is_pm and latest[sid] > AREA_PM_MAX)]
             daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
