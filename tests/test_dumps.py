@@ -26,6 +26,10 @@ def _store(tmp_path):
          "ts": T0, "parameter": "iron", "value": 2.4, "unit": "mg/L", "ingested_at": T0}])
     store.add_report(domain="air", category="odor", description="smell", lat=38.123456,
                      lon=-81.654321, contact_email="resident@example.com", ip_hash="deadbeef")
+    store.add_event(title="Plant fire", kind="fire", region="Belle", start_ts=T0, sensor_ids=["197127"],
+                    sources=[{"label": "WV DEP", "url": "https://dep.wv.gov/"}])
+    store.add_event(title="Unreviewed draft", status="draft")
+    store.add_event(title="Withdrawn event", status="archived")
     return store
 
 
@@ -54,13 +58,20 @@ def test_write_dumps(tmp_path):
 
     records = _rows(out / "record.csv.gz")
     assert len(records) == m["files"]["record.csv.gz"]["rows"] > 0
+    events = _rows(out / "events.csv.gz")   # published only
+    assert [e["title"] for e in events] == ["Plant fire"]
+    assert m["files"]["events.csv.gz"]["rows"] == 1
+    assert list(events[0]) == m["files"]["events.csv.gz"]["columns"]
+    assert json.loads(events[0]["sources"])[0]["label"] == "WV DEP"   # citations stay JSON
+
     # each layer file's provenance block travels with the dump
     assert m["provenance"]["nrc_spills"]["source"]
     assert "provisional" in m["caveats"]
 
     # nothing private: report contact / ip / exact coordinates, raw provider payloads
     blob = b"".join(gzip.decompress((out / f).read_bytes()) for f in dumps.FILES if f.endswith(".gz"))
-    for private in (b"resident@example.com", b"deadbeef", b"38.123456", b"secret_payload"):
+    for private in (b"resident@example.com", b"deadbeef", b"38.123456", b"secret_payload",
+                    b"Unreviewed draft", b"Withdrawn event"):
         assert private not in blob
 
 
@@ -77,4 +88,6 @@ def test_dump_route(tmp_path, monkeypatch):
     assert list(csv.reader(io.StringIO(gzip.decompress(r.content).decode())))[0][0] == "medium"
     for bad in ("d.sqlite", "..%2Fd.sqlite", "site.csv.gz.tmp"):
         assert c.get(f"/data/dumps/{bad}").status_code == 404
-    assert 'href="/data/dumps/site.csv.gz"' in c.get("/data").text
+    assert c.get("/data/dumps/events.csv.gz").status_code == 200
+    page = c.get("/data").text
+    assert 'href="/data/dumps/site.csv.gz"' in page and 'href="/data/dumps/events.csv.gz"' in page
