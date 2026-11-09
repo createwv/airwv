@@ -71,7 +71,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Tighten the harness map check to "the map's first view contains West Virginia and is at most about 2× its size", at every screen size. [auto:S]
 - [x] Show sensor names on the local database copy, not bare IDs, so screenshots read like production. [auto:S]
 - [x] Move /air's controls on phone below the map into a collapsed "Filters" sheet (the next §6 item). [auto:S]
-- [ ] Harness: run the a11y checks with a dialog open and a map popup open (report modal, facility detail, a sensor popup) [auto:S]
+- [x] Harness: run the a11y checks with a dialog open and a map popup open (report modal, facility detail, a sensor popup) [auto:S]
 - [x] Map markers: give the Leaflet markers that open popups keyboard access and names (`keyboard: true`, `title`/`alt`) once Leaflet is vendored for the harness [auto:S]
 - [x] Skip link ("Skip to content") and a `<main>` landmark in `base.html` [auto:S]
 - [x] Explore v2: a "measurements" option using the `/api/query` series mode (site + param + from/to), with table, CSV and API link [auto:M]
