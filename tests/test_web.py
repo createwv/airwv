@@ -12,18 +12,6 @@ from airwv.web import app as webapp
 from airwv.web.app import create_app
 
 
-def test_sensor_names_fall_back_to_public_listing(tmp_path, monkeypatch):
-    # no private registry (worktree / fresh clone): the listing names the mapped sensors
-    (tmp_path / "sensor_index_map.json").write_text(json.dumps({"AA": 197127, "BB": 200001, "CC": 300003}))
-    (tmp_path / "wv_public_sensors.json").write_text(json.dumps([
-        {"name": "Listed Belle", "sensor_index": 197127}, {"name": "Listed Rutledge", "sensor_index": 200001},
-        {"name": "Someone Else", "sensor_index": 999}]))
-    monkeypatch.setenv("AIRWV_INDEX_CACHE", str(tmp_path / "sensor_index_map.json"))
-    monkeypatch.setattr("airwv.registry.load_wv_sensors",
-                        lambda: [SensorInfo(name="Registry Belle", device_id="AA", source="purpleair")])
-    assert webapp._index_to_name() == {"197127": "Registry Belle", "200001": "Listed Rutledge", "300003": "300003"}
-
-
 def _client(tmp_path):
     store = Store(f"sqlite:///{tmp_path / 'web.sqlite'}")
     store.create_schema()
@@ -626,3 +614,15 @@ def test_home_is_my_place_when_a_place_is_set(tmp_path):
     assert "localStorage.getItem('airwv_place')" in statewide   # a saved place opens here
     assert 'id="pl-status"' not in c.get("/?place=rutledge&statewide=1").text
     assert 'href="/?statewide=1"' not in c.get("/place").text
+
+
+def test_sensor_names_fall_back_to_public_listing(tmp_path, monkeypatch):
+    # no private registry (worktree / fresh clone): the listing names the mapped sensors
+    (tmp_path / "sensor_index_map.json").write_text(json.dumps({"AA": 197127, "BB": 200001, "CC": 300003}))
+    (tmp_path / "wv_public_sensors.json").write_text(json.dumps([
+        {"name": "Listed Belle", "sensor_index": 197127}, {"name": "Listed Rutledge", "sensor_index": 200001},
+        {"name": "Someone Else", "sensor_index": 999}]))
+    monkeypatch.setenv("AIRWV_INDEX_CACHE", str(tmp_path / "sensor_index_map.json"))
+    monkeypatch.setattr("airwv.registry.load_wv_sensors",
+                        lambda: [SensorInfo(name="Registry Belle", device_id="AA", source="purpleair")])
+    assert webapp._index_to_name() == {"197127": "Registry Belle", "200001": "Listed Rutledge", "300003": "300003"}
