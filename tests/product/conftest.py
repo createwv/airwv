@@ -69,6 +69,8 @@ LOCAL_MAPS = {"nb-map"}
 WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 # The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
 MORE_PAGE = ("more", "/")
+# /air's "Filters" sheet, tapped open where it's collapsed and shot at every DEVICES size.
+FILTERS_PAGE = ("filters", "/air")
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {
     "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
@@ -218,7 +220,9 @@ def product(tmp_path_factory):
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES]
             + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in MAP_PAGES]
             + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
-                "openMore": True}],
+                "openMore": True}]
+            + [{"name": FILTERS_PAGE[0], "path": FILTERS_PAGE[1], "viewports": _device_viewports(),
+                "openFilters": True}],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))

@@ -6,8 +6,8 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES, SITE_PAGES, VIEWPORTS,
-                      WV_LINE, map_span)
+from conftest import (DEVICES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES, SITE_PAGES,
+                      VIEWPORTS, WV_LINE, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
@@ -71,6 +71,26 @@ def test_more_menu_not_cut_off(product, width):
         f"More menu cut off in a {m['innerWidth']}x{m['innerHeight']} screen: {m['cut']}"
     assert m["scrollWidth"] <= m["innerWidth"], \
         f"open menu makes the page {m['scrollWidth']}px wide in a {m['innerWidth']}px viewport"
+
+
+@pytest.mark.parametrize("width", [d["viewport"]["width"] for d in DEVICES.values()])
+def test_air_filters_sheet(product, width):
+    """Phones get the map first and /air's controls collapsed under it, opening with a tap;
+    bigger screens keep them open above the map (same media query as dashboard.html)."""
+    r = _get(product, FILTERS_PAGE[0], width)
+    assert r["error"] is None, r["error"]
+    first = r["filters"]["first"]
+    assert "error" not in first, first.get("error")
+    if width <= 560 or r["height"] <= 480:
+        assert first["belowMap"] and first["summary"], first
+        assert not first["open"] and not first["metricVisible"], first
+        tapped = r["filters"]["tapped"]
+        assert tapped["open"] and tapped["metricVisible"], tapped
+        assert tapped["scrollWidth"] <= tapped["innerWidth"], \
+            f"open sheet makes the page {tapped['scrollWidth']}px wide in {tapped['innerWidth']}px"
+    else:
+        assert not first["belowMap"] and not first["summary"], first
+        assert first["open"] and first["metricVisible"], first
 
 
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])
