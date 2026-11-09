@@ -87,7 +87,7 @@ def test_spill_age_cap_skips_old_reports_only():
 
     edge, old = rec(1, "2024-04-02"), rec(2, "2024-04-01")           # 60 and 61 days before _NOW
     undated, garbled = rec(3, None), rec(4, "unknown")
-    alerts, _ = evaluate_records([_Sub()], [edge, old, undated, garbled], {1: set()}, _NOW)
+    alerts, _, _ = evaluate_records([_Sub()], [edge, old, undated, garbled], {1: set()}, _NOW)
     assert {r["site_id"] for r in alerts[0].records} == {
         "spill_report:1", "spill_report:3", "spill_report:4"}
     # only an old report: nothing to send
