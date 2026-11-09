@@ -186,6 +186,15 @@ def test_mode_pages_render(tmp_path):
     assert c.get("/analysis", follow_redirects=False).status_code == 301  # old link redirects to /air
 
 
+def test_air_filters_sheet(tmp_path):
+    # /air's controls sit in one "Filters" disclosure that phones move under the map
+    page = _client(tmp_path).get("/air").text
+    sheet = page[page.index('id="air-filters"'):page.index("</details>", page.index('id="air-filters"'))]
+    assert "<summary>Filters" in sheet
+    assert all(hook in sheet for hook in ['id="field"', 'id="start"', 'id="end"', 'id="dl"', 'id="layers"'])
+    assert 'card.after(filters)' in page and 'id="map-card"' in page
+
+
 def test_nav_collapsed(tmp_path):
     # docs/DIRECTION.md §3: <= 6 top-level items, the rest under "More", no emoji, Admin in the footer
     import re
