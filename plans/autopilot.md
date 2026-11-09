@@ -52,7 +52,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Data centers, PSC: search the PSC case system for each operator and confirm the 24-0611-E-T-PW final order; add case links to `dockets`. [auto]
 - [x] Data centers, watch list: a dated "open comment periods / hearings" list in DATA-CENTERS.md (e.g. R14-0042 comments due 2026-11-13), refreshed from DEP notices. [auto]
 - [ ] Data centers, geocode: add verified coordinates (from permits or parcel records) for sites that have a street address, with `location_precision` filled. [auto]
-- [ ] Per-fact source keys in `data_centers.json` (a source index next to each field), so each card line links its own source [auto:S]
+- [x] Per-fact source keys in `data_centers.json` (a source index next to each field), so each card line links its own source [auto:S]
 - [x] When the Place picker and Depth toggle merge, show the data-center card on `/place` and the full record under `view=adv` [auto:S]
 - [ ] Move `/api/near` and the other site kinds onto `/site/<kind>/<id>` (the existing "Site pages" item can use `site.html`) [auto:M]
 - [x] Show dated open comment periods (e.g. R14-0042 comments due 2026-11-13) on the data-center card once the watch-list item lands [auto:S]
