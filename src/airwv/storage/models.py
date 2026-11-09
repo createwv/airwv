@@ -137,6 +137,9 @@ class AlertSeen(Base):
     record_key: Mapped[str] = mapped_column(String(512))
     seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_present_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # How it became known: "baseline" (on file at the first check) | "alert" (fired).
+    # Null = stored before this was tracked.
+    origin: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
 
 class Report(Base):

@@ -243,6 +243,56 @@ def test_run_alerts_baselines_then_fires_on_a_new_spill(tmp_path, monkeypatch):
     assert "Diesel Fuel" in alert_body(sent[0])
     assert run(later + timedelta(days=1)) == []              # seen: no repeat
 
+    # the admin view tells the starting point from what fired
+    from fastapi.testclient import TestClient
+
+    from airwv.web.app import create_app
+
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    c = TestClient(create_app(store))
+    assert c.get("/api/admin/subscriptions").status_code in (401, 403)
+    (row,) = c.get("/api/admin/subscriptions", headers={"X-Admin-Token": "secret"}).json()["results"]
+    hist = row["record_history"]
+    assert (hist["baseline"]["taken_at"], hist["baseline"]["count"]) == (_NOW.isoformat(), 1)
+    assert [r["site_id"] for r in hist["baseline"]["records"]] == ["spill_report:1"]
+    assert hist["sends"] == 1 and hist["unlabeled"] == 0
+    assert hist["fired"][0]["at"] == later.isoformat()
+    assert [r["site_id"] for r in hist["fired"][0]["records"]] == ["spill_report:2"]
+
+
+def test_admin_history_is_null_for_reading_alerts_and_flags_unlabeled_rows(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from airwv.storage.models import AlertSeen
+    from airwv.web.app import create_app
+
+    monkeypatch.setenv("AIRWV_ADMIN_TOKEN", "secret")
+    store = Store(f"sqlite:///{tmp_path / 'h.sqlite'}")
+    store.create_schema()
+    air = store.add_subscription(channel="email", target="a@x.org", field="pm2_5", threshold=35.0)
+    rec = store.add_subscription(channel="email", target="b@x.org", kind="record", field="water",
+                                 threshold=0.0)
+    with store._session_factory() as session:   # a row from before origin was tracked
+        session.add(AlertSeen(subscription_id=rec, record_key="site|health_violation|", seen_at=_NOW))
+        session.commit()
+    rows = TestClient(create_app(store)).get("/api/admin/subscriptions",
+                                             headers={"X-Admin-Token": "secret"}).json()["results"]
+    by_id = {r["id"]: r["record_history"] for r in rows}
+    assert by_id[air] is None
+    assert by_id[rec]["unlabeled"] == 1 and by_id[rec]["baseline"]["count"] == 0
+    assert by_id[rec]["checked_at"] is None and by_id[rec]["fired"] == []
+
+
+def test_ensure_columns_adds_origin_to_an_older_alert_seen(tmp_path):
+    from sqlalchemy import inspect, text
+
+    store = Store(f"sqlite:///{tmp_path / 'o.sqlite'}")
+    with store._engine.begin() as conn:
+        conn.execute(text("CREATE TABLE alert_seen (id INTEGER PRIMARY KEY, subscription_id INTEGER, "
+                          "record_key VARCHAR(512), seen_at TIMESTAMP)"))
+    store.create_schema()
+    assert "origin" in {c["name"] for c in inspect(store._engine).get_columns("alert_seen")}
+
 
 def _facilities_file(data_dir, status):
     (data_dir / "echo_facilities.json").write_text(json.dumps({

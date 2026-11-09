@@ -274,7 +274,8 @@ def _areas_client(tmp_path, monkeypatch):
         "197127": "Kanawha Valley", "200001": "Kanawha Valley", "300003": "Mid-Ohio Valley",
         "400004": "Other"})
     # a month of daily readings: Kanawha City climbs (40-70 days ago), the Mid-Ohio sensor
-    # eases off; its latest reading is a PM spike over 1000 µg/m³, which /api/areas drops
+    # eases off; its latest reading and one more the day before are PM spikes over
+    # 1000 µg/m³, which /api/areas drops from the current value and the daily trend
     days = [NOW - timedelta(days=d) for d in range(30, 0, -1)]
     utc = timezone.utc
     store.save_readings(
@@ -283,7 +284,9 @@ def _areas_client(tmp_path, monkeypatch):
         + [Reading(source="purpleair", sensor_id="300003", ts=t.replace(tzinfo=utc),
                    pm2_5=20.0 - i * 0.3, voc=150.0 - i, humidity=55.0 + i % 3) for i, t in enumerate(days)]
         + [Reading(source="purpleair", sensor_id="300003", ts=NOW.replace(tzinfo=utc),
-                   pm2_5=4000.0, voc=120.0)])
+                   pm2_5=4000.0, voc=120.0),
+           Reading(source="purpleair", sensor_id="300003", ts=(days[-1] + timedelta(hours=1)).replace(tzinfo=utc),
+                   pm2_5=3000.0)])
 
     class Frozen(datetime):
         @classmethod
@@ -298,10 +301,16 @@ def test_api_areas_matches_snapshot(tmp_path, monkeypatch):
     got = {f"{f},{d}": c.get(f"/api/areas?field={f}&days={d}").json()
            for f, d in [("pm2_5", 180), ("voc", 180), ("humidity", 180), ("pm2_5", 20)]}
     got |= {f"series:{r},{f}": c.get(f"/api/areas/series?region={r}&field={f}").json()
-            for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"), ("Nowhere", "pm2_5")]}
+            for r, f in [("Kanawha Valley", "pm2_5"), ("Mid-Ohio Valley", "pm2_5"), ("Mid-Ohio Valley", "voc"),
+                         ("Nowhere", "pm2_5")]}
     want = _check_snapshot(AREAS_SNAPSHOT, got)
     trends = {a["trend"]["direction"] for r in want.values() for a in r.get("areas", [])}
     assert len(trends) > 1 and any(a["reporting"] == 0 for a in want["pm2_5,180"]["areas"])
+    # the spike-only day is gone from the PM series, the mixed day keeps its real reading
+    pm = want["series:Mid-Ohio Valley,pm2_5"]
+    assert len(pm["points"]) == 30 and pm["points"][-1] == {"date": "2026-07-30", "n": 1, "value": 11.3}
+    assert pm["trend"]["direction"] == "falling"
+    assert len(want["series:Mid-Ohio Valley,voc"]["points"]) == 31   # only PM is capped
 
 
 def test_api_query_area_and_window(tmp_path, monkeypatch):

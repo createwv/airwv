@@ -425,7 +425,7 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
         log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
                  "" if send else " (not stored in a dry run)")
         if send:
-            store.mark_records_seen(sub_id, keys, now)
+            store.mark_records_seen(sub_id, keys, now, origin="baseline")
     if send:
         for sub_id, keys in present.items():
             store.mark_records_present(sub_id, keys, now)
@@ -448,7 +448,8 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
             notifier_factory(a.channel).send(a)
             store.mark_notified(a.subscription_id, now)
             if a.kind == "record":
-                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now)
+                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now,
+                                        origin="alert")
         except Exception as exc:  # one bad channel shouldn't block the rest
             log.warning("  failed to send alert %d via %s: %s", a.subscription_id, a.channel, exc)
     return alerts

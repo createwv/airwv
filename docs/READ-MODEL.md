@@ -54,8 +54,6 @@ with the date it was last seen.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - AirNow reference monitors in `readings` aren't sites yet (only `reference_monitors.json`);
   a GROUP BY over the readings table per query is too slow, so that needs a small sites table.
-- `/api/areas` still drops a region's PM value over 1000 µg/m³ only from the *current*
-  rollup, not from its daily trend (pinned as-is by the snapshot).
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting
   DEP site a few metres.
