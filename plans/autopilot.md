@@ -100,4 +100,5 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Long-lived `Cache-Control` (immutable) on `/static/vendor/*`, since the file names are pinned to versions. [S] [auto]
 - [ ] Refresh the product-harness baseline now that Leaflet and Plotly are local, so the map and chart checks stop skipping. [S] [auto]
 - [ ] Depth toggle + advanced view: `view=adv` on `/place` shows today's /air controls under the place; /air redirects to `/place?…&view=adv` (Place picker merged as 5b5f722). [auto:M]
+- [ ] Popups and lists link to `/site/<kind>/<id>` [auto:S]
 
