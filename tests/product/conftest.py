@@ -71,6 +71,15 @@ WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 MORE_PAGE = ("more", "/")
 # /air's "Filters" sheet, tapped open where it's collapsed and shot at every DEVICES size.
 FILTERS_PAGE = ("filters", "/air")
+# A dialog or map popup opened as a user would, shot at every DEVICES size; the a11y checks run
+# on what opens (`scope`), since the pages under them are already checked in PAGES.
+OPEN_PAGES = [
+    ("open-report", "/air", {"click": '[data-open="report"]', "scope": "#reportmodal.on"}),
+    ("open-facility", "/sources", {"click": ".srccard", "scope": "#srcdetail.on"}),
+    # Home's map, not /air's: clicking an /air sensor redraws the markers, closing its popup at once
+    ("open-sensor", "/", {"marker": {"map": "ov-map", "text": "µg/m³ PM2.5"},
+                          "scope": "#ov-map .leaflet-popup"}),
+]
 # Explore's measurements option, driven through its form at every DEVICES size.
 EXPLORE_SERIES = ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5")
 # Explore with its county and value filters set from the URL, at every DEVICES size.
@@ -230,7 +239,9 @@ def product(tmp_path_factory):
             + [{"name": EXPLORE_SERIES[0], "path": EXPLORE_SERIES[1], "viewports": _device_viewports(),
                 "driveSeries": True}]
             + [{"name": EXPLORE_FILTERS[0], "path": EXPLORE_FILTERS[1], "viewports": _device_viewports(),
-                "probeExFilters": True}],
+                "probeExFilters": True}]
+            + [{"name": n, "path": p, "viewports": _device_viewports(), "open": o}
+               for n, p, o in OPEN_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))

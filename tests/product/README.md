@@ -21,6 +21,13 @@ where it's collapsed). `test_air_filters_sheet` wants it collapsed under the map
 Pages with a statewide map (`MAP_PAGES` in `conftest.py`, `map-<page>-<width>.png`) are shot at
 every devices.json size for the map check below; the report's `maps` column shows each one's `×` size.
 
+A dialog or map popup, opened as a user would (`OPEN_PAGES` in `conftest.py`: the report modal,
+a facility's detail on `/sources`, a sensor's popup on Home's map; `open-<name>-<width>.png`,
+open in the shot) is run through the accessibility checks below at every devices.json size.
+Those checks look only inside what opened, and the Tab check starts on its first control and
+stops when Tab leaves it. `test_dialog_or_popup_opens` fails if it didn't open or Tab can't
+get in. Known gaps are in `A11Y_KNOWN` (`test_smoke.py`): xfail, and only for that exact failure.
+
 Checks (`test_smoke.py`), per page × width unless noted:
 
 - page loads (200, no failed local requests)
