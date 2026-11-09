@@ -3,6 +3,11 @@
 {% macro cite(srcs) %}{% if srcs %} <span class="dc-cite">{% for s in srcs %}<a href="{{ s.url }}" target="_blank" rel="noopener" title="{{ s.kind }}: {{ s.title }}" aria-label="Source {{ s.n }}: {{ s.title }}">[{{ s.n }}]</a>{% endfor %}</span>{% endif %}{% endmacro %}
 
 {% macro dc_card(c) %}
+{% for p in c.comment_periods %}
+<div class="dc-due"><b>Open for public comment:</b> air permit <b>{{ p.permit }}</b>, written comments due <b>{{ p.due }}</b>.
+  {% if p.source %}<a href="{{ p.source.url }}" target="_blank" rel="noopener">How to comment (DEP notice) →</a>{% endif %}
+  <span class="meta">Deadlines can change; check the notice.</span></div>
+{% endfor %}
 <div class="dc-grid">
   {% for t in c.topics %}
   <div class="dc-topic">
@@ -15,7 +20,7 @@
   </div>
   {% endfor %}
 </div>
-<div class="dc-sources"><b>Sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
+<div class="dc-sources"><b>Data sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
   <ol>{% for s in c.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
     <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
 </div>

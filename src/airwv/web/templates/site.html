@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_dc_card.html" import dc_card, how_to_ask, cite %}
+{% from "_related.html" import related %}
 {% block content %}
 {% set c = card %}
 <div class="page">
@@ -39,7 +40,7 @@
       <tr><th>Not disclosed</th><td>{{ dc.not_disclosed | join('; ') }}</td></tr>
     </table>
   </div>
-  <div class="card"><h2>Filings and sources for this site</h2>
+  <div class="card"><h2>Filings and data sources for this site</h2>
     <ol class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
       <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
   </div>
@@ -52,8 +53,13 @@
   <div class="card dc-card">{{ how_to_ask(ask) }}</div>
   {% endif %}
 
+  {{ related(kind, 'data_center:' ~ dc.id, dc.lat, dc.lon) }}
+
   <div class="card"><p class="meta" style="padding:10px 14px">{{ prov.disclaimer }}
-    <br>Source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
+    <br>Data source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
     Raw record: <a href="/api/data-centers">/api/data-centers</a> · <a href="/data">all data sources</a></p></div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/site.js?v={{ asset_v }}"></script>
 {% endblock %}

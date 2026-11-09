@@ -1,4 +1,4 @@
-"""Nightly public dumps: the three read views as gzipped CSV, plus a manifest.
+"""Nightly public dumps: the three read views and published events as gzipped CSV, plus a manifest.
 
 ``python -m airwv.dumps [--out DIR]`` writes, into ``AIRWV_DUMPS_DIR`` (default
 ``data/dumps``, gitignored):
@@ -6,10 +6,12 @@
 * ``site.csv.gz``        — every located thing (``attrs`` is the layer's JSON record)
 * ``measurement.csv.gz`` — every air and water value, tall (``raw`` provider payloads left out)
 * ``record.csv.gz``      — violations, statuses, listings, spills
+* ``events.csv.gz``      — curated events, published only (no drafts or archived ones)
 * ``manifest.json``      — when, row counts, columns, and each layer file's provenance block
 
-Only the public views are read (storage/readmodel.py), never ``reports`` / ``feedback`` /
-``subscriptions``, so no contact details, IP hashes or exact report coordinates. Each file
+Only the public views (storage/readmodel.py) and published ``events`` are read, never
+``reports`` / ``feedback`` / ``subscriptions``, so no contact details, IP hashes or exact
+report coordinates. Each file
 is written beside its final name and renamed into place, so the web app never serves a
 half-written dump. The app serves them at ``/data/dumps/<name>`` (web/app.py).
 
@@ -28,13 +30,14 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from airwv.storage import Store
 from airwv.storage.readmodel import FILE_LAYERS
 
 log = logging.getLogger(__name__)
 
-# dump name -> (view, columns, ORDER BY); the order keeps nightly files diff-friendly
+# dump name -> (view or filtered table, columns, ORDER BY); the order keeps nightly files diff-friendly
 TABLES = {
     "site": ("site", ["site_id", "kind", "medium", "layer", "ref", "name", "lat", "lon",
                       "county", "url", "attrs"], "layer, ord, ref"),
@@ -42,6 +45,10 @@ TABLES = {
                                     "unit", "quality"], "medium, ref, parameter, ts"),
     "record": ("record", ["site_id", "layer", "kind", "value", "effective", "url", "as_of"],
                "layer, site_id, kind"),
+    "events": ("events WHERE status = 'published'",
+               ["id", "title", "medium", "kind", "region", "lat", "lon", "start_ts", "end_ts",
+                "description", "origin", "scope", "regions_affected", "captured", "sensor_ids",
+                "source_refs", "report_ids", "sources"], "start_ts, id"),
 }
 
 FILES = [f"{name}.csv.gz" for name in TABLES] + ["manifest.json"]
@@ -49,6 +56,7 @@ FILES = [f"{name}.csv.gz" for name in TABLES] + ["manifest.json"]
 CAVEATS = ("Public data, re-published as received: government data is provisional and not a "
            "regulatory determination; community-sensor (PurpleAir) values are as the sensor reported "
            "them, without the EPA PM2.5 correction. "
+           "Events are curated by AirWV; each row's 'sources' lists its citations. "
            "Each layer's source, scope and disclaimer are under 'provenance'; see "
            "https://air.createwv.org/data.")
 
@@ -91,6 +99,31 @@ def write_dumps(store: Store, out_dir: Path | str | None = None, now: datetime |
     tmp.write_text(buf.getvalue() + "\n", encoding="utf-8")
     tmp.replace(out / "manifest.json")
     return manifest
+
+
+def human_size(n: int) -> str:
+    if n < 1000:
+        return f"{n} bytes"
+    if n < 999_500:
+        return f"{n / 1e3:.0f} KB"
+    if n < 999_950_000:
+        return f"{n / 1e6:.1f} MB"
+    return f"{n / 1e9:.1f} GB"
+
+
+def summary(out_dir: Path | str | None = None) -> dict | None:
+    """What /data shows from manifest.json: ``as_of`` (Eastern) and ``sizes`` by file name.
+    None until the first run has written it, or if it can't be read, so the page still renders."""
+    path = (Path(out_dir) if out_dir is not None else default_dir()) / "manifest.json"
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        made = datetime.fromisoformat(manifest["generated_at"]).astimezone(ZoneInfo("America/New_York"))
+        sizes = {name: human_size(info["bytes"]) for name, info in manifest["files"].items()}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        if not isinstance(exc, FileNotFoundError):
+            log.warning("unreadable dump manifest %s: %s", path, exc)
+        return None
+    return {"as_of": made.strftime("%b %-d, %Y, %-I:%M %p ET"), "sizes": sizes}
 
 
 def main(argv: list[str] | None = None) -> None:

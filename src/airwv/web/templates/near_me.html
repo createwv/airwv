@@ -15,7 +15,7 @@
     <div id="nb-symptoms" class="nb-chips"></div>
     <div style="margin:14px 0 6px"><b>2. Your location</b></div>
     <div class="controls" style="gap:12px">
-      <button id="nb-loc" class="primary">📍 Use my location</button>
+      <button id="nb-loc" class="primary">Use my location</button>
       <label>Within <select id="nb-km">
         <option value="3">2 miles</option>
         <option value="8" selected>5 miles</option>
@@ -35,6 +35,7 @@
 {% include "_modals.html" %}
 {% endblock %}
 {% block scripts %}
+<script src="/static/dc.js?v={{ asset_v }}"></script>
 <script src="/static/near_me.js?v={{ asset_v }}"></script>
 <script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

@@ -74,6 +74,31 @@ def test_clamp_y_leaves_normal_data_alone():
     assert _js("W.clampY([1, 2, 900])") is None   # too few points to judge
 
 
+def test_accessible_markers_name_and_activate_titled_markers():
+    # A fake Leaflet: one layer that records its handlers and the attributes set on its element.
+    got = _js("""(() => {
+      class Marker {}; class CircleMarker {};
+      const hooks = [], clicks = [];
+      const cls = {addInitHook: f => hooks.push(f)};
+      Object.assign(Marker, cls); Object.assign(CircleMarker, cls);
+      W.accessibleMarkers({Marker, CircleMarker});
+      const attrs = {}, on = {};
+      const el = {setAttribute: (k, v) => { attrs[k] = v; }, addEventListener() {}, isConnected: true};
+      const m = Object.assign(new CircleMarker(), {options: {title: 'Charleston A, community sensor'},
+        on: (t, f) => { on[t] = f; }, getElement: () => el, fire: t => clicks.push(t),
+        _map: {getContainer: () => null}, closePopup: () => clicks.push('close')});
+      hooks[0].call(m);
+      on.add();
+      const key = k => on.keydown({originalEvent: {key: k, target: el, preventDefault() {}}});
+      key('Enter'); key(' '); key('Escape'); key('a');
+      const bare = Object.assign(new Marker(), {options: {}, on: () => clicks.push('wired')});
+      hooks[0].call(bare);
+      return {attrs, clicks};
+    })()""")
+    assert got["attrs"] == {"tabindex": "0", "role": "button", "aria-label": "Charleston A, community sensor"}
+    assert got["clicks"] == ["click", "click", "close"]   # and a marker with no title isn't touched
+
+
 def _contrast_on_white(hex_: str) -> float:
     def lum(c):
         v = c / 255

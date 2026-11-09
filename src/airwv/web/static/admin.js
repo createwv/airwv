@@ -46,11 +46,11 @@ function reportCard(r){
     ${meas}${photo}
     <div class="meta">${when} · ${(r.lat||0).toFixed(4)}, ${(r.lon||0).toFixed(4)}${r.area_label ? ' · ' + esc(r.area_label) : ''}${priv ? ' · ' + priv : ''}${r.mod_note ? ' · note: ' + esc(r.mod_note) : ''}</div>
     <div class="arow">
-      ${r.stage !== 'confirmed' ? `<button onclick="act(${r.id},'confirm')">✓ Verify</button>` : ''}
+      ${r.stage !== 'confirmed' ? `<button onclick="act(${r.id},'confirm')">Verify</button>` : ''}
       ${r.stage === 'held' ? `<button onclick="act(${r.id},'publish')">Publish (unverified)</button>` : ''}
       ${r.suspected_org && !r.org_public ? `<button onclick="act(${r.id},'approve_org')">Show org publicly</button>` : ''}
-      ${r.photo && !r.photo_ok ? `<button onclick="act(${r.id},'approve_photo')">📷 Show photo publicly</button>` : ''}
-      ${r.photo && r.photo_ok ? `<button onclick="act(${r.id},'reject_photo')">📷 Hide photo</button>` : ''}
+      ${r.photo && !r.photo_ok ? `<button onclick="act(${r.id},'approve_photo')">Show photo publicly</button>` : ''}
+      ${r.photo && r.photo_ok ? `<button onclick="act(${r.id},'reject_photo')">Hide photo</button>` : ''}
       <button class="danger" onclick="act(${r.id},'remove')">Remove</button>
     </div></div>`;
 }
@@ -86,7 +86,7 @@ function eventCard(e){
     <div><b>#${e.id} ${esc(e.title)}</b> <span class="tag">${esc(e.status)}</span>
       <span class="tag">${esc(e.kind)}</span>
       ${e.captured ? '<span class="tag cap">📈 sensor data</span>' : ''}</div>
-    <div class="meta">${esc(e.region||'')}${e.region?' · ':''}${when} · ${(e.sensor_ids||[]).length} sensor(s) · ${(e.sources||[]).length} source(s)</div>
+    <div class="meta">${esc(e.region||'')}${e.region?' · ':''}${when} · ${(e.sensor_ids||[]).length} sensor(s) · ${(e.sources||[]).length} data source(s)</div>
     <div class="arow">
       ${e.status !== 'published' ? `<button onclick="evSet(${e.id},'published')">Publish</button>` : `<button onclick="evSet(${e.id},'draft')">Unpublish</button>`}
       <button class="danger" onclick="evDelete(${e.id})">Delete</button></div></div>`;
@@ -119,7 +119,7 @@ async function evCreate(){
   loadQueue();
 }
 const EV_FORM = `<div class="acard evform">
-  <b>➕ New event</b>
+  <b>New event</b>
   <input id="ev-f-title" placeholder="Title *">
   <div class="evrow">
     <select id="ev-f-medium"><option value="air">air</option><option value="water">water</option>
@@ -139,7 +139,7 @@ const EV_FORM = `<div class="acard evform">
     <input id="ev-f-regions" placeholder="Regions affected (free text)"></div>
   <label class="evchk"><input type="checkbox" id="ev-f-captured"> Our sensors captured this</label>
   <input id="ev-f-sensors" placeholder="Sensor ids, comma-separated (e.g. 214373,214357)">
-  <input id="ev-f-srcrefs" placeholder="Related facility names (comma-sep, must match Sources)">
+  <input id="ev-f-srcrefs" placeholder="Related facility names (comma-sep, must match Facilities)">
   <input id="ev-f-reports" placeholder="Related report ids (comma-sep)">
   <div class="evrow"><input id="ev-f-srclabel" placeholder="Citation label">
     <input id="ev-f-srcurl" placeholder="Citation URL"></div>
@@ -170,7 +170,7 @@ async function loadCandidates(){
     const n = d.counts;
     box.innerHTML = `<p class="meta"><b>Proposed from sensors</b> (${(d.since||'').slice(0,10)} → ${(d.until||'').slice(0,10)}):
       ${n.corroborated} spike(s) seen by nearby sensors too, ${n.single_sensor} at one sensor only
-      (local source or sensor fault), ${n.no_neighbors} with no neighbor reporting.</p>`
+      (local pollution source or sensor fault), ${n.no_neighbors} with no neighbor reporting.</p>`
       + (EV_CANDS.map(candCard).join('') || '<p class="meta">no candidates</p>');
   } catch(e){ box.innerHTML = '<p class="meta">candidates unavailable</p>'; }
 }

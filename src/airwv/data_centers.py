@@ -10,6 +10,9 @@ site's source list. Nothing here adds facts; it only sorts the file's fields. Se
 
 from __future__ import annotations
 
+import re
+from datetime import date
+
 STATUS_LABEL = {
     "operating": "Operating", "under_construction": "Under construction",
     "certified": "State-certified (not yet built)", "permitted": "Permitted (not yet built)",
@@ -55,6 +58,10 @@ HOW_TO_ASK = [
 
 _GAP_PREFIXES = ("not disclosed", "none found")
 
+# "R14-0042 (...; written comments to 2026-11-13)" in air_permits.permits; the same pattern
+# tests/test_data_centers.py checks against the watch list in docs/DATA-CENTERS.md.
+_COMMENT_DUE = re.compile(r"\b(R1\d-\d{4})\b[^)]*comments to (\d{4}-\d{2}-\d{2})")
+
 
 def is_gap(value) -> bool:
     """True when the record says nobody has made this public ("not disclosed" / "none found")."""
@@ -67,7 +74,20 @@ def cited(dc: dict, key: str) -> list[dict]:
     return [{**srcs[i], "n": i + 1} for i in (dc.get("cite") or {}).get(key, []) if 0 <= i < len(srcs)]
 
 
-def card(dc: dict) -> dict:
+def comment_periods(dc: dict, today: date | None = None) -> list[dict]:
+    """Air-permit comment periods still open on ``today``: permit, due date and the
+    primary source that names the permit (the DEP notice), soonest first."""
+    today = (today or date.today()).isoformat()
+    out = []
+    for permit, due in _COMMENT_DUE.findall((dc.get("air_permits") or {}).get("permits") or ""):
+        if due < today:
+            continue
+        src = next((s for s in dc.get("sources") or [] if s.get("kind") == "primary" and permit in s.get("title", "")), None)
+        out.append({"permit": permit, "due": due, "source": src})
+    return sorted(out, key=lambda p: p["due"])
+
+
+def card(dc: dict, today: date | None = None) -> dict:
     """The basic-view summary of one data center: known / not disclosed per topic."""
     topics = []
     for topic, fields in TOPICS.items():
@@ -95,5 +115,6 @@ def card(dc: dict) -> dict:
     return {"id": dc["id"], "name": dc["name"], "operator": dc.get("operator"),
             "county": dc.get("county"), "place": dc.get("place"),
             "status": dc.get("status"), "status_label": STATUS_LABEL.get(dc.get("status"), dc.get("status")),
+            "comment_periods": comment_periods(dc, today),
             "topics": topics, "not_disclosed": dc.get("not_disclosed") or [],
             "sources": dc.get("sources") or [], "url": f"/site/data_center/{dc['id']}"}

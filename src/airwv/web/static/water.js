@@ -83,7 +83,7 @@ async function toggleCoal(on) {
       ? `<br><span style="color:#c0392b;font-weight:600">⚠️ On a 303(d)-impaired stream</span>`
         + `<br><small>Impaired for: ${(p.impairment_causes || []).map(esc).join(', ')}</small>`
       : '';
-    L.circleMarker([p.lat, p.lon], {radius: r, color: '#333', weight: 1, fillColor: fill, fillOpacity: 0.82})
+    L.circleMarker([p.lat, p.lon], {title: `${p.operator}, permit ${p.permit}`, radius: r, color: '#333', weight: 1, fillColor: fill, fillOpacity: 0.82})
       .bindPopup(`<b>${esc(p.operator)}</b> <small>${esc(p.permit)}</small>`
         + `<br>⛏️ <b>${p.outlets}</b> permitted discharge outlet${p.outlets === 1 ? '' : 's'}`
         + ` into <b>${p.stream_count}</b> stream${p.stream_count === 1 ? '' : 's'}`
@@ -101,7 +101,7 @@ function nearMe() {
   navigator.geolocation.getCurrentPosition(p => {
     const lat = p.coords.latitude, lon = p.coords.longitude;
     if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat, lon], {zIndexOffset: 1000,
+    userMarker = L.marker([lat, lon], {title: 'You are here', zIndexOffset: 1000,
       icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
       .addTo(map).bindPopup('You are here').openPopup();
     map.setView([lat, lon], 11);
@@ -128,7 +128,7 @@ function draw() {
     const t = l.ts ? new Date(l.ts).getTime() : null;
     if (t) { newest = newest == null ? t : Math.max(newest, t); oldest = oldest == null ? t : Math.min(oldest, t); }
     const val = `${l.value}${meta.unit ? ' ' + meta.unit : ''}`;
-    L.circleMarker([s.lat, s.lon], {radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
+    L.circleMarker([s.lat, s.lon], {title: s.name, radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
         + (l.ts ? `<br><small>latest sample: ${fmtDate(l.ts)}</small>` : '')
         + `<br><small>click to chart</small>`)
@@ -219,7 +219,7 @@ function drawSdwaMap() {
     if (c.lat == null || !c.health) return;
     const rate = c.systems ? c.health / c.systems : 0;
     const col = rate >= 0.4 ? '#7e0023' : rate >= 0.25 ? '#c0392b' : rate >= 0.12 ? '#e07b00' : '#e0a030';
-    L.circleMarker([c.lat, c.lon], {radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
+    L.circleMarker([c.lat, c.lon], {title: `${c.county} County`, radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
       .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${AIRWV_WV.ink(col)}">${c.health}</b> of ${c.systems} systems with a health-based violation`
         + `<br><small>${c.serious} serious violator(s) · ${Number(c.pop_affected).toLocaleString()} people served</small>`
         + `<br><small><a href="#" data-cofilter="${esc(c.county)}">show these systems ↓</a></small>`)

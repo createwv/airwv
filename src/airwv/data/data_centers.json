@@ -52,7 +52,7 @@
     {"category": "cloud", "confidence": "medium", "evidence": "Microsoft LOI includes 'compute services' and a 'long-term data center lease'"}
    ],
    "not_disclosed": ["water withdrawal volume and intake", "exact certification dates and microgrid certification record", "operating noise levels", "gas pipeline operator", "final Microsoft contract; Anthropic confirmation"],
-   "cite": {"water.cooling": [2], "water.permits": [0], "power.utility": [2], "noise.mitigation": [2], "use.0": [2]},
+   "cite": {"water.cooling": [2], "water.permits": [0], "power.utility": [2], "noise.mitigation": [2]},
    "sources": [
     {"kind": "primary", "date": "2026-09-29", "title": "WV DEP: public comment period for Monarch Cloud Campus (R14-0042, SWP-26-0002/0003)", "url": "https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx"},
     {"kind": "primary", "date": "2026-09-03", "title": "Governor: more than $81 billion new investment (Monarch and Tamarack certifications)", "url": "https://governor.wv.gov/article/governor-morrisey-announces-more-81-billion-new-investment-west-virginia-business-summit"},
@@ -143,7 +143,7 @@
     {"category": "generative_ai", "confidence": "low", "evidence": "Company website: designed to support 'artificial intelligence, cloud computing, and enterprise systems'"}
    ],
    "not_disclosed": ["turbine count, model and MW", "control equipment vendor", "owners of the manager LLCs and investors", "tenant or offtaker", "water volumes and cooling design", "grid interconnection and utility", "noise and lighting specifications", "construction start (application: 2027-2028, 'subject to change')"],
-   "cite": {"water.source": [1], "power.utility": [1], "air_permits.backup_generators": [0], "noise.local_rules": [6], "use.1": [8]},
+   "cite": {"power.utility": [1], "air_permits.backup_generators": [0], "noise.local_rules": [6], "use.1": [8]},
    "sources": [
     {"kind": "primary", "date": "2025-08-15", "title": "WV DEP permit R13-3713 (Fundamental Data, Ridgeline Facility)", "url": "https://www.wboy.com/wp-content/uploads/sites/43/2025/08/WVDEP-Construction-Permit-1.pdf"},
     {"kind": "primary", "date": "2025-03-18", "title": "R13-3713 application (redacted copy)", "url": "https://dep.wv.gov/daq/permitting/Documents/Fundamental%20Data%20LLC;%20Ridgeline%20Facility/093-00034_APPL_13-3713.pdf"},
@@ -514,7 +514,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY, Dominion Post)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
-   "cite": {"water.source": [0], "water.cooling": [0], "power.mw": [0], "power.supply": [0], "use.0": [0]},
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]
@@ -563,7 +563,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
-   "cite": {"water.source": [0], "water.cooling": [0], "power.mw": [0], "power.supply": [0], "use.0": [0]},
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]
@@ -587,7 +587,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
-   "cite": {"water.source": [0], "water.cooling": [0], "power.mw": [0], "power.supply": [0], "use.0": [0]},
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]

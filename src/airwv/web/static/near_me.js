@@ -78,41 +78,17 @@ function renderResults() {
   renderDataCenters();
 }
 
-// Data centers (/api/data-centers): a plain card per site near this place, the same shape
-// as templates/_dc_card.html — what we know / what's not disclosed, with sources.
-const ext = u => `href="${esc(u)}" target="_blank" rel="noopener"`;
-const dcCite = srcs => srcs && srcs.length ? ` <span class="dc-cite">${srcs.map(s =>
-  `<a ${ext(s.url)} title="${esc(s.kind)}: ${esc(s.title)}" aria-label="Source ${s.n}: ${esc(s.title)}">[${s.n}]</a>`).join('')}</span>` : '';
-function dcList(items) {
-  return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}${dcCite(k.sources)}` : esc(k.label)}</li>`).join('');
-}
-function dcCard(c) {
-  const where = c.mi != null ? `${c.mi} mi away` : `in ${esc(c.county)} County · exact location not public`;
-  const topics = c.topics.map(t => `<div class="dc-topic"><h3>${esc(t.label)}</h3>
-    ${t.known.length ? `<div class="dc-sub">What we know</div><ul>${dcList(t.known)}</ul>` : ''}
-    ${t.gaps.length ? `<div class="dc-sub dc-gap">Not disclosed or not found</div><ul>${dcList(t.gaps)}</ul>` : ''}
-    ${!t.known.length && !t.gaps.length ? '<p class="meta">Nothing in the public record we found.</p>' : ''}</div>`).join('');
-  const srcs = c.sources.map(s => `<li><span class="rbadge${s.kind === 'primary' ? ' ok' : ''}">${esc(s.kind)}</span>
-    <a ${ext(s.url)}>${esc(s.title)}</a> <span class="meta">${esc(s.date)}</span></li>`).join('');
-  return `<div class="dc-card"><div class="dc-head">
-      <span class="nb-title"><a href="${esc(c.url)}">${esc(c.name)}</a></span>
-      <span class="rbadge">${esc(c.status_label)}</span><span class="nb-meta">${where} · ${esc(c.operator)}</span></div>
-    <div class="dc-grid">${topics}</div>
-    <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ol>${srcs}</ol></details>
-    <div class="nb-actions" style="margin-top:6px"><a href="${esc(c.url)}">plain summary →</a><a href="${esc(c.url)}?view=adv">full record and filings →</a></div>
-  </div>`;
-}
+// Data centers (/api/data-centers): a plain card per site near this place (static/dc.js).
 function renderDataCenters() {
   const old = $('nb-dc'); if (old) old.remove();
   if (!DC) return;
   const all = DC.near.concat(DC.in_county);
   if (!all.length) return;
-  const ask = DC.how_to_ask.map(a => `<li><b>${a.url ? `<a ${ext(a.url)}>${esc(a.where)}</a>` : esc(a.where)}:</b> ${esc(a.how)}</li>`).join('');
   $('nb-results').insertAdjacentHTML('afterbegin', `<div class="card" id="nb-dc">
-    <h2>🏢 Data centers near here <span class="meta">${all.length} · within ${Math.round(DC.place.km * 0.621371)} mi${DC.county ? ' or in ' + esc(DC.county) + ' County' : ''}</span></h2>
+    <h2>Data centers near here <span class="meta">${all.length} · within ${Math.round(DC.place.km * 0.621371)} mi${DC.county ? ' or in ' + esc(DC.county) + ' County' : ''}</span></h2>
     <p class="meta" style="padding:6px 14px 0">What the public record says about water, energy, noise and what it's for, and what nobody has disclosed. Hand-compiled ${esc(DC.fetched_at)}; <a href="/data">where this comes from</a>.</p>
-    ${all.map(dcCard).join('')}
-    <div class="dc-card"><div class="dc-ask"><b>Where the data doesn't exist, you can ask</b><ul>${ask}</ul></div></div>
+    ${all.map(AIRWV_DC.card).join('')}
+    <div class="dc-card">${AIRWV_DC.ask(DC.how_to_ask)}</div>
   </div>`);
 }
 
@@ -125,17 +101,17 @@ function drawMap() {
   nbMap.setView([DATA.lat, DATA.lon], 12);
   if (nbLayer) nbLayer.remove();
   nbLayer = L.layerGroup();
-  L.marker([DATA.lat, DATA.lon], {icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+  L.marker([DATA.lat, DATA.lon], {title: 'You are here', icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
     .bindPopup('You are here').addTo(nbLayer);
   (DATA.hazards || []).forEach(h => {
     if (h.lat == null || h.lon == null) return;
-    L.circleMarker([h.lat, h.lon], {radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
+    L.circleMarker([h.lat, h.lon], {title: h.label, radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
       .bindPopup(`<b>${esc(h.label)}</b><br><small>${h.mi != null ? h.mi + ' mi · ' : ''}${esc(h.detail || '')}</small>`)
       .addTo(nbLayer);
   });
   ((DC && DC.near) || []).forEach(c => {
     if (c.lat == null || c.lon == null) return;
-    L.marker([c.lat, c.lon], {icon: L.divIcon({className: '', html: '🏢', iconSize: [24, 24], iconAnchor: [12, 12]})})
+    L.marker([c.lat, c.lon], {title: `${c.name}, data center`, icon: L.divIcon({className: '', html: '🏢', iconSize: [24, 24], iconAnchor: [12, 12]})})
       .bindPopup(`<b>${esc(c.name)}</b><br><small>Data center · ${esc(c.status_label)} · ${c.mi} mi</small><br><a href="${esc(c.url)}">what we know →</a>`)
       .addTo(nbLayer);
   });
