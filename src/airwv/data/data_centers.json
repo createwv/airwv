@@ -25,26 +25,27 @@
    "hb2014": "High Impact Data Center (announced 2026-09-03); company calls it the first state-certified AI microgrid, but no Commerce microgrid-district record found",
    "power": {
     "mw": "2,160 MW on-site (DEP notice); Microsoft LOI for 1.35 GW",
-    "supply": "off-grid: 864 natural-gas reciprocating engines (2.5 MW each, 12 power nodes); company says Caterpillar G3500 gensets",
+    "supply": "off-grid: 864 Caterpillar G3520K natural-gas engines (2.5 MW each, 2.16 GW; DEP fact sheet), 12 power nodes",
     "utility": "none (off-grid; company says designed to allow future export)",
     "gas_supply": "23-mile gas line per a county commissioner; pipeline operator not disclosed (stormwater permit WVR312628 covers 556.5 acres of pipeline work in Putnam and Mason)",
-    "psc_dockets": "none found"
+    "psc_dockets": "none found for power: no PSC case names Nscale, Fidelis, Monarch or a microgrid (case names and descriptions searched 2026-11-09). One transport case, 26-0831-MC-CC, is a permit to bus construction workers to the site"
    },
    "water": {
     "source": "Ohio River 'in limited amounts', no local wells (county commissioner, news)",
     "withdrawal": "not disclosed",
-    "cooling": "closed loop: water-cooled chillers plus air-cooled coolers (company / consultant ERM)",
-    "permits": "State waters permits SWP-26-0002 and SWP-26-0003 (wetland/stream fill, 1.78 and 2.98 acres wetland per DEP); no water-withdrawal permit found"
+    "cooling": "closed loop 'with minimal makeup water', no volume stated (DEP fact sheet); engine radiators dry cooled (permit application); 'Dry Cooling' (SWP-26-0003 application); earlier description: water-cooled chillers plus air-cooled coolers (company / consultant ERM)",
+    "permits": "State waters permits SWP-26-0002 and SWP-26-0003 (wetland/stream fill, 1.78 and 2.98 acres wetland per DEP; comment period closed 2026-10-26); no water-withdrawal permit found, and DEP publishes no large-quantity-user list we could find"
    },
    "air_permits": {
-    "permits": "R14-0042 (major source / PSD; preliminary determination 2026-09-28; written comments to 2026-11-13)",
-    "backup_generators": "12 diesel emergency generators, 6 diesel fire-water pumps, 18 ULSD tanks (plus the 864 gas engines)",
-    "potential_emissions_tpy": "CO 984.83, VOC 898.89, total HAPs 619.16, NOx 398.96, PM2.5 35.46, SO2 47.68, CO2e 11,050,507 (DEP notice)"
+    "permits": "R14-0042 (major source / PSD; preliminary determination 2026-09-28; written comments to 2026-11-13 per DEP's live pages; its posted notice PDF still says 2026-10-30)",
+    "backup_generators": "12 diesel emergency generators (1 MW each; 100 hours a year for maintenance and testing, no limit in emergencies), 6 diesel fire-water pumps, 18 ULSD/DEF tanks (plus the 864 gas engines)",
+    "potential_emissions_tpy": "CO 984.83, VOC 898.89, total HAPs 619.16, NOx 398.96, PM2.5 35.46, SO2 47.68, CO2e 11,050,507 (DEP fact sheet, Table 5)",
+    "modeling": "DEP fact sheet: annual PM2.5 7.97 µg/m³ with background (88.56% of the 9.0 standard); highest 1-hour NO2 112.21 µg/m³ (59.69% of 188); nearest residence 152 m (499 ft) from a modeled stack"
    },
    "noise": {
     "local_rules": "HB 2014 bars county noise and light ordinances for certified projects",
     "complaints": "yes: neighbors complained of construction noise (news)",
-    "measurements": "a neighbor reported readings up to 94 dB 'for hours at a time' during construction (news; method not given); no operating noise study disclosed",
+    "measurements": "a neighbor reported readings up to 94 dB 'for hours at a time' during construction (news; method not given); no operating noise study disclosed, and the DEP fact sheet, draft permit and application don't mention noise",
     "mitigation": "company promises enclosures, mufflers, berms and walls; no dB targets disclosed"
    },
    "use": [
@@ -52,7 +53,7 @@
     {"category": "cloud", "confidence": "medium", "evidence": "Microsoft LOI includes 'compute services' and a 'long-term data center lease'"}
    ],
    "not_disclosed": ["water withdrawal volume and intake", "exact certification dates and microgrid certification record", "operating noise levels", "gas pipeline operator", "final Microsoft contract; Anthropic confirmation"],
-   "cite": {"water.cooling": [2], "water.permits": [0], "power.utility": [2], "noise.mitigation": [2]},
+   "cite": {"water.cooling": [2, 9, 11, 12], "water.permits": [0], "power.utility": [2], "noise.mitigation": [2], "air_permits.permits": [0, 13], "air_permits.backup_generators": [9, 10], "air_permits.potential_emissions_tpy": [9], "air_permits.modeling": [9]},
    "sources": [
     {"kind": "primary", "date": "2026-09-29", "title": "WV DEP: public comment period for Monarch Cloud Campus (R14-0042, SWP-26-0002/0003)", "url": "https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx"},
     {"kind": "primary", "date": "2026-09-03", "title": "Governor: more than $81 billion new investment (Monarch and Tamarack certifications)", "url": "https://governor.wv.gov/article/governor-morrisey-announces-more-81-billion-new-investment-west-virginia-business-summit"},
@@ -62,7 +63,12 @@
     {"kind": "news", "date": "2026-06-03", "title": "Herald-Dispatch: new permits eyed for Mason Co. data center-tied project", "url": "https://herald-dispatch.com/news/new-permits-eyed-for-mason-co-data-center-tied-project-after-eight-figure-wv-support/article_4cf595a0-abef-4dac-8117-4ef159ca8a81.html"},
     {"kind": "news", "date": "2026-01-31", "title": "WSAZ: Fidelis data center proceeding with plans", "url": "https://www.wsaz.com/2026/01/31/fidelis-data-center-proceeding-with-plans-build/"},
     {"kind": "news", "date": "2026-09-05", "title": "HuffPost: Mason County data center neighbors", "url": "https://www.huffpost.com/entry/data-center-mason-countywest-virginia_n_6a99d6eee4b0e51a2d921dcf"},
-    {"kind": "news", "date": "2026-08-27", "title": "WDTV: data center lands reported $45 billion AI agreement", "url": "https://www.wdtv.com/2026/08/27/west-virginia-data-center-lands-reported-45-billion-ai-agreement-morrisey-says/"}
+    {"kind": "news", "date": "2026-08-27", "title": "WDTV: data center lands reported $45 billion AI agreement", "url": "https://www.wdtv.com/2026/08/27/west-virginia-data-center-lands-reported-45-billion-ai-agreement-morrisey-says/"},
+    {"kind": "primary", "date": "2026-09-28", "title": "WV DEP DAQ: preliminary determination / fact sheet, R14-0042", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/PRELIMINARY_DETERMINATION_EVALUATION_R14-0042.pdf"},
+    {"kind": "primary", "date": "undated draft", "title": "WV DEP DAQ: draft permit R14-0042", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/DAQs_Draft_PERMIT_R14-0042.pdf"},
+    {"kind": "primary", "date": "2026-09-15", "title": "R14-0042 permit application, Point Pleasant Campus", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/09_16_2026_MCC_Point_Pleasant_Campus_45CSR14_Permit_App_with_TOC.pdf"},
+    {"kind": "primary", "date": "2026-06-26", "title": "SWP-26-0003 application, Data Center #3", "url": "https://apps.dep.wv.gov/Documents/PIO/Draft-Permits-Applications/SWP-26-0003-file0001.pdf"},
+    {"kind": "primary", "date": "2026-09-28", "title": "WV DEP DAQ: notice of intent to issue R14-0042 (states 2026-10-30)", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/Monarch%20DAQ%20Notice%20-%20TF%20Version.pdf"}
    ]
   },
   {
@@ -919,7 +925,7 @@
   }
  ],
  "dockets": [
-  {"id": "24-0611-E-T-PW", "agency": "WV PSC", "title": "Appalachian Power / Wheeling Power large-load tariff (data centers)", "detail": "Filed 2024-07-18; APCo said large loads could add 8,000 MW. Stipulation 2025-01-22 with Google: 100 MW per site (150 MW aggregate), 12-year minimum term, 80% minimum demand. Reportedly approved March 2025 (order not found).", "url": "https://wvpublic.org/data-center-deal-struck-between-appalachian-power-google/"},
+  {"id": "24-0611-E-T-PW", "agency": "WV PSC", "title": "Appalachian Power / Wheeling Power large-load tariff (data centers)", "detail": "Filed 2024-07-18; APCo said large loads could add 8,000 MW. Stipulation 2025-01-22 with Google: 100 MW per site (150 MW aggregate), 12-year minimum term, 80% minimum demand. Commission order entered 2025-03-25 accepted the stipulation; the docket still lists the case as active.", "url": "http://www.psc.state.wv.us/Scripts/WebDocket/ViewDocument.cfm?CaseActivityID=638931&NotType=WebDocket"},
   {"id": "26-0108-E-CN", "agency": "WV PSC", "title": "Mon Power / Potomac Edison 1,200 MW gas plant at Fort Martin, Maidsville", "detail": "Filed 2026-02-13 (~$2.48B). PSC staff called prospective data center load 'the primary reason' for projected growth; Mon Power's president testified it is in talks with 3 unnamed data center developers. Hearing July 2026; decision expected ~March 2027.", "url": "https://wvmetronews.com/2026/07/16/mon-power-president-says-data-centers-will-end-up-paying-for-natural-gas-powered-power-plant/"},
   {"id": "26-0633-E-GI", "agency": "WV PSC", "title": "General investigation: HB 2014 power rules for data centers and microgrids", "detail": "Modified rules approved mid-October 2026 (69% coal capacity factor became a goal); next to the Legislative Rule-Making Review Committee and the 2027 session.", "url": "https://wvpublic.org/story/energy-environment/psc-files-proposed-data-center-power-rule/amp/"},
   {"id": "21-0658-E-ENEC", "agency": "WV PSC", "title": "Grant Town (AMBIT) contract buyout to become a crypto mine", "detail": "Rejected December 2021.", "url": "https://www.eenews.net/articles/cryptocurrency-plan-fails-for-manchin-connected-coal-plant/"},

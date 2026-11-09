@@ -136,7 +136,7 @@ def test_card_sorts_known_and_not_disclosed():
 
 
 def test_card_keeps_the_note_on_a_qualified_gap():
-    dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}}
+    dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}, "cite": {}}
     energy = next(t for t in dcs.card(dc)["topics"] if t["topic"] == "energy")
     assert {"label": "Backup generators", "value": "none found (federal facility)", "sources": []} in energy["gaps"]
 

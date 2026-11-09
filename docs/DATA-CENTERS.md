@@ -58,7 +58,7 @@ check the notice before you rely on a date.
 
 | Date | What | Site | How to take part | Source |
 |---|---|---|---|---|
-| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. The same notice covers state waters permits SWP-26-0002/0003; their deadline isn't recorded here | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
+| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. Email daqpubliccomments@wv.gov (subject "Monarch Comments") or mail Edward Andrews, P.E., DAQ, by 5 p.m. DEP's live pages say Nov 13; its posted notice PDF still says Oct 30, and we found no extension notice. Hearings were Oct 20 and 29; state waters permits SWP-26-0002/0003 closed Oct 26 | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
 
 **Other dates to watch** (not comment periods)
 
@@ -205,7 +205,7 @@ sometimes cited as West Virginia is actually about Limestone, Tennessee.
 
 | Docket | What | Status |
 |---|---|---|
-| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | reportedly approved March 2025 (order not found) |
+| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | order entered 2025-03-25 accepted the stipulation; docket still listed active |
 | 26-0108-E-CN | Mon Power 1,200 MW gas plant at Fort Martin. PSC staff call data center load "the primary reason" for it | decision expected ~March 2027 |
 | 26-0633-E-GI | PSC rules for HB 2014 power (the 69% coal capacity factor is now a goal) | to Legislature 2027 |
 | 21-0658-E-ENEC | Grant Town plan to become a 95.7 MW crypto mine | rejected 2021 |
@@ -235,7 +235,11 @@ data center developers.
   evaluations for R14-0042, R13-3713, R13-3714 and R13-3715 are the best primary detail. We
   couldn't read some of the PDFs.
 - WV DEP water-use reporting (large-quantity users) and NPDES/stormwater permit search.
-- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
+- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names). Searched 2026-11-09 for
+  Nscale, Fidelis, Monarch and microgrid in case names and descriptions: the only match for this site is
+  26-0831-MC-CC, a permit to bus construction workers to it. The other operators aren't searched yet.
+- R14-0042's record disagrees with itself on PM: 49.25 TPY (notice), 21.68 (fact sheet text), 21.54 (fact
+  sheet Table 5); engine filterable PM is 0.01 lb/hr (fact sheet) and 0.005 lb/hr (draft permit).
 - WV Air Quality Board appeals: <https://aqb.wv.gov/>.
 - Commerce Data Economy Office: <https://westvirginia.gov/datacenters/>.
 
