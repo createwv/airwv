@@ -9,7 +9,7 @@
   const words = s => esc(String(s).replace(/_/g, ' '));
 
   const cite = srcs => srcs && srcs.length ? ` <span class="dc-cite">${srcs.map(s =>
-    `<a ${ext(s.url)} title="${esc(s.kind)}: ${esc(s.title)}" aria-label="Source ${s.n}: ${esc(s.title)}">[${s.n}]</a>`).join('')}</span>` : '';
+    `<a ${ext(s.url)} title="${esc(s.kind)}: ${esc(s.title)}" aria-label="Data source ${s.n}: ${esc(s.title)}">[${s.n}]</a>`).join('')}</span>` : '';
 
   function list(items) {
     return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}${cite(k.sources)}` : esc(k.label)}</li>`).join('');
