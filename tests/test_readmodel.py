@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 from airwv.sources.base import Reading
 from airwv.storage import Store
 from airwv.web import app as webapp
+from airwv.wvgeo import county_names
 
 SNAPSHOT = Path(__file__).parent / "snapshots" / "api_near.json"
 
@@ -220,6 +221,8 @@ def test_explore_page(tmp_path, monkeypatch):
     # the measurements option (series mode): its site and window fields
     assert 'value="measurements"' in r.text and 'name="site_id"' in r.text
     assert 'name="from"' in r.text and 'name="to"' in r.text
+    # the county and value filters; McDowell keeps its capital D
+    assert 'name="county"' in r.text and '<option value="McDowell">' in r.text and 'name="over"' in r.text
 
 
 # /api/water/near and /api/areas moved onto the read model too; these snapshots were
@@ -329,6 +332,63 @@ def test_api_query_area_and_window(tmp_path, monkeypatch):
     assert {s["site_id"]: s["peak"] and s["peak"]["value"] for s in pk["sites"]}["sample_site:S1"] == 2.4
     assert pk["filters"]["to"] == "2026-07-01"
     assert c.get(f"{base}&from=July").status_code == 400
+
+
+def test_county_names():
+    assert county_names("Marshall County") == ["Marshall"]
+    assert county_names("Mc Dowell") == county_names("MCDOWELL") == ["McDowell"]
+    assert county_names("Berkeley / Jefferson") == ["Berkeley", "Jefferson"]
+    assert county_names("not disclosed") == county_names("") == county_names(None) == []
+
+
+def test_api_query_county(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    # no point needed; any spelling asks; every spelling in the layers answers
+    r = c.get("/api/query?county=kanawha county&kind=facility&limit=500").json()
+    assert r["place"] is None and r["filters"]["county"] == ["Kanawha"] and r["count"]
+    assert {s["county"] for s in r["sites"]} == {"Kanawha", "Kanawha County"}
+    # a comma list, and a project listed under several counties counts in each
+    both = c.get("/api/query?county=Kanawha,Mason&kind=data_center&limit=500").json()
+    assert both["filters"]["county"] == ["Kanawha", "Mason"]
+    assert any("/" in s["county"] for s in both["sites"])
+    assert all({"Kanawha", "Mason"} & set(county_names(s["county"])) for s in both["sites"])
+    # with a point it narrows the radius search; a region name is not a county
+    near = c.get("/api/query?lat=38.3727&lon=-81.6540&km=8&county=Kanawha&kind=facility").json()
+    assert near["place"] and all(county_names(s["county"]) == ["Kanawha"] for s in near["sites"])
+    assert c.get("/api/query?county=Kanawha Valley").status_code == 400
+    assert c.get("/api/query?county=Kanawha,Nowhere").status_code == 400
+    # sites with no county listed (sensors) drop out rather than being guessed from a point
+    assert c.get("/api/query?county=Kanawha&kind=sensor").json()["sites"] == []
+
+
+def test_api_query_over(tmp_path, monkeypatch):
+    c, _ = _client(tmp_path, monkeypatch)
+    base = "/api/query?lat=38.3727&lon=-81.6540&km=8&param=iron,pm2_5"
+    ids = lambda r: [s["site_id"] for s in r["sites"]]
+    # strictly above, on each site's latest value (iron 1.9, pm2_5 10.04 and 12.35)
+    r = c.get(f"{base}&over=10").json()
+    assert ids(r) == ["sensor:197127", "sensor:200001"] and r["filters"]["over"] == 10
+    assert ids(c.get(f"{base}&over=10.04").json()) == ["sensor:200001"]
+    assert "sample_site:S1" in ids(c.get(f"{base}&over=0&kind=sample_site").json())
+    # the answer's provenance covers only what's left
+    assert set(r["provenance"]) == {"community_sensors"}
+    # limit counts sites that pass: the nearest site overall (197127) doesn't
+    assert ids(c.get(f"{base}&over=11&limit=1").json()) == ["sensor:200001"]
+    # sites that can't have a value never pass, and the from/to window decides "latest"
+    assert c.get(f"{base}&over=0&kind=facility").json()["sites"] == []
+    assert ids(c.get(f"{base}&over=2&kind=sample_site&to=2026-07-01").json()) == ["sample_site:S1"]
+    assert ids(c.get(f"{base}&over=2&kind=sample_site").json()) == []
+    # CSV is the same answer
+    assert len(c.get(f"{base}&over=10&format=csv").text.strip().splitlines()) == 3
+    # needs a param and a real number
+    assert c.get("/api/query?lat=38.3727&lon=-81.6540&over=10").status_code == 400
+    assert c.get(f"{base}&over=nan").status_code == 400
+    assert c.get(f"{base}&over=inf").status_code == 400
+    assert c.get(f"{base}&over=lots").status_code == 422
+    # series mode: only the rows above it, and the CSV link keeps the filter
+    w = c.get("/api/query?site_id=sample_site:S1&param=iron&over=2").json()
+    assert [x["value"] for x in w["rows"]] == [2.4] and w["filters"]["over"] == 2
+    assert "over=2.0" in w["csv"] and len(c.get(w["csv"]).text.strip().splitlines()) == 2
 
 
 def test_api_query_series(tmp_path, monkeypatch):

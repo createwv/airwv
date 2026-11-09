@@ -1,5 +1,5 @@
 // Explore (query builder, docs/DIRECTION.md §5.2): a form over /api/query. The form lives in
-// the URL (?show=&place=&km=&medium=&param=&since=&limit=&kind=a,b), so a shared link reproduces
+// the URL (?show=&place=&km=&county=&medium=&param=&over=&since=&limit=&kind=a,b), so a shared link reproduces
 // the table; the CSV and API links are the same query with format=csv / as JSON.
 // show=measurements (+ site_id=&from=&to=) lists one site's readings from the series mode.
 const $ = id => document.getElementById(id);
@@ -22,7 +22,8 @@ const day = ts => ts ? String(ts).slice(0, 10) : '—';
 const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${text}</a>` : text;
 
 const form = $('ex-form');
-const FIELDS = ['show', 'km', 'medium', 'param', 'since', 'site_id', 'from', 'to', 'limit'];
+const FIELDS = ['show', 'km', 'county', 'medium', 'param', 'over', 'since', 'site_id', 'from', 'to', 'limit'];
+const COUNTY_NOTE = "The county filter only finds places whose data source lists a county. Sensors, gauges and sample sites don't, so they drop out. ";
 const MEASURED_KINDS = 'sensor,reference_monitor,gauge,sample_site';
 const isSeries = () => form.elements.show.value === 'measurements';
 let urlSite = null;   // a site_id from the URL, until the site list has been filled once
@@ -72,11 +73,12 @@ function params() {
   const api = new URLSearchParams({lat, lon});
   FIELDS.filter(f => !form.elements[f].closest('[hidden]')).forEach(f => {
     const v = form.elements[f].value;
+    if (f === 'over' && !form.elements.param.value) return;   // /api/query needs a reading to compare
     if (v) { api.set(f, v); page.set(f, v); }
   });
   if (isSeries()) {
     const series = new URLSearchParams({site_id: form.elements.site_id.value, param: form.elements.param.value});
-    ['from', 'to', 'limit'].forEach(f => { if (api.has(f)) series.set(f, api.get(f)); });
+    ['from', 'to', 'over', 'limit'].forEach(f => { if (api.has(f)) series.set(f, api.get(f)); });
     return {api: series, page};
   }
   const kinds = [...form.querySelectorAll('input[name=kind]:checked')].map(cb => cb.value);
@@ -166,9 +168,9 @@ function seriesTable(rows) {
 }
 
 function seriesCount(r, label) {
-  const {from, to, limit} = r.filters;
+  const {from, to, limit, over} = r.filters;
   const range = from && to ? `, ${from} to ${to}` : from ? `, from ${from}` : to ? `, up to ${to}` : '';
-  return `${r.count} reading${r.count === 1 ? '' : 's'} of ${esc(label)} at ${link(r.site.url, esc(r.site.name || r.site.ref))}${esc(range)}`
+  return `${r.count} reading${r.count === 1 ? '' : 's'} of ${esc(label)}${over != null ? ` over ${esc(over)}` : ''} at ${link(r.site.url, esc(r.site.name || r.site.ref))}${esc(range)}`
     + (r.truncated ? ` (newest ${limit} only)` : '');
 }
 
@@ -196,6 +198,13 @@ async function runSeries() {
   }
 }
 
+// How the county and value filters read in the result line.
+function filterNote(r) {
+  const {county, over} = r.filters;
+  return (county ? ` in ${county.join(', ')} County` : '')
+    + (over != null ? `, latest ${form.elements.param.selectedOptions[0].textContent} over ${over}` : '');
+}
+
 async function run() {
   if (isSeries()) return runSeries();
   const {api, page} = params();
@@ -208,15 +217,15 @@ async function run() {
     const miles = Math.round(r.place.km * 0.621371);
     if (api.get('show') === 'records') {
       const rows = recordRows(r);
-      $('ex-count').textContent = `${rows.length} record${rows.length === 1 ? '' : 's'} at ${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi`
+      $('ex-count').textContent = `${rows.length} record${rows.length === 1 ? '' : 's'} at ${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi${filterNote(r)}`
         + (r.filters.since ? `, dated since ${r.filters.since}` : '');
       $('ex-table').innerHTML = rows.length ? recordTable(rows) : '<tbody><tr><td class="meta">No records match.</td></tr></tbody>';
     } else {
-      $('ex-count').textContent = `${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi`
+      $('ex-count').textContent = `${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi${filterNote(r)}`
         + (r.count >= r.filters.limit ? ` (first ${r.filters.limit}, nearest first)` : ', nearest first');
       $('ex-table').innerHTML = r.count ? siteTable(r) : '<tbody><tr><td class="meta">Nothing matches.</td></tr></tbody>';
     }
-    $('ex-prov').innerHTML = provLine(r.provenance);
+    $('ex-prov').innerHTML = (r.filters.county ? COUNTY_NOTE : '') + provLine(r.provenance);
   } catch (e) {
     $('ex-count').textContent = `Couldn't load results (${e}).`;
     $('ex-table').innerHTML = '';

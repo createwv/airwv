@@ -6,6 +6,8 @@ Anything placed this way should be labelled "approximate — county location".
 """
 from __future__ import annotations
 
+import re
+
 # 3-digit FIPS county code (as WV DEP stores it) -> name
 WV_COUNTY_FIPS = {
     "001": "Barbour", "003": "Berkeley", "005": "Boone", "007": "Braxton", "009": "Brooke",
@@ -51,6 +53,18 @@ def canon_county(name: str | None) -> str | None:
         return None
     n = name.strip().title()
     return "McDowell" if n == "Mcdowell" else n
+
+
+def county_names(raw: str | None) -> list[str]:
+    """The WV counties a source's county field names, canonical. Tolerates the forms the
+    layers use ('Marshall County', 'Mc Dowell', 'Berkeley / Jefferson'); [] if it names none."""
+    out = []
+    for part in (raw or "").split("/"):
+        n = canon_county(re.sub(r"\s+county\s*$", "", part, flags=re.I))
+        n = "McDowell" if n == "Mc Dowell" else n
+        if n in WV_COUNTY_CENTROID:
+            out.append(n)
+    return out
 
 
 def county_centroid(name: str | None) -> tuple[float, float] | None:

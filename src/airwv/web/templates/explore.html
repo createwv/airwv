@@ -18,6 +18,10 @@
         <option value="16">10 miles</option>
         <option value="40.25">25 miles</option>
       </select></label>
+      <label data-for="list">County <select name="county">
+        <option value="">any</option>
+        {% for c in counties %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select></label>
       <label>Medium <select name="medium">
         <option value="">any</option>
         <option value="air">air</option>
@@ -38,6 +42,7 @@
           <option value="ecoli">E. coli</option>
         </optgroup>
       </select></label>
+      <label>Over <input type="number" step="any" name="over" placeholder="any value"></label>
       <label data-for="series" hidden>Site <select name="site_id"></select></label>
       <label data-for="list">Changed since <input type="date" name="since"></label>
       <label data-for="series" hidden>From <input type="date" name="from"></label>

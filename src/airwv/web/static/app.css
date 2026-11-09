@@ -477,7 +477,7 @@
     .ex-recs-in { display:block; }
     .ex-table td:first-child { width:auto; }
     .ex-grid { grid-template-columns:1fr 1fr; gap:8px 10px; }
-    .ex-grid select, .ex-grid input { font-size:14px; min-width:0; width:100%; }
+    .ex-grid select, .ex-grid input { font-size:14px; min-width:0; width:100%; box-sizing:border-box; }
     .ex-table th, .ex-table td { padding:7px 6px; font-size:13px; }
   }
 

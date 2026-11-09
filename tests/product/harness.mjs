@@ -307,6 +307,18 @@ async function visit(vp, pg) {
       await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
       info.series.link = await page.evaluate(seriesProbe);
     }
+    if (pg.probeExFilters) {
+      await page.waitForFunction(() => !/Loading/.test(document.getElementById("ex-count").textContent), null, { timeout: 30000 });
+      info.exFilters = await page.evaluate(() => {
+        const f = document.getElementById("ex-form");
+        return { county: f.elements.county.value, over: f.elements.over.value,
+                 countyShown: f.elements.county.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+                 count: document.getElementById("ex-count").textContent,
+                 prov: document.getElementById("ex-prov").textContent,
+                 api: document.getElementById("ex-api").getAttribute("href"),
+                 csv: document.getElementById("ex-csv").getAttribute("href") };
+      });
+    }
   } catch (e) { err = String(e.message || e).split("\n")[0]; }
   const ms = Date.now() - t0;
   const shot = join(cfg.out, `${pg.name}-${vp.w}.png`);

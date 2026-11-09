@@ -21,6 +21,8 @@ import math
 from contextlib import contextmanager
 from pathlib import Path
 
+from airwv.wvgeo import county_names
+
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 # layer name -> JSON file in DATA_DIR (each keeps its provenance block in the file)
@@ -54,6 +56,12 @@ def hav_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     h = (math.sin(dp / 2) ** 2 + math.cos(math.radians(lat1))
          * math.cos(math.radians(lat2)) * math.sin(dl / 2) ** 2)
     return 2 * 3959 * math.asin(math.sqrt(h))
+
+
+def in_county(raw: str | None, wanted: str) -> bool:
+    """Does a ``county`` field name one of ``wanted`` (comma-joined canonical names)?
+    Registered in SQL; the layers spell counties several ways (see ``county_names``)."""
+    return any(n in wanted.split(",") for n in county_names(raw))
 
 
 def _j(path: str) -> str:
@@ -163,6 +171,7 @@ class ReadModel:
     def _setup(self, conn) -> None:
         raw = conn.connection.dbapi_connection
         raw.create_function("hav_mi", 4, hav_mi, deterministic=True)
+        raw.create_function("in_county", 2, in_county, deterministic=True)
         conn.exec_driver_sql("CREATE TEMP TABLE IF NOT EXISTS layer_doc ("
                              "layer TEXT PRIMARY KEY, stamp TEXT, fetched_at TEXT, doc TEXT)")
         for ddl in (SITE_VIEW, MEASUREMENT_VIEW, RECORD_VIEW):
@@ -203,18 +212,23 @@ class ReadModel:
     def sites_near(self, conn, lat: float | None, lon: float | None, radius_mi: float, *,
                    layer: str | None = None, kinds: list[str] | None = None,
                    medium: str | None = None, area: str | None = None,
-                   limit: int = 50, bbox_km: float | None = None) -> list[dict]:
+                   county: list[str] | None = None, limit: int = 50,
+                   bbox_km: float | None = None) -> list[dict]:
         """Sites within ``radius_mi`` of a point, nearest first (ties in layer order).
         ``area`` keeps sites whose county or WV region (community sensors) is that name;
         with no point (``lat``/``lon`` None) it's the only place filter, in layer order,
-        and sites without coordinates count too. ``bbox_km`` adds the cheap lat/lon box
-        the water query has always used."""
+        and sites without coordinates count too. ``county`` (canonical names) keeps sites
+        whose own county field names one of them; sites with none listed drop out. ``limit``
+        -1 is no limit. ``bbox_km`` adds the cheap lat/lon box the water query has always used."""
         params: dict = {"lat": lat, "lon": lon, "r": radius_mi, "limit": limit}
         point = lat is not None and lon is not None
         where = ["lat IS NOT NULL", "lon IS NOT NULL", "hav_mi(:lat, :lon, lat, lon) <= :r"] if point else []
         if area:
             where.append("(county = :area OR json_extract(attrs, '$.region') = :area)")
             params["area"] = area
+        if county:
+            where.append("in_county(county, :county)")
+            params["county"] = ",".join(county)
         if layer:
             where.append("layer = :layer")
             params["layer"] = layer
@@ -251,11 +265,15 @@ class ReadModel:
         return _site(r) if r is not None else None
 
     def series(self, conn, medium: str, ref: str, parameter: str, since=None, until=None,
-               limit: int = 5000) -> tuple[list[dict], bool]:
-        """Measurement rows of ``parameter`` for one ref inside the window (inclusive),
-        oldest first: ``([{ts, value, unit, source, quality}], truncated)``. Past ``limit``
-        rows, the newest ``limit`` are kept and ``truncated`` is True."""
+               limit: int = 5000, over: float | None = None) -> tuple[list[dict], bool]:
+        """Measurement rows of ``parameter`` for one ref inside the window (inclusive) and
+        above ``over`` when given, oldest first: ``([{ts, value, unit, source, quality}],
+        truncated)``. Past ``limit`` rows, the newest ``limit`` are kept and ``truncated``
+        is True."""
         window, wp = _window(since, until)
+        if over is not None:
+            window += " AND value > :over"
+            wp["over"] = over
         rows = conn.exec_driver_sql(
             "SELECT ts, value, unit, source, quality FROM measurement WHERE medium = :m "
             f"AND parameter = :p AND ref = :r{window} ORDER BY ts DESC LIMIT :n",
