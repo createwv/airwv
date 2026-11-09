@@ -48,7 +48,6 @@ PAGES = [
     ("about", "/about"),
     ("data", "/data"),
     ("explore", "/explore?place=rutledge&km=8&param=pm2_5"),   # query builder at the demo place
-    ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5"),   # one site's readings
     # data centers: Near me at Point Pleasant (Monarch is ~4 mi); its site page is in SITE_PAGES
     ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
     ("place-dc", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8"),
@@ -72,6 +71,8 @@ WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 MORE_PAGE = ("more", "/")
 # /air's "Filters" sheet, tapped open where it's collapsed and shot at every DEVICES size.
 FILTERS_PAGE = ("filters", "/air")
+# Explore's measurements option, driven through its form at every DEVICES size.
+EXPLORE_SERIES = ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5")
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {
     "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
@@ -223,7 +224,9 @@ def product(tmp_path_factory):
             + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
                 "openMore": True}]
             + [{"name": FILTERS_PAGE[0], "path": FILTERS_PAGE[1], "viewports": _device_viewports(),
-                "openFilters": True}],
+                "openFilters": True}]
+            + [{"name": EXPLORE_SERIES[0], "path": EXPLORE_SERIES[1], "viewports": _device_viewports(),
+                "driveSeries": True}],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))
