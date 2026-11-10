@@ -161,9 +161,14 @@ data center developers.
 
 ## What doesn't exist (yet)
 
-- **No water-withdrawal volume** for any site. We found no WV DEP water-use (large-quantity
-  user) report or withdrawal permit tied to a data center. *We didn't query DEP's water-use
-  database directly. That's the next step.*
+- **No water-withdrawal volume** for any site, and DEP doesn't publish one per facility.
+  Anyone withdrawing more than 300,000 gallons in 30 days (a large-quantity user) reports to
+  DEP's Water Use Program each year, but DEP publishes only statewide totals by category
+  (340 users, 609 billion gallons in 2024; no data center category) in its
+  [2025 Annual Water Resources Report](https://apps.dep.wv.gov/Documents/DWWM/WaterUse/WRPAReports/2025AnnualReport.pdf)
+  (Dec 2025, pp. 6-8), and its [LQU page](https://dep.wv.gov/WWE/wateruse/AnnualCertification-LargeQuantityUsers/Pages/default.aspx)
+  lists no facilities. None of the sites is operating yet, so none would have reported
+  (checked 2026-11-09). We did not file a records request.
 - **No operating noise measurement** anywhere in WV. The only figure is a neighbor's
   construction reading at Monarch.
 - **No official list** of HIDC or microgrid certifications. Commerce's program page lists
@@ -177,9 +182,14 @@ data center developers.
 
 - WV DEP DAQ permit applications and notices:
   <https://dep.wv.gov/daq/permitting/Pages/NSR-Permit-Applications.aspx>. The engineering
-  evaluations for R14-0042, R13-3713, R13-3714 and R13-3715 are the best primary detail. We
-  couldn't read some of the PDFs.
-- WV DEP water-use reporting (large-quantity users) and NPDES/stormwater permit search.
+  evaluations for R14-0042, R13-3713, R13-3714 and R13-3715 are the best primary detail.
+  As of 2026-11-09 the page no longer links the R13 ones, and the old
+  `dep.wv.gov/daq/permitting/Documents/Transgas-Adams-Fork*` PDFs return 404. DEP says
+  finished permits' documents are in its Application Enhancer database
+  (<https://documents.dep.wv.gov/>, guest login on the NSR page; search 13-3713, 13-3714,
+  13-3715). The Air Quality Board's certified appeal records (25-02-AQB for Ridgeline) also
+  appear to include the evaluations.
+- WV DEP NPDES/stormwater permit search.
 - WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
 - WV Air Quality Board appeals: <https://aqb.wv.gov/>.
 - Commerce Data Economy Office: <https://westvirginia.gov/datacenters/>.
