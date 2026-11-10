@@ -108,12 +108,20 @@ def test_nrc_repeat_updates_are_dropped():
     base = {"date": "2025-07-12", "materials": [{"name": "Natural Gas", "amount": 7.4}], "lat": 39.6}
     spills = [
         {**base, "report_id": 1436736, "description": "RELEASED FROM A RELIEF VALVE"},
-        {**base, "report_id": 1436930, "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 //"},
-        {**base, "report_id": 1436931, "description": "THIS IS AN UPDATE TO REPORT #1436736",
+        {**base, "report_id": 1436930, "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 //"
+         " UPDATE IS AS FOLLOWS: - NO UPDATES TO REPORT. ORIGINAL REPORT: RELEASED FROM A RELIEF VALVE"},
+        {**base, "report_id": 1436931, "description": "THIS IS AN UPDATE TO REPORT #1436736 NO UPDATES",
          "materials": [{"name": "Natural Gas", "amount": 9.0}]},     # new amount → kept
-        {**base, "report_id": 1436932, "description": "UPDATE TO NRC REPORT 1400000"},  # original absent
+        {**base, "report_id": 1436932, "description": "UPDATE TO NRC REPORT 1400000 NO UPDATES"},  # original absent
+        # same fields, but the update text adds facts (cf. 1422142, Clarksburg) → kept
+        {**base, "report_id": 1436933, "description": "/// 48HR UPDATE TO NRC REPORT #1436736 /// THERE WAS"
+         " A FIRE, ONE FATALITY INVOLVED. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ..."},
+        # "no updates" only inside the quoted original, not in the update itself → kept
+        {**base, "report_id": 1436934, "description": "UPDATE TO NRC REPORT 1436736: SMELL IS WORSE."
+         " ORIGINAL REPORT: ... NO UPDATES TO REPORT."},
     ]
-    assert [s["report_id"] for s in mod.drop_repeat_updates(spills)] == [1436736, 1436931, 1436932]
+    assert [s["report_id"] for s in mod.drop_repeat_updates(spills)] == [
+        1436736, 1436931, 1436932, 1436933, 1436934]
 
 
 def test_api_near_hazards_have_site_pages(tmp_path, monkeypatch):
