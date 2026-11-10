@@ -25,26 +25,27 @@
    "hb2014": "High Impact Data Center (announced 2026-09-03); company calls it the first state-certified AI microgrid, but no Commerce microgrid-district record found",
    "power": {
     "mw": "2,160 MW on-site (DEP notice); Microsoft LOI for 1.35 GW",
-    "supply": "off-grid: 864 natural-gas reciprocating engines (2.5 MW each, 12 power nodes); company says Caterpillar G3500 gensets",
+    "supply": "off-grid: 864 Caterpillar G3520K natural-gas engines (2.5 MW each, 2.16 GW; DEP fact sheet), 12 power nodes",
     "utility": "none (off-grid; company says designed to allow future export)",
     "gas_supply": "23-mile gas line per a county commissioner; pipeline operator not disclosed (stormwater permit WVR312628 covers 556.5 acres of pipeline work in Putnam and Mason)",
-    "psc_dockets": "none found"
+    "psc_dockets": "none found for power: no PSC case names Nscale, Fidelis, Monarch or a microgrid (case names and descriptions searched 2026-11-09). One transport case, 26-0831-MC-CC, is a permit to bus construction workers to the site"
    },
    "water": {
     "source": "Ohio River 'in limited amounts', no local wells (county commissioner, news)",
     "withdrawal": "not disclosed",
-    "cooling": "closed loop: water-cooled chillers plus air-cooled coolers (company / consultant ERM)",
-    "permits": "State waters permits SWP-26-0002 and SWP-26-0003 (wetland/stream fill, 1.78 and 2.98 acres wetland per DEP); no water-withdrawal permit found"
+    "cooling": "closed loop 'with minimal makeup water', no volume stated (DEP fact sheet); engine radiators dry cooled (permit application); 'Dry Cooling' (SWP-26-0003 application); earlier description: water-cooled chillers plus air-cooled coolers (company / consultant ERM)",
+    "permits": "State waters permits SWP-26-0002 and SWP-26-0003 (wetland/stream fill, 1.78 and 2.98 acres wetland per DEP; comment period closed 2026-10-26); no water-withdrawal permit found, and DEP publishes no large-quantity-user list we could find"
    },
    "air_permits": {
-    "permits": "R14-0042 (major source / PSD; preliminary determination 2026-09-28; written comments to 2026-11-13)",
-    "backup_generators": "12 diesel emergency generators, 6 diesel fire-water pumps, 18 ULSD tanks (plus the 864 gas engines)",
-    "potential_emissions_tpy": "CO 984.83, VOC 898.89, total HAPs 619.16, NOx 398.96, PM2.5 35.46, SO2 47.68, CO2e 11,050,507 (DEP notice)"
+    "permits": "R14-0042 (major source / PSD; preliminary determination 2026-09-28; written comments to 2026-11-13 per DEP's live pages; its posted notice PDF still says 2026-10-30)",
+    "backup_generators": "12 diesel emergency generators (1 MW each; 100 hours a year for maintenance and testing, no limit in emergencies), 6 diesel fire-water pumps, 18 ULSD/DEF tanks (plus the 864 gas engines)",
+    "potential_emissions_tpy": "CO 984.83, VOC 898.89, total HAPs 619.16, NOx 398.96, PM2.5 35.46, SO2 47.68, CO2e 11,050,507 (DEP fact sheet, Table 5)",
+    "modeling": "DEP fact sheet: annual PM2.5 7.97 µg/m³ with background (88.56% of the 9.0 standard); highest 1-hour NO2 112.21 µg/m³ (59.69% of 188); nearest residence 152 m (499 ft) from a modeled stack"
    },
    "noise": {
     "local_rules": "HB 2014 bars county noise and light ordinances for certified projects",
     "complaints": "yes: neighbors complained of construction noise (news)",
-    "measurements": "a neighbor reported readings up to 94 dB 'for hours at a time' during construction (news; method not given); no operating noise study disclosed",
+    "measurements": "a neighbor reported readings up to 94 dB 'for hours at a time' during construction (news; method not given); no operating noise study disclosed, and the DEP fact sheet, draft permit and application don't mention noise",
     "mitigation": "company promises enclosures, mufflers, berms and walls; no dB targets disclosed"
    },
    "use": [
@@ -52,6 +53,7 @@
     {"category": "cloud", "confidence": "medium", "evidence": "Microsoft LOI includes 'compute services' and a 'long-term data center lease'"}
    ],
    "not_disclosed": ["water withdrawal volume and intake", "exact certification dates and microgrid certification record", "operating noise levels", "gas pipeline operator", "final Microsoft contract; Anthropic confirmation"],
+   "cite": {"water.cooling": [2, 9, 11, 12], "water.permits": [0], "power.utility": [2], "noise.mitigation": [2], "air_permits.permits": [0, 13], "air_permits.backup_generators": [9, 10], "air_permits.potential_emissions_tpy": [9], "air_permits.modeling": [9]},
    "sources": [
     {"kind": "primary", "date": "2026-09-29", "title": "WV DEP: public comment period for Monarch Cloud Campus (R14-0042, SWP-26-0002/0003)", "url": "https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx"},
     {"kind": "primary", "date": "2026-09-03", "title": "Governor: more than $81 billion new investment (Monarch and Tamarack certifications)", "url": "https://governor.wv.gov/article/governor-morrisey-announces-more-81-billion-new-investment-west-virginia-business-summit"},
@@ -61,7 +63,12 @@
     {"kind": "news", "date": "2026-06-03", "title": "Herald-Dispatch: new permits eyed for Mason Co. data center-tied project", "url": "https://herald-dispatch.com/news/new-permits-eyed-for-mason-co-data-center-tied-project-after-eight-figure-wv-support/article_4cf595a0-abef-4dac-8117-4ef159ca8a81.html"},
     {"kind": "news", "date": "2026-01-31", "title": "WSAZ: Fidelis data center proceeding with plans", "url": "https://www.wsaz.com/2026/01/31/fidelis-data-center-proceeding-with-plans-build/"},
     {"kind": "news", "date": "2026-09-05", "title": "HuffPost: Mason County data center neighbors", "url": "https://www.huffpost.com/entry/data-center-mason-countywest-virginia_n_6a99d6eee4b0e51a2d921dcf"},
-    {"kind": "news", "date": "2026-08-27", "title": "WDTV: data center lands reported $45 billion AI agreement", "url": "https://www.wdtv.com/2026/08/27/west-virginia-data-center-lands-reported-45-billion-ai-agreement-morrisey-says/"}
+    {"kind": "news", "date": "2026-08-27", "title": "WDTV: data center lands reported $45 billion AI agreement", "url": "https://www.wdtv.com/2026/08/27/west-virginia-data-center-lands-reported-45-billion-ai-agreement-morrisey-says/"},
+    {"kind": "primary", "date": "2026-09-28", "title": "WV DEP DAQ: preliminary determination / fact sheet, R14-0042", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/PRELIMINARY_DETERMINATION_EVALUATION_R14-0042.pdf"},
+    {"kind": "primary", "date": "undated draft", "title": "WV DEP DAQ: draft permit R14-0042", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/DAQs_Draft_PERMIT_R14-0042.pdf"},
+    {"kind": "primary", "date": "2026-09-15", "title": "R14-0042 permit application, Point Pleasant Campus", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/09_16_2026_MCC_Point_Pleasant_Campus_45CSR14_Permit_App_with_TOC.pdf"},
+    {"kind": "primary", "date": "2026-06-26", "title": "SWP-26-0003 application, Data Center #3", "url": "https://apps.dep.wv.gov/Documents/PIO/Draft-Permits-Applications/SWP-26-0003-file0001.pdf"},
+    {"kind": "primary", "date": "2026-09-28", "title": "WV DEP DAQ: notice of intent to issue R14-0042 (states 2026-10-30)", "url": "https://apps.dep.wv.gov/Documents/DAQ/NSRPermits/053-00136/Draft/Monarch%20DAQ%20Notice%20-%20TF%20Version.pdf"}
    ]
   },
   {
@@ -91,6 +98,7 @@
     {"category": "unknown", "confidence": "high", "evidence": "No tenant or workload named; Starwood did not answer questions on power or timing"}
    ],
    "not_disclosed": ["acreage and former use", "tenant", "water source and volume", "utility contract or tariff", "certification date", "permit numbers"],
+   "cite": {"water.cooling": [1], "power.mw": [0], "power.supply": [1], "noise.mitigation": [1]},
    "sources": [
     {"kind": "primary", "date": "2026-09-03", "title": "Governor: more than $81 billion new investment", "url": "https://governor.wv.gov/article/governor-morrisey-announces-more-81-billion-new-investment-west-virginia-business-summit"},
     {"kind": "company", "date": "2026", "title": "Project Tamarack", "url": "https://projecttamarack.com"},
@@ -141,6 +149,7 @@
     {"category": "generative_ai", "confidence": "low", "evidence": "Company website: designed to support 'artificial intelligence, cloud computing, and enterprise systems'"}
    ],
    "not_disclosed": ["turbine count, model and MW", "control equipment vendor", "owners of the manager LLCs and investors", "tenant or offtaker", "water volumes and cooling design", "grid interconnection and utility", "noise and lighting specifications", "construction start (application: 2027-2028, 'subject to change')"],
+   "cite": {"power.utility": [1], "air_permits.backup_generators": [0], "noise.local_rules": [6], "use.1": [8]},
    "sources": [
     {"kind": "primary", "date": "2025-08-15", "title": "WV DEP permit R13-3713 (Fundamental Data, Ridgeline Facility)", "url": "https://www.wboy.com/wp-content/uploads/sites/43/2025/08/WVDEP-Construction-Permit-1.pdf"},
     {"kind": "primary", "date": "2025-03-18", "title": "R13-3713 application (redacted copy)", "url": "https://dep.wv.gov/daq/permitting/Documents/Fundamental%20Data%20LLC;%20Ridgeline%20Facility/093-00034_APPL_13-3713.pdf"},
@@ -268,6 +277,7 @@
     {"category": "generative_ai", "confidence": "low", "evidence": "Same state framing; no tenant or workload disclosed"}
    ],
    "not_disclosed": ["tenant", "water volume and cooling design", "backup generators", "electric service agreement"],
+   "cite": {"water.cooling": [4], "water.permits": [4], "power.mw": [0], "power.supply": [0], "use.0": [0], "use.1": [0]},
    "sources": [
     {"kind": "primary", "date": "2026-02-26", "title": "Governor: $4 billion private investment, West Virginia's first high impact data center", "url": "https://governor.wv.gov/article/governor-morrisey-announces-4-billion-private-investment-west-virginias-first-high-impact"},
     {"kind": "news", "date": "2026-02-28", "title": "Gazette-Mail: questions unanswered after Penzance data center announced", "url": "https://www.wvgazettemail.com/news/energy_and_environment/public-comments-unheeded-questions-unanswered-after-penzance-data-center-announced/article_286784d2-28b9-40c7-a732-9b208ca703da.html"},
@@ -309,6 +319,7 @@
     {"category": "generative_ai", "confidence": "low", "evidence": "Same; no workload disclosed"}
    ],
    "not_disclosed": ["MW", "water source and volume (the '120%' figure is Google's company-wide replenishment goal, not a site commitment)", "cooling design", "backup generators", "building count (3 x ~300k sq ft per one trade report)"],
+   "cite": {"power.supply": [0], "noise.local_rules": [4]},
    "sources": [
     {"kind": "company", "date": "2026", "title": "Google: Buffalo WV data center", "url": "https://buffalowvdatacenter.com"},
     {"kind": "news", "date": "2026-03-27", "title": "WV MetroNews: Google announces plans for data center in Buffalo", "url": "https://wvmetronews.com/2026/03/27/google-announces-plans-for-data-center-in-buffalo-w-va/"},
@@ -363,6 +374,7 @@
    "noise": {"local_rules": "county zoning applies", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "unknown", "confidence": "high", "evidence": "No tenant or workload reported"}],
    "not_disclosed": ["MW", "tenant", "water", "generators"],
+   "cite": {"water.source": [0], "noise.local_rules": [0], "use.0": [0]},
    "sources": [
     {"kind": "tracker", "date": "2026-04-30", "title": "nearbydatacenters (citing The Observer)", "url": "https://nearbydatacenters.org/"}
    ]
@@ -386,6 +398,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "unknown", "confidence": "high", "evidence": "No end user"}],
    "not_disclosed": ["developer/tenant", "schedule", "water volume"],
+   "cite": {"water.source": [0], "water.cooling": [0], "power.mw": [0], "power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2026-05-09", "title": "WDTV: Marion County company studies data center on 300-acre property", "url": "https://www.wdtv.com/2026/05/09/marion-county-company-studies-data-center-development-300-acre-property"}
    ]
@@ -411,6 +424,7 @@
     {"category": "unknown", "confidence": "medium", "evidence": "No workload named; founder also founded Hiveon (bitcoin-mining software), which is not evidence of crypto use here"}
    ],
    "not_disclosed": ["what will be built", "tenant", "water"],
+   "cite": {"power.mw": [0], "power.supply": [0], "power.utility": [0], "noise.local_rules": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2026-06", "title": "Weirton Daily Times: Warwood site eyed for 100-megawatt data center campus", "url": "https://www.weirtondailytimes.com/news/local-news/2026/06/from-foundry-to-future-warwood-site-eyed-for-100-megawatt-data-center-campus/"}
    ]
@@ -458,6 +472,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "SEC filing describes bitcoin-mining hosting (company says it is moving toward AI)"}],
    "not_disclosed": ["exact site", "cooling", "start date"],
+   "cite": {"power.supply": [0], "power.utility": [0], "air_permits.backup_generators": [0], "use.0": [0]},
    "sources": [
     {"kind": "primary", "date": "2026-10-26", "title": "Bitari Inc. S-1/A (Amendment 4), SEC", "url": "https://www.sec.gov/Archives/edgar/data/0002091680/000118518526004983/bitaris1a4102526.htm"}
    ]
@@ -481,6 +496,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining by WBOY and the Dominion Post; tax appeals on crypto-mining equipment"}],
    "not_disclosed": ["per-site MW", "utility and contract", "start date", "hosted clients"],
+   "cite": {"use.0": [0, 1]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers set up shop in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"},
     {"kind": "news", "date": "2026-03-11", "title": "Dominion Post: commission approves tax exoneration for bitcoin mining site", "url": "https://www.dominionpost.com/2026/03/11/commission-approves-sizable-tax-exoneration-for-bitcoin-mining-site/"},
@@ -506,6 +522,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY, Dominion Post)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]
@@ -529,6 +546,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
+   "cite": {"use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"},
     {"kind": "news", "date": "2025-10-22", "title": "Bloomberg Tax: WV Tax Appeals reverses property tax ruling on cryptocurrency mining", "url": "https://news.bgov.com/crypto/west-virginia-tax-appeals-reverses-property-tax-ruling-on-cryptocurrency-mining"}
@@ -553,6 +571,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]
@@ -576,6 +595,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Reported as bitcoin mining (WBOY)"}],
    "not_disclosed": ["per-site MW", "utility", "start date"],
+   "cite": {"water.source": [0], "water.cooling": [0], "power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-12-04", "title": "WBOY via Yahoo: bitcoin mining data centers in abandoned WV coal mines", "url": "https://finance.yahoo.com/news/bitcoin-mining-data-centers-set-231322625.html"}
    ]
@@ -599,6 +619,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "medium", "evidence": "Mining containers photographed; earlier crypto plan before the PSC; billing records cited by the Times West Virginian"}],
    "not_disclosed": ["whether mining is active", "MW", "cooling"],
+   "cite": {"use.0": [0, 1]},
    "sources": [
     {"kind": "news", "date": "2026-04-16", "title": "Times West Virginian: Grant Town power plant believed to be mining cryptocurrency", "url": "https://www.timeswv.com/news/local_news/grant-town-power-plant-believed-to-be-mining-cryptocurrency-in-marion-county/article_a13502ed-4c9e-4589-8608-383e7b9d8bc3.html"},
     {"kind": "news", "date": "2022-01-05", "title": "E&E News: cryptocurrency plan fails for coal plant", "url": "https://www.eenews.net/articles/cryptocurrency-plan-fails-for-manchin-connected-coal-plant/"}
@@ -623,6 +644,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "high", "evidence": "Announced as a bitcoin mining facility"}],
    "not_disclosed": ["current status"],
+   "cite": {"water.cooling": [2]},
    "sources": [
     {"kind": "news", "date": "2022-05", "title": "WCHS: bitcoin mining leader to build facility at former Hobet site", "url": "https://wchstv.com/news/local/bitcoin-mining-leader-to-build-facility-as-extension-of-former-hobet-site-project"},
     {"kind": "company", "date": "2022-05-25", "title": "PR Newswire: SEVA announces bitcoin mining partnership for SunPark", "url": "https://www.prnewswire.com/news-releases/seva-announces-bitcoin-mining-partnership-to-help-advance-the-development-of-sunpark-301556092.html"},
@@ -675,6 +697,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "crypto_mining", "confidence": "low", "evidence": "Announced as a bitcoin mining farm; existence unconfirmed"}],
    "not_disclosed": ["location", "MW", "status"],
+   "cite": {"use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2021-02-23", "title": "AiThority: BOTS Inc. moves toward new bitcoin mining facility in West Virginia", "url": "https://aithority.com/bs-mining/bots-inc-moves-forward-towards-new-bitcoin-mining-facility-in-west-virginia/"}
    ]
@@ -698,6 +721,7 @@
    "noise": {"local_rules": "county zoning", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "unknown", "confidence": "high", "evidence": "No end user reported"}],
    "not_disclosed": ["developer's end user", "MW"],
+   "cite": {"noise.local_rules": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2024-01", "title": "DCD: Raleigh County suspends data center proposal indefinitely", "url": "https://www.datacenterdynamics.com/en/news/west-virginias-raleigh-county-suspends-data-center-proposal-indefinitely/"}
    ]
@@ -721,6 +745,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "government_or_surveillance", "confidence": "medium", "evidence": "Federal research lab computing; tracker listing only"}],
    "not_disclosed": ["size", "schedule"],
+   "cite": {"use.0": [0]},
    "sources": [
     {"kind": "tracker", "date": "2026", "title": "Cleanview: NETL Computational Science & Engineering Center", "url": "https://cleanview.co/data-centers/west-virginia/2195/netl-computational-science--engineering-center"}
    ]
@@ -744,6 +769,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "government_or_surveillance", "confidence": "high", "evidence": "Hosts national criminal-justice databases and biometric identification systems"}],
    "not_disclosed": ["MW", "water", "generator count"],
+   "cite": {"power.supply": [0], "air_permits.backup_generators": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2008-07", "title": "Route Fifty: the FBI's expanding data center", "url": "https://www.route-fifty.com/digital-government/2008/07/the-fbis-expanding-data-center/279755/"}
    ]
@@ -767,6 +793,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "government_or_surveillance", "confidence": "high", "evidence": "Federal tax-records processing (IRS Master File)"}],
    "not_disclosed": ["MW", "water", "generators"],
+   "cite": {"power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "news", "date": "2025-03-06", "title": "The Intercept: IRS Martinsburg", "url": "https://theintercept.com/2025/03/06/trump-irs-taxes-martinsburg/"}
    ]
@@ -814,6 +841,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "government_or_surveillance", "confidence": "high", "evidence": "NASA mission software verification"}],
    "not_disclosed": ["MW"],
+   "cite": {"use.0": [1]},
    "sources": [
     {"kind": "primary", "date": "2014", "title": "NASA OIG IG-14-024 (IV&V facility operations and WVU Research Corp. ownership)", "url": "https://www.oversight.gov/sites/default/files/oig-reports/IG-14-024.pdf"},
     {"kind": "primary", "date": "2026", "title": "NASA: Katherine Johnson IV&V Facility", "url": "https://www.nasa.gov/centers-and-facilities/ivv/"}
@@ -838,6 +866,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "government_or_surveillance", "confidence": "high", "evidence": "State agency IT"}],
    "not_disclosed": ["MW"],
+   "cite": {"power.supply": [0], "use.0": [0]},
    "sources": [
     {"kind": "tracker", "date": "undated", "title": "ConstructConnect: state bid notice, electrical work for WVOT data centers (Charleston and Sutton)", "url": "https://projects.constructconnect.com/details/5649491-electrical-work-for-data-centers&find_loc=west-virginia-25301"}
    ]
@@ -861,6 +890,7 @@
    "noise": {"local_rules": "none found", "complaints": "none found", "measurements": "none found", "mitigation": "not disclosed"},
    "use": [{"category": "enterprise", "confidence": "high", "evidence": "Regulated gaming hosting"}],
    "not_disclosed": ["MW"],
+   "cite": {"power.mw": [2]},
    "sources": [
     {"kind": "news", "date": "2024-02-26", "title": "SBC Americas: Continent 8 second West Virginia site", "url": "https://sbcamericas.com/2024/02/26/continent-8-second-west-virginia-site/"},
     {"kind": "tracker", "date": "2026", "title": "Data Center Map: Continent 8 West Virginia DC2", "url": "https://www.datacentermap.com/usa/west-virginia/petersburg/continent-8-west-virginia-dc2"},
@@ -889,6 +919,7 @@
     {"category": "storage", "confidence": "low", "evidence": "Backup and hosting services are typical; not verified per site"}
    ],
    "not_disclosed": ["MW", "water", "generators"],
+   "cite": {"power.mw": [1]},
    "sources": [
     {"kind": "tracker", "date": "2026", "title": "Data Center Map: West Virginia", "url": "https://datacentermap.com/usa/west-virginia"},
     {"kind": "tracker", "date": "2026", "title": "Data Center Map: Citynet Bridgeport (100 Platinum Dr)", "url": "https://www.datacentermap.com/usa/west-virginia/bridgeport-wv/citynet-bridgeport/"}
@@ -896,7 +927,7 @@
   }
  ],
  "dockets": [
-  {"id": "24-0611-E-T-PW", "agency": "WV PSC", "title": "Appalachian Power / Wheeling Power large-load tariff (data centers)", "detail": "Filed 2024-07-18; APCo said large loads could add 8,000 MW. Stipulation 2025-01-22 with Google: 100 MW per site (150 MW aggregate), 12-year minimum term, 80% minimum demand. Reportedly approved March 2025 (order not found).", "url": "https://wvpublic.org/data-center-deal-struck-between-appalachian-power-google/"},
+  {"id": "24-0611-E-T-PW", "agency": "WV PSC", "title": "Appalachian Power / Wheeling Power large-load tariff (data centers)", "detail": "Filed 2024-07-18; APCo said large loads could add 8,000 MW. Stipulation 2025-01-22 with Google: 100 MW per site (150 MW aggregate), 12-year minimum term, 80% minimum demand. Commission order entered 2025-03-25 accepted the stipulation; the docket still lists the case as active.", "url": "http://www.psc.state.wv.us/Scripts/WebDocket/ViewDocument.cfm?CaseActivityID=638931&NotType=WebDocket"},
   {"id": "26-0108-E-CN", "agency": "WV PSC", "title": "Mon Power / Potomac Edison 1,200 MW gas plant at Fort Martin, Maidsville", "detail": "Filed 2026-02-13 (~$2.48B). PSC staff called prospective data center load 'the primary reason' for projected growth; Mon Power's president testified it is in talks with 3 unnamed data center developers. Hearing July 2026; decision expected ~March 2027.", "url": "https://wvmetronews.com/2026/07/16/mon-power-president-says-data-centers-will-end-up-paying-for-natural-gas-powered-power-plant/"},
   {"id": "26-0633-E-GI", "agency": "WV PSC", "title": "General investigation: HB 2014 power rules for data centers and microgrids", "detail": "Modified rules approved mid-October 2026 (69% coal capacity factor became a goal); next to the Legislative Rule-Making Review Committee and the 2027 session.", "url": "https://wvpublic.org/story/energy-environment/psc-files-proposed-data-center-power-rule/amp/"},
   {"id": "21-0658-E-ENEC", "agency": "WV PSC", "title": "Grant Town (AMBIT) contract buyout to become a crypto mine", "detail": "Rejected December 2021.", "url": "https://www.eenews.net/articles/cryptocurrency-plan-fails-for-manchin-connected-coal-plant/"},

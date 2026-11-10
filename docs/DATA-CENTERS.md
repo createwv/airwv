@@ -15,6 +15,13 @@ what it's for: what we know / what's not disclosed, with sources, and where to a
 `?view=adv` for the full record, its filings and the statewide dockets. **Near me** shows
 the same card for sites within 10 miles (or the chosen radius, if larger) and for sites in
 the nearest county that have no public coordinates, and puts mapped ones on its map.
+**My place** (`/place`) adds a "Data centers" status line and the same cards for the same
+sites; with `view=adv` it shows each one's full record and filings, plus the statewide
+dockets (`/api/data-centers?full=true` carries the record; `static/dc.js` renders both).
+An air-permit comment period written into `air_permits.permits` as "comments to YYYY-MM-DD"
+shows at the top of the card and the full record (permit, due date, link to the DEP notice
+among the site's primary sources) until the day after the deadline (`comment_periods` in
+the API row).
 API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 
 **How to read the values**
@@ -28,6 +35,54 @@ API: `/api/data-centers[?lat=&lon=&km=]`; `/api/query?kind=data_center`.
 - **Use** labels (generative AI / cloud / crypto mining / storage / government or
   surveillance / enterprise / unknown) are our read of the evidence, with a confidence. They
   aren't findings. A site can have more than one.
+- **Per-fact sources** (`cite`): a map from a field (`"water.permits"`, `"power.mw"`,
+  `"use.0"`) to indexes (0-based) into that site's `sources`. The card shows them as
+  numbered links (`[1]`) after the line, matching the numbered source list. A key is added
+  only where the record itself ties the fact to one source: a permit number in the source's
+  title, an attribution tag ("DEP notice", "state release", "company", "SEC filing", "a
+  tracker") with one source of that kind, or a site with a single source. Lines without a
+  key fall back to the site's source list. A line that mixes facts from several sources
+  (e.g. a DEP figure plus a news or tracker figure) gets no key unless every source behind
+  it is in the list, even on a single-source site. Bare "not disclosed" / "none found" lines get no
+  key. `tests/test_data_centers.py` checks every key names a real fact and source.
+
+---
+
+## Watch list: open comment periods and hearings
+
+**Last checked: 2026-11-07**, against the DEP notices and dockets already cited in the data
+file. Dates are as the notice states them. Agencies can extend a deadline or add a hearing, so
+check the notice before you rely on a date.
+
+**Open now**
+
+| Date | What | Site | How to take part | Source |
+|---|---|---|---|---|
+| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. Email daqpubliccomments@wv.gov (subject "Monarch Comments") or mail Edward Andrews, P.E., DAQ, by 5 p.m. DEP's live pages say Nov 13; its posted notice PDF still says Oct 30, and we found no extension notice. Hearings were Oct 20 and 29; state waters permits SWP-26-0002/0003 closed Oct 26 | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
+
+**Other dates to watch** (not comment periods)
+
+| Date | What | Site | Source |
+|---|---|---|---|
+| 2026-11-15 | Listed start date for 148 acres of grading under stormwater permit WVR113565 | Bedington, Berkeley | the site's sources in the data file |
+| ~March 2027 | PSC decision expected on 26-0108-E-CN (Mon Power 1,200 MW gas plant at Fort Martin); the hearing was July 2026 | statewide | [docket entry](#energy-the-psc-dockets) |
+| 2027 session | PSC's HB 2014 power rules (26-0633-E-GI) go to the Legislative Rule-Making Review Committee, then the Legislature | statewide | [docket entry](#energy-the-psc-dockets) |
+| no date found | Ridgeline permit opponents say they'll go to the WV Supreme Court after the 2026-08-26 dismissals | Ridgeline, Tucker | WV Highlands Conservancy, 2026-08-28 |
+
+**Recently closed:** Adams Fork R13-3714/R13-3715 (DEP public meeting August 2025; permits
+issued 2025-10-02 after 119 comments). Ridgeline R13-3713 (issued 2025-08-15; upheld by the
+Air Quality Board 2026-02-05).
+
+**How to refresh it:** check DEP's DAQ permit applications and notices page
+(<https://dep.wv.gov/daq/permitting/Pages/NSR-Permit-Applications.aspx>), DEP news
+(<https://dep.wv.gov/news/>) and events (<https://dep.wv.gov/events/>) for any permit
+number or operator on this page, plus the Air Quality Board and PSC links under *Where to look
+next*. Add each new comment period or hearing with its notice date and link (and the notice to
+that site's `sources`), move past dates to *Recently closed*, and update *Last checked*.
+`tests/test_data_centers.py` fails if a comment deadline in the data file is missing here.
+To put a new deadline on the site's cards too, write it into that permit's
+`air_permits.permits` text as "comments to YYYY-MM-DD" and cite the notice (with the permit
+number in its title) as a primary source.
 
 ---
 
@@ -150,7 +205,7 @@ sometimes cited as West Virginia is actually about Limestone, Tennessee.
 
 | Docket | What | Status |
 |---|---|---|
-| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | reportedly approved March 2025 (order not found) |
+| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | order entered 2025-03-25 accepted the stipulation; docket still listed active |
 | 26-0108-E-CN | Mon Power 1,200 MW gas plant at Fort Martin. PSC staff call data center load "the primary reason" for it | decision expected ~March 2027 |
 | 26-0633-E-GI | PSC rules for HB 2014 power (the 69% coal capacity factor is now a goal) | to Legislature 2027 |
 | 21-0658-E-ENEC | Grant Town plan to become a 95.7 MW crypto mine | rejected 2021 |
@@ -203,7 +258,11 @@ data center developers.
   Application Enhancer or by records request. AQB stopped posting appeal documents on
   2026-04-24; later ones come from the Board's clerk.
 - WV DEP NPDES/stormwater permit search.
-- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
+- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names). Searched 2026-11-09 for
+  Nscale, Fidelis, Monarch and microgrid in case names and descriptions: the only match for this site is
+  26-0831-MC-CC, a permit to bus construction workers to it. The other operators aren't searched yet.
+- R14-0042's record disagrees with itself on PM: 49.25 TPY (notice), 21.68 (fact sheet text), 21.54 (fact
+  sheet Table 5); engine filterable PM is 0.01 lb/hr (fact sheet) and 0.005 lb/hr (draft permit).
 - WV Air Quality Board appeals: <https://aqb.wv.gov/>.
 - Commerce Data Economy Office: <https://westvirginia.gov/datacenters/>.
 

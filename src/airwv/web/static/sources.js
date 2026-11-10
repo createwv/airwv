@@ -104,7 +104,7 @@ function phStyle(cat) {
   return `background:linear-gradient(135deg,${c.color}22,${c.color}44)`;
 }
 function phInner(icon) {
-  return `<span class="ph-ic">${icon}</span><span class="ph-cap">📷 photo coming soon</span>`;
+  return `<span class="ph-ic">${icon}</span>`;
 }
 function thumb(s, w, h, cls) {
   const c = CAT[s.category] || CAT.other;
@@ -154,10 +154,18 @@ function renderGrid() {
   const rows = SOURCES.filter(s => s.lat != null
     && (!cat || s.category === cat || (s.categories || []).includes(cat))
     && (!q || (s.name + ' ' + (s.operator || '') + ' ' + (s.type || '') + ' ' + (s.names || []).join(' ')).toLowerCase().includes(q)));
-  $('src-count').textContent = `${rows.length} facilit${rows.length === 1 ? 'y' : 'ies'}`;
-  $('src-grid').innerHTML = rows.map(s => card(s, SOURCES.indexOf(s))).join('')
+  const shown = rows.slice(0, gridLimit);
+  $('src-count').textContent = rows.length > shown.length
+    ? `showing ${shown.length} of ${rows.length} facilities`
+    : `${rows.length} facilit${rows.length === 1 ? 'y' : 'ies'}`;
+  $('src-grid').innerHTML = shown.map(s => card(s, SOURCES.indexOf(s))).join('')
     || '<p class="meta" style="padding:14px">No matches.</p>';
+  $('src-more').hidden = rows.length <= shown.length;
 }
+// render the grid a page at a time (all ~500 cards at once made a very long, slow page)
+const GRID_PAGE = 24;
+let gridLimit = GRID_PAGE;
+function resetGrid() { gridLimit = GRID_PAGE; renderGrid(); }
 
 function renderFacilities() {
   const st = $('fac-status').value, pg = $('fac-program').value;
@@ -410,18 +418,15 @@ async function init() {
   $('mine-type').addEventListener('change', renderMines);
   $('coal-min').addEventListener('change', renderCoal);
   $('coal-impaired').addEventListener('change', renderCoal);
-  if (!SV_KEY) {
-    $('src-count').insertAdjacentHTML('afterend',
-      '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');
-  }
 
   // interactions (event delegation for cards in both carousel and grid)
   document.body.addEventListener('click', e => {
     const b = e.target.closest('.srccard');
     if (b) openDetail(SOURCES[+b.dataset.i]);
   });
-  $('src-q').addEventListener('input', renderGrid);
-  $('src-cat').addEventListener('change', renderGrid);
+  $('src-q').addEventListener('input', resetGrid);
+  $('src-cat').addEventListener('change', resetGrid);
+  $('src-more').addEventListener('click', () => { gridLimit += GRID_PAGE; renderGrid(); });
   // deep link from the Events page: /sources#facility=<name> opens that facility
   const want = decodeURIComponent((location.hash.match(/facility=([^&]+)/) || [])[1] || '');
   // match the canonical name OR any of the merged variant names (Events may link an old name)

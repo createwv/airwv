@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <div class="ov-intro"><h1>{{ site.name or site.ref }}</h1>
+    <p><span class="rbadge">Permit</span> <b>{{ what[0] }}</b>{% if a.operator %} · {{ a.operator }}{% endif %}<br>
+      <span class="meta">{% if site.county %}{{ site.county }} County · {% endif %}{% if site.lat is not none %}{{ '%.4f' % site.lat }}, {{ '%.4f' % site.lon }}{% else %}location not listed{% endif %}
+      · Permit {{ site.ref }}</span></p>
+    <p class="meta">
+      {% if view == 'adv' %}<a href="?view=basic">← Plain summary</a> · Full record
+      {% else %}Plain summary · <a href="?view=adv">Full record →</a>{% endif %}
+      · <a href="/data">Where this comes from</a></p>
+  </div>
+
+  {% if view != 'adv' %}
+  <div class="card"><h2>Permit stage</h2>
+    <p style="padding:8px 14px 0">
+    {% if site.layer == 'coal_npdes' %}<b>Active discharge permit</b> on WV DEP's coal NPDES list:
+      {{ a.outlets }} outlet{{ '' if a.outlets == 1 else 's' }} to {{ a.stream_count }} stream{{ '' if a.stream_count == 1 else 's' }}.
+    {% elif stage %}<b>{{ stage }}</b>{% if stage_rec and stage_rec.value %} — WV DEP lists it as "{{ stage_rec.value }}"{% endif %}.
+    {% elif stage_rec %}<b>{{ stage_rec.value }}</b> (WV DEP's status).
+    {% else %}No stage listed.{% endif %}</p>
+    <p class="meta" style="padding:4px 14px 12px">
+      {% if a.type %}{{ a.type }}. {% endif %}{% if a.well_type %}{{ a.well_type }} well{% if a.formation %}, {{ a.formation }} formation{% endif %}. {% endif %}
+      {% if a.received_date %}Application received {{ a.received_date }}. {% endif %}
+      {% if a.issue_date %}Issued {{ a.issue_date }}. {% endif %}{% if a.expire_date %}Expires {{ a.expire_date }}. {% endif %}
+      {% if a.acres_disturbed is defined and a.acres_disturbed is not none %}{{ a.acres_disturbed }} acres disturbed{% if a.acres_reclaimed is not none %}, {{ a.acres_reclaimed }} reclaimed{% endif %}. {% endif %}
+      {% if site.url %}<a href="{{ site.url }}" target="_blank" rel="noopener">The agency's record →</a>{% endif %}</p>
+  </div>
+
+  <div class="card"><h2>Impaired streams (303(d) list)</h2>
+    {% if site.layer != 'coal_npdes' %}
+    <p class="meta" style="padding:8px 14px 12px">We only check coal discharge permits against WV's 303(d) list of impaired streams, so there is no 303(d) record for this permit.</p>
+    {% elif impaired %}
+    <p style="padding:8px 14px 0">A discharge outlet is within about 800 m of a stream on WV's 2016 303(d) list, impaired for:
+      <b>{{ impaired.value or 'causes not listed' }}</b>.</p>
+    {% if a.impaired_streams %}<p class="meta" style="padding:4px 14px 0">Listed streams: {{ a.impaired_streams | join(', ') }}.</p>{% endif %}
+    <p class="meta" style="padding:4px 14px 12px">This flags where to look; it does not mean this permit caused the impairment.
+      {% if a.effluent_url %}<a href="{{ a.effluent_url }}" target="_blank" rel="noopener">Measured discharge (EPA ECHO effluent charts) →</a>{% endif %}</p>
+    {% else %}
+    <p class="meta" style="padding:8px 14px 12px">No outlet of this permit is within about 800 m of a stream on WV's 2016 303(d) list.
+      {% if a.effluent_url %}<a href="{{ a.effluent_url }}" target="_blank" rel="noopener">Measured discharge (EPA ECHO effluent charts) →</a>{% endif %}</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="card"><h2>Full record</h2>
+    <table class="dc-rec">
+      <tr><th>What it is</th><td>{{ what[0] }}</td></tr>
+      {% for k, v in a.items() if k not in ('lat', 'lon') %}
+      <tr><th>{{ k.replace('_', ' ') }}</th><td>{% if v is sameas true %}yes{% elif v is sameas false %}no{% elif v is none %}—{% elif v is string or v is number %}{{ v }}{% else %}{{ v | join(', ') }}{% endif %}</td></tr>
+      {% endfor %}
+      <tr><th>Location</th><td>{% if site.lat is not none %}{{ site.lat }}, {{ site.lon }}{% else %}not listed{% endif %}</td></tr>
+    </table>
+  </div>
+  <div class="card"><h2>Records</h2>
+    {% if records %}
+    <table class="dc-rec">
+      {% for r in records %}
+      <tr><th>{{ 'Permit stage' if r.kind == 'permit_stage' else 'Impaired stream (303(d)) causes' if r.kind == 'impaired_303d' else r.kind }}</th>
+        <td>{{ r.value or '—' }}{% if r.effective %} · effective {{ r.effective }}{% endif %} · as of {{ r.as_of }}
+          {% if r.url %}· <a href="{{ r.url }}" target="_blank" rel="noopener">data source</a>{% endif %}</td></tr>
+      {% endfor %}
+    </table>
+    {% else %}<p class="meta" style="padding:8px 14px 12px">No records for this permit.</p>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card"><p class="meta" style="padding:10px 14px">Data source: {{ what[1] }}{% if prov.source %} ({{ prov.source }}){% endif %}.
+    {% if prov.fetched_at %}Listing as of {{ prov.fetched_at }}.{% endif %}
+    {% if prov.disclaimer %}<br>{{ prov.disclaimer }}{% endif %}
+    <br>Raw listing: <a href="{{ what[2] }}">{{ what[2] }}</a> · <a href="/data">all data sources</a></p></div>
+</div>
+{% endblock %}

@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict
+from datetime import datetime, timezone
 from typing import Iterable
 
 from sqlalchemy import and_, create_engine, func, insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from airwv.config import Config
@@ -25,6 +27,7 @@ from airwv.storage.models import (
     Feedback,
     FieldReading,
     ReadingRow,
+    ReadingSite,
     Report,
     Subscription,
     WaterReading,
@@ -33,14 +36,6 @@ from airwv.storage.models import (
 from airwv.validate import validate_reading
 
 log = logging.getLogger("airwv.storage")
-
-
-def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    import math
-    dp, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
-    h = (math.sin(dp / 2) ** 2
-         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dl / 2) ** 2)
-    return 2 * 3959 * math.asin(math.sqrt(h))
 
 
 # Columns that come straight from a Reading (everything except bookkeeping).
@@ -70,6 +65,11 @@ _READING_FIELDS = (
     "count_10_0",
     "raw",
 )
+
+
+def _ts_key(t: datetime) -> datetime:
+    """Comparable form of a reading ts: naive UTC (SQLite hands back naive datetimes)."""
+    return t.astimezone(timezone.utc).replace(tzinfo=None) if t.tzinfo else t
 
 
 class Store:
@@ -102,6 +102,7 @@ class Store:
         """
         Base.metadata.create_all(self._engine)
         self._ensure_columns()
+        self._backfill_reading_sites()
 
     def _ensure_columns(self) -> None:
         """Idempotent, additive column back-fill for tables that predate a new field.
@@ -117,6 +118,7 @@ class Store:
             "reports": {"contact_name": "VARCHAR(160)"},
             "subscriptions": {"center_lat": "FLOAT", "center_lon": "FLOAT", "radius_km": "FLOAT",
                               "records_checked_at": "TIMESTAMP"},
+            "alert_seen": {"last_present_at": "TIMESTAMP", "origin": "VARCHAR(16)"},
         }
         insp = _inspect(self._engine)
         with self._engine.begin() as conn:
@@ -155,10 +157,84 @@ class Store:
                     result = session.execute(self._upsert_stmt(rows[i:i + batch]))
                     written += result.rowcount
                 session.commit()
-            return written
+        else:
+            # Portable fallback for dialects without native upsert: check-then-write.
+            written = self._save_readings_fallback(rows)
+        self._update_reading_sites(rows)
+        return written
 
-        # Portable fallback for dialects without native upsert: check-then-write.
-        return self._save_readings_fallback(rows)
+    def _update_reading_sites(self, rows: list[dict]) -> None:
+        """Fold a batch of reading rows into ``reading_sites`` (one row per sensor):
+        widen its first/last ts, and move it to the coords of its latest located reading."""
+        seen: dict[tuple, dict] = {}
+        for row in rows:
+            key, ts = (row["source"], row["sensor_id"]), row["ts"]
+            s = seen.setdefault(key, {"first_ts": ts, "last_ts": ts, "located_ts": None})
+            if _ts_key(ts) < _ts_key(s["first_ts"]):
+                s["first_ts"] = ts
+            if _ts_key(ts) > _ts_key(s["last_ts"]):
+                s["last_ts"] = ts
+            if row.get("lat") is not None and row.get("lon") is not None and (
+                    s["located_ts"] is None or _ts_key(ts) >= _ts_key(s["located_ts"])):
+                s.update(lat=row["lat"], lon=row["lon"], located_ts=ts)
+        try:
+            self._merge_reading_sites(seen)
+        except IntegrityError:
+            # another writer added one of these sensors meanwhile: merge into its row
+            self._merge_reading_sites(seen)
+
+    def _merge_reading_sites(self, seen: dict[tuple, dict]) -> None:
+        with self._session_factory() as session:
+            for (source, sensor_id), s in seen.items():
+                site = session.get(ReadingSite, (source, sensor_id))
+                if site is None:
+                    session.add(ReadingSite(source=source, sensor_id=sensor_id, **s))
+                    continue
+                if _ts_key(s["first_ts"]) < _ts_key(site.first_ts):
+                    site.first_ts = s["first_ts"]
+                if _ts_key(s["last_ts"]) > _ts_key(site.last_ts):
+                    site.last_ts = s["last_ts"]
+                if s["located_ts"] is not None and (
+                        site.located_ts is None or _ts_key(s["located_ts"]) >= _ts_key(site.located_ts)):
+                    site.lat, site.lon, site.located_ts = s["lat"], s["lon"], s["located_ts"]
+            session.commit()
+
+    def name_reading_sites(self, source: str, names: dict[str, str]) -> None:
+        """Set display names on known ``reading_sites`` rows (e.g. AirNow site names)."""
+        with self._session_factory() as session:
+            for sensor_id, name in names.items():
+                site = session.get(ReadingSite, (source, sensor_id))
+                if site is not None and name:
+                    site.name = name
+            session.commit()
+
+    def _backfill_reading_sites(self) -> None:
+        """One-off fill of ``reading_sites`` for a database that has readings from
+        before the table existed (one GROUP BY, then per-sensor indexed lookups)."""
+        with self._session_factory() as session:
+            if session.scalar(select(ReadingSite.sensor_id).limit(1)) is not None:
+                return
+            spans = session.execute(
+                select(ReadingRow.source, ReadingRow.sensor_id, func.min(ReadingRow.ts),
+                       func.max(ReadingRow.ts)).group_by(ReadingRow.source, ReadingRow.sensor_id)).all()
+            for source, sensor_id, first_ts, last_ts in spans:
+                loc = session.execute(
+                    select(ReadingRow.lat, ReadingRow.lon, ReadingRow.ts).where(
+                        ReadingRow.sensor_id == sensor_id, ReadingRow.source == source,
+                        ReadingRow.lat.isnot(None), ReadingRow.lon.isnot(None))
+                    .order_by(ReadingRow.ts.desc()).limit(1)).first()
+                session.add(ReadingSite(
+                    source=source, sensor_id=sensor_id, first_ts=first_ts, last_ts=last_ts,
+                    lat=loc[0] if loc else None, lon=loc[1] if loc else None,
+                    located_ts=loc[2] if loc else None))
+            try:
+                session.commit()
+            except IntegrityError:
+                # another process (web app, a collector) back-filled at the same time
+                session.rollback()
+                return
+            if spans:
+                log.info("reading_sites: back-filled %d sensors from readings", len(spans))
 
     def count(self) -> int:
         with self._session_factory() as session:
@@ -400,13 +476,59 @@ class Store:
                 out[sid].add(key)
         return out
 
-    def mark_records_seen(self, subscription_id: int, keys, when) -> None:
-        """Remember these records for the subscription and stamp ``records_checked_at``."""
+    def records_last_present(self, subscription_ids) -> dict[int, dict]:
+        """When each record a subscription knows was last found in the data (or None)."""
+        ids = list(subscription_ids)
+        out: dict[int, dict] = {i: {} for i in ids}
+        if not ids:
+            return out
         with self._session_factory() as session:
-            have = set(session.scalars(select(AlertSeen.record_key)
-                                       .where(AlertSeen.subscription_id == subscription_id)))
-            session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when)
-                            for k in sorted(set(keys) - have))
+            for sid, key, last in session.execute(
+                    select(AlertSeen.subscription_id, AlertSeen.record_key, AlertSeen.last_present_at)
+                    .where(AlertSeen.subscription_id.in_(ids))):
+                out[sid][key] = last
+        return out
+
+    def mark_records_present(self, subscription_id: int, keys, when) -> None:
+        """Stamp known records as still listed, and ``records_checked_at`` as this check."""
+        wanted = set(keys)
+        with self._session_factory() as session:
+            for row in session.scalars(select(AlertSeen)
+                                       .where(AlertSeen.subscription_id == subscription_id)):
+                if row.record_key in wanted:
+                    row.last_present_at = when
+            sub = session.get(Subscription, subscription_id)
+            if sub is not None:
+                sub.records_checked_at = when
+            session.commit()
+
+    def record_history(self, subscription_ids) -> dict[int, list[tuple]]:
+        """Each subscription's known records as ``(record_key, origin, seen_at)``, newest first."""
+        ids = list(subscription_ids)
+        out: dict[int, list[tuple]] = {i: [] for i in ids}
+        if not ids:
+            return out
+        with self._session_factory() as session:
+            for sid, key, origin, at in session.execute(
+                    select(AlertSeen.subscription_id, AlertSeen.record_key,
+                           AlertSeen.origin, AlertSeen.seen_at)
+                    .where(AlertSeen.subscription_id.in_(ids))
+                    .order_by(AlertSeen.seen_at.desc(), AlertSeen.record_key)):
+                out[sid].append((key, origin, at))
+        return out
+
+    def mark_records_seen(self, subscription_id: int, keys, when, origin: str) -> None:
+        """Remember these records as present now and stamp ``records_checked_at``.
+        ``origin`` says how new ones became known: ``"baseline"`` or ``"alert"``."""
+        wanted = set(keys)
+        with self._session_factory() as session:
+            have = {row.record_key: row for row in session.scalars(
+                select(AlertSeen).where(AlertSeen.subscription_id == subscription_id))}
+            session.add_all(AlertSeen(subscription_id=subscription_id, record_key=k, seen_at=when,
+                                      last_present_at=when, origin=origin)
+                            for k in sorted(wanted - set(have)))
+            for k in wanted & set(have):
+                have[k].last_present_at = when
             sub = session.get(Subscription, subscription_id)
             if sub is not None:
                 sub.records_checked_at = when
@@ -751,42 +873,6 @@ class Store:
                 s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
                                             "ts": w.ts.isoformat() if w.ts else None}
             return list(sites.values())
-
-    def water_near(self, lat: float, lon: float, km: float = 5.0,
-                   limit: int = 6) -> list[dict]:
-        """Water sample sites within ``km`` of a point, each with its latest value
-        per parameter, nearest first. A cheap bounding-box query then a haversine
-        filter (used to attach measured water to a coal discharger / facility)."""
-        import math
-
-        dlat = km / 111.0
-        dlon = km / (111.0 * max(math.cos(math.radians(lat)), 0.01))
-        with self._session_factory() as session:
-            sub = (select(WaterReading.site_id, WaterReading.parameter,
-                          func.max(WaterReading.ts).label("mts"))
-                   .where(WaterReading.lat.between(lat - dlat, lat + dlat),
-                          WaterReading.lon.between(lon - dlon, lon + dlon))
-                   .group_by(WaterReading.site_id, WaterReading.parameter).subquery())
-            q = select(WaterReading).join(
-                sub, and_(WaterReading.site_id == sub.c.site_id,
-                          WaterReading.parameter == sub.c.parameter,
-                          WaterReading.ts == sub.c.mts))
-            sites: dict[str, dict] = {}
-            for w in session.scalars(q):
-                if w.lat is None or w.lon is None:
-                    continue
-                s = sites.setdefault(w.site_id, {
-                    "site_id": w.site_id, "name": w.site_name,
-                    "lat": w.lat, "lon": w.lon, "latest": {}})
-                s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
-                                            "ts": w.ts.isoformat() if w.ts else None}
-        out = []
-        for s in sites.values():
-            d = _haversine_mi(lat, lon, s["lat"], s["lon"])
-            if d <= km * 0.621371:
-                out.append({**s, "mi": round(d, 1)})
-        out.sort(key=lambda s: s["mi"])
-        return out[:limit]
 
     def water_series(self, site_id: str, parameter: str, since=None) -> list[dict]:
         with self._session_factory() as session:

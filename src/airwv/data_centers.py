@@ -3,10 +3,15 @@
 The basic view shows one card per data center: for water, energy, noise and purpose,
 "what we know" (the record's own words, which carry their attribution, e.g. "(DEP
 notice)") and "what's not disclosed", then the site's sources and how to ask for what's
-missing. Nothing here adds facts; it only sorts the file's fields. See docs/DATA-CENTERS.md.
+missing. A record's ``cite`` maps a field ("water.source", "use.0") to indexes into its
+``sources``, so a card line can link its own source; lines without a key fall back to the
+site's source list. Nothing here adds facts; it only sorts the file's fields. See docs/DATA-CENTERS.md.
 """
 
 from __future__ import annotations
+
+import re
+from datetime import date
 
 STATUS_LABEL = {
     "operating": "Operating", "under_construction": "Under construction",
@@ -53,13 +58,36 @@ HOW_TO_ASK = [
 
 _GAP_PREFIXES = ("not disclosed", "none found")
 
+# "R14-0042 (...; written comments to 2026-11-13)" in air_permits.permits; the same pattern
+# tests/test_data_centers.py checks against the watch list in docs/DATA-CENTERS.md.
+_COMMENT_DUE = re.compile(r"\b(R1\d-\d{4})\b[^)]*comments to (\d{4}-\d{2}-\d{2})")
+
 
 def is_gap(value) -> bool:
     """True when the record says nobody has made this public ("not disclosed" / "none found")."""
     return isinstance(value, str) and value.strip().lower().startswith(_GAP_PREFIXES)
 
 
-def card(dc: dict) -> dict:
+def cited(dc: dict, key: str) -> list[dict]:
+    """The sources a record's ``cite`` gives for one field, each with its 1-based number in the list."""
+    srcs = dc.get("sources") or []
+    return [{**srcs[i], "n": i + 1} for i in (dc.get("cite") or {}).get(key, []) if 0 <= i < len(srcs)]
+
+
+def comment_periods(dc: dict, today: date | None = None) -> list[dict]:
+    """Air-permit comment periods still open on ``today``: permit, due date and the
+    primary source that names the permit (the DEP notice), soonest first."""
+    today = (today or date.today()).isoformat()
+    out = []
+    for permit, due in _COMMENT_DUE.findall((dc.get("air_permits") or {}).get("permits") or ""):
+        if due < today:
+            continue
+        src = next((s for s in dc.get("sources") or [] if s.get("kind") == "primary" and permit in s.get("title", "")), None)
+        out.append({"permit": permit, "due": due, "source": src})
+    return sorted(out, key=lambda p: p["due"])
+
+
+def card(dc: dict, today: date | None = None) -> dict:
     """The basic-view summary of one data center: known / not disclosed per topic."""
     topics = []
     for topic, fields in TOPICS.items():
@@ -69,19 +97,24 @@ def card(dc: dict) -> dict:
             if not value or (isinstance(value, str) and value.strip().lower() == "not applicable"):
                 continue
             if is_gap(value):   # the bare phrase adds nothing under the "not disclosed" heading
-                gaps.append({"label": label, "value": None if value.strip().lower() in _GAP_PREFIXES else value})
+                bare = value.strip().lower() in _GAP_PREFIXES
+                gaps.append({"label": label, "value": None if bare else value,
+                             "sources": [] if bare else cited(dc, f"{section}.{field}")})
             else:
-                known.append({"label": label, "value": value})
+                known.append({"label": label, "value": value, "sources": cited(dc, f"{section}.{field}")})
         topics.append({"topic": topic, "label": TOPIC_LABEL[topic], "known": known, "gaps": gaps})
     uses = dc.get("use") or []
     topics.append({
         "topic": "purpose", "label": TOPIC_LABEL["purpose"],
         "known": [{"label": f"{USE_LABEL.get(u['category'], u['category'])} ({u['confidence']} confidence)",
-                   "value": u["evidence"]} for u in uses if u.get("category") != "unknown"],
-        "gaps": [{"label": "Use", "value": u["evidence"]} for u in uses if u.get("category") == "unknown"],
+                   "value": u["evidence"], "sources": cited(dc, f"use.{i}")}
+                  for i, u in enumerate(uses) if u.get("category") != "unknown"],
+        "gaps": [{"label": "Use", "value": u["evidence"], "sources": cited(dc, f"use.{i}")}
+                 for i, u in enumerate(uses) if u.get("category") == "unknown"],
     })
     return {"id": dc["id"], "name": dc["name"], "operator": dc.get("operator"),
             "county": dc.get("county"), "place": dc.get("place"),
             "status": dc.get("status"), "status_label": STATUS_LABEL.get(dc.get("status"), dc.get("status")),
+            "comment_periods": comment_periods(dc, today),
             "topics": topics, "not_disclosed": dc.get("not_disclosed") or [],
             "sources": dc.get("sources") or [], "url": f"/site/data_center/{dc['id']}"}

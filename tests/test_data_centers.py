@@ -6,6 +6,9 @@ someone skipped a question, so these tests fail on it. Only lat/lon may be null
 """
 
 import json
+import re
+from datetime import date
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -72,6 +75,43 @@ def test_every_site_is_sourced():
             assert src["url"].startswith("https://"), s["id"]
 
 
+def test_cite_keys_point_at_real_facts_and_sources():
+    """``cite`` maps "section.field" or "use.N" to indexes into the site's sources; a key must
+    name a field that has a fact (not a bare "not disclosed" / "none found") and a real source."""
+    for s in SITES:
+        for key, idx in (s.get("cite") or {}).items():
+            section, field = key.split(".")
+            value = s["use"][int(field)]["evidence"] if section == "use" else s[section][field]
+            assert value.strip().lower() not in ("not disclosed", "none found", "not applicable"), (s["id"], key)
+            assert idx and len(set(idx)) == len(idx), (s["id"], key)
+            assert all(isinstance(i, int) and 0 <= i < len(s["sources"]) for i in idx), (s["id"], key)
+
+
+def test_card_line_links_its_own_source(tmp_path):
+    c = dcs.card(MONARCH)
+    lines = {k["label"]: k for t in c["topics"] for k in t["known"] + t["gaps"]}
+    dep = MONARCH["sources"][0]
+    assert lines["Water permits"]["sources"] == [{**dep, "n": 1}]
+    assert lines["Water source"]["sources"] == []   # no key: falls back to the site's source list
+    page = _client(tmp_path).get("/site/data_center/monarch-compute-campus").text
+    assert f'aria-label="Data source 1: {dep["title"]}">[1]</a>' in page
+    adv = _client(tmp_path).get("/site/data_center/monarch-compute-campus?view=adv").text
+    assert 'aria-label="Data source 3:' in adv   # Nscale, on the cooling row
+
+
+def test_watch_list_has_every_comment_deadline():
+    md = (Path(__file__).parents[1] / "docs" / "DATA-CENTERS.md").read_text()
+    watch = md.split("## Watch list", 1)[1].split("\n## ", 1)[0]
+    assert re.search(r"Last checked: \d{4}-\d{2}-\d{2}", watch)
+    deadlines = [(s["id"], permit, due) for s in SITES
+                 for permit, due in re.findall(r"\b(R1\d-\d{4})\b[^)]*comments to (\d{4}-\d{2}-\d{2})",
+                                               s.get("air_permits", {}).get("permits", ""))]
+    assert ("monarch-compute-campus", "R14-0042", "2026-11-13") in deadlines
+    for site, permit, due in deadlines:
+        row = next((ln for ln in watch.splitlines() if permit in ln), "")
+        assert due in row, f"{site}: {permit} comments due {due} not on the watch list"
+
+
 # ---- on the site: the data_center kind, /api/data-centers, /site/data_center/<id> ----
 
 MONARCH = next(s for s in SITES if s["id"] == "monarch-compute-campus")
@@ -88,7 +128,7 @@ def test_card_sorts_known_and_not_disclosed():
     topics = {t["topic"]: t for t in c["topics"]}
     assert list(topics) == ["water", "energy", "noise", "purpose"]
     water = topics["water"]
-    assert {"label": "How much water it takes", "value": None} in water["gaps"]   # "not disclosed"
+    assert {"label": "How much water it takes", "value": None, "sources": []} in water["gaps"]   # "not disclosed"
     assert any(k["label"] == "Water source" and "Ohio River" in k["value"] for k in water["known"])
     assert all(not dcs.is_gap(k["value"]) for t in c["topics"] for k in t["known"])
     assert any(k["label"].startswith("Generative AI (high") for k in topics["purpose"]["known"])
@@ -96,9 +136,28 @@ def test_card_sorts_known_and_not_disclosed():
 
 
 def test_card_keeps_the_note_on_a_qualified_gap():
-    dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}}
+    dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}, "cite": {}}
     energy = next(t for t in dcs.card(dc)["topics"] if t["topic"] == "energy")
-    assert {"label": "Backup generators", "value": "none found (federal facility)"} in energy["gaps"]
+    assert {"label": "Backup generators", "value": "none found (federal facility)", "sources": []} in energy["gaps"]
+
+
+def test_card_shows_open_comment_periods_until_the_deadline():
+    open_ = dcs.card(MONARCH, today=date(2026, 11, 13))["comment_periods"]
+    assert [(p["permit"], p["due"]) for p in open_] == [("R14-0042", "2026-11-13")]
+    assert open_[0]["source"]["kind"] == "primary" and "R14-0042" in open_[0]["source"]["title"]
+    assert dcs.card(MONARCH, today=date(2026, 11, 14))["comment_periods"] == []
+    no_deadline = next(s for s in SITES if s["id"] != MONARCH["id"] and "R13-" in s["air_permits"]["permits"])
+    assert dcs.card(no_deadline, today=date(2000, 1, 1))["comment_periods"] == []
+
+
+def test_card_template_shows_the_comment_period():
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader(Path(dcs.__file__).parent / "web" / "templates"), autoescape=True)
+    macro = env.get_template("_dc_card.html").module.dc_card
+    html = str(macro(dcs.card(MONARCH, today=date(2026, 11, 7))))
+    assert "Open for public comment" in html and "R14-0042" in html and "2026-11-13" in html
+    assert "Public-Comment-Period" in html
+    assert "Open for public comment" not in str(macro(dcs.card(MONARCH, today=date(2026, 12, 1))))
 
 
 def test_how_to_ask_covers_psc_dep_and_records():
@@ -146,3 +205,28 @@ def test_site_page_basic_and_advanced(tmp_path):
     assert page.status_code == 200 and "exact location not public" in page.text
     assert c.get("/site/data_center/no-such-site").status_code == 404
     assert c.get("/site/well/anything").status_code == 404   # other kinds come with the site-pages item
+
+
+def test_api_full_record_for_the_advanced_view(tmp_path):
+    c = _client(tmp_path)
+    q = f"/api/data-centers?lat={MONARCH['lat']}&lon={MONARCH['lon']}&km=16"
+    assert "record" not in c.get(q).json()["near"][0]   # the basic view stays small
+    full = c.get(f"{q}&full=true").json()["near"][0]
+    assert full["record"]["id"] == MONARCH["id"] and full["record"]["air_permits"] == MONARCH["air_permits"]
+
+
+def test_place_page_loads_the_data_center_renderer(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/place?place=rutledge&km=8&view=adv")
+    assert r.status_code == 200 and r.text.index("/static/dc.js") < r.text.index("/static/place.js")
+    assert 'id="pl-dc"' in r.text
+    assert "/static/dc.js" in c.get("/nearby").text
+
+
+def test_site_page_related_nearby(tmp_path):
+    c = _client(tmp_path)
+    page = c.get("/site/data_center/monarch-compute-campus").text
+    assert 'id="site-related" data-kind="data_center" data-site="data_center:monarch-compute-campus"' in page
+    assert "/static/site.js" in page
+    unmapped = next(s for s in SITES if s["lat"] is None)
+    assert "location isn't listed" in c.get(f"/site/data_center/{unmapped['id']}").text

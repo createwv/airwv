@@ -48,14 +48,80 @@ PAGES = [
     ("about", "/about"),
     ("data", "/data"),
     ("explore", "/explore?place=rutledge&km=8&param=pm2_5"),   # query builder at the demo place
-    # data centers: Near me at Point Pleasant (Monarch is ~4 mi) and a site page
+    # data centers: Near me at Point Pleasant (Monarch is ~4 mi); its site page is in SITE_PAGES
     ("nearby-dc", "/nearby?lat=38.86&lon=-82.13&from=Point+Pleasant"),
-    ("site-dc", "/site/data_center/monarch-compute-campus"),
+    ("place-dc", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8"),
+    ("place-dc-adv", "/place?lat=38.86&lon=-82.13&name=Point+Pleasant&km=8&view=adv"),
 ]
 VIEWPORTS = [(390, 844), (1280, 800)]   # phone (iPhone 12–15), laptop
+# `/site/<kind>/<id>`: one page per kind the route serves, shot at every DEVICES size. Add a
+# line here as each kind lands (sensor, monitor, gauge, facility, water system, well, spill).
+SITE_PAGES = [
+    ("site-dc", "/site/data_center/monarch-compute-campus"),
+    ("site-dc-adv", "/site/data_center/monarch-compute-campus?view=adv"),
+    ("site-permit-coal", "/site/permit/WV1012487"),        # coal discharge on 303(d) streams
+    ("site-permit-og", "/site/permit/051-02423"),          # oil & gas permit stage
+]
+# Pages whose maps open on the whole state, shot at every DEVICES size for the map check.
+MAP_PAGES = [("map-home", "/"), ("map-air", "/air"), ("map-water", "/water"),
+             ("map-spills", "/spills")]
+# Maps that open on one place by design, so they aren't held to the statewide first view.
+LOCAL_MAPS = {"nb-map"}
+# The state line (WV_BBOX in static/wv.js).
+WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
+# The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
+MORE_PAGE = ("more", "/")
+# /air's "Filters" sheet, tapped open where it's collapsed and shot at every DEVICES size.
+FILTERS_PAGE = ("filters", "/air")
+# A dialog or map popup opened as a user would, shot at every DEVICES size; the a11y checks run
+# on what opens (`scope`), since the pages under them are already checked in PAGES.
+OPEN_PAGES = [
+    ("open-report", "/air", {"click": '[data-open="report"]', "scope": "#reportmodal.on"}),
+    ("open-facility", "/sources", {"click": ".srccard", "scope": "#srcdetail.on"}),
+    # Home's map, not /air's: clicking an /air sensor redraws the markers, closing its popup at once
+    ("open-sensor", "/", {"marker": {"map": "ov-map", "text": "µg/m³ PM2.5"},
+                          "scope": "#ov-map .leaflet-popup"}),
+]
+# Explore's measurements option, driven through its form at every DEVICES size.
+EXPLORE_SERIES = ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5")
+# Explore with its county and value filters set from the URL, at every DEVICES size.
+EXPLORE_FILTERS = ("explore-filters", "/explore?place=kanawha&km=40.25&county=Kanawha&param=pm2_5&over=1")
+# The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
+DEVICES = {
+    "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
+                    "isMobile": True, "hasTouch": True},
+    "phone": {"viewport": {"width": 390, "height": 844}, "deviceScaleFactor": 3,
+              "isMobile": True, "hasTouch": True},
+    "phone-landscape": {"viewport": {"width": 844, "height": 390}, "deviceScaleFactor": 3,
+                        "isMobile": True, "hasTouch": True},
+    "tablet": {"viewport": {"width": 820, "height": 1180}, "deviceScaleFactor": 2,
+               "isMobile": True, "hasTouch": True},
+    "desktop": {"viewport": {"width": 1280, "height": 800}, "deviceScaleFactor": 1,
+                "isMobile": False, "hasTouch": False},
+    "desktop-wide": {"viewport": {"width": 1920, "height": 1080}, "deviceScaleFactor": 1,
+                     "isMobile": False, "hasTouch": False},
+}
+try:
+    DEVICES = {k: v for k, v in json.loads((PW_DIR / "devices.json").read_text()).items()
+               if isinstance(v, dict) and "viewport" in v} or DEVICES
+except (OSError, ValueError):
+    pass
 GEO = {"lat": 38.35, "lon": -81.63}     # Charleston
 VENDOR_DIRS = [os.environ.get("AIRWV_VENDOR_DIR", ""), str(REPO / "src/airwv/web/static/vendor"),
                str(HERE / "vendor")]
+
+
+def _device_viewports() -> list[dict]:
+    return [{"w": d["viewport"]["width"], "h": d["viewport"]["height"], "device": name,
+             "scale": d.get("deviceScaleFactor", 1), "mobile": bool(d.get("isMobile")),
+             "touch": bool(d.get("hasTouch"))} for name, d in DEVICES.items()]
+
+
+def map_span(m: dict) -> float:
+    """How many times West Virginia's size a map's view is, along its tighter-fitting side.
+    The other side is set by the map's shape: a 958x400 map shows ~4x the state's width at best."""
+    return min((m["north"] - m["south"]) / (WV_LINE["north"] - WV_LINE["south"]),
+               (m["east"] - m["west"]) / (WV_LINE["east"] - WV_LINE["west"]))
 
 
 def _main_checkout() -> Path | None:
@@ -165,7 +231,19 @@ def product(tmp_path_factory):
         cfg = tmp / "harness.json"
         cfg.write_text(json.dumps({
             "base": base, "out": str(OUT), "geo": GEO,
-            "pages": [{"name": n, "path": p} for n, p in PAGES],
+            "pages": [{"name": n, "path": p} for n, p in PAGES]
+            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in SITE_PAGES]
+            + [{"name": n, "path": p, "viewports": _device_viewports()} for n, p in MAP_PAGES]
+            + [{"name": MORE_PAGE[0], "path": MORE_PAGE[1], "viewports": _device_viewports(),
+                "openMore": True}]
+            + [{"name": FILTERS_PAGE[0], "path": FILTERS_PAGE[1], "viewports": _device_viewports(),
+                "openFilters": True}]
+            + [{"name": EXPLORE_SERIES[0], "path": EXPLORE_SERIES[1], "viewports": _device_viewports(),
+                "driveSeries": True}]
+            + [{"name": EXPLORE_FILTERS[0], "path": EXPLORE_FILTERS[1], "viewports": _device_viewports(),
+                "probeExFilters": True}]
+            + [{"name": n, "path": p, "viewports": _device_viewports(), "open": o}
+               for n, p, o in OPEN_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
             "vendorDirs": [d for d in VENDOR_DIRS if d],
         }))
@@ -195,12 +273,28 @@ def _report(data) -> str:
             "|---|---|---|---|---|---|---|---|---|"]
     for r in data["results"]:
         reading = (r.get("reading") or {}).get("text", "—").replace("|", "/")[:60]
-        maps = ", ".join(f"{m['id']} z{m['zoom']}" for m in r.get("maps", [])) or "—"
+        maps = ", ".join(f"{m['id']} z{m['zoom']}"
+                         + ("" if m["id"] in LOCAL_MAPS else f" ×{map_span(m):.2f}")
+                         for m in r.get("maps", [])) or "—"
         errs = len(r["consoleErrors"]) + len(r["pageErrors"])
         a11y = ", ".join(f"{k} {len(v)}" for k, v in (r.get("a11y") or {}).items()
                          if isinstance(v, list) and v) or "ok"
         rows.append(f"| {r['page']} | {r['width']} | {r['status']} | {r['ms']} | "
                     f"{r.get('navCount', '—')} | {reading} | {maps} | {errs} | {a11y} |")
+    more = [r for r in data["results"] if "more" in r]
+    if more:
+        rows += ["", '## "More" menu, open', "",
+                 "| device | width | menu box (top,left–right,bottom) | links | cut off "
+                 "| past first screen |", "|---|---|---|---|---|---|"]
+        for r in more:
+            m = r["more"]
+            if "error" in m:
+                rows.append(f"| {r.get('device')} | {r['width']} | {m['error']} | | | |")
+                continue
+            b = m["rect"]
+            rows.append(f"| {r.get('device')} | {r['width']} | {b['top']},{b['left']}–"
+                        f"{b['right']},{b['bottom']} | {m['links']} | "
+                        f"{', '.join(m['cut']) or 'none'} | {', '.join(m['belowFold']) or '—'} |")
     shimmed = sorted({s for r in data["results"] for s in r.get("shimmed", [])})
     if shimmed:
         rows += ["", (f"Shimmed (no local copy, no network): {', '.join(shimmed)}. Map/chart "

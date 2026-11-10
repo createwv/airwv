@@ -1,20 +1,28 @@
 {# Basic-view data-center card (what we know / what's not disclosed); near_me.js renders the same shape. #}
+{# A line's own sources, numbered as in the list below (record field "cite"). #}
+{% macro cite(srcs) %}{% if srcs %} <span class="dc-cite">{% for s in srcs %}<a href="{{ s.url }}" target="_blank" rel="noopener" title="{{ s.kind }}: {{ s.title }}" aria-label="Data source {{ s.n }}: {{ s.title }}">[{{ s.n }}]</a>{% endfor %}</span>{% endif %}{% endmacro %}
+
 {% macro dc_card(c) %}
+{% for p in c.comment_periods %}
+<div class="dc-due"><b>Open for public comment:</b> air permit <b>{{ p.permit }}</b>, written comments due <b>{{ p.due }}</b>.
+  {% if p.source %}<a href="{{ p.source.url }}" target="_blank" rel="noopener">How to comment (DEP notice) →</a>{% endif %}
+  <span class="meta">Deadlines can change; check the notice.</span></div>
+{% endfor %}
 <div class="dc-grid">
   {% for t in c.topics %}
   <div class="dc-topic">
     <h3>{{ t.label }}</h3>
     {% if t.known %}<div class="dc-sub">What we know</div>
-    <ul>{% for k in t.known %}<li><b>{{ k.label }}:</b> {{ k.value }}</li>{% endfor %}</ul>{% endif %}
+    <ul>{% for k in t.known %}<li><b>{{ k.label }}:</b> {{ k.value }}{{ cite(k.sources) }}</li>{% endfor %}</ul>{% endif %}
     {% if t.gaps %}<div class="dc-sub dc-gap">Not disclosed or not found</div>
-    <ul>{% for k in t.gaps %}<li>{% if k.value %}<b>{{ k.label }}:</b> {{ k.value }}{% else %}{{ k.label }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+    <ul>{% for k in t.gaps %}<li>{% if k.value %}<b>{{ k.label }}:</b> {{ k.value }}{{ cite(k.sources) }}{% else %}{{ k.label }}{% endif %}</li>{% endfor %}</ul>{% endif %}
     {% if not t.known and not t.gaps %}<p class="meta">Nothing in the public record we found.</p>{% endif %}
   </div>
   {% endfor %}
 </div>
-<div class="dc-sources"><b>Sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
-  <ul>{% for s in c.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
-    <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ul>
+<div class="dc-sources"><b>Data sources</b> <span class="meta">(primary = agency or court record; news and tracker claims can be wrong or out of date)</span>
+  <ol>{% for s in c.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
+    <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
 </div>
 {% endmacro %}
 

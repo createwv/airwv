@@ -6,27 +6,35 @@
        colored by that site's <b>most recent</b> sample, <b>not</b> an average. USGS stream gauges
        update continuously; Water Quality Portal lab samples (metals, bacteria, sulfate…) are
        <b>periodic</b>, so each marker carries its own sample date. New to this? See
-       <a href="/learn#water">Learn: drinking water, swimming, fish &amp; health →</a>.</p></div>
+       <a href="/learn#water">Learn: drinking water, swimming, fish &amp; health →</a>.</p>
+    <p class="meta">On this page: <a href="#streams">Rivers &amp; streams</a> ·
+       <a href="#drinking-water">Drinking-water systems &amp; violations</a></p></div>
+
+  <section id="streams" aria-labelledby="streams-h">
+  <h2 class="ov-sechead" id="streams-h">Rivers &amp; streams</h2>
 
   <div class="controls">
     <label>Measure <select id="w-param"></select></label>
-    <button id="w-nearme">📍 Near me</button>
+    <button id="w-nearme">Near me</button>
     <label title="WV DEP permitted coal-mine water discharges, by permit"><input type="checkbox" id="w-coal"> ⛏️ Coal discharge</label>
     <span class="meta" id="w-note"></span>
     <a href="/learn#water" class="meta">🎓 Learn: drinking water, swimming, fish &amp; more →</a>
   </div>
-  <div class="card"><h2>Water monitoring sites <span class="meta" id="w-count"></span><span class="meta" id="w-asof"></span></h2>
+  <div class="card"><h3 class="card-h">Stream gauges &amp; sample sites <span class="meta" id="w-count"></span><span class="meta" id="w-asof"></span></h3>
     <div id="w-map"></div>
     <div class="legend" id="w-legend"></div>
   </div>
 
   <div class="card" id="w-detailcard" style="display:none">
-    <h2 id="w-sitename">Site</h2>
+    <h3 class="card-h" id="w-sitename">Site</h3>
     <div id="w-chart" class="chart"></div>
     <p class="meta" id="w-detailnote"></p>
   </div>
 
-  <h2 class="ov-sechead" style="margin-top:26px">🚰 Drinking-water systems &amp; violations <span class="meta" id="sdwa-src"></span></h2>
+  </section>
+
+  <section id="drinking-water" aria-labelledby="drinking-water-h">
+  <h2 class="ov-sechead" id="drinking-water-h" style="margin-top:26px">Drinking-water systems &amp; violations <span class="meta" id="sdwa-src"></span></h2>
   <p class="meta" style="margin:-6px 0 10px">This is the crisis behind the headlines — WV has the nation's
      worst rate of health-based drinking-water violations, concentrated in the southern coalfields. Every
      public water system and whether it has a <b>Safe Drinking Water Act</b> violation, from
@@ -43,12 +51,13 @@
     <div class="legend">Bubble size = systems with a health-based violation · <span style="color:#c0392b">●</span> darker = higher share · click a county to filter</div>
   </div>
   <div class="card" style="padding:0"><table id="sdwa-table" class="fac-table">
-    <thead><tr><th>System</th><th>County</th><th>Serves</th><th>Source</th><th>Violation</th><th>Record</th></tr></thead>
+    <thead><tr><th>System</th><th>County</th><th>Serves</th><th>Water source</th><th>Violation</th><th>Record</th></tr></thead>
     <tbody id="sdwa-body"><tr><td colspan="6" class="meta" style="padding:14px">Loading…</td></tr></tbody>
   </table></div>
   <p class="meta" id="sdwa-disc" style="margin-top:8px"></p>
+  </section>
 
-  <div class="about"><p class="meta">Sources: <a href="https://waterservices.usgs.gov/" target="_blank"
+  <div class="about"><p class="meta">Data sources: <a href="https://waterservices.usgs.gov/" target="_blank"
     rel="noopener">USGS NWIS</a> real-time gauges (flow, gage height, and some pH / oxygen /
     conductivity / turbidity) and the <a href="https://www.waterqualitydata.us/" target="_blank"
     rel="noopener">Water Quality Portal</a> (EPA/USGS lab &amp; grab samples — <b>E. coli</b>,

@@ -1,6 +1,7 @@
-// Explore v1 (query builder, docs/DIRECTION.md §5.2): a form over /api/query. The form lives in
-// the URL (?show=&place=&km=&medium=&param=&since=&limit=&kind=a,b), so a shared link reproduces
+// Explore (query builder, docs/DIRECTION.md §5.2): a form over /api/query. The form lives in
+// the URL (?show=&place=&km=&county=&medium=&param=&over=&since=&limit=&kind=a,b), so a shared link reproduces
 // the table; the CSV and API links are the same query with format=csv / as JSON.
+// show=measurements (+ site_id=&from=&to=) lists one site's readings from the series mode.
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
@@ -21,7 +22,20 @@ const day = ts => ts ? String(ts).slice(0, 10) : '—';
 const link = (url, text) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${text}</a>` : text;
 
 const form = $('ex-form');
-const FIELDS = ['show', 'km', 'medium', 'param', 'since', 'limit'];
+const FIELDS = ['show', 'km', 'county', 'medium', 'param', 'over', 'since', 'site_id', 'from', 'to', 'limit'];
+const COUNTY_NOTE = "The county filter only finds places whose data source lists a county. Sensors, gauges and sample sites don't, so they drop out. ";
+const MEASURED_KINDS = 'sensor,reference_monitor,gauge,sample_site';
+const isSeries = () => form.elements.show.value === 'measurements';
+let urlSite = null;   // a site_id from the URL, until the site list has been filled once
+
+// Show the controls this kind of query uses; hidden ones stay out of the URL (see params).
+function syncMode() {
+  const series = isSeries();
+  form.querySelectorAll('[data-for]').forEach(el => { el.hidden = el.dataset.for !== (series ? 'series' : 'list'); });
+  $('ex-param-label').textContent = series ? 'Reading' : 'Latest reading of';
+  $('ex-limit-series').disabled = !series;   // /api/query caps site lists at 500 rows
+  if (!series && form.elements.limit.value === '5000') form.elements.limit.value = '500';
+}
 
 function readForm() {
   const q = new URLSearchParams(location.search);
@@ -41,19 +55,32 @@ function readForm() {
   });
   const kinds = (q.get('kind') || '').split(',');
   form.querySelectorAll('input[name=kind]').forEach(cb => { cb.checked = kinds.includes(cb.value); });
+  urlSite = q.get('site_id');
+  syncMode();
+}
+
+// The picked place: its point, and how this page's own query string names it.
+function where() {
+  const opt = $('ex-place').selectedOptions[0];
+  const p = PLACES.find(x => x.id === opt.value);
+  const lat = p ? p.lat : parseFloat(opt.dataset.lat), lon = p ? p.lon : parseFloat(opt.dataset.lon);
+  return {lat, lon, page: new URLSearchParams(p ? {place: p.id} : {lat, lon, name: opt.textContent})};
 }
 
 // The form as /api/query parameters (and as this page's own query string).
 function params() {
-  const opt = $('ex-place').selectedOptions[0];
-  const p = PLACES.find(x => x.id === opt.value);
-  const lat = p ? p.lat : parseFloat(opt.dataset.lat), lon = p ? p.lon : parseFloat(opt.dataset.lon);
+  const {lat, lon, page} = where();
   const api = new URLSearchParams({lat, lon});
-  const page = new URLSearchParams(p ? {place: p.id} : {lat, lon, name: opt.textContent});
-  FIELDS.forEach(f => {
+  FIELDS.filter(f => !form.elements[f].closest('[hidden]')).forEach(f => {
     const v = form.elements[f].value;
+    if (f === 'over' && !form.elements.param.value) return;   // /api/query needs a reading to compare
     if (v) { api.set(f, v); page.set(f, v); }
   });
+  if (isSeries()) {
+    const series = new URLSearchParams({site_id: form.elements.site_id.value, param: form.elements.param.value});
+    ['from', 'to', 'over', 'limit'].forEach(f => { if (api.has(f)) series.set(f, api.get(f)); });
+    return {api: series, page};
+  }
   const kinds = [...form.querySelectorAll('input[name=kind]:checked')].map(cb => cb.value);
   if (kinds.length) { api.set('kind', kinds.join(',')); page.set('kind', kinds.join(',')); }
   return {api, page};
@@ -95,27 +122,75 @@ function provLine(prov) {
     '<a href="/data">About these data sources →</a>' : '';
 }
 
-async function run() {
-  const {api, page} = params();
-  history.replaceState(null, '', `${location.pathname}?${page}`);
-  const url = `/api/query?${api}`;
+// The Site list: measured sites near the place, nearest first, with the picked reading if any.
+function fillSites(sites) {
+  const sel = form.elements.site_id;
+  const want = urlSite || sel.value;
+  sel.innerHTML = sites.map(s => `<option value="${esc(s.site_id)}">${esc(`${s.name || s.ref} · ${kindLabel(s.kind)} · ${mi(s.mi)}`)}</option>`).join('')
+    || '<option value="">No site with readings here</option>';
+  if (urlSite && !sites.some(s => s.site_id === urlSite)) {
+    sel.insertAdjacentHTML('afterbegin', `<option value="${esc(urlSite)}">${esc(urlSite)}</option>`);
+  }
+  urlSite = null;
+  if ([...sel.options].some(o => o.value === want)) sel.value = want;
+}
+
+let siteKey = null, sitesReady = null;
+function loadSites() {
+  const {lat, lon} = where();
+  const q = new URLSearchParams({lat, lon, km: form.elements.km.value, kind: MEASURED_KINDS, limit: 500});
+  const medium = form.elements.medium.value, param = form.elements.param.value;
+  if (medium) q.set('medium', medium);
+  if (param) q.set('param', param);
+  const key = q.toString();
+  if (key === siteKey) return sitesReady;
+  siteKey = key;
+  sitesReady = fetch(`/api/query?${q}`).then(x => x.ok ? x.json() : Promise.reject(x.status)).then(r => {
+    if (key === siteKey) fillSites(r.sites.filter(s => !param || s.latest));
+  }).catch(e => { if (key === siteKey) siteKey = null; throw e; });
+  return sitesReady;
+}
+
+function setLinks(api) {
+  $('ex-links').hidden = !api;
+  if (!api) return;
   const csv = new URLSearchParams(api); csv.set('format', 'csv');
-  $('ex-api').href = url;
+  $('ex-api').href = `/api/query?${api}`;
   $('ex-csv').href = `/api/query?${csv}`;
+}
+
+function seriesTable(rows) {
+  const head = '<thead><tr><th>Time</th><th>Value</th><th>Data source</th><th>Quality</th></tr></thead>';
+  const when = ts => String(ts).length > 10 ? `${String(ts).slice(0, 16).replace('T', ' ')} UTC` : String(ts);
+  const body = rows.map(x => `<tr><td>${esc(when(x.ts))}</td><td>${esc(x.value)} ${esc(x.unit || '')}</td>
+    <td>${esc(x.source || '—')}</td><td>${esc(x.quality || '—')}</td></tr>`);
+  return head + `<tbody>${body.join('')}</tbody>`;
+}
+
+function seriesCount(r, label) {
+  const {from, to, limit, over} = r.filters;
+  const range = from && to ? `, ${from} to ${to}` : from ? `, from ${from}` : to ? `, up to ${to}` : '';
+  return `${r.count} reading${r.count === 1 ? '' : 's'} of ${esc(label)}${over != null ? ` over ${esc(over)}` : ''} at ${link(r.site.url, esc(r.site.name || r.site.ref))}${esc(range)}`
+    + (r.truncated ? ` (newest ${limit} only)` : '');
+}
+
+async function runSeries() {
   $('ex-count').textContent = 'Loading…';
   try {
-    const r = await fetch(url).then(x => x.ok ? x.json() : Promise.reject(x.status));
-    const miles = Math.round(r.place.km * 0.621371);
-    if (api.get('show') === 'records') {
-      const rows = recordRows(r);
-      $('ex-count').textContent = `${rows.length} record${rows.length === 1 ? '' : 's'} at ${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi`
-        + (r.filters.since ? `, dated since ${r.filters.since}` : '');
-      $('ex-table').innerHTML = rows.length ? recordTable(rows) : '<tbody><tr><td class="meta">No records match.</td></tr></tbody>';
-    } else {
-      $('ex-count').textContent = `${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi`
-        + (r.count >= r.filters.limit ? ` (first ${r.filters.limit}, nearest first)` : ', nearest first');
-      $('ex-table').innerHTML = r.count ? siteTable(r) : '<tbody><tr><td class="meta">Nothing matches.</td></tr></tbody>';
+    await loadSites();
+    const {api, page} = params();
+    history.replaceState(null, '', `${location.pathname}?${page}`);
+    if (!api.get('site_id') || !api.get('param')) {
+      setLinks(null);
+      $('ex-count').textContent = api.get('site_id') ? 'Pick a reading to list its measurements.'
+        : 'No site near here has this reading. Try a wider distance or another reading.';
+      $('ex-table').innerHTML = $('ex-prov').innerHTML = '';
+      return;
     }
+    setLinks(api);
+    const r = await fetch(`/api/query?${api}`).then(x => x.ok ? x.json() : Promise.reject(x.status));
+    $('ex-count').innerHTML = seriesCount(r, form.elements.param.selectedOptions[0].textContent);
+    $('ex-table').innerHTML = r.count ? seriesTable(r.rows) : '<tbody><tr><td class="meta">No readings match.</td></tr></tbody>';
     $('ex-prov').innerHTML = provLine(r.provenance);
   } catch (e) {
     $('ex-count').textContent = `Couldn't load results (${e}).`;
@@ -123,6 +198,44 @@ async function run() {
   }
 }
 
+// How the county and value filters read in the result line.
+function filterNote(r) {
+  const {county, over} = r.filters;
+  return (county ? ` in ${county.join(', ')} County` : '')
+    + (over != null ? `, latest ${form.elements.param.selectedOptions[0].textContent} over ${over}` : '');
+}
+
+async function run() {
+  if (isSeries()) return runSeries();
+  const {api, page} = params();
+  history.replaceState(null, '', `${location.pathname}?${page}`);
+  const url = `/api/query?${api}`;
+  setLinks(api);
+  $('ex-count').textContent = 'Loading…';
+  try {
+    const r = await fetch(url).then(x => x.ok ? x.json() : Promise.reject(x.status));
+    const miles = Math.round(r.place.km * 0.621371);
+    if (api.get('show') === 'records') {
+      const rows = recordRows(r);
+      $('ex-count').textContent = `${rows.length} record${rows.length === 1 ? '' : 's'} at ${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi${filterNote(r)}`
+        + (r.filters.since ? `, dated since ${r.filters.since}` : '');
+      $('ex-table').innerHTML = rows.length ? recordTable(rows) : '<tbody><tr><td class="meta">No records match.</td></tr></tbody>';
+    } else {
+      $('ex-count').textContent = `${r.count} place${r.count === 1 ? '' : 's'} within ${miles} mi${filterNote(r)}`
+        + (r.count >= r.filters.limit ? ` (first ${r.filters.limit}, nearest first)` : ', nearest first');
+      $('ex-table').innerHTML = r.count ? siteTable(r) : '<tbody><tr><td class="meta">Nothing matches.</td></tr></tbody>';
+    }
+    $('ex-prov').innerHTML = (r.filters.county ? COUNTY_NOTE : '') + provLine(r.provenance);
+  } catch (e) {
+    $('ex-count').textContent = `Couldn't load results (${e}).`;
+    $('ex-table').innerHTML = '';
+  }
+}
+
 form.addEventListener('submit', e => { e.preventDefault(); run(); });
+form.addEventListener('change', () => {
+  syncMode();
+  if (isSeries()) loadSites().catch(() => {});   // run() reports a failed list
+});
 readForm();
 run();
