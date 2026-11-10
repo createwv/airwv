@@ -869,6 +869,8 @@ class Store:
             for w in session.scalars(q):
                 s = sites.setdefault(w.site_id, {
                     "site_id": w.site_id, "name": w.site_name,
+                    # the read model's site kind, for the /site/<kind>/<id> link
+                    "kind": "gauge" if w.source == "usgs" else "sample_site",
                     "lat": w.lat, "lon": w.lon, "latest": {}})
                 s["latest"][w.parameter] = {"value": w.value, "unit": w.unit,
                                             "ts": w.ts.isoformat() if w.ts else None}

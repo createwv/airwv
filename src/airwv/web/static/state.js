@@ -74,6 +74,10 @@
     },
     // a link to another page carrying the given state, e.g. href('/nearby', {lat, lon})
     href: (path, patch) => path + merge('', patch),
+    // the site page of one sensor, monitor, gauge, facility, permit, … (/site/<kind>/<ref>)
+    site: (kind, ref) => ref == null || ref === '' ? null : `/site/${kind}/${encodeURIComponent(ref)}`,
+    // … of one /api/sensors row (kind 'reference' = an EPA monitor, else a community sensor)
+    sensorSite: x => api.site(x.kind === 'reference' ? 'reference_monitor' : 'sensor', x.sensor_id),
   };
   root.AirwvState = api;
   if (root.document) api.carry();

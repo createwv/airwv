@@ -68,3 +68,10 @@ def test_merge_sets_removes_and_keeps_other_keys():
     assert (back["lat"], back["lon"], back["km"], back["from"], back["view"]) == (38.2, -81.5, 16, "2024-01-01", "adv")
     assert _node("S.href('/nearby', {lat: 38, lon: -81, label: 'A & B'})") == \
         "/nearby?lat=38.0000&lon=-81.0000&label=A+%26+B"
+
+
+def test_site_links():
+    assert _node("S.site('permit', 'WV 1/2')") == "/site/permit/WV%201%2F2"
+    assert _node("S.site('well', '')") is None and _node("S.site('well', null)") is None
+    assert _node("S.sensorSite({kind: 'reference', sensor_id: '540390020'})") == "/site/reference_monitor/540390020"
+    assert _node("S.sensorSite({kind: 'community', sensor_id: '197127'})") == "/site/sensor/197127"

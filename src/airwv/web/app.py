@@ -2226,6 +2226,10 @@ def create_app(store: Store) -> FastAPI:
         rm = store.read_model
         with rm.connect() as conn:
             site = rm.site(conn, f"{kind}:{ref}")
+            if site is None and kind == "reference_monitor" and len(ref) == 9 and ref.isdigit():
+                # /api/sensors lists AirNow monitors by 9-digit AQSID; the read model keeps
+                # the dashed AQS form when reference_monitors.json lists the same monitor
+                site = rm.site(conn, f"{kind}:{ref[:2]}-{ref[2:5]}-{ref[5:]}")
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that id")
             measured = rm.parameters(conn, site["medium"], site["ref"])

@@ -173,6 +173,7 @@ function redrawSensors(){
     L.marker([x.lat, x.lon], {title: `${x.name}, ozone monitor`, icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
       html:`<div class="o3mk" style="background:${x.ozone_color||'#9e9e9e'}"></div>`})})
       .bindPopup(`<b>${x.name}</b><br><i>EPA ozone monitor</i><br>latest O₃: <b>${x.latest_ozone} ppb</b>`
+        + `<br><a href="${esc(AirwvState.sensorSite(x))}">Monitor details →</a>`
         + `<br><small>select the Ozone metric, then click to chart</small>`)
       .on('click', () => toggleChart(x.sensor_id)).addTo(ozoneLayer);
   });
@@ -190,6 +191,7 @@ function redrawSensors(){
     const pop = `<b>${x.name}</b>${x.kind==='reference'?'<br><i>reference monitor (EPA/AirNow)</i>':''}`+
       `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`+
       nearLink+
+      `<br><a href="${esc(AirwvState.sensorSite(x))}">${x.kind==='reference'?'Monitor':'Sensor'} details →</a>`+
       `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
@@ -364,6 +366,7 @@ function redrawEcho(){
         (progs?`<br><small>${progs}</small>`:'')+
         (f.last_inspection?`<br><small>last inspected ${f.last_inspection}</small>`:'')+
         water+
+        (f.registry_id?`<br><a href="${esc(AirwvState.site('facility', f.registry_id))}">Facility details →</a>`:'')+
         `<br><a href="${f.echo_url}" target="_blank" rel="noopener">EPA ECHO report →</a>`)
       .addTo(echoLayer);
   });
@@ -393,6 +396,7 @@ function redrawDep(){
         `<br><small>${[p.county && p.county+' Co.', p.well_type].filter(Boolean).join(' · ')}</small>`+
         (p.formation?`<br><small>${p.formation}${p.marcellus?' · Marcellus':''}</small>`:'')+
         (when?`<br><small>${p.issue_date?'permit issued':'application'} ${when}</small>`:'')+
+        (p.permit_id?`<br><a href="${esc(AirwvState.site('permit', p.permit_id))}">Permit details →</a>`:'')+
         (p.link?`<br><a href="${p.link}" target="_blank" rel="noopener">WV DEP record →</a>`:''))
       .addTo(depLayer);
   });
@@ -421,7 +425,8 @@ function redrawMines(){
         `<br><small>${[m.type, m.facility].filter(Boolean).join(' · ')}</small>`+
         acres+
         (m.inspection_status?`<br><small>${m.inspection_status}</small>`:'')+
-        (m.issue_date?`<br><small>permit ${m.issue_date}</small>`:''))
+        (m.issue_date?`<br><small>permit ${m.issue_date}</small>`:'')+
+        (m.permit_id?`<br><a href="${esc(AirwvState.site('permit', m.permit_id))}">Permit details →</a>`:''))
       .addTo(mineLayer);
   });
   mineLayer.addTo(map);
@@ -460,6 +465,7 @@ function redrawWells(){
         (w.county?`<br><small>${w.county} County</small>`:'')+
         `<br><small>${prox}</small>`+
         `<br><small>Leaking wells can vent natural gas / H2S near homes.</small>`+
+        (w.id?`<br><a href="${esc(AirwvState.site('well', w.id))}">Well details →</a>`:'')+
         `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`+
         `<br><a href="#" class="well-report" data-lat="${w.lat}" data-lon="${w.lon}" data-id="${w.id||''}" data-orphan="${w.orphan?1:0}" data-county="${w.county||''}">🚨 Report a problem with this well →</a>`)
       .addTo(wellLayer);

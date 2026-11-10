@@ -15,7 +15,7 @@ function spillCard(s) {
   return `<div class="evcard" style="cursor:default">
     <span class="evico">🛢️</span>
     <div class="evcard-body">
-      <div class="evcard-title">${esc(spillMats(s).slice(0, 3).join(', ') || 'Reported release')} ${water}</div>
+      <div class="evcard-title">${s.report_id != null ? `<a href="${esc(AirwvState.site('spill_report', s.report_id))}">${esc(spillMats(s).slice(0, 3).join(', ') || 'Reported release')}</a>` : esc(spillMats(s).slice(0, 3).join(', ') || 'Reported release')} ${water}</div>
       <div class="evcard-meta">${esc(loc)}${loc ? ' · ' : ''}${fmtD(s.date)}${s.body_of_water ? ' · into ' + esc(s.body_of_water) : ''}</div>
       ${s.description ? `<div class="evcard-desc">${esc(s.description.slice(0, 150))}${s.description.length > 150 ? '…' : ''}</div>` : ''}
     </div></div>`;
@@ -28,7 +28,8 @@ function spillPopup(s) {
     + (mats ? `<br><small>Material:<br>${mats}</small>` : '')
     + (s.body_of_water ? `<br><small>💧 into ${esc(s.body_of_water)}</small>` : '')
     + (s.description ? `<br><small>${esc(s.description.slice(0, 220))}</small>` : '')
-    + `<br><small class="meta">NRC report #${esc('' + s.report_id)}${s.geo === 'county' ? ' · approx (county)' : ''}</small>`;
+    + `<br><small class="meta">NRC report #${esc('' + s.report_id)}${s.geo === 'county' ? ' · approx (county)' : ''}</small>`
+    + (s.report_id != null ? `<br><a href="${esc(AirwvState.site('spill_report', s.report_id))}">Spill report details →</a>` : '');
 }
 function drawSpills(list) {
   if (!spillMap) {

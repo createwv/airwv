@@ -90,6 +90,7 @@ async function toggleCoal(on) {
         + impaired
         + (streams ? `<br><small>Receiving:<br>· ${streams}${p.stream_count > 5 ? '<br>· …' : ''}</small>` : '')
         + `<div class="cn-wq" data-pending data-lat="${p.lat}" data-lon="${p.lon}"></div>`
+        + `<br><a href="${esc(AirwvState.site('permit', p.permit))}">Permit details →</a>`
         + `<br><a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">EPA ECHO effluent charts →</a>`)
       .addTo(coalLayer);
   });
@@ -135,6 +136,7 @@ function draw() {
     L.circleMarker([s.lat, s.lon], {title: s.name, radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
         + (l.ts ? `<br><small>latest sample: ${fmtDate(l.ts)}</small>` : '')
+        + `<br><a href="${esc(AirwvState.site(s.kind || 'sample_site', s.site_id))}">${s.kind === 'gauge' ? 'Gauge' : 'Sample site'} details →</a>`
         + `<br><small>click to chart</small>`)
       .on('click', () => showSite(s)).addTo(layer);
   });
@@ -248,7 +250,7 @@ function renderSdwa() {
       s.lead_copper_violation ? '<span class="prog-chip" style="background:#f6d7d2;color:#a5301f">lead/copper</span>' : '',
     ].filter(Boolean).join(' ') || '<span class="meta">no current violation</span>';
     return `<tr>
-      <td><b>${esc(s.name || s.pws_id)}</b>${s.community ? '' : `<div class="meta">${esc(s.type || '')}</div>`}</td>
+      <td><b><a href="${esc(AirwvState.site('water_system', s.pws_id))}">${esc(s.name || s.pws_id)}</a></b>${s.community ? '' : `<div class="meta">${esc(s.type || '')}</div>`}</td>
       <td class="meta">${esc(s.county || '')}</td>
       <td class="meta">${Number(s.population || 0).toLocaleString()}</td>
       <td class="meta">${esc(s.source || '')}</td>

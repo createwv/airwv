@@ -578,3 +578,30 @@ def test_site_pages_have_related_nearby(tmp_path, monkeypatch):
     lat, lon = (box.split(f'data-{k}="')[1].split('"')[0] for k in ("lat", "lon"))
     near = c.get(f"/api/query?lat={lat}&lon={lon}&km=40.25&kind=gauge&limit=1").json()["sites"]
     assert [s["kind"] for s in near] == ["gauge"] and near[0]["mi"] is not None
+
+
+def test_map_and_list_rows_link_to_working_site_pages(tmp_path, monkeypatch):
+    # the ids the popups and lists build /site/<kind>/<id> from (static/*.js, state.js) open a page
+    from urllib.parse import quote
+
+    c, _ = _client(tmp_path, monkeypatch)
+    sensors = {s["sensor_id"]: s for s in c.get("/api/sensors").json()}
+    assert sensors["197127"]["kind"] == "community" and c.get("/site/sensor/197127").status_code == 200
+    # AirNow rows carry the 9-digit AQSID; the page finds the monitor under its dashed AQS id
+    assert sensors["540390020"]["kind"] == "reference"
+    assert c.get("/site/reference_monitor/540390020").status_code == 200
+    water = {s["site_id"]: s["kind"] for s in c.get("/api/water/sites").json()["sites"]}
+    assert water["03198000"] == "gauge" and water["S1"] == "sample_site"
+    for sid, kind in water.items():
+        assert c.get(f"/site/{kind}/{sid}").status_code == 200, sid
+    for api, key, kind, ref in [("/api/facilities", "facilities", "facility", "registry_id"),
+                                ("/api/dep-permits", "permits", "permit", "permit_id"),
+                                ("/api/dep-mining", "mines", "permit", "permit_id"),
+                                ("/api/coal-npdes", "permits", "permit", "permit"),
+                                ("/api/abandoned-wells", "wells", "well", "id"),
+                                ("/api/sdwa", "systems", "water_system", "pws_id"),
+                                ("/api/nrc-spills", "spills", "spill_report", "report_id")]:
+        rows = c.get(api).json()[key]
+        assert rows, api
+        for row in rows[:3]:
+            assert c.get(f"/site/{kind}/{quote(str(row[ref]), safe='')}").status_code == 200, (api, row[ref])

@@ -78,7 +78,8 @@ function drawMap(sensors){
     const m = L.circleMarker([s.lat, s.lon], {
       title: `${s.name}, ${ref ? 'reference monitor' : 'community sensor'}`, radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
       fillColor: s.color, fillOpacity: ref ? 0.7 : 0.85})
-      .bindPopup(`<b>${esc(s.name)}</b><br>${val}${ref ? '<br><i>EPA reference monitor</i>' : ''}`);
+      .bindPopup(`<b>${esc(s.name)}</b><br>${val}${ref ? '<br><i>EPA reference monitor</i>' : ''}`
+        + `<br><a href="${esc(AirwvState.sensorSite(s))}">${ref ? 'Monitor' : 'Sensor'} details →</a>`);
     m.addTo(map);
   });
   // a place in the URL (shared state, state.js) centres the map on it; otherwise the statewide fitWV view stands

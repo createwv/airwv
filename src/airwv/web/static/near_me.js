@@ -108,7 +108,8 @@ function drawMap() {
   (DATA.hazards || []).forEach(h => {
     if (h.lat == null || h.lon == null) return;
     L.circleMarker([h.lat, h.lon], {title: h.label, radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
-      .bindPopup(`<b>${esc(h.label)}</b><br><small>${h.mi != null ? h.mi + ' mi · ' : ''}${esc(h.detail || '')}</small>`)
+      .bindPopup(`<b>${esc(h.label)}</b><br><small>${h.mi != null ? h.mi + ' mi · ' : ''}${esc(h.detail || '')}</small>`
+        + (h.page ? `<br><a href="${esc(h.page)}">details →</a>` : ''))
       .addTo(nbLayer);
   });
   ((DC && DC.near) || []).forEach(c => {
