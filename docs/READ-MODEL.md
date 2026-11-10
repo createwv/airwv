@@ -11,8 +11,9 @@ builder puts in a table (with `format=csv` for the download). Its series mode
 site pages `/site/<kind>/<ref>` for `sensor`, `reference_monitor`, `gauge` and `sample_site`
 chart the last 7 days (monitors 30, sample sites 365) up to the site's latest reading from
 it, with the same URL as their CSV and API links (`?param=` picks what to chart; the
-choices come from `ReadModel.parameters`). Monitors match their AirData history
-(`54-003-0003`); AirNow's hourly rows use a 9-digit AQSID and aren't on the page yet.
+choices come from `ReadModel.parameters`). A monitor's series reads both ids it is
+stored under (`measured_refs`): AirNow's hourly rows (9-digit AQSID `540390020`) and its
+AirData daily history (dashed `54-039-0020`), each row tagged with its `source`.
 `/site/permit/<ref>` (coal discharge, DEP mining, oil & gas) reads one `site` row and its
 `record` rows: the `permit_stage` (DEP mining, oil & gas) and, for coal discharges, the
 `impaired_303d` causes, with the layer's disclaimer; `?view=adv` lists every field.
@@ -34,7 +35,8 @@ from `ReadModel.site`; `/api/near` gives each hazard its `page`.
   per `source`, `sensor_id`: name, `lat`/`lon` of its latest located reading, first/last
   `ts`) that `Store.save_readings` keeps current at ingest, so no query groups over
   `readings`. `airnow` and `epa_airdata` rows are `reference_monitor`s (AirNow runs set the
-  names), the rest `sensor`s; ids that `reference_monitors.json` or the resolved listing
+  names from the hourly file's `SiteName`, AirData runs from the CSV's `Local Site Name`),
+  the rest `sensor`s; ids that `reference_monitors.json` or the resolved listing
   already carry are left to those layers. Monitor ids are compared in the dashed AQS form
   (AirNow's 9-digit `540390020` is `54-039-0020`), and an AirData monitor AirNow also
   reports is left to AirNow, so one monitor is one site. A database with readings from before the table
@@ -68,7 +70,8 @@ with the date it was last seen.
 - `site_id` repeats for oil & gas permits, where one API number has several applications.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - Readings-table sensors with no coordinates in any reading aren't sites (nothing to place
-  them by); AirNow names come only from the hourly file, so AirData-only monitors have none.
+  them by). AirData-only monitors with a blank `Local Site Name` have no name, and monitors
+  imported before AirData runs set names get one only on the next `ingest airdata`.
 - Where `site_id` repeats (oil & gas permits), `/site/<kind>/<ref>` shows the first row.
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting

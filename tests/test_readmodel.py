@@ -7,6 +7,7 @@ re-recorded too):
     AIRWV_UPDATE_SNAPSHOTS=1 .venv/bin/python -m pytest tests/test_readmodel.py
 """
 
+import importlib.util
 import json
 import os
 from datetime import datetime, timedelta, timezone
@@ -87,6 +88,40 @@ def test_api_near_matches_snapshot(tmp_path, monkeypatch):
     # the snapshot actually exercises every hazard category
     cats = {h["category"] for r in want.values() for h in r["hazards"]}
     assert cats == {"gas", "air", "water", "chemical", "sensor"}
+
+
+def test_api_near_lists_each_spill_once(tmp_path, monkeypatch):
+    # NRC files PHMSA 48-hour updates under a new report number; one that repeats its
+    # original (Blacksville natural gas, 2025-07-12) used to show twice here
+    c, _ = _client(tmp_path, monkeypatch)
+    for r in _near_all(c).values():
+        spills = [(h["label"], h["detail"], h["lat"], h["lon"]) for h in r["hazards"]
+                  if h["flag"] == "spill"]
+        assert len(spills) == len(set(spills)), spills
+
+
+def test_nrc_repeat_updates_are_dropped():
+    spec = importlib.util.spec_from_file_location(
+        "fetch_nrc_spills", Path(__file__).parent.parent / "scripts" / "fetch_nrc_spills.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    base = {"date": "2025-07-12", "materials": [{"name": "Natural Gas", "amount": 7.4}], "lat": 39.6}
+    spills = [
+        {**base, "report_id": 1436736, "description": "RELEASED FROM A RELIEF VALVE"},
+        {**base, "report_id": 1436930, "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 //"
+         " UPDATE IS AS FOLLOWS: - NO UPDATES TO REPORT. ORIGINAL REPORT: RELEASED FROM A RELIEF VALVE"},
+        {**base, "report_id": 1436931, "description": "THIS IS AN UPDATE TO REPORT #1436736 NO UPDATES",
+         "materials": [{"name": "Natural Gas", "amount": 9.0}]},     # new amount → kept
+        {**base, "report_id": 1436932, "description": "UPDATE TO NRC REPORT 1400000 NO UPDATES"},  # original absent
+        # same fields, but the update text adds facts (cf. 1422142, Clarksburg) → kept
+        {**base, "report_id": 1436933, "description": "/// 48HR UPDATE TO NRC REPORT #1436736 /// THERE WAS"
+         " A FIRE, ONE FATALITY INVOLVED. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ..."},
+        # "no updates" only inside the quoted original, not in the update itself → kept
+        {**base, "report_id": 1436934, "description": "UPDATE TO NRC REPORT 1436736: SMELL IS WORSE."
+         " ORIGINAL REPORT: ... NO UPDATES TO REPORT."},
+    ]
+    assert [s["report_id"] for s in mod.drop_repeat_updates(spills)] == [
+        1436736, 1436931, 1436932, 1436933, 1436934]
 
 
 def test_api_near_hazards_have_site_pages(tmp_path, monkeypatch):
@@ -197,6 +232,29 @@ def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
     with store._engine.connect() as conn:
         got = dict(conn.exec_driver_sql("SELECT sensor_id, lat FROM reading_sites").all())
     assert got["540250003"] == 38.36 and got["197127"] is None and len(got) == 8
+
+
+def test_airdata_ingest_names_its_monitors(tmp_path, monkeypatch):
+    import io
+    import zipfile
+
+    import httpx
+
+    from airwv.ingest import run_airdata
+    _, store = _client(tmp_path, monkeypatch)
+    head = "State Code,County Code,Site Num,Latitude,Longitude,Date Local,Arithmetic Mean,Local Site Name\n"
+    rows = ["54,099,0001,38.2,-82.5,2026-07-01,6.5,Fake Huntington Site\n",
+            "54,107,0009,39.3,-81.5,2026-07-01,7.0,\n"]   # AirData leaves some names blank
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("daily_88101_2026.csv", head + "".join(rows))
+    monkeypatch.setattr(httpx, "get", lambda *a, **k: httpx.Response(200, content=buf.getvalue()))
+    assert run_airdata(None, 2026, 2026, store=store) == 2
+    with store.read_model.connect() as conn:
+        names = dict(conn.exec_driver_sql(
+            "SELECT site_id, name FROM site WHERE layer = 'reading_sites' AND kind = 'reference_monitor'").all())
+    assert names["reference_monitor:54-099-0001"] == "Fake Huntington Site"
+    assert names["reference_monitor:54-107-0009"] is None
 
 
 def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
@@ -519,6 +577,32 @@ def test_api_query_series(tmp_path, monkeypatch):
     assert c.get("/api/query?site_id=sensor:197127&param=pm2_5,voc").status_code == 400
     assert c.get("/api/query?site_id=sensor:nope&param=pm2_5").status_code == 404
     assert c.get("/api/query?site_id=sensor:197127&param=pm2_5&from=July").status_code == 400
+
+
+def test_api_query_series_covers_airnow_monitors(tmp_path, monkeypatch):
+    c, store = _client(tmp_path, monkeypatch)
+    t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    store.save_readings([
+        # Charleston: reference_monitors.json lists it as 54-039-0020; AirNow stores 540390020
+        Reading(source="epa_airdata", sensor_id="54-039-0020", ts=t0 - timedelta(days=1), pm2_5=6.0,
+                lat=38.3456, lon=-81.6283),
+        Reading(source="airnow", sensor_id="540390020", ts=t0, pm2_5=7.0, lat=38.3456, lon=-81.6283),
+        # an AirNow-only site in reading_sites, with AirData's copy under the dashed id
+        Reading(source="airnow", sensor_id="540250003", ts=t0, pm2_5=5.5, lat=38.36, lon=-81.64),
+        Reading(source="epa_airdata", sensor_id="54-025-0003", ts=t0 - timedelta(days=1), pm2_5=4.5,
+                lat=38.36, lon=-81.64)])
+    r = c.get("/api/query?site_id=reference_monitor:54-039-0020&param=pm2_5").json()
+    assert [(x["source"], x["value"]) for x in r["rows"]] == [("epa_airdata", 6.0), ("airnow", 7.0)]
+    r = c.get("/api/query?site_id=reference_monitor:540250003&param=pm2_5").json()
+    assert r["site"]["layer"] == "reading_sites"
+    assert [(x["source"], x["value"]) for x in r["rows"]] == [("epa_airdata", 4.5), ("airnow", 5.5)]
+    assert len(c.get(r["csv"]).text.strip().splitlines()) == 3
+    # the site page's chart window comes from the latest reading of either id
+    p = c.get("/site/reference_monitor/540390020").text
+    assert "from=2026-06-01&amp;to=2026-07-01" in p
+    # PurpleAir ids are never read as AQS ids
+    from airwv.storage.readmodel import measured_refs
+    assert measured_refs({"kind": "sensor", "ref": "540390020"}) == ["540390020"]
 
 
 def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):

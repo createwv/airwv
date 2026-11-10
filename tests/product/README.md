@@ -37,18 +37,22 @@ Checks (`test_smoke.py`), per page × width unless noted:
   overlay (390: xfail until the place view lands)
 - every visible Leaflet map has a size. Statewide maps' first view contains West Virginia and is
   at most about 2× its size (limit ×2.25, measured along the tighter-fitting side, since a wide
-  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`) are only
+  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`, or every map on a `LOCAL_PAGES` page such as
+  `/place?…&view=adv`) are only
   checked to be centered on West Virginia
 - accessibility (`test_a11y`, per page × width × check; the browser asks for reduced motion):
   text contrast at WCAG AA (4.5:1; 3:1 for large text and for symbols inside a control;
   legend dots outside a control and disabled controls are exempt; text over images/gradients
   can't be measured and is skipped), `<img>` without `alt`, controls without an accessible
   name, mouse-only controls (`cursor:pointer` but not focusable), infinite animations under
-  reduced motion, and the first 15 Tab stops each showing a focus ring. The report's `a11y`
-  column counts what each page fails.
+  reduced motion, and the first 15 Tab stops each showing a focus ring (a stop without one is
+  looked at again 150 ms later). The report's `a11y` column counts what each page fails.
+  Checks listed in `A11Y_FLAKY` (now `air`-1280 `noFocus`) are xfail when they fail, with
+  what they saw, instead of red.
 
 Output in `tests/product/out/` (gitignored): `<page>-<width>.png` (first screen),
-`<page>-<width>-full.png`, `results.json`, `report.md`.
+`<page>-<width>-full.png`, `results.json`, `report.md`. `tests/product/baseline/` keeps a committed
+`report.md` and a few key shots from a run with Leaflet and Plotly vendored (no shims, no skips).
 
 **Data.** `AIRWV_PRODUCT_DB=<path>`, else `airwv.sqlite` in this checkout or the main
 checkout (worktrees), else a seeded fake DB (`AIRWV_PRODUCT_DB=seed` forces it). The file is

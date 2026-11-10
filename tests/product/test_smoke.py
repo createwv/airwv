@@ -6,9 +6,9 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, EXPLORE_AREA, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE,
+from conftest import (DEVICES, EXPLORE_AREA, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, MAP_PAGES, MORE_PAGE,
                       OPEN_PAGES, PAGES,
-                      SITE_PAGES, VIEWPORTS, WV_LINE, map_span)
+                      SITE_PAGES, VIEWPORTS, WV_LINE, local_map, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
@@ -204,7 +204,7 @@ def test_map_bounds(product, name, width):
         if m["width"] < 50 or m["height"] < 50:
             continue   # hidden/collapsed map (e.g. a tab not open yet)
         sized += 1
-        if m["id"] not in LOCAL_MAPS:
+        if not local_map(name, m):
             problem = _first_view_problem(m)
             assert problem is None, f"#{m['id']} {problem}"
             continue
@@ -230,6 +230,11 @@ A11Y_KNOWN = {
     ("open-facility", "contrast"): (
         "rgb(119, 128, 140)", "#sd-known-as (.sd-known-as in app.css) is #77808c, 4.00:1 on white"),
 }
+# Unreliable checks: (page, width, check) -> why. A failure here is xfail (shown under -rx, with
+# what it saw), not red; a pass is a pass. Not reproduced in isolation (35 runs, some 6 at once).
+A11Y_FLAKY = {
+    ("air", 1280, "noFocus"): "flaky: an /air Tab stop at 1280 sometimes reads with no focus ring",
+}
 
 
 @pytest.mark.parametrize("check", list(A11Y))
@@ -241,6 +246,8 @@ def test_a11y(product, name, width, check):
     mark, why = A11Y_KNOWN.get((name, check), (None, ""))
     if mark and a.get(check) and all(mark in x for x in a[check]):
         pytest.xfail(why)
+    if a.get(check) and (name, width, check) in A11Y_FLAKY:
+        pytest.xfail(f"{A11Y_FLAKY[name, width, check]}: {a[check]}")
     assert a.get(check) == [], f"{A11Y[check]}: {a.get(check)}"
 
 

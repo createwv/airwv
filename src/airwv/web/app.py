@@ -41,6 +41,7 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.storage.readmodel import measured_refs
 from airwv.web.public_api import PublicDataMiddleware
 from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
@@ -71,6 +72,17 @@ def _vendor(name: str, cdn: str) -> str:
 
 
 TEMPLATES.env.globals["vendor"] = _vendor
+
+
+class _VendorFiles(StaticFiles):
+    """static/vendor/: pinned third-party copies that never change in place (an upgrade is a
+    new file name, static/vendor/README.md), so browsers and Cloudflare keep them a year."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code in (200, 304):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
 
 
 def _parse_bbox(bbox: str | None) -> tuple[float, float, float, float] | None:
@@ -877,7 +889,7 @@ def create_app(store: Store) -> FastAPI:
             site = rm.site(conn, site_id)
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that site_id")
-            rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
+            rows, truncated = rm.series(conn, site["medium"], measured_refs(site), param,
                                         since=from_, until=to, limit=limit, over=over)
             prov = rm.provenance(conn, [site["layer"]])
         if format == "csv":
@@ -2116,18 +2128,21 @@ def create_app(store: Store) -> FastAPI:
         # here with it, unless ?statewide=1 asks for the statewide view.
         if not statewide and (place or (lat and lon)):
             return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                              context={"mode": "place", "home": True})
+                                              context={"mode": "place", "home": True,
+                                                       "adv": request.query_params.get("view") == "adv"})
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 
-    @app.get("/air", response_class=HTMLResponse)
+    @app.get("/air")
     def air(request: Request):
-        return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
-                                          context={"mode": "air"})
+        # /air's tools are the advanced view of a place now (DIRECTION.md §3); the rest of the
+        # query (?src=, ?param=, ?lat=&lon=, ?layers=, …) rides along so old links keep working
+        q = [(k, v) for k, v in request.query_params.multi_items() if k != "view"]
+        return RedirectResponse("/place?" + urlencode(q + [("view", "adv")]), status_code=302)
 
     @app.get("/analysis")
     def analysis_redirect():   # kept so old links / bookmarks still work
-        return RedirectResponse("/air", status_code=301)
+        return RedirectResponse("/place?view=adv", status_code=301)
 
     @app.get("/learn", response_class=HTMLResponse)
     def learn(request: Request):
@@ -2165,9 +2180,10 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/place", response_class=HTMLResponse)
     def place_page(request: Request):
         # "my place now" (basic view, DIRECTION.md §2): the page reads lat/lon/km/name
-        # from its URL and builds every line from /api/query
+        # from its URL and builds every line from /api/query; view=adv adds /air's tools under it
         return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                          context={"mode": "place"})
+                                          context={"mode": "place",
+                                                   "adv": request.query_params.get("view") == "adv"})
 
     @app.get("/explore", response_class=HTMLResponse)
     def explore_page(request: Request):
@@ -2233,7 +2249,7 @@ def create_app(store: Store) -> FastAPI:
                 site = rm.site(conn, f"{kind}:{ref[:2]}-{ref[2:5]}-{ref[5:]}")
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that id")
-            measured = rm.parameters(conn, site["medium"], site["ref"])
+            measured = rm.parameters(conn, site["medium"], measured_refs(site))
             prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
         names = [m["parameter"] for m in measured]
         chosen = next((m for m in measured if m["parameter"] == param), None) \
@@ -2295,7 +2311,10 @@ def create_app(store: Store) -> FastAPI:
 
     static_dir = Path(__file__).parent / "static"
     if static_dir.is_dir():
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        if (static_dir / "vendor").is_dir():   # before /static, which would match it first
+            app.mount("/static/vendor", _VendorFiles(directory=str(static_dir / "vendor")),
+                      name="vendor")
+        app.mount("/static",StaticFiles(directory=str(static_dir)), name="static")
 
     return app
 

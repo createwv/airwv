@@ -37,7 +37,7 @@ def test_air_line_links_the_sensor_page():
     html = _js(f"S.airLine({json.dumps(air)}, P)")
     assert '<a href="/site/reference_monitor/54-039-0020">Charleston &lt;EPA&gt;</a>' in html
     assert '<a href="/site/reference_monitor/54-039-0020">data behind this →</a>' in html
-    assert '<a href="/air">statewide map →</a>' in _js("S.airLine({sites: []}, P)")
+    assert '<a href="/?statewide=1">statewide map →</a>' in _js("S.airLine({sites: []}, P)")
 
 
 def test_water_line_links_the_gauge_or_sample_site_page():
@@ -52,3 +52,10 @@ def test_place_query_is_what_home_reopens():
     assert _js("S.placeQuery({id: 'rutledge', km: 8})") == "place=rutledge&km=8"
     assert _js("S.placeQuery({id: '', name: 'My home', lat: 38.38, lon: -81.585, km: 16})") \
         == "lat=38.3800&lon=-81.5850&name=My%20home&km=16"
+
+
+def test_view_href_spells_out_the_depth():
+    # basic is written, not dropped, so a saved Advanced doesn't send the visitor back to it
+    loc = "{pathname: '/place', search: '?place=rutledge&km=8&view=adv'}"
+    assert _js(f"S.viewHref('basic', '', {loc})") == "/place?place=rutledge&km=8&view=basic"
+    assert _js(f"S.viewHref('adv', '#pl-dc', {loc})") == "/place?place=rutledge&km=8&view=adv#pl-dc"

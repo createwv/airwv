@@ -67,11 +67,10 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  // default: nearest community sensor to ?lat=&lon= if the link has one, else the
+  // default: nearest community sensor to the place (PLACE_AT) if there is one, else the
   // highest current PM2.5; the reason is shown above the chart (AIRWV_WV.pickDefaultSensor)
-  const q = new URLSearchParams(location.search), qlat = parseFloat(q.get('lat')), qlon = parseFloat(q.get('lon'));
   setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors,
-    isNaN(qlat) || isNaN(qlon) ? null : {lat: qlat, lon: qlon, label: 'the place in this link'}));
+    PLACE_AT && {lat: PLACE_AT.lat, lon: PLACE_AT.lon, label: window.AIRWV_PLACE ? PLACE_AT.label : 'the place in this link'}));
   // legend "as of": the newest community reading, so people know it's a live snapshot
   const asof = $('legend-asof');
   if (asof){
@@ -104,6 +103,10 @@ const URL_LAYERS = {sensors:'community', ref:'reference', ozone:'ozone', reports
 const urlLayersOn = () => Object.keys(URL_LAYERS).filter(k => layerState[URL_LAYERS[k]]);
 const DEFAULT_URL_LAYERS = urlLayersOn().join(',');
 const URL_STATE = AirwvState.get();
+// the place to pin: on /place?view=adv, the one place.js shows (a known place has no lat/lon in
+// the URL); else ?lat=&lon=[&label=]
+const PLACE_AT = window.AIRWV_PLACE
+  || (URL_STATE.lat != null ? {lat: URL_STATE.lat, lon: URL_STATE.lon, label: URL_STATE.label} : null);
 if (URL_STATE.layers) Object.keys(URL_LAYERS).forEach(k => { layerState[URL_LAYERS[k]] = URL_STATE.layers.includes(k); });
 if (URL_STATE.param && [...$('field').options].some(o => o.value === URL_STATE.param)) $('field').value = URL_STATE.param;
 if (URL_STATE.from) $('start').value = URL_STATE.from;
@@ -152,7 +155,7 @@ function drawMap(sensors){
   }
   redrawSensors();
   // a place in the URL (state.js) pins and zooms to it; otherwise the statewide fitWV view stands
-  if (URL_STATE.lat != null) showPlace(URL_STATE.lat, URL_STATE.lon, URL_STATE.label || 'Selected place');
+  if (PLACE_AT) showPlace(PLACE_AT.lat, PLACE_AT.lon, PLACE_AT.label || 'Selected place');
   loadSources();
   loadReports();
   loadFacilities();

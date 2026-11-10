@@ -142,5 +142,8 @@ alembic revision --autogenerate -m "add column X"
 alembic upgrade head
 ```
 
+`tests/test_migrations.py` fails if `alembic upgrade head` no longer builds what the
+models describe, so a model change needs its migration in the same commit.
+
 Alembic reads `AIRWV_DATABASE_URL` (same as the app), so run these from the repo root
 with the env loaded (`set -a; . ./.env; set +a`).
