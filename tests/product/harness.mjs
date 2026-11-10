@@ -240,17 +240,20 @@ async function focusProbe(page, scope = null, stops = 15) {
       "a[href], button, input:not([type=hidden]):not(.hp), select, textarea, summary")?.focus(), scope);
     await page.keyboard.press("Shift+Tab");   // so the Tab below lands on it from the keyboard
   }
+  const look = () => page.evaluate(s => {
+    const el = document.activeElement;
+    if (!el || el === document.body || (s && !el.closest(s))) return null;
+    const f = getComputedStyle(el);
+    const shown = (f.outlineStyle !== "none" && parseFloat(f.outlineWidth) > 0) || f.boxShadow !== "none";
+    const t = (el.getAttribute("aria-label") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40);
+    return { shown, el: `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""} "${t}" `
+      + `(outline ${f.outlineStyle} ${f.outlineWidth}, focus-visible ${el.matches(":focus-visible")})` };
+  }, scope);
   for (let i = 0; i < stops; i++) {
     await page.keyboard.press("Tab");
-    const r =await page.evaluate(s => {
-      const el = document.activeElement;
-      if (!el || el === document.body || (s && !el.closest(s))) return null;
-      const f = getComputedStyle(el);
-      const shown = (f.outlineStyle !== "none" && parseFloat(f.outlineWidth) > 0) || f.boxShadow !== "none";
-      const t = (el.getAttribute("aria-label") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40);
-      return { shown, el: `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""} "${t}" `
-        + `(outline ${f.outlineStyle} ${f.outlineWidth}, focus-visible ${el.matches(":focus-visible")})` };
-    }, scope);
+    let r = await look();
+    // a late render can catch a stop mid-update (seen once in a while on /air at 1280): look again
+    if (r && !r.shown) { await page.waitForTimeout(150); r = await look(); }
     if (!r) break;
     visited++;
     if (!r.shown) missing.push(r.el);
