@@ -79,7 +79,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Explore: a county filter and a "where value over N" filter on `/api/query`, with tests [auto:M]
 - [x] CORS + rate limit on `/api/*` and `/data/dumps/*` (after Postgres) [auto:S]
 - [x] Add published events (`events` with status 'published') as an `events.csv.gz` dump [auto:S]
-- [ ] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
+- [x] Parquet dumps once `pyarrow` is an approved dependency [auto:S]
 - [x] Show the dumps' "as of" date and file sizes on `/data` from `manifest.json` [auto:S]
 - [x] Age cap for spill alerts (e.g. skip reports dated more than 60 days back), with the cap stated in the email [auto:S]
 - [x] Tell a cleared violation that comes back apart from one already seen (remember when each record was last present) [auto:S]
