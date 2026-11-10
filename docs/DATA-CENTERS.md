@@ -167,8 +167,8 @@ data center developers.
   (340 users, 609 billion gallons in 2024; no data center category) in its
   [2025 Annual Water Resources Report](https://apps.dep.wv.gov/Documents/DWWM/WaterUse/WRPAReports/2025AnnualReport.pdf)
   (Dec 2025, pp. 6-8), and its [LQU page](https://dep.wv.gov/WWE/wateruse/AnnualCertification-LargeQuantityUsers/Pages/default.aspx)
-  lists no facilities. None of the sites is operating yet, so none would have reported
-  (checked 2026-11-09). We did not file a records request.
+  lists no facilities. The permitted R13 sites (Ridgeline, Adams Fork) aren't built yet, so
+  they wouldn't have reported (checked 2026-11-09). We did not file a records request.
 - **No operating noise measurement** anywhere in WV. The only figure is a neighbor's
   construction reading at Monarch.
 - **No official list** of HIDC or microgrid certifications. Commerce's program page lists
@@ -186,8 +186,10 @@ data center developers.
   As of 2026-11-09 the page no longer links the R13 ones, and the old
   `dep.wv.gov/daq/permitting/Documents/Transgas-Adams-Fork*` PDFs return 404. DEP says
   finished permits' documents are in its Application Enhancer database
-  (<https://documents.dep.wv.gov/>, guest login on the NSR page; search 13-3713, 13-3714,
-  13-3715). The Air Quality Board's certified appeal records (25-02-AQB for Ridgeline) also
+  (<https://documents.dep.wv.gov/>, public login listed on the NSR page; search Secondary ID
+  13-3713, 13-3714, 13-3715). It is a JavaScript app with a limited number of public
+  licenses, and DEP says "usually, the only file available to view will be the permit
+  application", so we haven't searched it yet. The Air Quality Board's certified appeal records (25-02-AQB for Ridgeline) also
   appear to include the evaluations.
 - WV DEP NPDES/stormwater permit search.
 - WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
