@@ -425,20 +425,15 @@ class Store:
         """One (lat, lon) per sensor for a source, from stored readings.
 
         Used for reference monitors (EPA AirNow / AirData), whose coords live on the
-        readings rather than in the community listing.
+        readings rather than in the community listing. Reads ``reading_sites`` (the
+        coords of each sensor's latest located reading), not ``readings`` itself.
         """
-        out: dict[str, tuple] = {}
         with self._session_factory() as session:
-            sids = list(session.scalars(
-                select(ReadingRow.sensor_id).where(ReadingRow.source == source).distinct()))
-            for sid in sids:
-                row = session.execute(
-                    select(ReadingRow.lat, ReadingRow.lon).where(
-                        (ReadingRow.sensor_id == sid) & (ReadingRow.source == source)
-                        & ReadingRow.lat.isnot(None)).limit(1)).first()
-                if row:
-                    out[sid] = (row[0], row[1])
-        return out
+            rows = session.execute(
+                select(ReadingSite.sensor_id, ReadingSite.lat, ReadingSite.lon).where(
+                    ReadingSite.source == source, ReadingSite.lat.isnot(None),
+                    ReadingSite.lon.isnot(None))).all()
+        return {sid: (lat, lon) for sid, lat, lon in rows}
 
     # -- subscriptions -----------------------------------------------------
 
