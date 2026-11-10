@@ -51,7 +51,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Data centers, primary records: pull DEP DAQ engineering evaluations for R14-0042, R13-3713/3714/3715 and DEP water-use (large-quantity user) reports; fill the "none found" water and generator fields in `data_centers.json`. [auto]
 - [ ] Data centers, PSC: search the PSC case system for each operator and confirm the 24-0611-E-T-PW final order; add case links to `dockets`. [auto]
 - [x] Data centers, watch list: a dated "open comment periods / hearings" list in DATA-CENTERS.md (e.g. R14-0042 comments due 2026-11-13), refreshed from DEP notices. [auto]
-- [ ] Data centers, geocode: add verified coordinates (from permits or parcel records) for sites that have a street address, with `location_precision` filled. [auto]
+- [x] Data centers, geocode: add verified coordinates (from permits or parcel records) for sites that have a street address, with `location_precision` filled. [auto]
 - [x] Per-fact source keys in `data_centers.json` (a source index next to each field), so each card line links its own source [auto:S]
 - [x] When the Place picker and Depth toggle merge, show the data-center card on `/place` and the full record under `view=adv` [auto:S]
 - [x] Move `/api/near` and the other site kinds onto `/site/<kind>/<id>` (the existing "Site pages" item can use `site.html`) [auto:M]
