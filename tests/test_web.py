@@ -198,6 +198,28 @@ def test_air_filters_sheet(tmp_path):
     assert 'card.after(filters)' in page and 'id="map-card"' in page
 
 
+def test_air_is_place_advanced(tmp_path):
+    # DIRECTION.md §3: /air redirects to /place?…&view=adv, keeping the rest of its query
+    c = _client(tmp_path)
+    r = c.get("/air?src=Amos+Plant&param=voc&view=basic", follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"] == "/place?src=Amos+Plant&param=voc&view=adv"
+    assert c.get("/air", follow_redirects=False).headers["location"] == "/place?view=adv"
+    assert c.get("/analysis", follow_redirects=False).headers["location"] == "/place?view=adv"
+    # view=adv: the place first, then /air's tools and scripts (place.js before app.js)
+    adv = c.get("/place?place=rutledge&km=8&view=adv").text
+    assert adv.index('id="pl-status"') < adv.index('id="map-card"') < adv.index('id="pl-changes"')
+    assert adv.index("/static/place.js") < adv.index("/static/app.js")
+    assert "areas.js" in adv and "wellsvoc.js" in adv
+    assert 'id="pl-adv" href="?view=adv" aria-current="page"' in adv
+    nav = adv[adv.index('<nav class="modenav"'):adv.index("</nav>")]
+    assert 'class="on">Air</a>' in nav and 'class="on">My place' not in nav
+    # basic (the default): no map tools, Basic is the current depth
+    basic = c.get("/place?place=rutledge&km=8").text
+    assert 'id="map-card"' not in basic and "/static/app.js" not in basic
+    assert 'id="pl-basic" href="?view=basic" aria-current="page"' in basic
+
+
 def test_nav_collapsed(tmp_path):
     # docs/DIRECTION.md §3: <= 6 top-level items, the rest under "More", no emoji, Admin in the footer
     import re

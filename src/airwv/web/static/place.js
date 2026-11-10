@@ -94,7 +94,7 @@ function airLine(air, p) {
   const live = withVal.filter(s => isLive(s.latest.ts));
   const s = live[0] || withVal[0];
   if (!s) return line('Air', null, `no sensor or monitor with readings within ${miles(p.km)} mi.`,
-                      '<a href="/air">statewide map →</a>');
+                      '<a href="/?statewide=1">statewide map →</a>');
   const v = s.latest.value, b = PM_BANDS[bandIx(v)];
   const who = s.kind === 'reference_monitor' ? 'nearest EPA monitor' : 'nearest sensor';
   const when = live.length ? `as of ${fmtTime(s.latest.ts)}` : `no live reading; last one ${fmtTime(s.latest.ts)}`;
