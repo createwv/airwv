@@ -84,7 +84,8 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Age cap for spill alerts (e.g. skip reports dated more than 60 days back), with the cap stated in the email [auto:S]
 - [x] Tell a cleared violation that comes back apart from one already seen (remember when each record was last present) [auto:S]
 - [x] Admin view: per-subscription record alert history (what fired, what was taken as the starting point) at `/api/admin/subscriptions` [auto:S]
-- [ ] (session with Corey) SMTP go-live: set the email settings on papa-greatness, send the waitlist confirmations, check the first record alert email. [auto]
+- [ ] (session with Corey) SMTP go-live: set the email settings on papa-greatness, send the waitlist confirmations, check the first record alert email.
+- [ ] (session with Corey) Call Edward Andrews at DEP, (304) 926-0499 ext. 41244, to confirm the R14-0042 (Monarch) comment deadline: DEP's pages say Nov 13, the posted notice says Oct 30. Work to Nov 13 until confirmed.
 - [x] Serve the glossary on the site (for example a section on `/learn`) so the footer link stays on the site instead of going to GitHub [auto:S]
 - [x] Add a test that fails if "source" is used alone in page text, nav or popups, per the glossary [auto:S]
 - [x] Exclude PM readings over 1000 µg/m³ from the `/api/areas` daily trend as well as the current value, and update `api_areas.json` [auto:S]
