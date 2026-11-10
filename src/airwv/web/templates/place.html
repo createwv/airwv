@@ -10,12 +10,24 @@
         <option value="40.25">25 miles</option>
       </select></label>
       <button id="pl-loc" type="button">Use my location</button>
+      {# depth toggle (DIRECTION.md §2): same place, time and parameter; only how much is shown #}
+      <span class="pl-depth" role="group" aria-label="How much to show">
+        <a id="pl-basic" href="?view=basic"{% if not adv %} aria-current="page"{% endif %}>Basic</a>
+        <a id="pl-adv" href="?view=adv"{% if adv %} aria-current="page"{% endif %}>Advanced</a>
+      </span>
     </div>
   </div></div>
 
   <h1 class="pl-h" id="pl-title">My place now</h1>
   <div class="card"><div id="pl-status" class="pl-status"><div class="pl-line meta">Loading…</div></div></div>
+</div>
 
+{% if adv %}
+<h2 class="pl-h2 pl-advh">Advanced: map, charts and records</h2>
+{% include "_air_controls.html" %}
+{% endif %}
+
+<div class="page">
   <h2 class="pl-h2">What changed <span class="meta" id="pl-since"></span></h2>
   <div class="card"><div id="pl-changes" class="pl-status"><div class="pl-line meta">Loading…</div></div></div>
 
@@ -34,5 +46,10 @@
 {% block scripts %}
 <script src="/static/dc.js?v={{ asset_v }}"></script>
 <script src="/static/place.js?v={{ asset_v }}"></script>
+{% if adv %}{# after place.js: it writes the place into the URL and window.AIRWV_PLACE first #}
+<script src="/static/app.js?v={{ asset_v }}"></script>
+<script src="/static/areas.js?v={{ asset_v }}"></script>
+<script src="/static/wellsvoc.js?v={{ asset_v }}"></script>
+{% endif %}
 <script src="/static/reporting.js?v={{ asset_v }}"></script>
 {% endblock %}

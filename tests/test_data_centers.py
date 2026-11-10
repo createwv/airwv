@@ -75,6 +75,30 @@ def test_every_site_is_sourced():
             assert src["url"].startswith("https://"), s["id"]
 
 
+def test_cite_keys_point_at_real_facts_and_sources():
+    """``cite`` maps "section.field" or "use.N" to indexes into the site's sources; a key must
+    name a field that has a fact (not a bare "not disclosed" / "none found") and a real source."""
+    for s in SITES:
+        for key, idx in (s.get("cite") or {}).items():
+            section, field = key.split(".")
+            value = s["use"][int(field)]["evidence"] if section == "use" else s[section][field]
+            assert value.strip().lower() not in ("not disclosed", "none found", "not applicable"), (s["id"], key)
+            assert idx and len(set(idx)) == len(idx), (s["id"], key)
+            assert all(isinstance(i, int) and 0 <= i < len(s["sources"]) for i in idx), (s["id"], key)
+
+
+def test_card_line_links_its_own_source(tmp_path):
+    c = dcs.card(MONARCH)
+    lines = {k["label"]: k for t in c["topics"] for k in t["known"] + t["gaps"]}
+    dep = MONARCH["sources"][0]
+    assert lines["Water permits"]["sources"] == [{**dep, "n": 1}]
+    assert lines["Water source"]["sources"] == []   # no key: falls back to the site's source list
+    page = _client(tmp_path).get("/site/data_center/monarch-compute-campus").text
+    assert f'aria-label="Data source 1: {dep["title"]}">[1]</a>' in page
+    adv = _client(tmp_path).get("/site/data_center/monarch-compute-campus?view=adv").text
+    assert 'aria-label="Data source 3:' in adv   # Nscale, on the cooling row
+
+
 def test_watch_list_has_every_comment_deadline():
     md = (Path(__file__).parents[1] / "docs" / "DATA-CENTERS.md").read_text()
     watch = md.split("## Watch list", 1)[1].split("\n## ", 1)[0]
@@ -104,7 +128,7 @@ def test_card_sorts_known_and_not_disclosed():
     topics = {t["topic"]: t for t in c["topics"]}
     assert list(topics) == ["water", "energy", "noise", "purpose"]
     water = topics["water"]
-    assert {"label": "How much water it takes", "value": None} in water["gaps"]   # "not disclosed"
+    assert {"label": "How much water it takes", "value": None, "sources": []} in water["gaps"]   # "not disclosed"
     assert any(k["label"] == "Water source" and "Ohio River" in k["value"] for k in water["known"])
     assert all(not dcs.is_gap(k["value"]) for t in c["topics"] for k in t["known"])
     assert any(k["label"].startswith("Generative AI (high") for k in topics["purpose"]["known"])
@@ -114,7 +138,7 @@ def test_card_sorts_known_and_not_disclosed():
 def test_card_keeps_the_note_on_a_qualified_gap():
     dc = {**MONARCH, "air_permits": {"backup_generators": "none found (federal facility)"}}
     energy = next(t for t in dcs.card(dc)["topics"] if t["topic"] == "energy")
-    assert {"label": "Backup generators", "value": "none found (federal facility)"} in energy["gaps"]
+    assert {"label": "Backup generators", "value": "none found (federal facility)", "sources": []} in energy["gaps"]
 
 
 def test_card_shows_open_comment_periods_until_the_deadline():
@@ -180,7 +204,7 @@ def test_site_page_basic_and_advanced(tmp_path):
     page = c.get(f"/site/data_center/{unmapped['id']}")
     assert page.status_code == 200 and "exact location not public" in page.text
     assert c.get("/site/data_center/no-such-site").status_code == 404
-    assert c.get("/site/well/anything").status_code == 404   # other kinds come with the site-pages item
+    assert c.get("/site/well/anything").status_code == 404   # an unknown well
 
 
 def test_api_full_record_for_the_advanced_view(tmp_path):

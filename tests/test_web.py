@@ -146,9 +146,9 @@ def test_sources_have_stable_site_ids(tmp_path):
     for s in rows:
         assert raw[int(s["id"][4:])]["name"] in s["names"]
     amos = next(s for s in rows if s["name"] == "John Amos Power Plant")
-    r = c.get(f"/site/facility/{amos['id']}", follow_redirects=False)
-    assert r.status_code == 307 and r.headers["location"].startswith("/sources#facility=")
-    assert c.get("/site/facility/tri-99999", follow_redirects=False).status_code == 404
+    r = c.get(f"/site/facility/{amos['id']}")
+    assert r.status_code == 200 and "/sources#facility=" in r.text
+    assert c.get("/site/facility/tri-99999").status_code == 404
 
 
 def test_guide_endpoint(tmp_path):
@@ -196,6 +196,28 @@ def test_air_filters_sheet(tmp_path):
     assert "<summary>Filters" in sheet
     assert all(hook in sheet for hook in ['id="field"', 'id="start"', 'id="end"', 'id="dl"', 'id="layers"'])
     assert 'card.after(filters)' in page and 'id="map-card"' in page
+
+
+def test_air_is_place_advanced(tmp_path):
+    # DIRECTION.md §3: /air redirects to /place?…&view=adv, keeping the rest of its query
+    c = _client(tmp_path)
+    r = c.get("/air?src=Amos+Plant&param=voc&view=basic", follow_redirects=False)
+    assert r.status_code == 302
+    assert r.headers["location"] == "/place?src=Amos+Plant&param=voc&view=adv"
+    assert c.get("/air", follow_redirects=False).headers["location"] == "/place?view=adv"
+    assert c.get("/analysis", follow_redirects=False).headers["location"] == "/place?view=adv"
+    # view=adv: the place first, then /air's tools and scripts (place.js before app.js)
+    adv = c.get("/place?place=rutledge&km=8&view=adv").text
+    assert adv.index('id="pl-status"') < adv.index('id="map-card"') < adv.index('id="pl-changes"')
+    assert adv.index("/static/place.js") < adv.index("/static/app.js")
+    assert "areas.js" in adv and "wellsvoc.js" in adv
+    assert 'id="pl-adv" href="?view=adv" aria-current="page"' in adv
+    nav = adv[adv.index('<nav class="modenav"'):adv.index("</nav>")]
+    assert 'class="on">Air</a>' in nav and 'class="on">My place' not in nav
+    # basic (the default): no map tools, Basic is the current depth
+    basic = c.get("/place?place=rutledge&km=8").text
+    assert 'id="map-card"' not in basic and "/static/app.js" not in basic
+    assert 'id="pl-basic" href="?view=basic" aria-current="page"' in basic
 
 
 def test_nav_collapsed(tmp_path):
@@ -621,6 +643,15 @@ def test_vendor_falls_back_to_cdn(tmp_path, monkeypatch):
     assert web._vendor("leaflet.js", "https://cdn/x.js") == "/static/vendor/leaflet.js"
     html = _client(tmp_path).get("/").text
     assert "/static/vendor/leaflet.js" in html and "unpkg.com/leaflet@1.9.4/dist/leaflet.js" not in html
+
+
+def test_vendor_files_cached_immutable(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/static/vendor/leaflet.css")
+    assert r.status_code == 200 and "immutable" in r.headers["cache-control"]
+    assert "max-age=31536000" in c.get("/static/vendor/images/marker-icon.png").headers["cache-control"]
+    assert "immutable" not in c.get("/static/state.js").headers.get("cache-control", "")
+    assert c.get("/static/vendor/nope.js").status_code == 404
 
 
 def test_home_is_my_place_when_a_place_is_set(tmp_path):

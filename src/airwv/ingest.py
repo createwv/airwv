@@ -412,18 +412,23 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
 
     # place-based record alerts (spills, violations): records new for the place since last check
     record_subs = [s for s in subs if is_record_sub(s)]
-    baselines = {}
+    baselines, present = {}, {}
     if record_subs:
         with store.read_model.connect() as conn:
             records = store.read_model.alert_records(conn, RECORD_RULES)
         seen = store.seen_records(s.id for s in record_subs)
-        rec_alerts, baselines = evaluate_records(record_subs, records, seen, now)
+        last_present = store.records_last_present(s.id for s in record_subs)
+        rec_alerts, baselines, present = evaluate_records(record_subs, records, seen, now,
+                                                          last_present=last_present)
         alerts += rec_alerts
     for sub_id, keys in baselines.items():
         log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
                  "" if send else " (not stored in a dry run)")
         if send:
-            store.mark_records_seen(sub_id, keys, now)
+            store.mark_records_seen(sub_id, keys, now, origin="baseline")
+    if send:
+        for sub_id, keys in present.items():
+            store.mark_records_present(sub_id, keys, now)
 
     base = os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/")
     tokens = {s.id: s.token for s in subs if getattr(s, "token", None)}
@@ -443,7 +448,8 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
             notifier_factory(a.channel).send(a)
             store.mark_notified(a.subscription_id, now)
             if a.kind == "record":
-                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now)
+                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now,
+                                        origin="alert")
         except Exception as exc:  # one bad channel shouldn't block the rest
             log.warning("  failed to send alert %d via %s: %s", a.subscription_id, a.channel, exc)
     return alerts
@@ -567,6 +573,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
             continue
         agg: dict = defaultdict(list)  # (site, date) -> [values]
         meta: dict = {}                # site -> (lat, lon)
+        names: dict = {}               # site -> "Local Site Name" (blank for some monitors)
         # some years' zips list a directory entry first — pick the actual CSV
         csv_name = next((n for n in zf.namelist() if n.endswith(".csv")), zf.namelist()[0])
         with zf.open(csv_name) as fh:
@@ -582,6 +589,8 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
                 site = f"{row['State Code']}-{row['County Code']}-{row['Site Num']}"
                 agg[(site, ts)].append(val)
                 meta[site] = (lat, lon)
+                if (row.get("Local Site Name") or "").strip():
+                    names[site] = row["Local Site Name"].strip()
         readings = [
             Reading(source="epa_airdata", sensor_id=site, ts=ts,
                     lat=meta[site][0], lon=meta[site][1],
@@ -589,6 +598,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
             for (site, ts), vals in agg.items()
         ]
         n = store.save_readings(readings)
+        store.name_reading_sites("epa_airdata", names)
         total += n
         log.info("airdata %s: %d daily readings from %d monitors", year, n, len({k[0] for k in agg}))
     log.info("airdata: %d total daily readings stored (source=epa_airdata, %d–%d)",
@@ -696,6 +706,7 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         return 0
     readings, monitors = _parse_airnow(content)
     n = store.save_readings(readings)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors.items()})
     total = _airnow_save_monitors(config, monitors)
     log.info("airnow: %d readings from %d monitors (HourlyAQObs_%s; %d monitors known total)",
              n, len(monitors), stamp, total)
@@ -728,6 +739,7 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
                 readings, monitors = _parse_airnow(got)
                 total += store.save_readings(readings)
                 monitors_all.update(monitors)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow backfill: %d readings across %d days", total, days)
     return total
@@ -773,6 +785,7 @@ def run_airnow_hourly(config: Config, year: int, store=None, workers: int = 10) 
     if batch:
         total += store.save_readings(batch)
     client.close()
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow hourly %d: %d readings from %d files", year, total, len(hours))
     return total

@@ -11,7 +11,9 @@ from __future__ import annotations
 import abc
 import logging
 
-log = logging.getLogger("airwv.notify")
+from airwv.alerts import RECORD_RULES
+
+log =logging.getLogger("airwv.notify")
 
 
 RECORD_LABELS = {"spills": ("reported spill", "reported spills"),
@@ -45,7 +47,13 @@ def alert_subject(alert) -> str:
     if getattr(alert, "kind", "threshold") == "record":
         n = len(alert.records)
         noun = RECORD_LABELS.get(alert.field, (alert.field, alert.field))[n != 1]
-        return f"AirWV: {n} new {noun} near {alert.label or 'your place'}"
+        place = alert.label or "your place"
+        back = sum(1 for r in alert.records if r.get("last_present"))
+        if back == n:
+            return f"AirWV: {n} {noun} back on the list near {place}"
+        if back:
+            return f"AirWV: {n - back} new and {back} returning {noun} near {place}"
+        return f"AirWV: {n} new {noun} near {place}"
     if getattr(alert, "kind", "threshold") == "trend":
         return f"AirWV trend alert: {alert.field} rising +{alert.value}% at sensor {alert.sensor_id}"
     return f"AirWV alert: {alert.field} {alert.value} ≥ {alert.threshold} at sensor {alert.sensor_id}"
@@ -60,15 +68,21 @@ def alert_body(alert) -> str:
         lines = []
         for r in recs[:MAX_RECORD_LINES]:
             lines.append(f"• {record_line(r)}")
+            if r.get("last_present"):
+                lines.append(f"  Back on the list: AirWV last saw this listed on {r['last_present']}, "
+                             "and it was off the list after that.")
             if r.get("url"):
                 lines.append(f"  {r['url']}")
         if len(recs) > MAX_RECORD_LINES:
             lines.append(f"…and {len(recs) - MAX_RECORD_LINES} more.")
         sources = sorted({r["source"] for r in recs if r.get("source")})
+        cap = RECORD_RULES.get(alert.field, {}).get("max_age_days")
+        noun = RECORD_LABELS.get(alert.field, (alert.field, alert.field))[1]
         return (f"New in the public records AirWV follows, near {alert.label or 'your place'}:\n\n"
                 + "\n".join(lines)
                 + "\n\nThese are public records, not findings of harm; the date is the record's own, "
                 "and it can be older than the day it reached us. Check the linked source for the details."
+                + (f"\nThis alert leaves out {noun} dated more than {cap} days back." if cap else "")
                 + (f"\nSource: {'; '.join(sources)}." if sources else "")
                 + footer)
     if getattr(alert, "kind", "threshold") == "trend":

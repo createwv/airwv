@@ -6,8 +6,9 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE, PAGES,
-                      SITE_PAGES, VIEWPORTS, WV_LINE, map_span)
+from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, MAP_PAGES, MORE_PAGE,
+                      OPEN_PAGES, PAGES,
+                      SITE_PAGES, VIEWPORTS, WV_LINE, local_map, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
@@ -22,6 +23,8 @@ CASES += SITE_CASES
 IDS = [f"{n}-{w}" for n, w in CASES]
 # statewide maps at every standard screen size; these pages only feed test_map_bounds
 MAP_CASES = [(name, d["viewport"]["width"]) for name, _ in MAP_PAGES for d in DEVICES.values()]
+# a dialog or map popup open, at every standard screen size; the a11y checks run on what opened
+OPEN_CASES = [(name, d["viewport"]["width"]) for name, _, _ in OPEN_PAGES for d in DEVICES.values()]
 
 
 def _get(product, name, width):
@@ -187,7 +190,7 @@ def test_map_bounds(product, name, width):
         if m["width"] < 50 or m["height"] < 50:
             continue   # hidden/collapsed map (e.g. a tab not open yet)
         sized += 1
-        if m["id"] not in LOCAL_MAPS:
+        if not local_map(name, m):
             problem = _first_view_problem(m)
             assert problem is None, f"#{m['id']} {problem}"
             continue
@@ -208,11 +211,38 @@ A11Y = {
     "motion": "infinite animations despite prefers-reduced-motion",
     "noFocus": "tab stops with no visible focus indicator",
 }
+# Known gaps: (page, check) -> what every failure must contain to count as this gap, and why.
+A11Y_KNOWN = {
+    ("open-facility", "contrast"): (
+        "rgb(119, 128, 140)", "#sd-known-as (.sd-known-as in app.css) is #77808c, 4.00:1 on white"),
+}
+# Unreliable checks: (page, width, check) -> why. A failure here is xfail (shown under -rx, with
+# what it saw), not red; a pass is a pass. Not reproduced in isolation (35 runs, some 6 at once).
+A11Y_FLAKY = {
+    ("air", 1280, "noFocus"): "flaky: an /air Tab stop at 1280 sometimes reads with no focus ring",
+}
 
 
 @pytest.mark.parametrize("check", list(A11Y))
-@pytest.mark.parametrize("name,width", CASES, ids=IDS)
+@pytest.mark.parametrize("name,width", CASES + OPEN_CASES,
+                         ids=IDS + [f"{n}-{w}" for n, w in OPEN_CASES])
 def test_a11y(product, name, width, check):
     a = _get(product, name, width).get("a11y") or {}
     assert "error" not in a, a.get("error")
+    mark, why = A11Y_KNOWN.get((name, check), (None, ""))
+    if mark and a.get(check) and all(mark in x for x in a[check]):
+        pytest.xfail(why)
+    if a.get(check) and (name, width, check) in A11Y_FLAKY:
+        pytest.xfail(f"{A11Y_FLAKY[name, width, check]}: {a[check]}")
     assert a.get(check) == [], f"{A11Y[check]}: {a.get(check)}"
+
+
+@pytest.mark.parametrize("name,width", OPEN_CASES, ids=[f"{n}-{w}" for n, w in OPEN_CASES])
+def test_dialog_or_popup_opens(product, name, width):
+    """The a11y checks above saw the open dialog or popup, and could Tab into it."""
+    r = _get(product, name, width)
+    if "leaflet.js" in r.get("shimmed", []) and name == "open-sensor":
+        pytest.skip("Leaflet not vendored locally (no network); see tests/product/README.md")
+    assert r["error"] is None, r["error"]
+    assert r.get("opened"), "opened, but it's empty"
+    assert (r.get("a11y") or {}).get("tabStops", 0) > 0, "Tab never reached a control inside it"

@@ -34,6 +34,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from airwv.storage import Store
 from airwv.storage.readmodel import FILE_LAYERS
@@ -148,6 +149,31 @@ def write_dumps(store: Store, out_dir: Path | str | None = None, now: datetime |
     tmp.write_text(buf.getvalue() + "\n", encoding="utf-8")
     tmp.replace(out / "manifest.json")
     return manifest
+
+
+def human_size(n: int) -> str:
+    if n < 1000:
+        return f"{n} bytes"
+    if n < 999_500:
+        return f"{n / 1e3:.0f} KB"
+    if n < 999_950_000:
+        return f"{n / 1e6:.1f} MB"
+    return f"{n / 1e9:.1f} GB"
+
+
+def summary(out_dir: Path | str | None = None) -> dict | None:
+    """What /data shows from manifest.json: ``as_of`` (Eastern) and ``sizes`` by file name.
+    None until the first run has written it, or if it can't be read, so the page still renders."""
+    path = (Path(out_dir) if out_dir is not None else default_dir()) / "manifest.json"
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        made = datetime.fromisoformat(manifest["generated_at"]).astimezone(ZoneInfo("America/New_York"))
+        sizes = {name: human_size(info["bytes"]) for name, info in manifest["files"].items()}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        if not isinstance(exc, FileNotFoundError):
+            log.warning("unreadable dump manifest %s: %s", path, exc)
+        return None
+    return {"as_of": made.strftime("%b %-d, %Y, %-I:%M %p ET"), "sizes": sizes}
 
 
 def main(argv: list[str] | None = None) -> None:

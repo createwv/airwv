@@ -86,7 +86,7 @@ function eventCard(e){
     <div><b>#${e.id} ${esc(e.title)}</b> <span class="tag">${esc(e.status)}</span>
       <span class="tag">${esc(e.kind)}</span>
       ${e.captured ? '<span class="tag cap">📈 sensor data</span>' : ''}</div>
-    <div class="meta">${esc(e.region||'')}${e.region?' · ':''}${when} · ${(e.sensor_ids||[]).length} sensor(s) · ${(e.sources||[]).length} source(s)</div>
+    <div class="meta">${esc(e.region||'')}${e.region?' · ':''}${when} · ${(e.sensor_ids||[]).length} sensor(s) · ${(e.sources||[]).length} data source(s)</div>
     <div class="arow">
       ${e.status !== 'published' ? `<button onclick="evSet(${e.id},'published')">Publish</button>` : `<button onclick="evSet(${e.id},'draft')">Unpublish</button>`}
       <button class="danger" onclick="evDelete(${e.id})">Delete</button></div></div>`;
@@ -170,7 +170,7 @@ async function loadCandidates(){
     const n = d.counts;
     box.innerHTML = `<p class="meta"><b>Proposed from sensors</b> (${(d.since||'').slice(0,10)} → ${(d.until||'').slice(0,10)}):
       ${n.corroborated} spike(s) seen by nearby sensors too, ${n.single_sensor} at one sensor only
-      (local source or sensor fault), ${n.no_neighbors} with no neighbor reporting.</p>`
+      (local pollution source or sensor fault), ${n.no_neighbors} with no neighbor reporting.</p>`
       + (EV_CANDS.map(candCard).join('') || '<p class="meta">no candidates</p>');
   } catch(e){ box.innerHTML = '<p class="meta">candidates unavailable</p>'; }
 }

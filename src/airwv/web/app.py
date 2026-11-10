@@ -23,7 +23,7 @@ import statistics
 from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
@@ -33,7 +33,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from airwv import dumps
-from airwv.alerts import RECORD_RULES
+from airwv.alerts import RECORD_RULES, is_record_sub
 from airwv.analysis import detrend_events, hour_of_day_profile
 from airwv.export_utils import (query_records_to_csv, query_series_to_csv, query_sites_to_csv,
                                 readings_to_csv)
@@ -41,6 +41,8 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.storage.readmodel import measured_refs
+from airwv.web.public_api import PublicDataMiddleware
 from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -72,6 +74,17 @@ def _vendor(name: str, cdn: str) -> str:
 TEMPLATES.env.globals["vendor"] = _vendor
 
 
+class _VendorFiles(StaticFiles):
+    """static/vendor/: pinned third-party copies that never change in place (an upgrade is a
+    new file name, static/vendor/README.md), so browsers and Cloudflare keep them a year."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code in (200, 304):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
 def _parse_bbox(bbox: str | None) -> tuple[float, float, float, float] | None:
     """``bbox=west,south,east,north`` (lon/lat degrees, the GeoJSON/OGC order) → a tuple,
     or None when absent. 400 on anything malformed."""
@@ -94,6 +107,27 @@ def _in_bbox(lat, lon, box: tuple[float, float, float, float]) -> bool:
 # Cloudflare reuse it briefly instead of refetching megabytes on every page view.
 _SHORT_CACHE = {"Cache-Control": "public, max-age=60"}
 _LAYER_CACHE = {"Cache-Control": "public, max-age=600"}
+
+# site kinds of the read model's `site` view -> the plain label a site page shows
+# (docs/GLOSSARY.md); each has a page at /site/<kind>/<ref>
+SITE_KINDS = {
+    "well": "Gas well", "facility": "Facility", "permit": "Permit", "spill_report": "Reported spill",
+    "water_system": "Water system", "reference_monitor": "Monitor", "sensor": "Sensor",
+    "gauge": "Gauge", "sample_site": "Sample site", "data_center": "Data center",
+}
+
+# record kinds of the `record` view -> what a site page calls them
+SITE_RECORD_LABELS = {
+    "orphan": "Orphan well (state list)", "violation": "EPA ECHO violation status",
+    "compliance_status": "EPA ECHO compliance status", "impaired_303d": "Receiving stream impaired (303(d) list) for",
+    "permit_stage": "Permit stage", "spill": "Reported to the National Response Center",
+    "health_violation": "Health-based drinking-water violation", "project_status": "Project status",
+}
+
+
+def site_page_url(kind: str, ref) -> str:
+    """The site page of one site: ``/site/<kind>/<ref>`` (ref URL-quoted)."""
+    return f"/site/{kind}/{quote(str(ref), safe='')}"
 
 
 class ReportReadingIn(BaseModel):
@@ -235,6 +269,7 @@ METRIC_THRESHOLDS = {
     "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
     "violations": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
 }
+ADMIN_HISTORY_CAP = 50   # records/sends listed per subscription in the admin view
 METRIC_LABELS = {
     "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
     "ozone": "Ozone (EPA)", "water": "Drinking-water violations near me",
@@ -253,6 +288,19 @@ SERIES_KIND_LABELS = {
     "gauge": ("Gauge", "a USGS stream gauge, near real time", "USGS Water Services"),
     "sample_site": ("Sample site", "water samples taken and lab-tested at intervals, not live",
                     "Water Quality Portal (WQP)"),
+}
+
+# /site/permit/<ref>: the three permit layers -> (what it is, data source, raw API); the stage
+# words match the map legends (app.js DEP_LABEL / MINE_LABEL)
+PERMIT_LAYERS = {
+    "coal_npdes": ("Coal-mine water discharge permit (NPDES)", "WV DEP Coal NPDES", "/api/coal-npdes"),
+    "dep_mining": ("Mining permit", "WV DEP Division of Mining & Reclamation", "/api/dep-mining"),
+    "dep_permits": ("Oil & gas well permit", "WV DEP Office of Oil & Gas", "/api/dep-permits"),
+}
+PERMIT_STAGE_LABELS = {
+    "requested": "Requested (pending)", "approved": "Approved (permit issued)",
+    "construction": "Under construction", "new": "New / not yet started",
+    "active": "Active / renewed", "inactive": "Inactive (idle)",
 }
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -278,6 +326,7 @@ def _IN_WV_REGION(lat: float, lon: float) -> bool:
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+AREA_PM_MAX = 1000.0    # µg/m³; PM readings over this stay out of the per-area rollups
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -453,6 +502,10 @@ def create_app(store: Store) -> FastAPI:
     # gzip JSON/HTML/JS/CSS: the big layers (/api/abandoned-wells, /api/water/sites) are
     # mostly repeated keys and shrink ~8-10×
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # added last so it runs first: a 429 costs no route work (limits are requests/minute per client)
+    app.add_middleware(PublicDataMiddleware, limits={
+        "api": int(os.environ.get("AIRWV_RATE_LIMIT_API", "").strip() or "300"),
+        "dumps": int(os.environ.get("AIRWV_RATE_LIMIT_DUMPS", "").strip() or "30")})
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()
@@ -591,7 +644,8 @@ def create_app(store: Store) -> FastAPI:
         and could it explain how I feel?' aggregation across all our layers. Each hazard
         carries a broad category (gas / air / water / chemical / sensor) the UI matches
         to symptoms. Not medical advice. Reads the unified views (site / measurement /
-        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output."""
+        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output.
+        ``link`` is the data source's own record; ``page`` is the site's /site/<kind>/<ref>."""
         km = min(max(km, 1.0), 25.0)
         radius_mi = km * 0.621371
         rm = store.read_model
@@ -603,7 +657,8 @@ def create_app(store: Store) -> FastAPI:
         with rm.connect() as conn:
             def near_pts(layer, cap, make):
                 sites = rm.sites_near(conn, lat, lon, radius_mi, layer=layer, limit=cap)
-                return [make(s, s["attrs"], f, round(s["d"], 1)) for s, f in flags(conn, sites)]
+                return [{**make(s, s["attrs"], f, round(s["d"], 1)), "page": site_page_url(s["kind"], s["ref"])}
+                        for s, f in flags(conn, sites)]
 
             haz: list[dict] = []
 
@@ -667,7 +722,7 @@ def create_app(store: Store) -> FastAPI:
                         (pm is not None and f"PM2.5 {round(pm, 1)}"),
                         (voc is not None and f"VOC {round(voc, 0):g}")] if x) or "community sensor",
                     "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
-                    "link": "/air", "report": False})
+                    "link": "/air", "report": False, "page": site_page_url(s["kind"], s["ref"])})
 
             # measured water sample sites → water
             wsites = rm.sites_near(conn, lat, lon, radius_mi, layer="water_readings", limit=10_000, bbox_km=km)
@@ -680,7 +735,7 @@ def create_app(store: Store) -> FastAPI:
                 haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
                             "detail": ", ".join(f"{k} {latest[k]['value']}" for k in keys[:3]) or "sample site",
                             "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
-                            "link": "/water", "report": False})
+                            "link": "/water", "report": False, "page": site_page_url(s["kind"], s["ref"])})
 
             # drinking-water systems with a health-based violation in the nearest county → water
             from airwv.wvgeo import WV_COUNTY_CENTROID
@@ -694,7 +749,8 @@ def create_app(store: Store) -> FastAPI:
                                     "label": f"{sy['name']} (water system)",
                                     "detail": f"health-based SDWA violation · serves {sy['attrs'].get('population')}",
                                     "flag": "violation", "mi": None, "lat": sy["lat"], "lon": sy["lon"],
-                                    "link": sy["url"], "report": False})
+                                    "link": sy["url"], "report": False,
+                                    "page": site_page_url(sy["kind"], sy["ref"])})
 
         cats: dict = defaultdict(int)
         for h in haz:
@@ -833,7 +889,7 @@ def create_app(store: Store) -> FastAPI:
             site = rm.site(conn, site_id)
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that site_id")
-            rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
+            rows, truncated = rm.series(conn, site["medium"], measured_refs(site), param,
                                         since=from_, until=to, limit=limit, over=over)
             prov = rm.provenance(conn, [site["layer"]])
         if format == "csv":
@@ -1229,10 +1285,38 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
 
+    def _record_history(sub, rows) -> dict:
+        """What a record subscription fired on (one entry per send, newest first) and what
+        was taken as its starting point. Lists stop at ADMIN_HISTORY_CAP; the counts don't."""
+        def record(key):
+            site_id, kind, value = key.split("|", 2)
+            return {"site_id": site_id, "kind": kind, "value": value or None}
+
+        sends: dict = {}
+        baseline = []
+        for key, origin, at in rows:
+            if origin == "alert":
+                sends.setdefault(at, []).append(record(key))
+            elif origin == "baseline":
+                baseline.append((key, at))
+        return {
+            "checked_at": sub.records_checked_at.isoformat() if sub.records_checked_at else None,
+            "sends": len(sends),
+            "fired": [{"at": at.isoformat(), "records": recs}
+                      for at, recs in list(sends.items())[:ADMIN_HISTORY_CAP]],
+            "baseline": {"taken_at": baseline[0][1].isoformat() if baseline else None,
+                         "count": len(baseline),
+                         "records": [record(k) for k, _at in baseline[:ADMIN_HISTORY_CAP]]},
+            # alert_seen rows stored before origin was tracked: can't say which they were
+            "unlabeled": sum(1 for _k, origin, _at in rows if origin is None),
+        }
+
     @app.get("/api/admin/subscriptions")
     def admin_subscriptions(_: bool = Depends(_require_admin)):
-        """Alert sign-ups — including the pending/unconfirmed waitlist."""
+        """Alert sign-ups — including the pending/unconfirmed waitlist — and, for record
+        subscriptions, their alert history."""
         subs = store.list_subscriptions(active_only=False)
+        history = store.record_history(s.id for s in subs if is_record_sub(s))
         return {"email_delivery": email_enabled(),
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
@@ -1242,7 +1326,9 @@ def create_app(store: Store) -> FastAPI:
                                         if s.center_lat is not None else None),
                              "active": s.active,
                              "confirmed": s.confirmed_at is not None,
-                             "created_at": s.created_at.isoformat() if s.created_at else None}
+                             "created_at": s.created_at.isoformat() if s.created_at else None,
+                             "record_history": (_record_history(s, history[s.id])
+                                                if s.id in history else None)}
                             for s in subs]}
 
     @app.post("/api/admin/notify-test")
@@ -1450,10 +1536,11 @@ def create_app(store: Store) -> FastAPI:
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
         Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
         then takes the median across the sensors reporting each day so one noisy unit
-        can't swing the area."""
+        can't swing the area. PM readings over AREA_PM_MAX are left out of the averages."""
+        cap = AREA_PM_MAX if field.startswith("pm") else None
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.read_model.daily(conn, "air", sid, field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since, max_value=cap).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1495,7 +1582,7 @@ def create_app(store: Store) -> FastAPI:
             dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
         for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
-                   if sid in latest and not (is_pm and latest[sid] > 1000)]
+                   if sid in latest and not (is_pm and latest[sid] > AREA_PM_MAX)]
             daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
@@ -2041,18 +2128,21 @@ def create_app(store: Store) -> FastAPI:
         # here with it, unless ?statewide=1 asks for the statewide view.
         if not statewide and (place or (lat and lon)):
             return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                              context={"mode": "place", "home": True})
+                                              context={"mode": "place", "home": True,
+                                                       "adv": request.query_params.get("view") == "adv"})
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 
-    @app.get("/air", response_class=HTMLResponse)
+    @app.get("/air")
     def air(request: Request):
-        return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
-                                          context={"mode": "air"})
+        # /air's tools are the advanced view of a place now (DIRECTION.md §3); the rest of the
+        # query (?src=, ?param=, ?lat=&lon=, ?layers=, …) rides along so old links keep working
+        q = [(k, v) for k, v in request.query_params.multi_items() if k != "view"]
+        return RedirectResponse("/place?" + urlencode(q + [("view", "adv")]), status_code=302)
 
     @app.get("/analysis")
     def analysis_redirect():   # kept so old links / bookmarks still work
-        return RedirectResponse("/air", status_code=301)
+        return RedirectResponse("/place?view=adv", status_code=301)
 
     @app.get("/learn", response_class=HTMLResponse)
     def learn(request: Request):
@@ -2090,9 +2180,10 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/place", response_class=HTMLResponse)
     def place_page(request: Request):
         # "my place now" (basic view, DIRECTION.md §2): the page reads lat/lon/km/name
-        # from its URL and builds every line from /api/query
+        # from its URL and builds every line from /api/query; view=adv adds /air's tools under it
         return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                          context={"mode": "place"})
+                                          context={"mode": "place",
+                                                   "adv": request.query_params.get("view") == "adv"})
 
     @app.get("/explore", response_class=HTMLResponse)
     def explore_page(request: Request):
@@ -2102,25 +2193,24 @@ def create_app(store: Store) -> FastAPI:
                                           context={"mode": "explore",
                                                    "counties": sorted(WV_COUNTY_CENTROID)})
 
-    @app.get("/site/{kind}/{ref}", response_class=HTMLResponse)
+    @app.get("/site/{kind}/{ref:path}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
-        """The single home of one site (docs/DIRECTION.md). Data centers (``view=adv`` is the
-        full record) and the measured kinds (a recent-readings chart from the /api/query
-        series mode); the other kinds come with the site-pages plan items."""
+        """The single home of one site (docs/DIRECTION.md), for every kind in the read
+        model's ``site`` view (``SITE_KINDS``). Measured kinds get a recent-readings chart from
+        the /api/query series mode; data centers keep their own card ("what we know / what's
+        not disclosed"); permits show their stage and 303(d) records; the rest their public
+        records. ``view=adv`` is the full record."""
         from airwv import data_centers as dcs
 
+        if kind not in SITE_KINDS:
+            raise HTTPException(status_code=404, detail="no such site kind")
+        view = "adv" if view == "adv" else "basic"
         if kind in SERIES_KINDS:
             return _measured_site_page(request, kind, ref, param)
-        if kind == "facility":
-            # no facility page yet: send the stable id on to where the facility lives now
-            # (curated sources: /sources#facility=<name>; ECHO: its EPA page)
-            with store.read_model.connect() as conn:
-                site = store.read_model.site(conn, f"facility:{ref}")
-            if site is None or not site["url"]:
-                raise HTTPException(status_code=404, detail="no facility with that id")
-            return RedirectResponse(site["url"], status_code=307)
+        if kind == "permit":
+            return _permit_site_page(request, ref, view)
         if kind != "data_center":
-            raise HTTPException(status_code=404, detail="no site page for this kind yet")
+            return _generic_site_page(request, kind, ref, view)
         api = data_centers_layer()
         rm = store.read_model
         with rm.connect() as conn:
@@ -2129,9 +2219,21 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="unknown data center")
         dc = found[0]["attrs"]
         return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
-            "mode": "site", "kind": kind, "view": "adv" if view == "adv" else "basic",
-            "dc": dc, "card": dcs.card(dc), "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
+            "mode": "site", "kind": kind, "view": view,
+            "dc": dc, "card": dcs.card(dc), "cited": dcs.cited, "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
             "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
+
+    def _generic_site_page(request: Request, kind: str, ref: str, view: str):
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"{kind}:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="unknown site")
+            records = rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"], {})
+        return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
+            "mode": "site", "kind": kind, "view": view, "site": site, "label": SITE_KINDS[kind],
+            "records": records, "record_labels": SITE_RECORD_LABELS, "prov": prov})
 
     def _measured_site_page(request, kind, ref, param):
         """A sensor, monitor, gauge or sample site: what it measures, its latest reading and a
@@ -2140,9 +2242,13 @@ def create_app(store: Store) -> FastAPI:
         rm = store.read_model
         with rm.connect() as conn:
             site = rm.site(conn, f"{kind}:{ref}")
+            if site is None and kind == "reference_monitor" and len(ref) == 9 and ref.isdigit():
+                # /api/sensors lists AirNow monitors by 9-digit AQSID; the read model keeps
+                # the dashed AQS form when reference_monitors.json lists the same monitor
+                site = rm.site(conn, f"{kind}:{ref[:2]}-{ref[2:5]}-{ref[5:]}")
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that id")
-            measured = rm.parameters(conn, site["medium"], site["ref"])
+            measured = rm.parameters(conn, site["medium"], measured_refs(site))
             prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
         names = [m["parameter"] for m in measured]
         chosen = next((m for m in measured if m["parameter"] == param), None) \
@@ -2160,10 +2266,31 @@ def create_app(store: Store) -> FastAPI:
             "chosen": chosen, "window": window, "label": SERIES_KIND_LABELS[kind],
             "plabel": lambda p: METRIC_LABELS.get(p, p.replace("_", " ")), "prov": prov})
 
+    def _permit_site_page(request, ref, view):
+        """A coal discharge, DEP mining or oil & gas permit: what it is, its permit stage and,
+        for coal discharges, the 303(d) impaired streams its outlets sit on (the read model's
+        ``record`` rows), with the layer's caveat. ``view=adv`` lists every field."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"permit:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no permit with that id")
+            # an oil & gas API number can list identical rows; keep each record once
+            records = list({tuple(r.values()): r for r in
+                            rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])}.values())
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        a = site["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site_permit.html", context={
+            "mode": "site", "kind": "permit", "view": view, "site": site, "a": a,
+            "what": PERMIT_LAYERS[site["layer"]], "stage": PERMIT_STAGE_LABELS.get(a.get("stage")),
+            "stage_rec": next((r for r in records if r["kind"] == "permit_stage"), None),
+            "impaired": next((r for r in records if r["kind"] == "impaired_303d"), None),
+            "records": records, "prov": prov})
+
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
-                                          context={"mode": "data"})
+                                          context={"mode": "data", "dump_info": dumps.summary()})
 
     @app.get("/data/dumps/{name}")
     def data_dump(name: str):
@@ -2185,7 +2312,10 @@ def create_app(store: Store) -> FastAPI:
 
     static_dir = Path(__file__).parent / "static"
     if static_dir.is_dir():
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        if (static_dir / "vendor").is_dir():   # before /static, which would match it first
+            app.mount("/static/vendor", _VendorFiles(directory=str(static_dir / "vendor")),
+                      name="vendor")
+        app.mount("/static",StaticFiles(directory=str(static_dir)), name="static")
 
     return app
 

@@ -176,7 +176,7 @@ function renderFacilities() {
     const chips = (f.programs || []).map(p => `<span class="prog-chip">${PROG[p] || p}</span>`).join(' ');
     const loc = [f.city, f.county && `${f.county} Co.`].filter(Boolean).join(', ');
     return `<tr>
-      <td><b>${esc(f.name)}</b>${f.last_inspection ? `<div class="meta">last inspected ${esc(f.last_inspection)}</div>` : ''}</td>
+      <td><b>${f.registry_id ? `<a href="${esc(AirwvState.site('facility', f.registry_id))}">${esc(f.name)}</a>` : esc(f.name)}</b>${f.last_inspection ? `<div class="meta">last inspected ${esc(f.last_inspection)}</div>` : ''}</td>
       <td class="meta">${esc(loc)}</td>
       <td>${chips || '<span class="meta">—</span>'}</td>
       <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
@@ -208,7 +208,7 @@ function renderPermits() {
     const whenLbl = p.issue_date ? 'issued' : p.received_date ? 'applied' : '';
     const form = p.formation ? `${esc(p.formation)}${p.marcellus ? ' · Marcellus' : ''}` : (p.marcellus ? 'Marcellus' : '');
     return `<tr>
-      <td><b>${esc(p.operator || 'Operator unknown')}</b>${p.well_type ? `<div class="meta">${esc(p.well_type)}</div>` : ''}</td>
+      <td><b>${p.permit_id ? `<a href="${esc(AirwvState.site('permit', p.permit_id))}">${esc(p.operator || 'Operator unknown')}</a>` : esc(p.operator || 'Operator unknown')}</b>${p.well_type ? `<div class="meta">${esc(p.well_type)}</div>` : ''}</td>
       <td class="meta">${esc(p.county || '')}</td>
       <td class="meta">${form || '—'}</td>
       <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
@@ -244,7 +244,7 @@ function renderMines() {
     const acres = m.acres_disturbed
       ? `${m.acres_disturbed}${m.acres_reclaimed ? ` <span class="meta">(${m.acres_reclaimed} reclaimed)</span>` : ''}` : '—';
     return `<tr>
-      <td><b>${esc(m.operator || 'Operator unknown')}</b>${m.facility ? `<div class="meta">${esc(m.facility)}</div>` : ''}</td>
+      <td><b>${m.permit_id ? `<a href="${esc(AirwvState.site('permit', m.permit_id))}">${esc(m.operator || 'Operator unknown')}</a>` : esc(m.operator || 'Operator unknown')}</b>${m.facility ? `<div class="meta">${esc(m.facility)}</div>` : ''}</td>
       <td class="meta">${esc(m.type || '')}</td>
       <td class="meta">${acres}</td>
       <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
@@ -286,7 +286,7 @@ function renderCoal() {
           `<span class="prog-chip" style="${MINING_CAUSES.has(cse) ? 'background:#f6d7d2;color:#a5301f' : ''}">${esc(cse)}</span>`).join(' ')
       : '<span class="meta">not on the 303(d) list</span>';
     return `<tr>
-      <td><b>${esc(p.operator || 'Operator unknown')}</b><div class="meta">${esc(p.permit || '')}</div></td>
+      <td><b>${p.permit ? `<a href="${esc(AirwvState.site('permit', p.permit))}">${esc(p.operator || 'Operator unknown')}</a>` : esc(p.operator || 'Operator unknown')}</b><div class="meta">${esc(p.permit || '')}</div></td>
       <td><b>${p.outlets}</b> <span class="meta">→ ${p.stream_count}</span></td>
       <td class="meta">${streams || '—'}</td>
       <td>${causes}</td>
@@ -349,7 +349,7 @@ function openDetail(s) {
   $('sd-imgwrap').innerHTML = thumb(s, 520, 240, 'sd-img');
   const near = nearbySensors(s);
   $('sd-sensors').innerHTML = near.length ? near.map(x => `<tr>
-    <td>${esc(x.name)}</td><td>${x.kind === 'reference' ? '◎ ref' : '● community'}</td>
+    <td><a href="${esc(AirwvState.sensorSite(x))}">${esc(x.name)}</a></td><td>${x.kind === 'reference' ? '◎ ref' : '● community'}</td>
     <td>${x.mi.toFixed(1)} mi</td><td>${x.dir}</td></tr>`).join('')
     : '<tr><td class="meta">No sensors located yet.</td></tr>';
   // permit & compliance: link to the facility's EPA ECHO record when we have one —

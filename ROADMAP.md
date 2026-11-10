@@ -167,10 +167,14 @@ Get warnings to the people who need them.
       NRC spill reports, `water` = SDWA health-based violations, `violations` = ECHO facility
       violations), read from the `record` view. Fires on records new for the place since the
       last check (`alert_seen` table; first check = silent baseline); county-only records also
-      match a place in that county. The `/alerts` form's water/spills waitlist rows went live
+      match a place in that county; spill reports dated over 60 days back are skipped
+      (`max_age_days`, stated in the email). `/api/admin/subscriptions` shows each record
+      subscription's history (`record_history`: what fired, per send, and the baseline). The `/alerts` form's water/spills waitlist rows went live
       (old rows are matched by field, no migration) and gained facility violations; `/place`'s
       *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
       *Email delivery still waits on SMTP go-live (a session with Corey).*
+      Violations that return after 30+ days off the list alert as "back on the list"
+      (`alert_seen.last_present_at`; spills don't).
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)
@@ -566,8 +570,9 @@ Grow the network and secure the record.
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
       views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
       `deploy/systemd/airwv-dumps.*`), and Parquet of the same with the `dumps` extra (`pyarrow`).
-      *CORS and rate limiting after Postgres.*
-- [ ] Public API documentation and rate limiting
+- [x] CORS (read-only, any origin) and a per-client rate limit on `/api/*` and
+      `/data/dumps/*` (`web/public_api.py`; in-memory, one process)
+- [ ] Public API documentation
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)
 
@@ -732,6 +737,7 @@ filings, news), not a measurement, like Soil/Land above.
       `data_centers`, `/site/data_center/<id>` (plain card: water · energy · noise · purpose, each
       *what we know* / *what's not disclosed*, with where to ask; `?view=adv` for filings and the
       statewide dockets), `/api/data-centers`, `/api/query?kind=data_center`, and a card on **Near me**.
+      Per-fact `cite` keys link a card line to its own numbered source where the record ties it to one.
 - [ ] **Keep it current** — re-check the sources DATA-CENTERS.md lists (DEP DAQ applications, PSC
       dockets, Air Quality Board, Commerce's Data Economy Office) on a schedule; show each site's
       "last checked" date. Any new fetcher needs Corey's OK (charter data rule 2).
@@ -804,10 +810,24 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       keeps the statewide overview.
       Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
       25 mi, from `/api/query`), each linking to its site page or its own record.
+- [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
+      permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
+      discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
+      caveat; `?view=adv` is the full record. Popups don't link to them yet.
+- [x] **Depth toggle + advanced view** — `/place` (and Home with a place) has a
+      `[Basic | Advanced]` toggle; `view=adv` keeps the place's status lines and puts today's
+      `/air` tools under them (map + layer tree, series, time of day, day vs. overnight,
+      validation, Explore: `templates/_air_controls.html`, formerly `dashboard.html`). The map
+      pins and zooms to the place when one is in the URL or saved; a bare visit stays statewide.
+      The depth is kept in the URL and `localStorage.airwv_view`; `/air` redirects to
+      `/place?…&view=adv` with the rest of its query (`?src=`, `?param=`, `?layers=`, …).
+      In Advanced, changing the place reloads the page. The toggle is on the place card, not the
+      header yet (the nav collapse item can move it).
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
-(composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.
+(composition, not new backend). `dashboard.html` (now `_air_controls.html`, under
+`/place?view=adv`), `app.js`, `near_me.js`, `base.html`.
 - [x] **Trust/clarity fixes (do-now)** — DONE: legend now states *colors = each sensor's
       **most recent** PM2.5 (not an average)* + a live "· as of {time}" line; context-layer
       colors labeled as such. Blank date pickers show "No data for this sensor in the selected

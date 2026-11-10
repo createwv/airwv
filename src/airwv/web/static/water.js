@@ -90,6 +90,7 @@ async function toggleCoal(on) {
         + impaired
         + (streams ? `<br><small>Receiving:<br>· ${streams}${p.stream_count > 5 ? '<br>· …' : ''}</small>` : '')
         + `<div class="cn-wq" data-pending data-lat="${p.lat}" data-lon="${p.lon}"></div>`
+        + `<br><a href="${esc(AirwvState.site('permit', p.permit))}">Permit details →</a>`
         + `<br><a href="${esc(p.effluent_url)}" target="_blank" rel="noopener">EPA ECHO effluent charts →</a>`)
       .addTo(coalLayer);
   });
@@ -100,12 +101,16 @@ function nearMe() {
   if (!navigator.geolocation) { $('w-note').textContent = 'geolocation not available on this device'; return; }
   navigator.geolocation.getCurrentPosition(p => {
     const lat = p.coords.latitude, lon = p.coords.longitude;
-    if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat, lon], {title: 'You are here', zIndexOffset: 1000,
-      icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
-      .addTo(map).bindPopup('You are here').openPopup();
-    map.setView([lat, lon], 11);
+    showPlace(lat, lon, 'You are here');
+    AirwvState.set({lat, lon, label: null});
   }, () => { $('w-note').textContent = 'could not get your location'; }, {enableHighAccuracy: true, timeout: 10000});
+}
+function showPlace(lat, lon, label) {
+  if (userMarker) userMarker.remove();
+  userMarker = L.marker([lat, lon], {title: label, zIndexOffset: 1000,
+    icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+    .addTo(map).bindPopup(esc(label)).openPopup();
+  map.setView([lat, lon], 11);
 }
 
 function colorFor(site, param) {
@@ -131,6 +136,7 @@ function draw() {
     L.circleMarker([s.lat, s.lon], {title: s.name, radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
         + (l.ts ? `<br><small>latest sample: ${fmtDate(l.ts)}</small>` : '')
+        + `<br><a href="${esc(AirwvState.site(s.kind || 'sample_site', s.site_id))}">${s.kind === 'gauge' ? 'Gauge' : 'Sample site'} details →</a>`
         + `<br><small>click to chart</small>`)
       .on('click', () => showSite(s)).addTo(layer);
   });
@@ -244,7 +250,7 @@ function renderSdwa() {
       s.lead_copper_violation ? '<span class="prog-chip" style="background:#f6d7d2;color:#a5301f">lead/copper</span>' : '',
     ].filter(Boolean).join(' ') || '<span class="meta">no current violation</span>';
     return `<tr>
-      <td><b>${esc(s.name || s.pws_id)}</b>${s.community ? '' : `<div class="meta">${esc(s.type || '')}</div>`}</td>
+      <td><b><a href="${esc(AirwvState.site('water_system', s.pws_id))}">${esc(s.name || s.pws_id)}</a></b>${s.community ? '' : `<div class="meta">${esc(s.type || '')}</div>`}</td>
       <td class="meta">${esc(s.county || '')}</td>
       <td class="meta">${Number(s.population || 0).toLocaleString()}</td>
       <td class="meta">${esc(s.source || '')}</td>
@@ -265,12 +271,17 @@ async function init() {
   const present = new Set();
   SITES.forEach(s => Object.keys(s.latest).forEach(p => present.add(p)));
   const opts = ORDER.filter(p => present.has(p));
-  current = opts.includes('ph') ? 'ph' : opts[0];
+  // shared URL state (state.js): ?param=&layers=coal&lat=&lon=[&label=]
+  const st = AirwvState.get();
+  current = opts.includes(st.param) ? st.param : opts.includes('ph') ? 'ph' : opts[0];
   $('w-param').innerHTML = opts.map(p => `<option value="${p}">${WATER_PARAMS[p].label}</option>`).join('');
   $('w-param').value = current;
-  $('w-param').addEventListener('change', e => { current = e.target.value; draw(); });
+  $('w-param').addEventListener('change', e => { current = e.target.value; AirwvState.set({param: current}); draw(); });
   $('w-nearme').addEventListener('click', nearMe);
-  $('w-coal').addEventListener('change', e => toggleCoal(e.target.checked));
+  $('w-coal').addEventListener('change', e => {
+    AirwvState.set({layers: e.target.checked ? ['coal'] : null}); toggleCoal(e.target.checked); });
+  if (st.layers && st.layers.includes('coal')) { $('w-coal').checked = true; toggleCoal(true); }
+  if (st.lat != null) showPlace(st.lat, st.lon, st.label || 'Selected place');
   loadSdwa();
   // lazily fill a coal popup's "measured water nearby" box the first time it opens
   map.on('popupopen', async e => {

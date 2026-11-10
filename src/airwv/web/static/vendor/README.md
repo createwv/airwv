@@ -32,4 +32,7 @@ a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6  leaflet.css
 ```
 
 Licenses: Plotly.js MIT, Leaflet BSD-2-Clause, Leaflet.markercluster MIT (keep each file's header).
-To upgrade, change the version in the file name/URL here and in `base.html` together.
+Served with `Cache-Control: public, max-age=31536000, immutable` (`_VendorFiles` in
+`web/app.py`), so a file here must never change in place: to upgrade, give it a new name (put the
+new version in it, e.g. `leaflet-1.9.5.js`; images in a new folder) and change the name/URL here
+and in `base.html` together.

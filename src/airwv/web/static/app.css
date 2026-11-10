@@ -439,7 +439,9 @@
   .dc-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:10px; margin:8px 0; }
   .dc-topic { background:#f8f9fb; border-radius:6px; padding:8px 10px; min-width:0; overflow-wrap:anywhere; }
   .dc-topic h3 { font-size:14px; margin:0 0 4px; color:#1a2b3c; }
-  .dc-topic ul, .dc-sources ul, .dc-ask ul, .dc-files { margin:2px 0 6px; padding-left:18px; font-size:13px; line-height:1.45; color:#333; }
+  .dc-cite { font-size:11px; white-space:nowrap; }
+  .dc-cite a { padding:2px 2px; text-decoration:none; }
+  .dc-topic ul, .dc-sources ul, .dc-sources ol, .dc-ask ul, .dc-files { margin:2px 0 6px; padding-left:18px; font-size:13px; line-height:1.45; color:#333; }
   .dc-sub { font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:#2a7a2a; margin-top:4px; }
   .dc-sub.dc-gap { color:#a35a00; }
   .dc-sources, .dc-ask { font-size:13px; margin-top:8px; overflow-wrap:anywhere; }
@@ -494,3 +496,8 @@
   .pl-more { font-size:13px; white-space:nowrap; }
   .pl-actions { display:flex; flex-wrap:wrap; gap:8px 18px; margin:14px 2px; font-size:14px; }
   .pl-prov { margin:8px 2px 18px; font-size:12px; }
+  .pl-depth { display:inline-flex; border:1px solid #cfd6dc; border-radius:6px; overflow:hidden; font-size:14px; }
+  .pl-depth a { padding:6px 12px; text-decoration:none; color:inherit; }
+  .pl-depth a + a { border-left:1px solid #cfd6dc; }
+  .pl-depth a[aria-current] { background:#3b2a6b; color:#fff; font-weight:600; }
+  .pl-advh { margin:18px 20px 0; }

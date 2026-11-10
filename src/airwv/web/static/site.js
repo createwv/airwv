@@ -15,18 +15,16 @@
     return `Latest: ${label} ${r.value}${unit ? ' ' + unit : ''} at ${String(r.ts).slice(0, 16).replace('T', ' ')} UTC`;
   }
 
-  // every kind /api/query knows; the ones with a /site/<kind>/<ref> page link there, the
-  // rest to their own record (the url /api/query gives them), as on /explore
+  // every kind /api/query knows; each has a /site/<kind>/<ref> page
   const KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site', 'data_center', 'facility',
                  'permit', 'spill_report', 'water_system', 'well'];
-  const PAGE_KINDS = ['sensor', 'reference_monitor', 'gauge', 'sample_site', 'data_center'];
   const KIND_LABEL = {sensor: 'Sensor', reference_monitor: 'Monitor', gauge: 'Gauge',
                       sample_site: 'Sample site', data_center: 'Data center', facility: 'Facility',
                       permit: 'Permit', spill_report: 'Spill report', water_system: 'Water system',
                       well: 'Well'};
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
   const mi = m => `${m < 10 ? m.toFixed(1) : m.toFixed(0)} mi`;
-  const href = s => PAGE_KINDS.includes(s.kind) ? `/site/${s.kind}/${encodeURIComponent(s.ref)}` : (s.url || null);
+  const href = s => `/site/${s.kind}/${encodeURIComponent(s.ref)}`;
 
   // lists: /api/query `sites` arrays (one per kind); the nearest of each kind that isn't
   // this page's kind (nor this site), closest first, at most n
@@ -42,10 +40,8 @@
   function relatedHtml(sites) {
     if (!sites.length) return '<p class="meta" style="padding:14px">No other kinds of site within 25 mi.</p>';
     return '<ul class="dc-files">' + sites.map(s => {
-      const h = href(s), name = esc(s.name || s.ref);
-      const ext = h && !h.startsWith('/') ? ' target="_blank" rel="noopener"' : '';
       return `<li><span class="rbadge">${esc(KIND_LABEL[s.kind] || s.kind)}</span> `
-        + (h ? `<a href="${esc(h)}"${ext}>${name}</a>` : name)
+        + `<a href="${esc(href(s))}">${esc(s.name || s.ref)}</a>`
         + ` <span class="meta">${mi(s.mi)}${s.county ? ' · ' + esc(s.county) + ' County' : ''}</span></li>`;
     }).join('') + '</ul>';
   }

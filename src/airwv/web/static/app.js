@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
 const j = async u => (await fetch(u)).json();
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const busy = (id,on) => { const el=$(id); if(el) el.classList.toggle('on', on); };
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
 let map, markers = {}, allSensors = [], GUIDE = null;
@@ -66,11 +67,10 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  // default: nearest community sensor to ?lat=&lon= if the link has one, else the
+  // default: nearest community sensor to the place (PLACE_AT) if there is one, else the
   // highest current PM2.5; the reason is shown above the chart (AIRWV_WV.pickDefaultSensor)
-  const q = new URLSearchParams(location.search), qlat = parseFloat(q.get('lat')), qlon = parseFloat(q.get('lon'));
   setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors,
-    isNaN(qlat) || isNaN(qlon) ? null : {lat: qlat, lon: qlon, label: 'the place in this link'}));
+    PLACE_AT && {lat: PLACE_AT.lat, lon: PLACE_AT.lon, label: window.AIRWV_PLACE ? PLACE_AT.label : 'the place in this link'}));
   // legend "as of": the newest community reading, so people know it's a live snapshot
   const asof = $('legend-asof');
   if (asof){
@@ -96,6 +96,25 @@ const layerState = {community:true, reference:true, sources:false, reports:true,
   echoStatus:{significant_violation:true, violation:true, compliant:false},
   depStage:{requested:true, construction:true, approved:true},
   mineStage:{new:true, active:true, inactive:false}};
+// Shared URL state (state.js): ?param=&from=&to=&layers=&lat=&lon=[&label=] reproduces this screen.
+// URL layer name → layerState key; the default set is left out of the URL to keep links short.
+const URL_LAYERS = {sensors:'community', ref:'reference', ozone:'ozone', reports:'reports', sources:'sources',
+  echo:'echo', dep:'dep', mine:'mine', wells:'wells'};
+const urlLayersOn = () => Object.keys(URL_LAYERS).filter(k => layerState[URL_LAYERS[k]]);
+const DEFAULT_URL_LAYERS = urlLayersOn().join(',');
+const URL_STATE = AirwvState.get();
+// the place to pin: on /place?view=adv, the one place.js shows (a known place has no lat/lon in
+// the URL); else ?lat=&lon=[&label=]
+const PLACE_AT = window.AIRWV_PLACE
+  || (URL_STATE.lat != null ? {lat: URL_STATE.lat, lon: URL_STATE.lon, label: URL_STATE.label} : null);
+if (URL_STATE.layers) Object.keys(URL_LAYERS).forEach(k => { layerState[URL_LAYERS[k]] = URL_STATE.layers.includes(k); });
+if (URL_STATE.param && [...$('field').options].some(o => o.value === URL_STATE.param)) $('field').value = URL_STATE.param;
+if (URL_STATE.from) $('start').value = URL_STATE.from;
+if (URL_STATE.to) $('end').value = URL_STATE.to;
+function writeLayerState(){
+  const on = urlLayersOn();
+  AirwvState.set({layers: on.join(',') === DEFAULT_URL_LAYERS ? null : (on.length ? on : 'none')});
+}
 // ⭐ My Sensors — a personal follow-list persisted in the browser (accounts later)
 let mySensors = new Set(JSON.parse(localStorage.getItem('airwv_my_sensors') || '[]'));
 function toggleFollow(sid){
@@ -135,11 +154,14 @@ function drawMap(sensors){
     });
   }
   redrawSensors();
+  // a place in the URL (state.js) pins and zooms to it; otherwise the statewide fitWV view stands
+  if (PLACE_AT) showPlace(PLACE_AT.lat, PLACE_AT.lon, PLACE_AT.label || 'Selected place');
   loadSources();
   loadReports();
   loadFacilities();
   loadDepPermits();
   loadDepMining();
+  if (layerState.wells) loadAbandonedWells();   // on from a shared link
 }
 function redrawSensors(){
   if (sensorLayer) sensorLayer.remove();
@@ -154,6 +176,7 @@ function redrawSensors(){
     L.marker([x.lat, x.lon], {title: `${x.name}, ozone monitor`, icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
       html:`<div class="o3mk" style="background:${x.ozone_color||'#9e9e9e'}"></div>`})})
       .bindPopup(`<b>${x.name}</b><br><i>EPA ozone monitor</i><br>latest O₃: <b>${x.latest_ozone} ppb</b>`
+        + `<br><a href="${esc(AirwvState.sensorSite(x))}">Monitor details →</a>`
         + `<br><small>select the Ozone metric, then click to chart</small>`)
       .on('click', () => toggleChart(x.sensor_id)).addTo(ozoneLayer);
   });
@@ -164,13 +187,14 @@ function redrawSensors(){
     const ring = charted ? {color:'#c9992f', weight:4} : null;
     // elevated = orange/red/purple AQI band → nudge toward the "what's nearby" drill-in
     const elevated = ['#ff7e00','#ff0000','#8f3f97'].includes((x.color||'').toLowerCase());
-    const nearUrl = `/nearby?lat=${x.lat}&lon=${x.lon}&from=${encodeURIComponent(x.name||'this sensor')}`;
+    const nearUrl = esc(AirwvState.href('/nearby', {lat:x.lat, lon:x.lon, label:x.name||'this sensor'}));
     const nearLink = elevated
       ? `<br><a href="${nearUrl}" style="color:#c0392b;font-weight:600">⚠ elevated — see what's nearby →</a>`
       : `<br><a href="${nearUrl}">🔎 What's near this reading? →</a>`;
     const pop = `<b>${x.name}</b>${x.kind==='reference'?'<br><i>reference monitor (EPA/AirNow)</i>':''}`+
       `<br>latest PM2.5: ${x.latest_pm2_5 ?? '—'}<br>${Number(x.count).toLocaleString()} readings`+
       nearLink+
+      `<br><a href="${esc(AirwvState.sensorSite(x))}">${x.kind==='reference'?'Monitor':'Sensor'} details →</a>`+
       `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
@@ -345,6 +369,7 @@ function redrawEcho(){
         (progs?`<br><small>${progs}</small>`:'')+
         (f.last_inspection?`<br><small>last inspected ${f.last_inspection}</small>`:'')+
         water+
+        (f.registry_id?`<br><a href="${esc(AirwvState.site('facility', f.registry_id))}">Facility details →</a>`:'')+
         `<br><a href="${f.echo_url}" target="_blank" rel="noopener">EPA ECHO report →</a>`)
       .addTo(echoLayer);
   });
@@ -374,6 +399,7 @@ function redrawDep(){
         `<br><small>${[p.county && p.county+' Co.', p.well_type].filter(Boolean).join(' · ')}</small>`+
         (p.formation?`<br><small>${p.formation}${p.marcellus?' · Marcellus':''}</small>`:'')+
         (when?`<br><small>${p.issue_date?'permit issued':'application'} ${when}</small>`:'')+
+        (p.permit_id?`<br><a href="${esc(AirwvState.site('permit', p.permit_id))}">Permit details →</a>`:'')+
         (p.link?`<br><a href="${p.link}" target="_blank" rel="noopener">WV DEP record →</a>`:''))
       .addTo(depLayer);
   });
@@ -402,7 +428,8 @@ function redrawMines(){
         `<br><small>${[m.type, m.facility].filter(Boolean).join(' · ')}</small>`+
         acres+
         (m.inspection_status?`<br><small>${m.inspection_status}</small>`:'')+
-        (m.issue_date?`<br><small>permit ${m.issue_date}</small>`:''))
+        (m.issue_date?`<br><small>permit ${m.issue_date}</small>`:'')+
+        (m.permit_id?`<br><a href="${esc(AirwvState.site('permit', m.permit_id))}">Permit details →</a>`:''))
       .addTo(mineLayer);
   });
   mineLayer.addTo(map);
@@ -441,6 +468,7 @@ function redrawWells(){
         (w.county?`<br><small>${w.county} County</small>`:'')+
         `<br><small>${prox}</small>`+
         `<br><small>Leaking wells can vent natural gas / H2S near homes.</small>`+
+        (w.id?`<br><a href="${esc(AirwvState.site('well', w.id))}">Well details →</a>`:'')+
         `<br><a href="${rec}" target="_blank" rel="noopener">WV DEP well record →</a>`+
         `<br><a href="#" class="well-report" data-lat="${w.lat}" data-lon="${w.lon}" data-id="${w.id||''}" data-orphan="${w.orphan?1:0}" data-county="${w.county||''}">🚨 Report a problem with this well →</a>`)
       .addTo(wellLayer);
@@ -732,10 +760,12 @@ async function render(){
     `<tr><td>${s.name}</td><td>${s.day ?? '—'}</td><td>${s.night ?? '—'}</td>
      <td><b>${s.night_day_ratio ?? '—'}</b></td></tr>`).join('');
 }
-$('field').addEventListener('change', () => { render(); renderGuide(); });
-$('start').addEventListener('change', render);
-$('end').addEventListener('change', render);
-$('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; render(); });
+$('field').addEventListener('change', () => { AirwvState.set({param:$('field').value}); render(); renderGuide(); });
+$('start').addEventListener('change', () => { AirwvState.set({from:$('start').value}); render(); });
+$('end').addEventListener('change', () => { AirwvState.set({to:$('end').value}); render(); });
+$('clear').addEventListener('click', () => { $('start').value=''; $('end').value=''; AirwvState.set({from:null, to:null}); render(); });
+// the tree's own handlers update layerState first; this bubbles up after them
+$('layers').addEventListener('change', writeLayerState);
 // ---- Community reports: 📣 map layer (submit form + feedback live in reporting.js) ----
 let reportLayer, allReports = [];
 const R_ICON = {air:'💨', water:'💧', soil:'🟤', wildlife:'🐾', violation:'⚠️', other:'📣'};
@@ -770,24 +800,30 @@ function nearMe(){
   if (note) note.textContent = 'locating…';
   navigator.geolocation.getCurrentPosition(p=>{
     const lat=p.coords.latitude, lon=p.coords.longitude;
-    if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat,lon], {title: 'You are here', zIndexOffset:1000,
-      icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
-      .addTo(map).bindPopup('You are here').openPopup();
-    map.setView([lat,lon], 11);
+    showPlace(lat, lon, 'You are here');
+    AirwvState.set({lat, lon, label:null});
     if (defaultPick && chartSet.size === 1 && chartSet.has(defaultPick.sensor.sensor_id)){
       setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors, {lat, lon, label: 'you'}));
       redrawSensors(); render();
     }
-    const near = allSensors.filter(s=>s.kind==='community' && s.lat!=null)
-      .map(s=>({...s, mi:haversineMi(lat,lon,s.lat,s.lon)})).sort((a,b)=>a.mi-b.mi).slice(0,6);
-    const seeAll = ` · <a href="/nearby?lat=${lat}&lon=${lon}">🔎 see everything near you →</a>`;
-    if (note) note.innerHTML = (near.length
-      ? '📍 Nearest to you: ' + near.map(s=>`<a href="#" data-nsid="${s.sensor_id}">${s.name}</a> <span class="cnt">${s.mi.toFixed(1)}mi</span>`).join(' · ')
-      : 'No community sensors located.') + seeAll;
-    note && note.querySelectorAll('[data-nsid]').forEach(a=>a.addEventListener('click', e=>{
-      e.preventDefault(); toggleChart(a.dataset.nsid); redrawSensors(); render(); }));
   }, ()=>{ if(note) note.textContent='could not get your location'; }, {enableHighAccuracy:true, timeout:10000});
+}
+// pin a place (geolocated, or from the URL), zoom in, and list the nearest community sensors
+function showPlace(lat, lon, label){
+  const note = $('nearme-note');
+  if (userMarker) userMarker.remove();
+  userMarker = L.marker([lat,lon], {title: label, zIndexOffset:1000,
+    icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
+    .addTo(map).bindPopup(esc(label)).openPopup();
+  map.setView([lat,lon], 11);
+  const near = allSensors.filter(s=>s.kind==='community' && s.lat!=null)
+    .map(s=>({...s, mi:haversineMi(lat,lon,s.lat,s.lon)})).sort((a,b)=>a.mi-b.mi).slice(0,6);
+  const seeAll = ` · <a href="${esc(AirwvState.href('/nearby', {lat, lon}))}">🔎 see everything near here →</a>`;
+  if (note) note.innerHTML = (near.length
+    ? '📍 Nearest: ' + near.map(s=>`<a href="#" data-nsid="${s.sensor_id}">${s.name}</a> <span class="cnt">${s.mi.toFixed(1)}mi</span>`).join(' · ')
+    : 'No community sensors located.') + seeAll;
+  note && note.querySelectorAll('[data-nsid]').forEach(a=>a.addEventListener('click', e=>{
+    e.preventDefault(); toggleChart(a.dataset.nsid); redrawSensors(); render(); }));
 }
 // report/feedback modal logic lives in reporting.js (shared with the Overview page)
 // map layer visibility is driven by the layers tree (buildLayers)

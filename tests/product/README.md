@@ -21,6 +21,13 @@ where it's collapsed). `test_air_filters_sheet` wants it collapsed under the map
 Pages with a statewide map (`MAP_PAGES` in `conftest.py`, `map-<page>-<width>.png`) are shot at
 every devices.json size for the map check below; the report's `maps` column shows each one's `×` size.
 
+A dialog or map popup, opened as a user would (`OPEN_PAGES` in `conftest.py`: the report modal,
+a facility's detail on `/sources`, a sensor's popup on Home's map; `open-<name>-<width>.png`,
+open in the shot) is run through the accessibility checks below at every devices.json size.
+Those checks look only inside what opened, and the Tab check starts on its first control and
+stops when Tab leaves it. `test_dialog_or_popup_opens` fails if it didn't open or Tab can't
+get in. Known gaps are in `A11Y_KNOWN` (`test_smoke.py`): xfail, and only for that exact failure.
+
 Checks (`test_smoke.py`), per page × width unless noted:
 
 - page loads (200, no failed local requests)
@@ -30,18 +37,22 @@ Checks (`test_smoke.py`), per page × width unless noted:
   overlay (390: xfail until the place view lands)
 - every visible Leaflet map has a size. Statewide maps' first view contains West Virginia and is
   at most about 2× its size (limit ×2.25, measured along the tighter-fitting side, since a wide
-  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`) are only
+  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`, or every map on a `LOCAL_PAGES` page such as
+  `/place?…&view=adv`) are only
   checked to be centered on West Virginia
 - accessibility (`test_a11y`, per page × width × check; the browser asks for reduced motion):
   text contrast at WCAG AA (4.5:1; 3:1 for large text and for symbols inside a control;
   legend dots outside a control and disabled controls are exempt; text over images/gradients
   can't be measured and is skipped), `<img>` without `alt`, controls without an accessible
   name, mouse-only controls (`cursor:pointer` but not focusable), infinite animations under
-  reduced motion, and the first 15 Tab stops each showing a focus ring. The report's `a11y`
-  column counts what each page fails.
+  reduced motion, and the first 15 Tab stops each showing a focus ring (a stop without one is
+  looked at again 150 ms later). The report's `a11y` column counts what each page fails.
+  Checks listed in `A11Y_FLAKY` (now `air`-1280 `noFocus`) are xfail when they fail, with
+  what they saw, instead of red.
 
 Output in `tests/product/out/` (gitignored): `<page>-<width>.png` (first screen),
-`<page>-<width>-full.png`, `results.json`, `report.md`.
+`<page>-<width>-full.png`, `results.json`, `report.md`. `tests/product/baseline/` keeps a committed
+`report.md` and a few key shots from a run with Leaflet and Plotly vendored (no shims, no skips).
 
 **Data.** `AIRWV_PRODUCT_DB=<path>`, else `airwv.sqlite` in this checkout or the main
 checkout (worktrees), else a seeded fake DB (`AIRWV_PRODUCT_DB=seed` forces it). The file is

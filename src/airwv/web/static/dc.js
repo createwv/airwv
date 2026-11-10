@@ -8,8 +8,11 @@
   const ext = u => `href="${esc(u)}" target="_blank" rel="noopener"`;
   const words = s => esc(String(s).replace(/_/g, ' '));
 
+  const cite = srcs => srcs && srcs.length ? ` <span class="dc-cite">${srcs.map(s =>
+    `<a ${ext(s.url)} title="${esc(s.kind)}: ${esc(s.title)}" aria-label="Data source ${s.n}: ${esc(s.title)}">[${s.n}]</a>`).join('')}</span>` : '';
+
   function list(items) {
-    return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}` : esc(k.label)}</li>`).join('');
+    return items.map(k => `<li>${k.value ? `<b>${esc(k.label)}:</b> ${esc(k.value)}${cite(k.sources)}` : esc(k.label)}</li>`).join('');
   }
   function where(c) {
     return c.mi != null ? `${c.mi} mi away` : `in ${esc(c.county)} County · exact location not public`;
@@ -39,7 +42,7 @@
     ${!t.known.length && !t.gaps.length ? '<p class="meta">Nothing in the public record we found.</p>' : ''}</div>`).join('');
     return `<div class="dc-card">${head(c)}${comments(c)}
     <div class="dc-grid">${topics}</div>
-    <details class="dc-sources"><summary><b>Sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ul>${sources(c)}</ul></details>
+    <details class="dc-sources"><summary><b>Data sources (${c.sources.length})</b> <span class="meta">primary = agency or court record; news can be wrong or out of date</span></summary><ol>${sources(c)}</ol></details>
     <div class="nb-actions" style="margin-top:6px"><a href="${esc(c.url)}">plain summary →</a><a href="${esc(c.url)}?view=adv">full record and filings →</a></div>
   </div>`;
   }
@@ -62,7 +65,7 @@
     rows.push(tr('Not disclosed', esc((d.not_disclosed || []).join('; '))));
     return `<div class="dc-card">${head(c)}${comments(c)}<p class="meta">${esc(d.status_detail)}</p></div>
     <table class="dc-rec">${rows.join('')}</table>
-    <div class="dc-card"><b>Filings and data sources for this site</b><ul class="dc-files">${sources(c)}</ul></div>`;
+    <div class="dc-card"><b>Filings and data sources for this site</b><ol class="dc-files">${sources(c)}</ol></div>`;
   }
 
   function ask(items) {
