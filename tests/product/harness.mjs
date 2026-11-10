@@ -345,6 +345,7 @@ async function visit(vp, pg) {
       info.series.moved = await submit();
       await page.goto(shared, { waitUntil: "load", timeout: 60000 });   // leaves the shots on the table
       await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+      await page.mouse.move(0, 0);   // the last click's spot can land on the nav after the reload (hover colours)
       info.series.link = await page.evaluate(seriesProbe);
     }
     if (pg.probeExFilters) {
