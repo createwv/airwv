@@ -470,6 +470,7 @@
   .ex-count { font-weight:600; }
   .ex-links { display:flex; gap:14px; }
   .ex-out { overflow-x:auto; }
+  .ex-chart { margin-bottom:12px; padding:6px 4px 0; }
   .ex-table td { overflow-wrap:break-word; }
   .ex-table td:first-child { width:45%; }
   .ex-table td:nth-child(2) { white-space:nowrap; }

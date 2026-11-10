@@ -82,10 +82,12 @@
       <a id="ex-api" href="#" target="_blank" rel="noopener">API link (JSON)</a>
     </span>
   </div>
+  <div class="card ex-chart" id="ex-chart" hidden></div>
   <div class="card ex-out"><table class="fac-table ex-table" id="ex-table"></table></div>
   <div class="meta pl-prov" id="ex-prov"></div>
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="/static/site.js?v={{ asset_v }}"></script>
 <script src="/static/explore.js?v={{ asset_v }}"></script>
 {% endblock %}

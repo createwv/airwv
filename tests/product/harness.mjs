@@ -122,6 +122,8 @@ function seriesProbe() {
            kindsShown: f.querySelector("input[name=kind]").checkVisibility(),
            linksShown: document.getElementById("ex-links").checkVisibility(),
            rows: document.querySelectorAll("#ex-table tbody tr").length,
+           chart: document.getElementById("ex-chart").checkVisibility()
+             && !!document.querySelector("#ex-chart .main-svg"),
            count: document.getElementById("ex-count").textContent,
            csv: document.getElementById("ex-csv").getAttribute("href"),
            api: document.getElementById("ex-api").getAttribute("href"),
