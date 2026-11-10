@@ -7,6 +7,7 @@ re-recorded too):
     AIRWV_UPDATE_SNAPSHOTS=1 .venv/bin/python -m pytest tests/test_readmodel.py
 """
 
+import importlib.util
 import json
 import os
 from datetime import datetime, timedelta, timezone
@@ -87,6 +88,32 @@ def test_api_near_matches_snapshot(tmp_path, monkeypatch):
     # the snapshot actually exercises every hazard category
     cats = {h["category"] for r in want.values() for h in r["hazards"]}
     assert cats == {"gas", "air", "water", "chemical", "sensor"}
+
+
+def test_api_near_lists_each_spill_once(tmp_path, monkeypatch):
+    # NRC files PHMSA 48-hour updates under a new report number; one that repeats its
+    # original (Blacksville natural gas, 2025-07-12) used to show twice here
+    c, _ = _client(tmp_path, monkeypatch)
+    for r in _near_all(c).values():
+        spills = [(h["label"], h["detail"], h["lat"], h["lon"]) for h in r["hazards"]
+                  if h["flag"] == "spill"]
+        assert len(spills) == len(set(spills)), spills
+
+
+def test_nrc_repeat_updates_are_dropped():
+    spec = importlib.util.spec_from_file_location(
+        "fetch_nrc_spills", Path(__file__).parent.parent / "scripts" / "fetch_nrc_spills.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    base = {"date": "2025-07-12", "materials": [{"name": "Natural Gas", "amount": 7.4}], "lat": 39.6}
+    spills = [
+        {**base, "report_id": 1436736, "description": "RELEASED FROM A RELIEF VALVE"},
+        {**base, "report_id": 1436930, "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 //"},
+        {**base, "report_id": 1436931, "description": "THIS IS AN UPDATE TO REPORT #1436736",
+         "materials": [{"name": "Natural Gas", "amount": 9.0}]},     # new amount → kept
+        {**base, "report_id": 1436932, "description": "UPDATE TO NRC REPORT 1400000"},  # original absent
+    ]
+    assert [s["report_id"] for s in mod.drop_repeat_updates(spills)] == [1436736, 1436931, 1436932]
 
 
 def test_api_near_hazards_have_site_pages(tmp_path, monkeypatch):

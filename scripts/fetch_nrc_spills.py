@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import re
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -73,6 +74,28 @@ def _num(v):
         return round(float(v), 2)
     except (TypeError, ValueError):
         return None
+
+
+# "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 //", "THIS IS AN UPDATE TO REPORT #1443838", ...
+UPDATE_OF = re.compile(r"UPDATE (?:TO|FOR) (?:NRC |INCIDENT )?REPORT(?: NUMBER)?\s*#?\s*(\d{6,8})")
+
+
+def drop_repeat_updates(spills: list[dict]) -> list[dict]:
+    """Drop follow-up reports (e.g. PHMSA 48-hour updates) that the NRC files under a
+    new SEQNOS but that repeat the original report in every field we show; /api/near
+    and the Events page otherwise list the same release twice. Updates that change
+    anything (amount, place, material...) stay, since they carry new information."""
+    def shown(s):
+        return {k: v for k, v in s.items() if k not in ("report_id", "description")}
+    by_id = {s["report_id"]: s for s in spills}
+    out = []
+    for s in spills:
+        m = UPDATE_OF.search(s.get("description") or "")
+        orig = by_id.get(int(m.group(1))) if m else None
+        if orig is not None and orig is not s and shown(orig) == shown(s):
+            continue
+        out.append(s)
+    return out
 
 
 def fetch_year(client: httpx.Client, year: int) -> list[dict]:
@@ -147,6 +170,9 @@ def main() -> None:
             print(f"  CY{y}: {len(rows)} WV reports ({sum(s['reached_water'] for s in rows)} reached water)")
             spills.extend(rows)
     spills.sort(key=lambda s: s["date"] or "", reverse=True)
+    n = len(spills)
+    spills = drop_repeat_updates(spills)
+    print(f"  dropped {n - len(spills)} update reports that repeat their original")
     data = {
         "source": "National Response Center (US Coast Guard) — reported oil/chemical releases",
         "scope": f"WV reports for calendar years {years}",

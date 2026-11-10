@@ -3307,18 +3307,6 @@
    },
    {
     "category": "chemical",
-    "detail": "2025-07-12",
-    "flag": "spill",
-    "icon": "🛢️",
-    "label": "Reported spill — Natural Gas",
-    "lat": 39.63,
-    "link": "https://nrc.uscg.mil/",
-    "lon": -80.05,
-    "mi": 2.1,
-    "report": false
-   },
-   {
-    "category": "chemical",
     "detail": "2025-06-15",
     "flag": "spill",
     "icon": "🛢️",
@@ -3335,6 +3323,18 @@
     "flag": "spill",
     "icon": "🛢️",
     "label": "Reported spill — Unknown Oil, Unknown Material",
+    "lat": 39.63,
+    "link": "https://nrc.uscg.mil/",
+    "lon": -80.05,
+    "mi": 2.1,
+    "report": false
+   },
+   {
+    "category": "chemical",
+    "detail": "2025-05-22",
+    "flag": "spill",
+    "icon": "🛢️",
+    "label": "Reported spill — Unknown Material",
     "lat": 39.63,
     "link": "https://nrc.uscg.mil/",
     "lon": -80.05,

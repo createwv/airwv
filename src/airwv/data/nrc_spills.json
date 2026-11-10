@@ -1663,54 +1663,6 @@
    "geo": "county"
   },
   {
-   "report_id": 1453545,
-   "date": "2026-01-26",
-   "city": "Clendenin",
-   "county": "Kanawha",
-   "type": "Pipeline",
-   "cause": "Unknown",
-   "company": "Columbia Gas Transmission",
-   "materials": [
-    {
-     "name": "Natural Gas",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "//////THIS IS A 48-HOUR PHMSA UPDATE FOR NRC REPORT NUMBER 1453413.//////// UPDATED INFO: - CALLER STATES EVERYTHING IS THE SAME FROM THE ORIGINAL REPORT (THERE ARE NO CHANGES). ORIGINAL REPORT: CALLER IS REPORTING A RELEASE OF NATURAL GAS FROM AN EIGHT INCH STEEL TRANSMISSION PIPELINE DUE TO UNKNOWN CAUSES.",
-   "lat": 38.32,
-   "lon": -81.53,
-   "geo": "county"
-  },
-  {
-   "report_id": 1453556,
-   "date": "2026-01-26",
-   "city": "Clendenin",
-   "county": "Kanawha",
-   "type": "Pipeline",
-   "cause": "Unknown",
-   "company": "Columbia Gas Transmission",
-   "materials": [
-    {
-     "name": "Natural Gas",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "////48 HOUR PHMSA UPDATE TO INCIDENT REPORT NUMBER 1453413./// //THE REPORTING PARTY STATED THERE ARE NO UPDATES TO THIS REPORT.// PREVIOUS DESCRIPTION OF INCIDENT CALLER IS REPORTING A RELEASE OF NATURAL GAS FROM AN EIGHT INCH STEEL TRANSMISSION PIPELINE DUE TO UNKNOWN CAUSES.",
-   "lat": 38.32,
-   "lon": -81.53,
-   "geo": "county"
-  },
-  {
    "report_id": 1453402,
    "date": "2026-01-25",
    "city": "Leet",
@@ -2414,30 +2366,6 @@
    "body_of_water": null,
    "water_supply_contaminated": false,
    "description": "THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, INTO THE ATMOSPHERE, FROM A TRANSMISSION PIPELINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
-   "lat": 39.28444,
-   "lon": -79.34667,
-   "geo": "exact"
-  },
-  {
-   "report_id": 1442688,
-   "date": "2025-09-12",
-   "city": null,
-   "county": "Grant",
-   "type": "Pipeline",
-   "cause": "Unknown",
-   "company": "Columbia Gas Transmission",
-   "materials": [
-    {
-     "name": "Natural Gas",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "*** THIS IS A 48 HR PHMSA UPDATE TO NRC REPORT 1442591 *** UPDATE IS AS FOLLOWS: - CALLER SPECIFIED WEATHER CONDITION: WIND BLOWING FROM THE EAST TO THE WEST - NO FURTHER UPDATE TO PROVIDE; CAUSE AND AMOUNT RELEASED REMAIN UNKNOWN. ORIGINAL REPORT BELOW: THE CALLER IS REPORTING A RELEASE OF NATURAL GAS, INTO THE ATMOSPHERE, FROM A TRANSMISSION PIPELINE. THE CALLER STATES THE CAUSE OF THE RELEASE IS UNKNOWN AT THIS TIME.",
    "lat": 39.28444,
    "lon": -79.34667,
    "geo": "exact"
@@ -3222,30 +3150,6 @@
    "geo": "exact"
   },
   {
-   "report_id": 1437966,
-   "date": "2025-07-17",
-   "city": null,
-   "county": "Marshall",
-   "type": "Pipeline",
-   "cause": "Unknown",
-   "company": "Williams Companies",
-   "materials": [
-    {
-     "name": "Condensate",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "/// UPDATE TO NRC REPORT #1437318 /// UPDATE IS AS FOLLOWS: CALLER STATES THE PIPELINE IS NON JURISDICTIONAL, NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: ****THIS 48-HOUR PHMSA UPDATE TO NRC REPORT #1437267**** UPDATE IS AS FOLLOWS: - THE CALLER STATES THEY DUG THE AREA THAT CONTAINS THE LEAK, WITH NEGATIVE FINDINGS. REMEDIATION WILL RESUME ON (7/21/2025). ORIGINAL REPORT THE CALLER DISCOVERED A CONDENSATE LEAK ON A 4-INCH CONDENSATE LINE. THE CAUSE IS UNKNOWN AT THIS TIME. THE DAMAGES W",
-   "lat": 39.87333,
-   "lon": -80.69306,
-   "geo": "exact"
-  },
-  {
    "report_id": 1436736,
    "date": "2025-07-12",
    "city": "Blacksville",
@@ -3265,30 +3169,6 @@
    "body_of_water": null,
    "water_supply_contaminated": false,
    "description": "CALLER STATES 7.4 MMCF OF NATURAL GAS RELEASED INTO THE ATMOSPHERE FROM A RELIEF VALVE AT A DEHYDRATION FACILITY. THE CAUSE OF THE RELEASE IS UNDER INVESTIGATION.",
-   "lat": 39.63,
-   "lon": -80.05,
-   "geo": "county"
-  },
-  {
-   "report_id": 1436930,
-   "date": "2025-07-12",
-   "city": "Blacksville",
-   "county": "Monongalia",
-   "type": "Pipeline",
-   "cause": "Unknown",
-   "company": "Dt Midstream",
-   "materials": [
-    {
-     "name": "Natural Gas",
-     "amount": 7.4,
-     "unit": "mmcf",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "// 48 HOUR PHMSA UPDATE TO NRC REPORT 1436736 // UPDATE IS AS FOLLOWS: - NO UPDATES TO REPORT. ORIGINAL REPORT: CALLER STATES 7.4 MMCF OF NATURAL GAS RELEASED INTO THE ATMOSPHERE FROM A RELIEF VALVE AT A DEHYDRATION FACILITY. THE CAUSE OF THE RELEASE IS UNDER INVESTIGATION.",
    "lat": 39.63,
    "lon": -80.05,
    "geo": "county"
@@ -3630,30 +3510,6 @@
    "body_of_water": null,
    "water_supply_contaminated": false,
    "description": "CALLER REPORTED A CHLORINE SMELL FOR THE LAST FEW MONTHS FROM A CHEMICAL PLANT. CALLER ALSO SAID IT CAUSES SKIN TINGLING AND EYE BURNING WHEN IT IS HAPPENING AND THEY HAD SEEN DEAD BIRDS ON 6/9. CALLER REPORTED THE SMELL IS PRESENT AGAIN THIS MORNING.",
-   "lat": 39.86,
-   "lon": -80.66,
-   "geo": "county"
-  },
-  {
-   "report_id": 1444077,
-   "date": "2025-06-13",
-   "city": "Proctor",
-   "county": "Marshall",
-   "type": "Fixed",
-   "cause": "Unknown",
-   "company": "Westlake",
-   "materials": [
-    {
-     "name": "Chlorine",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "****THIS IS AN UPDATE TO NRC REPORT #1433951**** UPDATE IS AS FOLLOWS: - THE CALLER STATES THE SMELL IS GETTING INCREASING WORSE, AND OCCURS MOSTLY AT NIGHT. ORIGINAL REPORT CALLER REPORTED A CHLORINE SMELL FOR THE LAST FEW MONTHS FROM A CHEMICAL PLANT. CALLER ALSO SAID IT CAUSES SKIN TINGLING AND EYE BURNING WHEN IT IS HAPPENING AND THEY HAD SEEN DEAD BIRDS ON 6/9. CALLER REPORTED THE SMELL IS PRESENT AGAIN THIS MORNING.",
    "lat": 39.86,
    "lon": -80.66,
    "geo": "county"
@@ -5017,30 +4873,6 @@
    "body_of_water": null,
    "water_supply_contaminated": false,
    "description": "THIS IS A POTENTIAL RELEASE... CALLER IS REPORTING THERE WAS A HOUSE THAT EXPLODED DUE TO UNKNOWN CAUSES AT THIS TIME. THIS HAD THE POTENTIAL TO RELEASE NATURAL GAS INTO THE AIR.",
-   "lat": 39.28,
-   "lon": -80.38,
-   "geo": "county"
-  },
-  {
-   "report_id": 1422142,
-   "date": "2025-01-26",
-   "city": "Clarksburg",
-   "county": "Harrison",
-   "type": "Pipeline",
-   "cause": "Explosion",
-   "company": null,
-   "materials": [
-    {
-     "name": "Natural Gas",
-     "amount": 0.0,
-     "unit": "unknown amount",
-     "reached_water": false
-    }
-   ],
-   "reached_water": false,
-   "body_of_water": null,
-   "water_supply_contaminated": false,
-   "description": "/// 48HR UPDATE TO NRC REPORT #1421949 /// UPDATE IS AS FOLLOWS: CALLER STATES THIS WAS A D.O.T REGULATED LINE, THE PIPELINE WAS BELOW GROUND, THERE WAS A FIRE INVOLVED AND THE FIRE WAS EXTINGUISHED, ONE FATALITY INVOLVED AND THE DAMAGES COST AMOUNT IS UNKNOWN. NO OTHER CHANGES OR UPDATES. ORIGINAL REPORT READS: THIS IS A POTENTIAL RELEASE... CALLER IS REPORTING THERE WAS A HOUSE THAT EXPLODED DUE TO UNKNOWN CAUSES AT THIS TIME. THIS HAD THE POTENTIAL TO RELEASE NATURAL GAS INTO THE AIR.",
    "lat": 39.28,
    "lon": -80.38,
    "geo": "county"
