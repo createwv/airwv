@@ -49,8 +49,8 @@ def test_related_is_the_nearest_of_each_other_kind():
 def test_related_links_each_site_to_its_page():
     html = _js(f"S.relatedHtml(S.pickRelated({json.dumps(NEAR)}, 'sensor', 'sensor:1'))")
     assert '<a href="/site/gauge/G%201">Elk River</a>' in html and "1.3 mi" in html
-    assert '<a href="https://example.org/w1" target="_blank" rel="noopener">Well &lt;1&gt;</a>' in html
-    assert "Kanawha County" in html and "No url" in html and "12 mi" in html
+    assert '<a href="/site/well/W1">Well &lt;1&gt;</a>' in html
+    assert '<a href="/site/permit/P">No url</a>' in html and "Kanawha County" in html and "12 mi" in html
     assert "No other kinds" in _js("S.relatedHtml([])")
 
 

@@ -9,7 +9,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Product harness: a pytest + Playwright smoke suite that boots the app on the local SQLite copy, screenshots the key pages at 390/1280, asserts a reading is visible above the fold, nav count, map bounds, and no console errors. Every later item cites it. Do first. [auto:M]
 - [x] Direction spec: Corey approved the review's direction on 2026-11-05 (six-noun model, Basic/Advanced toggle, nav collapse, demo place Rutledge). Write the one-page spec in docs/ from the review so later items build on it [auto:S]
 - [x] Unified read model, views + `/api/query`: SQL views (`site`, `measurement`, `record`) over the existing tables and JSON layers; `/api/near` reimplemented on them with a snapshot test proving identical output. (sized L in the review: fit it in one M job or split it, and say so) [auto:M]
-- [ ] URL-state everywhere: a shared `state.js` that reads/writes place, time, param, layers, view to the query string; Home/Air/Water/Nearby adopt it. [auto:M]
+- [x] URL-state everywhere: a shared `state.js` that reads/writes place, time, param, layers, view to the query string; Home/Air/Water/Nearby adopt it. [auto:M]
 - [x] Place picker + "my place now" basic view: new `/place` route and template; status lines per medium from `/api/query`; "what changed" from the same. [auto:M]
 - [ ] Depth toggle + advanced view: `view=adv` shows today's /air controls under the place; /air redirects to `/place?…&view=adv`. [auto:M]
 - [ ] Site pages: `/site/<kind>/<id>` for sensor, monitor, gauge, facility, water system, well, spill; popups and lists link to them. [auto:M]
@@ -54,7 +54,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [ ] Data centers, geocode: add verified coordinates (from permits or parcel records) for sites that have a street address, with `location_precision` filled. [auto]
 - [x] Per-fact source keys in `data_centers.json` (a source index next to each field), so each card line links its own source [auto:S]
 - [x] When the Place picker and Depth toggle merge, show the data-center card on `/place` and the full record under `view=adv` [auto:S]
-- [ ] Move `/api/near` and the other site kinds onto `/site/<kind>/<id>` (the existing "Site pages" item can use `site.html`) [auto:M]
+- [x] Move `/api/near` and the other site kinds onto `/site/<kind>/<id>` (the existing "Site pages" item can use `site.html`) [auto:M]
 - [x] Show dated open comment periods (e.g. R14-0042 comments due 2026-11-13) on the data-center card once the watch-list item lands [auto:S]
 - [x] Harness: add the `/site/<kind>/<id>` pages (one per kind, all screen sizes) to `tests/product/run.sh` once the harness exists. [auto]
 - [x] Site pages: a recent-readings chart for sensors, monitors and gauges, using the `/api/query` series mode. [auto]
@@ -84,7 +84,8 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Age cap for spill alerts (e.g. skip reports dated more than 60 days back), with the cap stated in the email [auto:S]
 - [x] Tell a cleared violation that comes back apart from one already seen (remember when each record was last present) [auto:S]
 - [x] Admin view: per-subscription record alert history (what fired, what was taken as the starting point) at `/api/admin/subscriptions` [auto:S]
-- [ ] (session with Corey) SMTP go-live: set the email settings on papa-greatness, send the waitlist confirmations, check the first record alert email. [auto]
+- [ ] (session with Corey) SMTP go-live: set the email settings on papa-greatness, send the waitlist confirmations, check the first record alert email.
+- [ ] (session with Corey) Call Edward Andrews at DEP, (304) 926-0499 ext. 41244, to confirm the R14-0042 (Monarch) comment deadline: DEP's pages say Nov 13, the posted notice says Oct 30. Work to Nov 13 until confirmed.
 - [x] Serve the glossary on the site (for example a section on `/learn`) so the footer link stays on the site instead of going to GitHub [auto:S]
 - [x] Add a test that fails if "source" is used alone in page text, nav or popups, per the glossary [auto:S]
 - [x] Exclude PM readings over 1000 µg/m³ from the `/api/areas` daily trend as well as the current value, and update `api_areas.json` [auto:S]

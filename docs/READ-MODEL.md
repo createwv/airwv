@@ -18,7 +18,9 @@ choices come from `ReadModel.parameters`). Monitors match their AirData history
 `impaired_303d` causes, with the layer's disclaimer; `?view=adv` lists every field.
 Every site page (data centers too) also shows "Related nearby": `site.js` asks `/api/query`
 for the nearest site of each other kind (`kind=<k>&limit=1`, 25 mi) and lists the 5 closest,
-linking each to its site page or, for kinds without one yet, to its own record (`url`).
+linking each to its site page.
+Every other site has a page at `/site/<kind>/<ref>` too (`site_page_url` in `web/app.py`), read
+from `ReadModel.site`; `/api/near` gives each hazard its `page`.
 
 ## How it works
 
@@ -66,6 +68,7 @@ with the date it was last seen.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - Readings-table sensors with no coordinates in any reading aren't sites (nothing to place
   them by); AirNow names come only from the hourly file, so AirData-only monitors have none.
+- Where `site_id` repeats (oil & gas permits), `/site/<kind>/<ref>` shows the first row.
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting
   DEP site a few metres.

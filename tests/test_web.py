@@ -146,9 +146,9 @@ def test_sources_have_stable_site_ids(tmp_path):
     for s in rows:
         assert raw[int(s["id"][4:])]["name"] in s["names"]
     amos = next(s for s in rows if s["name"] == "John Amos Power Plant")
-    r = c.get(f"/site/facility/{amos['id']}", follow_redirects=False)
-    assert r.status_code == 307 and r.headers["location"].startswith("/sources#facility=")
-    assert c.get("/site/facility/tri-99999", follow_redirects=False).status_code == 404
+    r = c.get(f"/site/facility/{amos['id']}")
+    assert r.status_code == 200 and "/sources#facility=" in r.text
+    assert c.get("/site/facility/tri-99999").status_code == 404
 
 
 def test_guide_endpoint(tmp_path):

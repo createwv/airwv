@@ -42,7 +42,9 @@ function renderSymptoms() {
 function hazardRow(h, relevant) {
   const flag = h.flag ? `<span class="nb-flag nb-${h.flag}">${h.flag.replace('_', ' ')}</span>` : '';
   const dist = h.mi != null ? `${h.mi} mi` : 'in your county';
-  const link = h.link ? `<a href="${esc(h.link)}" ${h.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
+  // each hazard's own site page (/site/<kind>/<id>), which links on to the data source's record
+  const href = h.page || h.link;
+  const link = href ? `<a href="${esc(href)}" ${href.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
   const report = h.report ? `<a href="#" class="nb-report" data-lat="${h.lat}" data-lon="${h.lon}" data-cat="${h.category}" data-label="${esc(h.label)}">report →</a>` : '';
   return `<div class="nb-item${relevant ? ' rel' : ''}">
     <span class="nb-ic">${h.icon || '•'}</span>
@@ -135,6 +137,7 @@ function wireReports() {
 // `from` is an optional human label (e.g. a sensor name) shown in the location line.
 async function loadAt(lat, lon, from) {
   const km = $('nb-km').value;
+  AirwvState.set({lat: +lat, lon: +lon, km: +km, label: from || null});   // a shareable link to this screen
   $('nb-locinfo').textContent = `📍 ${(+lat).toFixed(3)}, ${(+lon).toFixed(3)}${from ? ' · ' + from : ''}`;
   try {
     // data centers are big neighbors (water, power, generator noise): look at least 10 mi out
@@ -158,15 +161,15 @@ function locate() {
 
 renderSymptoms();
 $('nb-loc').addEventListener('click', locate);
-$('nb-km').addEventListener('change', () => { if (DATA) loadAt(DATA.lat, DATA.lon); });
+$('nb-km').addEventListener('change', () => { if (DATA) loadAt(DATA.lat, DATA.lon, AirwvState.get().label); });
 
-// Deep-link support: /nearby?lat=&lon=[&km=][&from=] auto-loads that point
-// (e.g. drilling in from a sensor reading on the Air page).
+// Deep-link support (shared URL state, state.js): /nearby?lat=&lon=[&km=][&label=] auto-loads
+// that point (e.g. drilling in from a sensor reading on the Air page).
 (function () {
-  const q = new URLSearchParams(location.search);
-  const lat = q.get('lat'), lon = q.get('lon');
-  if (lat && lon && !isNaN(+lat) && !isNaN(+lon)) {
-    if (q.get('km') && $('nb-km')) $('nb-km').value = q.get('km');
-    loadAt(lat, lon, q.get('from') || '');
-  }
+  const st = AirwvState.get();
+  if (st.lat == null) return;
+  const sel = $('nb-km');
+  if (st.km != null && sel && [...sel.options].some(o => +o.value === st.km))
+    sel.value = [...sel.options].find(o => +o.value === st.km).value;
+  loadAt(st.lat, st.lon, st.label || '');
 })();
