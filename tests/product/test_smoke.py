@@ -6,7 +6,7 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE,
+from conftest import (DEVICES, EXPLORE_AREA, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE,
                       OPEN_PAGES, PAGES,
                       SITE_PAGES, VIEWPORTS, WV_LINE, map_span)
 
@@ -17,7 +17,7 @@ NAV_TARGET = 6  # six top-level items, "More" included (docs/DIRECTION.md §3)
 
 CASES = [(name, w) for w, _ in VIEWPORTS for name, _ in PAGES]
 # site pages at every standard screen size (devices.json)
-SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in [*SITE_PAGES, EXPLORE_SERIES, EXPLORE_FILTERS]
+SITE_CASES = [(name, d["viewport"]["width"]) for name, _ in [*SITE_PAGES, EXPLORE_SERIES, EXPLORE_FILTERS, EXPLORE_AREA]
               for d in DEVICES.values()]
 CASES += SITE_CASES
 IDS = [f"{n}-{w}" for n, w in CASES]
@@ -125,10 +125,24 @@ def test_explore_filters(product, width):
     r = _get(product, EXPLORE_FILTERS[0], width)
     assert r["error"] is None, r["error"]
     f = r["exFilters"]
-    assert f["county"] == "Kanawha" and f["over"] == "1" and f["countyShown"] and f["overShown"], f
+    assert f["area"] == "Kanawha" and f["over"] == "1" and f["areaShown"] and f["overShown"], f
     assert "county=Kanawha" in f["api"] and "over=1" in f["api"] and f["csv"] == f["api"] + "&format=csv", f
     assert "in Kanawha County" in f["count"] and "over 1" in f["count"], f
     assert "lists a county" in f["prov"], f
+
+
+@pytest.mark.parametrize("width", [d["viewport"]["width"] for d in DEVICES.values()])
+def test_explore_area(product, width):
+    """Explore over a whole region with a reading window: no point in the query, the
+    distance is off, and the result line names the region and the window."""
+    r = _get(product, EXPLORE_AREA[0], width)
+    assert r["error"] is None, r["error"]
+    f = r["exFilters"]
+    assert f["area"] == "Kanawha Valley" and f["place"] == "anywhere" and f["areaShown"] and f["fromShown"], f
+    assert f["kmDisabled"] and "lat=" not in f["api"] and "km=" not in f["api"], f
+    assert "area=Kanawha+Valley" in f["api"] and "from=2026-06-01" in f["api"] and "to=2026-07-01" in f["api"], f
+    assert "in Kanawha Valley" in f["count"] and "2026-06-01 to 2026-07-01" in f["count"], f
+    assert "community sensors" in f["prov"], f
 
 
 @pytest.mark.parametrize("width", [w for w, _ in VIEWPORTS])

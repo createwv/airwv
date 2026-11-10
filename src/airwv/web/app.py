@@ -2175,7 +2175,8 @@ def create_app(store: Store) -> FastAPI:
         # URL, and the page shows the table, a CSV download and the API URL for the same answer
         return TEMPLATES.TemplateResponse(request=request, name="explore.html",
                                           context={"mode": "explore",
-                                                   "counties": sorted(WV_COUNTY_CENTROID)})
+                                                   "counties": sorted(WV_COUNTY_CENTROID),
+                                                   "regions": sorted(set(COUNTY_REGION.values()))})
 
     @app.get("/site/{kind}/{ref:path}", response_class=HTMLResponse)
     def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):

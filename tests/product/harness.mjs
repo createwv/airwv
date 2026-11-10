@@ -351,8 +351,9 @@ async function visit(vp, pg) {
       await page.waitForFunction(() => !/Loading/.test(document.getElementById("ex-count").textContent), null, { timeout: 30000 });
       info.exFilters = await page.evaluate(() => {
         const f = document.getElementById("ex-form");
-        return { county: f.elements.county.value, over: f.elements.over.value,
-                 countyShown: f.elements.county.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+        return { area: f.elements.area.value, over: f.elements.over.value, place: f.elements.place.value,
+                 areaShown: f.elements.area.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+                 fromShown: f.elements.from.checkVisibility(), kmDisabled: f.elements.km.disabled,
                  count: document.getElementById("ex-count").textContent,
                  prov: document.getElementById("ex-prov").textContent,
                  api: document.getElementById("ex-api").getAttribute("href"),

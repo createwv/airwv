@@ -18,9 +18,14 @@
         <option value="16">10 miles</option>
         <option value="40.25">25 miles</option>
       </select></label>
-      <label data-for="list">County <select name="county">
+      <label data-for="list">Area <select name="area">
         <option value="">any</option>
-        {% for c in counties %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        <optgroup label="Counties">
+          {% for c in counties %}<option value="{{ c }}" data-param="county">{{ c }}</option>{% endfor %}
+        </optgroup>
+        <optgroup label="Regions (community sensors)">
+          {% for r in regions %}<option value="{{ r }}" data-param="area">{{ r }}</option>{% endfor %}
+        </optgroup>
       </select></label>
       <label>Medium <select name="medium">
         <option value="">any</option>
@@ -45,8 +50,8 @@
       <label>Over <input type="number" step="any" name="over" placeholder="any value"></label>
       <label data-for="series" hidden>Site <select name="site_id"></select></label>
       <label data-for="list">Changed since <input type="date" name="since"></label>
-      <label data-for="series" hidden>From <input type="date" name="from"></label>
-      <label data-for="series" hidden>To <input type="date" name="to"></label>
+      <label><span id="ex-from-label">From</span> <input type="date" name="from"></label>
+      <label><span id="ex-to-label">To</span> <input type="date" name="to"></label>
       <label>Up to <select name="limit">
         <option value="50">50 rows</option>
         <option value="100" selected>100 rows</option>

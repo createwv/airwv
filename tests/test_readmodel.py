@@ -307,8 +307,9 @@ def test_explore_page(tmp_path, monkeypatch):
     # the measurements option (series mode): its site and window fields
     assert 'value="measurements"' in r.text and 'name="site_id"' in r.text
     assert 'name="from"' in r.text and 'name="to"' in r.text
-    # the county and value filters; McDowell keeps its capital D
-    assert 'name="county"' in r.text and '<option value="McDowell">' in r.text and 'name="over"' in r.text
+    # the area picker (counties as county=, regions as area=) and the value filter; McDowell keeps its capital D
+    assert 'name="area"' in r.text and '<option value="McDowell" data-param="county">' in r.text
+    assert '<option value="Kanawha Valley" data-param="area">' in r.text and 'name="over"' in r.text
 
 
 # /api/water/near and /api/areas moved onto the read model too; these snapshots were
