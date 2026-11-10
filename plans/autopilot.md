@@ -97,7 +97,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Remove the exact-duplicate natural-gas spill rows that `/api/near` still shows twice near 39.65,-80.02 (NRC spills fetch script) [auto:S]
 - [ ] Mark the flaky `test_a11y[air-1280-noFocus]` product check as unreliable, or make it pass consistently [auto:S]
 - [ ] Explore: when a single sensor, gauge or sample site is picked, show its readings as a table and chart from the series mode, with its CSV link [auto:M]
-- [ ] Read model: add AirNow monitors in `readings` as sites (a small sites table) so series mode covers them [auto:M]
+- [x] Read model: add AirNow monitors in `readings` as sites (a small sites table) so series mode covers them [auto:M]
 - [ ] Long-lived `Cache-Control` (immutable) on `/static/vendor/*`, since the file names are pinned to versions. [S] [auto]
 - [ ] Refresh the product-harness baseline now that Leaflet and Plotly are local, so the map and chart checks stop skipping. [S] [auto]
 - [ ] Depth toggle + advanced view: `view=adv` on `/place` shows today's /air controls under the place; /air redirects to `/place?…&view=adv` (Place picker merged as 5b5f722). [auto:M]
