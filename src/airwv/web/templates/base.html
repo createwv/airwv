@@ -35,8 +35,8 @@
 </header>
 <nav class="modenav" aria-label="main">
   <a href="/"         class="{{ 'on' if mode == 'overview' or home }}">Home</a>
-  <a href="/place"    class="{{ 'on' if mode == 'place' and not home }}">My place</a>
-  <a href="/air"      class="{{ 'on' if mode == 'air' }}">Air</a>
+  <a href="/place"    class="{{ 'on' if mode == 'place' and not home and not adv }}">My place</a>
+  <a href="/air"      class="{{ 'on' if mode == 'air' or adv }}">Air</a>
   <a href="/water"    class="{{ 'on' if mode == 'water' }}">Water</a>
   <a href="/alerts"   class="{{ 'on' if mode == 'alerts' }}">Alerts</a>
   {# "More" holds the rest (docs/DIRECTION.md §3); a <details> so it opens without JS #}

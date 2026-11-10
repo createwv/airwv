@@ -496,3 +496,8 @@
   .pl-more { font-size:13px; white-space:nowrap; }
   .pl-actions { display:flex; flex-wrap:wrap; gap:8px 18px; margin:14px 2px; font-size:14px; }
   .pl-prov { margin:8px 2px 18px; font-size:12px; }
+  .pl-depth { display:inline-flex; border:1px solid #cfd6dc; border-radius:6px; overflow:hidden; font-size:14px; }
+  .pl-depth a { padding:6px 12px; text-decoration:none; color:inherit; }
+  .pl-depth a + a { border-left:1px solid #cfd6dc; }
+  .pl-depth a[aria-current] { background:#3b2a6b; color:#fff; font-weight:600; }
+  .pl-advh { margin:18px 20px 0; }

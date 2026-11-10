@@ -2117,18 +2117,21 @@ def create_app(store: Store) -> FastAPI:
         # here with it, unless ?statewide=1 asks for the statewide view.
         if not statewide and (place or (lat and lon)):
             return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                              context={"mode": "place", "home": True})
+                                              context={"mode": "place", "home": True,
+                                                       "adv": request.query_params.get("view") == "adv"})
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 
-    @app.get("/air", response_class=HTMLResponse)
+    @app.get("/air")
     def air(request: Request):
-        return TEMPLATES.TemplateResponse(request=request, name="dashboard.html",
-                                          context={"mode": "air"})
+        # /air's tools are the advanced view of a place now (DIRECTION.md §3); the rest of the
+        # query (?src=, ?param=, ?lat=&lon=, ?layers=, …) rides along so old links keep working
+        q = [(k, v) for k, v in request.query_params.multi_items() if k != "view"]
+        return RedirectResponse("/place?" + urlencode(q + [("view", "adv")]), status_code=302)
 
     @app.get("/analysis")
     def analysis_redirect():   # kept so old links / bookmarks still work
-        return RedirectResponse("/air", status_code=301)
+        return RedirectResponse("/place?view=adv", status_code=301)
 
     @app.get("/learn", response_class=HTMLResponse)
     def learn(request: Request):
@@ -2166,9 +2169,10 @@ def create_app(store: Store) -> FastAPI:
     @app.get("/place", response_class=HTMLResponse)
     def place_page(request: Request):
         # "my place now" (basic view, DIRECTION.md §2): the page reads lat/lon/km/name
-        # from its URL and builds every line from /api/query
+        # from its URL and builds every line from /api/query; view=adv adds /air's tools under it
         return TEMPLATES.TemplateResponse(request=request, name="place.html",
-                                          context={"mode": "place"})
+                                          context={"mode": "place",
+                                                   "adv": request.query_params.get("view") == "adv"})
 
     @app.get("/explore", response_class=HTMLResponse)
     def explore_page(request: Request):

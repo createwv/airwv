@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block content %}
+{# /air's tools (map, layer tree, series, time of day, day vs. overnight, validation, explore),
+   shown under the place on /place?view=adv; app.js, areas.js and wellsvoc.js drive them #}
 <div class="controls" style="gap:10px">
   <button id="nearme">Near me</button>
   <button class="primary" data-open="report">Report a concern</button>
@@ -114,12 +114,3 @@
   <div class="meta" id="validatenote" style="padding:0 14px 12px"></div>
 </div>
 </details>
-
-{% include "_modals.html" %}
-{% endblock %}
-{% block scripts %}
-<script src="/static/app.js?v={{ asset_v }}"></script>
-<script src="/static/areas.js?v={{ asset_v }}"></script>
-<script src="/static/wellsvoc.js?v={{ asset_v }}"></script>
-<script src="/static/reporting.js?v={{ asset_v }}"></script>
-{% endblock %}

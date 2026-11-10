@@ -2,6 +2,9 @@
 // "what changed (7 days)" for a place. Place lives in the URL (?lat=&lon=&km=&place=);
 // every line comes from /api/query, so each number keeps its time, distance and source.
 // Data centers come from /api/data-centers: a plain card here, the full record under view=adv.
+// view=adv also puts /air's tools (app.js) under the place; the depth is kept in the browser too.
+// Self-contained (IIFE) so it doesn't clash with app.js globals on that view.
+(function () {
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
@@ -43,17 +46,22 @@ const placeQuery = p => p.id ? `place=${p.id}&km=${p.km}`
   : `lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}&name=${encodeURIComponent(p.name)}&km=${p.km}`;
 const savePlace = p => { try { localStorage.setItem(SAVED, placeQuery(p)); } catch (e) {} };
 const savedPlace = () => { try { return localStorage.getItem(SAVED) || ''; } catch (e) { return ''; } };
+// … and so is the depth (Basic / Advanced) last chosen
+const SAVED_VIEW = 'airwv_view';
+const saveView = v => { try { localStorage.setItem(SAVED_VIEW, v); } catch (e) {} };
+const savedView = () => { try { return localStorage.getItem(SAVED_VIEW) === 'adv' ? 'adv' : 'basic'; } catch (e) { return 'basic'; } };
 
 function readPlace() {
   let q = new URLSearchParams(location.search);
-  const given = q.has('place') || (q.has('lat') && q.has('lon'));
-  if (!given && savedPlace()) q = new URLSearchParams(`${savedPlace()}&${q}`);
+  const given = q.has('place') || (q.has('lat') && q.has('lon')), saved = !given && !!savedPlace();
+  const urlView = ['adv', 'basic'].includes(q.get('view')) ? q.get('view') : null;
+  if (saved) q = new URLSearchParams(`${savedPlace()}&${q}`);
   const known = PLACES.find(p => p.id === q.get('place')) || PLACES[0];
   const lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
   const custom = isFinite(lat) && isFinite(lon) && !(q.get('place') && known.id === q.get('place'));
   return {id: custom ? '' : known.id, name: custom ? (q.get('name') || 'Your location') : known.name,
           lat: custom ? lat : known.lat, lon: custom ? lon : known.lon,
-          km: parseFloat(q.get('km')) || 8, view: q.get('view') === 'adv' ? 'adv' : 'basic', given};
+          km: parseFloat(q.get('km')) || 8, view: urlView || savedView(), urlView, given, saved};
 }
 
 function writePlace(p) {
@@ -145,18 +153,19 @@ function dcLine(dc) {
     '<a href="#pl-dc">what we know →</a>');
 }
 
-function viewHref(view) {
-  const q = new URLSearchParams(location.search);
-  if (view === 'adv') q.set('view', 'adv'); else q.delete('view');
-  return `${location.pathname}?${q}#pl-dc`;
+// the same page at the other depth; basic is spelled out so a saved Advanced doesn't win
+function viewHref(view, hash = '', loc = location) {
+  const q = new URLSearchParams(loc.search);
+  q.set('view', view === 'adv' ? 'adv' : 'basic');
+  return `${loc.pathname}?${q}${hash}`;
 }
 
 function dcSection(dc, p) {
   const all = dc ? dc.near.concat(dc.in_county) : [];
   if (!all.length) return '';
   const adv = p.view === 'adv', D = window.AIRWV_DC;
-  const toggle = adv ? `<a href="${viewHref('basic')}">← plain summary</a> · full record and filings`
-                     : `plain summary · <a href="${viewHref('adv')}">full record and filings →</a>`;
+  const toggle = adv ? `<a href="${viewHref('basic', '#pl-dc')}">← plain summary</a> · full record and filings`
+                     : `plain summary · <a href="${viewHref('adv', '#pl-dc')}">full record and filings →</a>`;
   return `<h2 class="pl-h2">Data centers near here <span class="meta">${all.length} · within ${Math.round(dc.place.km * 0.621371)} mi`
     + `${dc.county ? ' or in ' + esc(dc.county) + ' County' : ''}</span></h2>
   <div class="card"><p class="meta" style="padding:8px 14px 0">${adv ? 'Every field in the record, with filings.'
@@ -195,9 +204,15 @@ function provLine(results) {
     + 'Sensor and gauge times are shown on each line. <a href="/data">All data sources →</a>';
 }
 
+let shown = false;
 async function load(p, save = true) {
   writePlace(p);
   if (save) savePlace(p);
+  // Advanced: /air's tools read the place once, at start, so a new place reloads the page
+  if (p.view === 'adv' && shown) { location.reload(); return; }
+  shown = true;
+  $('pl-basic').href = viewHref('basic');
+  $('pl-adv').href = viewHref('adv');
   $('pl-title').textContent = `${p.name}, now`;
   $('pl-km').value = String(p.km);
   $('pl-place').value = p.id;
@@ -233,6 +248,10 @@ async function load(p, save = true) {
 
 function init() {
   let p = readPlace();
+  if (p.urlView) saveView(p.urlView);
+  else if (p.view === 'adv') { location.replace(viewHref('adv')); return; }   // Advanced was chosen last
+  // app.js pins and zooms to this place; a bare visit (the demo place) keeps its statewide map
+  if (p.view === 'adv' && (p.given || p.saved)) window.AIRWV_PLACE = {lat: p.lat, lon: p.lon, label: p.name};
   $('pl-place').innerHTML = PLACES.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')
     + '<option value="">Your location</option>';
   $('pl-place').addEventListener('change', () => {
@@ -254,5 +273,6 @@ function init() {
   });
   load(p, p.given);   // a bare /place shows the demo place without saving it
 }
-if (typeof module !== 'undefined' && module.exports) module.exports = {siteHref, airLine, waterLine, placeQuery};
+if (typeof module !== 'undefined' && module.exports) module.exports = {siteHref, airLine, waterLine, placeQuery, viewHref};
 else init();
+})();
