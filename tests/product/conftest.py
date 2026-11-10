@@ -67,6 +67,14 @@ MAP_PAGES = [("map-home", "/"), ("map-air", "/air"), ("map-water", "/water"),
              ("map-spills", "/spills")]
 # Maps that open on one place by design, so they aren't held to the statewide first view.
 LOCAL_MAPS = {"nb-map"}
+# Pages whose maps all open on the place in the URL (/place?view=adv pins and zooms to it).
+LOCAL_PAGES = {"place-dc-adv"}
+
+
+def local_map(page, m) -> bool:
+    return m["id"] in LOCAL_MAPS or page in LOCAL_PAGES
+
+
 # The state line (WV_BBOX in static/wv.js).
 WV_LINE = {"south": 37.20, "north": 40.64, "west": -82.65, "east": -77.72}
 # The nav's "More" dropdown, opened on Home and shot at every DEVICES size (`more-<width>.png`).
@@ -274,7 +282,7 @@ def _report(data) -> str:
     for r in data["results"]:
         reading = (r.get("reading") or {}).get("text", "—").replace("|", "/")[:60]
         maps = ", ".join(f"{m['id']} z{m['zoom']}"
-                         + ("" if m["id"] in LOCAL_MAPS else f" ×{map_span(m):.2f}")
+                         + ("" if local_map(r["page"], m) else f" ×{map_span(m):.2f}")
                          for m in r.get("maps", [])) or "—"
         errs = len(r["consoleErrors"]) + len(r["pageErrors"])
         a11y = ", ".join(f"{k} {len(v)}" for k, v in (r.get("a11y") or {}).items()

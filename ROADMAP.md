@@ -814,10 +814,20 @@ demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes t
       permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
       discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
       caveat; `?view=adv` is the full record. Popups don't link to them yet.
+- [x] **Depth toggle + advanced view** — `/place` (and Home with a place) has a
+      `[Basic | Advanced]` toggle; `view=adv` keeps the place's status lines and puts today's
+      `/air` tools under them (map + layer tree, series, time of day, day vs. overnight,
+      validation, Explore: `templates/_air_controls.html`, formerly `dashboard.html`). The map
+      pins and zooms to the place when one is in the URL or saved; a bare visit stays statewide.
+      The depth is kept in the URL and `localStorage.airwv_view`; `/air` redirects to
+      `/place?…&view=adv` with the rest of its query (`?src=`, `?param=`, `?layers=`, …).
+      In Advanced, changing the place reloads the page. The toggle is on the place card, not the
+      header yet (the nav collapse item can move it).
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
-(composition, not new backend). `dashboard.html`, `app.js`, `near_me.js`, `base.html`.
+(composition, not new backend). `dashboard.html` (now `_air_controls.html`, under
+`/place?view=adv`), `app.js`, `near_me.js`, `base.html`.
 - [x] **Trust/clarity fixes (do-now)** — DONE: legend now states *colors = each sensor's
       **most recent** PM2.5 (not an average)* + a live "· as of {time}" line; context-layer
       colors labeled as such. Blank date pickers show "No data for this sensor in the selected

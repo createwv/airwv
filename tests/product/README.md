@@ -37,7 +37,8 @@ Checks (`test_smoke.py`), per page × width unless noted:
   overlay (390: xfail until the place view lands)
 - every visible Leaflet map has a size. Statewide maps' first view contains West Virginia and is
   at most about 2× its size (limit ×2.25, measured along the tighter-fitting side, since a wide
-  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`) are only
+  map always shows more east–west); maps that open on one place (`LOCAL_MAPS`, or every map on a `LOCAL_PAGES` page such as
+  `/place?…&view=adv`) are only
   checked to be centered on West Virginia
 - accessibility (`test_a11y`, per page × width × check; the browser asks for reduced motion):
   text contrast at WCAG AA (4.5:1; 3:1 for large text and for symbols inside a control;

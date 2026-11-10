@@ -6,9 +6,9 @@ item that should close them, so they turn into XPASS (not red) when it lands.
 
 import pytest
 # tests/ isn't a package; pytest puts this dir on sys.path
-from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, LOCAL_MAPS, MAP_PAGES, MORE_PAGE,
+from conftest import (DEVICES, EXPLORE_FILTERS, EXPLORE_SERIES, FILTERS_PAGE, MAP_PAGES, MORE_PAGE,
                       OPEN_PAGES, PAGES,
-                      SITE_PAGES, VIEWPORTS, WV_LINE, map_span)
+                      SITE_PAGES, VIEWPORTS, WV_LINE, local_map, map_span)
 
 # West Virginia plus a margin for border sensors (matches the app's region box in spirit).
 WV = {"south": 37.0, "north": 40.8, "west": -82.8, "east": -77.5}
@@ -190,7 +190,7 @@ def test_map_bounds(product, name, width):
         if m["width"] < 50 or m["height"] < 50:
             continue   # hidden/collapsed map (e.g. a tab not open yet)
         sized += 1
-        if m["id"] not in LOCAL_MAPS:
+        if not local_map(name, m):
             problem = _first_view_problem(m)
             assert problem is None, f"#{m['id']} {problem}"
             continue
