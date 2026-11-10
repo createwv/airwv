@@ -122,6 +122,8 @@ function seriesProbe() {
            kindsShown: f.querySelector("input[name=kind]").checkVisibility(),
            linksShown: document.getElementById("ex-links").checkVisibility(),
            rows: document.querySelectorAll("#ex-table tbody tr").length,
+           chart: document.getElementById("ex-chart").checkVisibility()
+             && !!document.querySelector("#ex-chart .main-svg"),
            count: document.getElementById("ex-count").textContent,
            csv: document.getElementById("ex-csv").getAttribute("href"),
            api: document.getElementById("ex-api").getAttribute("href"),
@@ -348,14 +350,16 @@ async function visit(vp, pg) {
       info.series.moved = await submit();
       await page.goto(shared, { waitUntil: "load", timeout: 60000 });   // leaves the shots on the table
       await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+      await page.mouse.move(0, 0);   // the last click's spot can land on the nav after the reload (hover colours)
       info.series.link = await page.evaluate(seriesProbe);
     }
     if (pg.probeExFilters) {
       await page.waitForFunction(() => !/Loading/.test(document.getElementById("ex-count").textContent), null, { timeout: 30000 });
       info.exFilters = await page.evaluate(() => {
         const f = document.getElementById("ex-form");
-        return { county: f.elements.county.value, over: f.elements.over.value,
-                 countyShown: f.elements.county.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+        return { area: f.elements.area.value, over: f.elements.over.value, place: f.elements.place.value,
+                 areaShown: f.elements.area.checkVisibility(), overShown: f.elements.over.checkVisibility(),
+                 fromShown: f.elements.from.checkVisibility(), kmDisabled: f.elements.km.disabled,
                  count: document.getElementById("ex-count").textContent,
                  prov: document.getElementById("ex-prov").textContent,
                  api: document.getElementById("ex-api").getAttribute("href"),

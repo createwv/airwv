@@ -94,6 +94,8 @@ OPEN_PAGES = [
 EXPLORE_SERIES = ("explore-series", "/explore?show=measurements&place=rutledge&km=8&param=pm2_5")
 # Explore with its county and value filters set from the URL, at every DEVICES size.
 EXPLORE_FILTERS = ("explore-filters", "/explore?place=kanawha&km=40.25&county=Kanawha&param=pm2_5&over=1")
+# Explore over a whole region (no point) with a reading window, from the URL, at every DEVICES size.
+EXPLORE_AREA = ("explore-area", "/explore?place=anywhere&area=Kanawha%20Valley&param=pm2_5&from=2026-06-01&to=2026-07-01")
 # The standard screen sizes (charter rule 6): ~/.czadmin/tools/devices.json, else this copy.
 DEVICES = {
     "phone-small": {"viewport": {"width": 360, "height": 780}, "deviceScaleFactor": 3,
@@ -248,8 +250,8 @@ def product(tmp_path_factory):
                 "openFilters": True}]
             + [{"name": EXPLORE_SERIES[0], "path": EXPLORE_SERIES[1], "viewports": _device_viewports(),
                 "driveSeries": True}]
-            + [{"name": EXPLORE_FILTERS[0], "path": EXPLORE_FILTERS[1], "viewports": _device_viewports(),
-                "probeExFilters": True}]
+            + [{"name": n, "path": p, "viewports": _device_viewports(), "probeExFilters": True}
+               for n, p in (EXPLORE_FILTERS, EXPLORE_AREA)]
             + [{"name": n, "path": p, "viewports": _device_viewports(), "open": o}
                for n, p, o in OPEN_PAGES],
             "viewports": [{"w": w, "h": h} for w, h in VIEWPORTS],
