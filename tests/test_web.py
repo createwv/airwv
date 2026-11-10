@@ -623,6 +623,15 @@ def test_vendor_falls_back_to_cdn(tmp_path, monkeypatch):
     assert "/static/vendor/leaflet.js" in html and "unpkg.com/leaflet@1.9.4/dist/leaflet.js" not in html
 
 
+def test_vendor_files_cached_immutable(tmp_path):
+    c = _client(tmp_path)
+    r = c.get("/static/vendor/leaflet.css")
+    assert r.status_code == 200 and "immutable" in r.headers["cache-control"]
+    assert "max-age=31536000" in c.get("/static/vendor/images/marker-icon.png").headers["cache-control"]
+    assert "immutable" not in c.get("/static/state.js").headers.get("cache-control", "")
+    assert c.get("/static/vendor/nope.js").status_code == 404
+
+
 def test_home_is_my_place_when_a_place_is_set(tmp_path):
     c = _client(tmp_path)
     for url in ("/?place=rutledge&km=8", "/?lat=38.38&lon=-81.58&name=Home"):
