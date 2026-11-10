@@ -111,7 +111,9 @@ def test_explore_measurements(product, width):
     assert not first["sinceShown"] and not first["kindsShown"], first
     assert "site_id=" in first["api"] and "param=pm2_5" in first["api"] and "show=" not in first["api"], first
     assert first["csv"] == first["api"] + "&format=csv", first
+    assert first["chart"] and link["chart"] and back["chart"], first
     assert not listed["siteShown"] and listed["sinceShown"] and listed["kindsShown"], listed
+    assert not listed["chart"], listed
     assert listed["urlSite"] is None and listed["urlShow"] == "sites" and "site_id=" not in listed["api"], listed
     assert back["site"] == first["site"] and back["rows"] > 0, back
     assert moved["site"] != first["site"], moved

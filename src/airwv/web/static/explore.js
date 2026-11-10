@@ -1,7 +1,8 @@
 // Explore (query builder, docs/DIRECTION.md §5.2): a form over /api/query. The form lives in
 // the URL (?show=&place=&km=&county=&medium=&param=&over=&since=&limit=&kind=a,b), so a shared link reproduces
 // the table; the CSV and API links are the same query with format=csv / as JSON.
-// show=measurements (+ site_id=&from=&to=) lists one site's readings from the series mode.
+// show=measurements (+ site_id=&from=&to=) charts and lists one site's readings from the series
+// mode (the chart's trace is site.js's, as on /site/<kind>/<ref>).
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
@@ -167,6 +168,23 @@ function seriesTable(rows) {
   return head + `<tbody>${body.join('')}</tbody>`;
 }
 
+// The picked site's readings over time, above the table; hidden when there's nothing to plot.
+function seriesChart(rows, label) {
+  const box = $('ex-chart');
+  box.hidden = !rows.length;
+  if (typeof Plotly !== 'undefined') Plotly.purge(box);
+  if (!rows.length) return;
+  if (typeof Plotly === 'undefined' || !window.AIRWV_SITE) {
+    box.innerHTML = `<p class="meta" style="padding:8px 10px">The chart library didn't load. The table and CSV have the readings.</p>`;
+    return;
+  }
+  box.innerHTML = '';
+  const unit = rows[rows.length - 1].unit;
+  Plotly.newPlot(box, [AIRWV_SITE.trace(rows, label)],
+    {margin: {t: 10, r: 10, b: 40, l: 48}, height: 260, yaxis: {title: label + (unit ? ` (${unit})` : '')}},
+    {displayModeBar: false, responsive: true});
+}
+
 function seriesCount(r, label) {
   const {from, to, limit, over} = r.filters;
   const range = from && to ? `, ${from} to ${to}` : from ? `, from ${from}` : to ? `, up to ${to}` : '';
@@ -185,16 +203,20 @@ async function runSeries() {
       $('ex-count').textContent = api.get('site_id') ? 'Pick a reading to list its measurements.'
         : 'No site near here has this reading. Try a wider distance or another reading.';
       $('ex-table').innerHTML = $('ex-prov').innerHTML = '';
+      seriesChart([]);
       return;
     }
     setLinks(api);
     const r = await fetch(`/api/query?${api}`).then(x => x.ok ? x.json() : Promise.reject(x.status));
-    $('ex-count').innerHTML = seriesCount(r, form.elements.param.selectedOptions[0].textContent);
+    const label = form.elements.param.selectedOptions[0].textContent;
+    $('ex-count').innerHTML = seriesCount(r, label);
+    seriesChart(r.rows, label);
     $('ex-table').innerHTML = r.count ? seriesTable(r.rows) : '<tbody><tr><td class="meta">No readings match.</td></tr></tbody>';
     $('ex-prov').innerHTML = provLine(r.provenance);
   } catch (e) {
     $('ex-count').textContent = `Couldn't load results (${e}).`;
     $('ex-table').innerHTML = '';
+    seriesChart([]);
   }
 }
 
@@ -207,6 +229,7 @@ function filterNote(r) {
 
 async function run() {
   if (isSeries()) return runSeries();
+  seriesChart([]);
   const {api, page} = params();
   history.replaceState(null, '', `${location.pathname}?${page}`);
   const url = `/api/query?${api}`;
