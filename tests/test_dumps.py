@@ -6,6 +6,7 @@ import io
 import json
 from datetime import datetime, timezone
 
+import pytest
 from fastapi.testclient import TestClient
 
 from airwv import dumps
@@ -93,6 +94,48 @@ def test_dump_route(tmp_path, monkeypatch):
     assert 'href="/data/dumps/site.csv.gz"' in page and 'href="/data/dumps/events.csv.gz"' in page
 
 
+def test_parquet_dumps(tmp_path):
+    pq = pytest.importorskip("pyarrow.parquet")
+    store, out = _store(tmp_path), tmp_path / "dumps"
+    m = dumps.write_dumps(store, out, now=T0)
+    for name in dumps.TABLES:   # same rows and columns as the CSV
+        t = pq.read_table(out / f"{name}.parquet")
+        assert t.column_names == m["files"][f"{name}.parquet"]["columns"]
+        assert t.num_rows == m["files"][f"{name}.parquet"]["rows"] == len(_rows(out / f"{name}.csv.gz"))
+    meas = pq.read_table(out / "measurement.parquet")
+    assert str(meas.schema.field("value").type) == "double"
+    assert sorted(meas.column("value").to_pylist()) == [2.4, 8.0, 97.0]
+    assert str(pq.read_table(out / "site.parquet").schema.field("lat").type) == "double"
+    events = pq.read_table(out / "events.parquet").to_pylist()
+    assert [e["title"] for e in events] == ["Plant fire"] and isinstance(events[0]["id"], int)
+    assert json.loads(events[0]["sources"])[0]["label"] == "WV DEP"   # citations stay JSON
+    texts = "".join(str(pq.read_table(out / f"{n}.parquet").to_pylist()) for n in dumps.TABLES)
+    for private in ("resident@example.com", "deadbeef", "38.123456", "secret_payload",
+                    "Unreviewed draft", "Withdrawn event"):
+        assert private not in texts
+
+
+def test_dumps_without_pyarrow(tmp_path, monkeypatch):
+    monkeypatch.setattr(dumps, "_pyarrow", lambda: None)   # the app and CSVs don't need the extra
+    store, out = _store(tmp_path), tmp_path / "dumps"
+    m = dumps.write_dumps(store, out, now=T0)
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        f for f in dumps.FILES if not f.endswith(".parquet"))
+    assert not any(f.endswith(".parquet") for f in m["files"])
+
+
+def test_parquet_route(tmp_path, monkeypatch):
+    pytest.importorskip("pyarrow")
+    store, out = _store(tmp_path), tmp_path / "dumps"
+    monkeypatch.setenv("AIRWV_DUMPS_DIR", str(out))
+    c = TestClient(webapp.create_app(store))
+    assert c.get("/data/dumps/site.parquet").status_code == 404   # before the first run
+    dumps.write_dumps(store, now=T0)
+    r = c.get("/data/dumps/site.parquet")
+    assert r.status_code == 200 and r.headers["content-type"] == "application/vnd.apache.parquet"
+    assert r.content[:4] == b"PAR1"
+
+
 def test_data_page_shows_as_of_and_sizes(tmp_path, monkeypatch):
     store, out = _store(tmp_path), tmp_path / "dumps"
     monkeypatch.setenv("AIRWV_DUMPS_DIR", str(out))
@@ -103,8 +146,9 @@ def test_data_page_shows_as_of_and_sizes(tmp_path, monkeypatch):
     m = dumps.write_dumps(store, now=T0)
     page = c.get("/data").text
     assert "These files are as of Jun 30, 2026, 8:00 PM ET." in page   # T0 is midnight UTC
-    for info in m["files"].values():
-        assert f"; {dumps.human_size(info['bytes'])})" in page
+    for name, info in m["files"].items():
+        if not name.endswith(".parquet"):   # /data doesn't link the Parquet files yet
+            assert f"; {dumps.human_size(info['bytes'])})" in page
 
     (out / "manifest.json").write_text("{not json")   # a bad manifest never takes the page down
     r = c.get("/data")

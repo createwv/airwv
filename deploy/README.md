@@ -96,6 +96,10 @@ ones PurpleAir already publishes.
 `AIRWV_DUMPS_DIR` (default `data/dumps`, gitignored). The dashboard serves them at
 `/data/dumps/<name>` and links them from `/data`; until the first run they 404.
 
+With the `dumps` extra (`pip install '.[dumps]'`, i.e. `pyarrow`) it also writes each table as
+`<name>.parquet` (typed columns) beside the CSV; without it the Parquet files are skipped with a
+warning in the journal and the CSVs are still written.
+
 ```bash
 sudo cp deploy/systemd/airwv-dumps.* /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now airwv-dumps.timer   # 03:30 nightly

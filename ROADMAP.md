@@ -569,7 +569,7 @@ Grow the network and secure the record.
       environmental data store) for long-term preservation
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
       views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
-      `deploy/systemd/airwv-dumps.*`). *Parquet after Postgres.*
+      `deploy/systemd/airwv-dumps.*`), and Parquet of the same with the `dumps` extra (`pyarrow`).
 - [x] CORS (read-only, any origin) and a per-client rate limit on `/api/*` and
       `/data/dumps/*` (`web/public_api.py`; in-memory, one process)
 - [ ] Public API documentation
