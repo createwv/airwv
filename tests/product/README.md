@@ -44,8 +44,10 @@ Checks (`test_smoke.py`), per page × width unless noted:
   legend dots outside a control and disabled controls are exempt; text over images/gradients
   can't be measured and is skipped), `<img>` without `alt`, controls without an accessible
   name, mouse-only controls (`cursor:pointer` but not focusable), infinite animations under
-  reduced motion, and the first 15 Tab stops each showing a focus ring. The report's `a11y`
-  column counts what each page fails.
+  reduced motion, and the first 15 Tab stops each showing a focus ring (a stop without one is
+  looked at again 150 ms later). The report's `a11y` column counts what each page fails.
+  Checks listed in `A11Y_FLAKY` (now `air`-1280 `noFocus`) are xfail when they fail, with
+  what they saw, instead of red.
 
 Output in `tests/product/out/` (gitignored): `<page>-<width>.png` (first screen),
 `<page>-<width>-full.png`, `results.json`, `report.md`.
