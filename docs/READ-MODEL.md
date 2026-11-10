@@ -11,8 +11,9 @@ builder puts in a table (with `format=csv` for the download). Its series mode
 site pages `/site/<kind>/<ref>` for `sensor`, `reference_monitor`, `gauge` and `sample_site`
 chart the last 7 days (monitors 30, sample sites 365) up to the site's latest reading from
 it, with the same URL as their CSV and API links (`?param=` picks what to chart; the
-choices come from `ReadModel.parameters`). Monitors match their AirData history
-(`54-003-0003`); AirNow's hourly rows use a 9-digit AQSID and aren't on the page yet.
+choices come from `ReadModel.parameters`). A monitor's series reads both ids it is
+stored under (`measured_refs`): AirNow's hourly rows (9-digit AQSID `540390020`) and its
+AirData daily history (dashed `54-039-0020`), each row tagged with its `source`.
 `/site/permit/<ref>` (coal discharge, DEP mining, oil & gas) reads one `site` row and its
 `record` rows: the `permit_stage` (DEP mining, oil & gas) and, for coal discharges, the
 `impaired_303d` causes, with the layer's disclaimer; `?view=adv` lists every field.

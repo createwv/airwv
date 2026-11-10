@@ -41,6 +41,7 @@ from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.storage.readmodel import measured_refs
 from airwv.web.public_api import PublicDataMiddleware
 from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
@@ -877,7 +878,7 @@ def create_app(store: Store) -> FastAPI:
             site = rm.site(conn, site_id)
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that site_id")
-            rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
+            rows, truncated = rm.series(conn, site["medium"], measured_refs(site), param,
                                         since=from_, until=to, limit=limit, over=over)
             prov = rm.provenance(conn, [site["layer"]])
         if format == "csv":
@@ -2232,7 +2233,7 @@ def create_app(store: Store) -> FastAPI:
                 site = rm.site(conn, f"{kind}:{ref[:2]}-{ref[2:5]}-{ref[5:]}")
             if site is None:
                 raise HTTPException(status_code=404, detail="no site with that id")
-            measured = rm.parameters(conn, site["medium"], site["ref"])
+            measured = rm.parameters(conn, site["medium"], measured_refs(site))
             prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
         names = [m["parameter"] for m in measured]
         chosen = next((m for m in measured if m["parameter"] == param), None) \

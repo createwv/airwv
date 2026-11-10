@@ -90,6 +90,21 @@ _REFERENCE_SOURCES = "'airnow', 'epa_airdata'"
 _AQS_ID = ("CASE WHEN sensor_id GLOB '" + "[0-9]" * 9 + "*' THEN substr(sensor_id, 1, 2) || '-' || "
            "substr(sensor_id, 3, 3) || '-' || substr(sensor_id, 6, 4) ELSE sensor_id END")
 
+
+def measured_refs(site: dict) -> list[str]:
+    """The ``measurement`` refs that hold one site's readings. A reference monitor is
+    stored twice over in ``readings``: AirNow under the 9-digit AQSID (540390020), AirData
+    under the dashed AQS id (54-039-0020); the site carries one of them, so both are read."""
+    ref = site["ref"]
+    if site["kind"] != "reference_monitor" or not ref:
+        return [ref]
+    if len(ref) == 11 and ref[2] == ref[6] == "-" and ref.replace("-", "").isdigit():
+        return [ref, ref.replace("-", "")]
+    if len(ref) == 9 and ref.isdigit():
+        return [ref, f"{ref[:2]}-{ref[2:5]}-{ref[5:]}"]
+    return [ref]
+
+
 SITE_VIEW = "CREATE TEMP VIEW site AS" + " UNION ALL".join([
     _layer_branch("abandoned_wells", "wells", "well", "'land'", _j("id"), "NULL", _j("county"),
                   "'http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47' || "
@@ -293,20 +308,21 @@ class ReadModel:
             "FROM site WHERE site_id = :id ORDER BY ord LIMIT 1", {"id": site_id}).mappings().first()
         return _site(r) if r is not None else None
 
-    def series(self, conn, medium: str, ref: str, parameter: str, since=None, until=None,
+    def series(self, conn, medium: str, ref: str | list[str], parameter: str, since=None, until=None,
                limit: int = 5000, over: float | None = None) -> tuple[list[dict], bool]:
-        """Measurement rows of ``parameter`` for one ref inside the window (inclusive) and
-        above ``over`` when given, oldest first: ``([{ts, value, unit, source, quality}],
-        truncated)``. Past ``limit`` rows, the newest ``limit`` are kept and ``truncated``
-        is True."""
+        """Measurement rows of ``parameter`` for one ref (or a site's ``measured_refs``)
+        inside the window (inclusive) and above ``over`` when given, oldest first:
+        ``([{ts, value, unit, source, quality}], truncated)``. Past ``limit`` rows, the
+        newest ``limit`` are kept and ``truncated`` is True."""
         window, wp = _window(since, until)
         if over is not None:
             window += " AND value > :over"
             wp["over"] = over
+        rin, rp = _refs_in(ref)
         rows = conn.exec_driver_sql(
             "SELECT ts, value, unit, source, quality FROM measurement WHERE medium = :m "
-            f"AND parameter = :p AND ref = :r{window} ORDER BY ts DESC LIMIT :n",
-            {"m": medium, "p": parameter, "r": ref, "n": limit + 1, **wp}).mappings().all()
+            f"AND parameter = :p AND {rin}{window} ORDER BY ts DESC LIMIT :n",
+            {"m": medium, "p": parameter, "n": limit + 1, **rp, **wp}).mappings().all()
         return [dict(r) for r in reversed(rows[:limit])], len(rows) > limit
 
     def records_for(self, conn, site_ids: list[str]) -> dict[str, list[dict]]:
@@ -417,12 +433,14 @@ class ReadModel:
             {"m": medium, "p": parameter, "r": ref, **wp, **({"cap": max_value} if cap else {})}).all()
         return {date.fromisoformat(str(d)[:10]): float(v) for d, v in rows if v is not None}
 
-    def parameters(self, conn, medium: str, ref: str) -> list[dict]:
-        """What one ref has measured: ``[{parameter, unit, count, last}]``, most rows first."""
+    def parameters(self, conn, medium: str, ref: str | list[str]) -> list[dict]:
+        """What one ref (or a site's ``measured_refs``) has measured:
+        ``[{parameter, unit, count, last}]``, most rows first."""
+        rin, rp = _refs_in(ref)
         rows = conn.exec_driver_sql(
             "SELECT parameter, unit, count(*) AS count, max(ts) AS last FROM measurement "
-            "WHERE medium = :m AND ref = :r GROUP BY parameter ORDER BY count DESC, parameter",
-            {"m": medium, "r": ref}).mappings().all()
+            f"WHERE medium = :m AND {rin} GROUP BY parameter ORDER BY count DESC, parameter",
+            {"m": medium, **rp}).mappings().all()
         return [dict(r) for r in rows]
 
 
@@ -430,6 +448,14 @@ def _ts(t) -> str:
     """A bound for ``ts``: date strings pass through; datetimes take the stored text form
     (SQLAlchemy's SQLite DateTime), so comparisons match the ORM's."""
     return t if isinstance(t, str) else t.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+
+def _refs_in(ref: str | list[str]) -> tuple[str, dict]:
+    """SQL and params matching ``ref`` against one ref or any of a list."""
+    refs = [ref] if isinstance(ref, str) else list(ref)
+    if len(refs) == 1:
+        return "ref = :r0", {"r0": refs[0]}
+    return "ref IN (%s)" % ", ".join(f":r{n}" for n in range(len(refs))), {f"r{n}": r for n, r in enumerate(refs)}
 
 
 def _window(since, until) -> tuple[str, dict]:

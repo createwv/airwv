@@ -578,6 +578,32 @@ def test_api_query_series(tmp_path, monkeypatch):
     assert c.get("/api/query?site_id=sensor:197127&param=pm2_5&from=July").status_code == 400
 
 
+def test_api_query_series_covers_airnow_monitors(tmp_path, monkeypatch):
+    c, store = _client(tmp_path, monkeypatch)
+    t0 = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    store.save_readings([
+        # Charleston: reference_monitors.json lists it as 54-039-0020; AirNow stores 540390020
+        Reading(source="epa_airdata", sensor_id="54-039-0020", ts=t0 - timedelta(days=1), pm2_5=6.0,
+                lat=38.3456, lon=-81.6283),
+        Reading(source="airnow", sensor_id="540390020", ts=t0, pm2_5=7.0, lat=38.3456, lon=-81.6283),
+        # an AirNow-only site in reading_sites, with AirData's copy under the dashed id
+        Reading(source="airnow", sensor_id="540250003", ts=t0, pm2_5=5.5, lat=38.36, lon=-81.64),
+        Reading(source="epa_airdata", sensor_id="54-025-0003", ts=t0 - timedelta(days=1), pm2_5=4.5,
+                lat=38.36, lon=-81.64)])
+    r = c.get("/api/query?site_id=reference_monitor:54-039-0020&param=pm2_5").json()
+    assert [(x["source"], x["value"]) for x in r["rows"]] == [("epa_airdata", 6.0), ("airnow", 7.0)]
+    r = c.get("/api/query?site_id=reference_monitor:540250003&param=pm2_5").json()
+    assert r["site"]["layer"] == "reading_sites"
+    assert [(x["source"], x["value"]) for x in r["rows"]] == [("epa_airdata", 4.5), ("airnow", 5.5)]
+    assert len(c.get(r["csv"]).text.strip().splitlines()) == 3
+    # the site page's chart window comes from the latest reading of either id
+    p = c.get("/site/reference_monitor/540390020").text
+    assert "from=2026-06-01&amp;to=2026-07-01" in p
+    # PurpleAir ids are never read as AQS ids
+    from airwv.storage.readmodel import measured_refs
+    assert measured_refs({"kind": "sensor", "ref": "540390020"}) == ["540390020"]
+
+
 def test_site_pages_for_measured_kinds(tmp_path, monkeypatch):
     c, store = _client(tmp_path, monkeypatch)
     store.save_readings([Reading(source="epa_airdata", sensor_id="54-003-0003",
