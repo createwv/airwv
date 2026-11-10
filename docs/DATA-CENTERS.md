@@ -58,7 +58,7 @@ check the notice before you rely on a date.
 
 | Date | What | Site | How to take part | Source |
 |---|---|---|---|---|
-| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. The same notice covers state waters permits SWP-26-0002/0003; their deadline isn't recorded here | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
+| 2026-11-13 | Written comments close on air permit **R14-0042** (major source / PSD; DEP's preliminary determination 2026-09-28) | Monarch, Mason | Written comments to WV DEP, as the notice says. Email daqpubliccomments@wv.gov (subject "Monarch Comments") or mail Edward Andrews, P.E., DAQ, by 5 p.m. DEP's live pages say Nov 13; its posted notice PDF still says Oct 30, and we found no extension notice. Hearings were Oct 20 and 29; state waters permits SWP-26-0002/0003 closed Oct 26 | [DEP notice, 2026-09-29](https://dep.wv.gov/news/Pages/Public-Comment-Period-and-Public-Participation-Opportunities-for-Monarch-Cloud-Campus.aspx) |
 
 **Other dates to watch** (not comment periods)
 
@@ -205,7 +205,7 @@ sometimes cited as West Virginia is actually about Limestone, Tennessee.
 
 | Docket | What | Status |
 |---|---|---|
-| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | reportedly approved March 2025 (order not found) |
+| 24-0611-E-T-PW | Appalachian Power large-load tariff. APCo said data centers could add 8,000 MW. Google settlement: 100 MW/site, 12-year minimum, 80% minimum demand | order entered 2025-03-25 accepted the stipulation; docket still listed active |
 | 26-0108-E-CN | Mon Power 1,200 MW gas plant at Fort Martin. PSC staff call data center load "the primary reason" for it | decision expected ~March 2027 |
 | 26-0633-E-GI | PSC rules for HB 2014 power (the 69% coal capacity factor is now a goal) | to Legislature 2027 |
 | 21-0658-E-ENEC | Grant Town plan to become a 95.7 MW crypto mine | rejected 2021 |
@@ -216,9 +216,14 @@ data center developers.
 
 ## What doesn't exist (yet)
 
-- **No water-withdrawal volume** for any site. We found no WV DEP water-use (large-quantity
-  user) report or withdrawal permit tied to a data center. *We didn't query DEP's water-use
-  database directly. That's the next step.*
+- **No water-withdrawal volume** for any site, and DEP doesn't publish one per facility.
+  Anyone withdrawing more than 300,000 gallons in 30 days (a large-quantity user) reports to
+  DEP's Water Use Program each year, but DEP publishes only statewide totals by category
+  (340 users, 609 billion gallons in 2024; no data center category) in its
+  [2025 Annual Water Resources Report](https://apps.dep.wv.gov/Documents/DWWM/WaterUse/WRPAReports/2025AnnualReport.pdf)
+  (Dec 2025, pp. 6-8), and its [LQU page](https://dep.wv.gov/WWE/wateruse/AnnualCertification-LargeQuantityUsers/Pages/default.aspx)
+  lists no facilities. The permitted R13 sites (Ridgeline, Adams Fork) aren't built yet, so
+  they wouldn't have reported (checked 2026-11-09). We did not file a records request.
 - **No operating noise measurement** anywhere in WV. The only figure is a neighbor's
   construction reading at Monarch.
 - **No official list** of HIDC or microgrid certifications. Commerce's program page lists
@@ -232,10 +237,32 @@ data center developers.
 
 - WV DEP DAQ permit applications and notices:
   <https://dep.wv.gov/daq/permitting/Pages/NSR-Permit-Applications.aspx>. The engineering
-  evaluations for R14-0042, R13-3713, R13-3714 and R13-3715 are the best primary detail. We
-  couldn't read some of the PDFs.
-- WV DEP water-use reporting (large-quantity users) and NPDES/stormwater permit search.
-- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
+  evaluations for R14-0042, R13-3713, R13-3714 and R13-3715 are the best primary detail.
+  As of 2026-11-09 the page no longer links the R13 ones, and the old
+  `dep.wv.gov/daq/permitting/Documents/Transgas-Adams-Fork*` PDFs return 404. DEP says
+  finished permits' documents are in its Application Enhancer database
+  (<https://documents.dep.wv.gov/>, public login listed on the NSR page; search Secondary ID
+  13-3713, 13-3714, 13-3715). It is a JavaScript app with a limited number of public
+  licenses, and DEP says "usually, the only file available to view will be the permit
+  application", so we haven't searched it yet.
+- Air Quality Board record for Ridgeline: the
+  [25-02-AQB appeal page](https://aqb.wv.gov/Pages/Appeal-Details.aspx?title=25-02-AQB)
+  lists a six-part Certified Record (2025-10-15, 653 pages, e.g.
+  [Part 1](https://aqb.wv.gov/AppealsDocuments/2025.10.15.%2025-02-AQB.%20Certified%20Record%20Part%201%20of%206.%20Pages%201%20-%20131.pdf)).
+  The Board's order cites the application at CR 2-79, the draft permit at CR 80-99 and the
+  final permit at CR 485-512; DEP's Jerry Williams testified he wrote the engineering
+  evaluation, so it should be in the record too. Each part is over 10 MB and we haven't read
+  them yet (checked 2026-11-10). The Board's order itself (scanned) has nothing on generators
+  or water. No AQB appeal exists for R13-3714 or R13-3715 (25-01 and 25-03 are other Tucker
+  County appeals; the open docket lists only 25-04), so the Adams Fork evaluations are only in
+  Application Enhancer or by records request. AQB stopped posting appeal documents on
+  2026-04-24; later ones come from the Board's clerk.
+- WV DEP NPDES/stormwater permit search.
+- WV PSC case search: <https://www.psc.state.wv.us/> (search operator names). Searched 2026-11-09 for
+  Nscale, Fidelis, Monarch and microgrid in case names and descriptions: the only match for this site is
+  26-0831-MC-CC, a permit to bus construction workers to it. The other operators aren't searched yet.
+- R14-0042's record disagrees with itself on PM: 49.25 TPY (notice), 21.68 (fact sheet text), 21.54 (fact
+  sheet Table 5); engine filterable PM is 0.01 lb/hr (fact sheet) and 0.005 lb/hr (draft permit).
 - WV Air Quality Board appeals: <https://aqb.wv.gov/>.
 - Commerce Data Economy Office: <https://westvirginia.gov/datacenters/>.
 
