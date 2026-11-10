@@ -38,7 +38,8 @@ from `ReadModel.site`; `/api/near` gives each hazard its `page`.
   already carry are left to those layers. Monitor ids are compared in the dashed AQS form
   (AirNow's 9-digit `540390020` is `54-039-0020`), and an AirData monitor AirNow also
   reports is left to AirNow, so one monitor is one site. A database with readings from before the table
-  existed is back-filled once by `create_schema`.
+  existed is back-filled once by `create_schema`. `Store.coords_from_readings` (reference
+  monitor coords for `/api/sensors` and ingest) reads this table too.
 
 ## Views
 

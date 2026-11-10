@@ -187,6 +187,9 @@ def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
     attrs = json.loads(attrs)
     assert attrs["source"] == "airnow" and attrs["first_ts"][:13] == "2026-06-30 19"
     assert attrs["last_ts"][:13] == "2026-07-01 02"
+    # coords_from_readings reads the same table: the latest located reading's coords
+    assert store.coords_from_readings("airnow")["540250003"] == (38.36, -81.64)
+    assert store.coords_from_readings("epa_airdata")["54-099-0001"] == (38.2, -82.5)
     # a database with readings from before the table existed is back-filled once
     with store._engine.begin() as conn:
         conn.exec_driver_sql("DELETE FROM reading_sites")
