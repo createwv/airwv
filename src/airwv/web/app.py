@@ -74,6 +74,17 @@ def _vendor(name: str, cdn: str) -> str:
 TEMPLATES.env.globals["vendor"] = _vendor
 
 
+class _VendorFiles(StaticFiles):
+    """static/vendor/: pinned third-party copies that never change in place (an upgrade is a
+    new file name, static/vendor/README.md), so browsers and Cloudflare keep them a year."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code in (200, 304):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
 def _parse_bbox(bbox: str | None) -> tuple[float, float, float, float] | None:
     """``bbox=west,south,east,north`` (lon/lat degrees, the GeoJSON/OGC order) → a tuple,
     or None when absent. 400 on anything malformed."""
@@ -2299,7 +2310,10 @@ def create_app(store: Store) -> FastAPI:
 
     static_dir = Path(__file__).parent / "static"
     if static_dir.is_dir():
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        if (static_dir / "vendor").is_dir():   # before /static, which would match it first
+            app.mount("/static/vendor", _VendorFiles(directory=str(static_dir / "vendor")),
+                      name="vendor")
+        app.mount("/static",StaticFiles(directory=str(static_dir)), name="static")
 
     return app
 

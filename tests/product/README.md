@@ -51,7 +51,8 @@ Checks (`test_smoke.py`), per page × width unless noted:
   what they saw, instead of red.
 
 Output in `tests/product/out/` (gitignored): `<page>-<width>.png` (first screen),
-`<page>-<width>-full.png`, `results.json`, `report.md`.
+`<page>-<width>-full.png`, `results.json`, `report.md`. `tests/product/baseline/` keeps a committed
+`report.md` and a few key shots from a run with Leaflet and Plotly vendored (no shims, no skips).
 
 **Data.** `AIRWV_PRODUCT_DB=<path>`, else `airwv.sqlite` in this checkout or the main
 checkout (worktrees), else a seeded fake DB (`AIRWV_PRODUCT_DB=seed` forces it). The file is
