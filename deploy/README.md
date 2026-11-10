@@ -89,6 +89,30 @@ Notes: the dashboard has no auth (it shows public data); add HTTP basic-auth at 
 proxy if you want it private during preview. Sensor coordinates shown are the same
 ones PurpleAir already publishes.
 
+## Nightly public dumps
+
+`python -m airwv.dumps` writes gzipped CSV of the public read views (`site`, `measurement`,
+`record`) and published `events`, plus `manifest.json` (row counts, columns, each layer's provenance) into
+`AIRWV_DUMPS_DIR` (default `data/dumps`, gitignored). The dashboard serves them at
+`/data/dumps/<name>` and links them from `/data`; until the first run they 404.
+
+```bash
+sudo cp deploy/systemd/airwv-dumps.* /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now airwv-dumps.timer   # 03:30 nightly
+```
+
+It reads only the public views (no reports, feedback or subscriptions) and needs no API key.
+
+## CORS and rate limits
+
+GET/HEAD on `/api/*` and `/data/dumps/*` can be read from any site (no credentials);
+`/api/admin/*` and writes get no CORS headers. Per client, `/api/*` allows 300 requests a
+minute and `/data/dumps/*` 30, then answers 429 with `Retry-After`; set
+`AIRWV_RATE_LIMIT_API` / `AIRWV_RATE_LIMIT_DUMPS` to change that (0 turns a limit off).
+Counts live in memory, so they reset on restart and assume one web process. Clients are
+told apart by `CF-Connecting-IP` / `X-Forwarded-For`, so keep the origin reachable only
+through the proxy, which has to set one of them.
+
 ## Notes
 
 - **Resolve occasionally, not every run.** Re-run `resolve` after deploying or

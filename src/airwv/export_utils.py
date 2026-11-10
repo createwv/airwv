@@ -34,3 +34,49 @@ def readings_to_csv(rows) -> str:
     for r in rows:
         writer.writerow([_value(r, col) for col in COLUMNS])
     return buf.getvalue()
+
+
+# /api/query?format=csv: one row per site (``show=sites``) or per record (``show=records``).
+QUERY_SITE_COLUMNS = [
+    "site_id", "kind", "medium", "layer", "ref", "name", "lat", "lon", "county", "mi",
+    "parameter", "value", "unit", "ts", "peak_value", "peak_ts", "records", "url",
+]
+QUERY_RECORD_COLUMNS = [
+    "site_id", "site_kind", "name", "medium", "mi", "record_kind", "value", "effective",
+    "as_of", "url",
+]
+
+
+# /api/query?site_id=&param=&format=csv: one row per measurement (series mode).
+QUERY_SERIES_COLUMNS = [
+    "site_id", "name", "medium", "parameter", "ts", "value", "unit", "source", "quality",
+]
+
+
+def _csv(columns, rows) -> str:
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buf.getvalue()
+
+
+def query_sites_to_csv(sites) -> str:
+    rows = []
+    for s in sites:
+        latest, peak = s.get("latest") or {}, s.get("peak") or {}
+        rows.append({**s, "parameter": latest.get("parameter"), "value": latest.get("value"),
+                     "unit": latest.get("unit"), "ts": latest.get("ts"),
+                     "peak_value": peak.get("value"), "peak_ts": peak.get("ts"),
+                     "records": len(s.get("records") or [])})
+    return _csv(QUERY_SITE_COLUMNS, rows)
+
+
+def query_records_to_csv(records) -> str:
+    return _csv(QUERY_RECORD_COLUMNS, [{**r, "record_kind": r["kind"]} for r in records])
+
+
+def query_series_to_csv(site, parameter, rows) -> str:
+    return _csv(QUERY_SERIES_COLUMNS, [{**r, "site_id": site["site_id"], "name": site["name"],
+                                        "medium": site["medium"], "parameter": parameter}
+                                       for r in rows])

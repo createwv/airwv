@@ -3,7 +3,7 @@
 <div class="page">
   <div class="ov-intro"><h1>Get environmental alerts</h1>
     <p>Pick what you care about and where you are — we'll email you when a nearby sensor
-       crosses the line you set. No account, unsubscribe in one click, and we rate-limit
+       crosses the line you set, or a new spill or violation shows up near you. No account, unsubscribe in one click, and we rate-limit
        + honor overnight quiet hours so you're never spammed.</p></div>
 
   <div class="card" style="max-width:640px">
@@ -22,11 +22,16 @@
         <label class="lvl"><input type="checkbox" class="a-metric" value="ozone">
           <span><b>Ozone</b> — EPA reference monitors <small>ground-level ozone (ppb)</small></span></label>
         <label class="lvl"><input type="checkbox" class="a-metric" value="water">
-          <span><b>Water advisories near me</b> <span class="soon">coming soon</span>
-          <small>drinking-water violations &amp; discharges</small></span></label>
+          <span><b>Drinking-water violations near me</b>
+          <small>new health-based violations EPA lists for a water system</small></span></label>
         <label class="lvl"><input type="checkbox" class="a-metric" value="spills">
-          <span><b>Reported spills near me</b> <span class="soon">coming soon</span>
-          <small>oil/chemical releases reported to the NRC</small></span></label>
+          <span><b>Reported spills near me</b>
+          <small>new oil/chemical releases reported to the National Response Center</small></span></label>
+        <label class="lvl"><input type="checkbox" class="a-metric" value="violations">
+          <span><b>Facility violations near me</b>
+          <small>a facility EPA ECHO newly lists in violation</small></span></label>
+        <p class="meta" style="margin:4px 6px 0">Spills and violations alert when a new one shows up
+          in the public records for your area, whatever level you pick below.</p>
       </fieldset>
 
       <fieldset class="a-fs">
@@ -46,7 +51,7 @@
       <fieldset class="a-fs">
         <legend>Where?</legend>
         <div class="rloc" style="margin-bottom:6px">
-          <button type="button" id="a-useloc">📍 Use my location</button>
+          <button type="button" id="a-useloc">Use my location</button>
           <input id="a-addr" maxlength="160" placeholder="…or type a town / address in WV" style="flex:1 1 160px">
           <button type="button" id="a-addrfind">Find</button>
         </div>
@@ -62,14 +67,15 @@
 
       <input type="text" id="a-website" name="website" tabindex="-1" autocomplete="off"
              style="position:absolute; left:-9999px" aria-hidden="true">
-      <button class="primary" type="submit" id="a-submit">🔔 Sign me up</button>
+      <button class="primary" type="submit" id="a-submit">Sign me up</button>
       <p class="meta" id="a-note"></p>
     </form>
   </div>
 
   <div class="about"><p class="meta">We're finishing the email-delivery piece; sign-ups made now are
-    held and confirmed the moment it goes live. <b>Water</b> &amp; <b>spills</b> alerts are captured now
-    and switch on when those proximity feeds are wired. Want Slack/Discord or a webhook for your org
+    held and confirmed the moment it goes live. Spill and violation alerts come from the same public
+    records as the map (<a href="/data">data sources</a>); a record's date can be older than the day it
+    reached us, and a listing is not a finding of harm. Want Slack/Discord or a webhook for your org
     instead? <a href="/about">Get in touch</a>.</p></div>
 </div>
 {% endblock %}

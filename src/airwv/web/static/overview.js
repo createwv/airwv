@@ -4,10 +4,11 @@ const $ = id => document.getElementById(id);
 const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 // EPA PM2.5 AQI categories (mirror of PM25_BANDS in app.py) — for the headline label.
+// `text`: a darker shade of the band color for numbers on white (WCAG AA, 3:1 at this size).
 const PM_BANDS = [
-  {max: 12.0, label: 'Good', color: '#00e400'},
-  {max: 35.4, label: 'Moderate', color: '#ffff00'},
-  {max: 55.4, label: 'Unhealthy for sensitive groups', color: '#ff7e00'},
+  {max: 12.0, label: 'Good', color: '#00e400', text: '#137333'},
+  {max: 35.4, label: 'Moderate', color: '#ffff00', text: '#8a7400'},
+  {max: 55.4, label: 'Unhealthy for sensitive groups', color: '#ff7e00', text: '#b85c00'},
   {max: 150.4, label: 'Unhealthy', color: '#ff0000'},
   {max: 250.4, label: 'Very unhealthy', color: '#8f3f97'},
   {max: Infinity, label: 'Hazardous', color: '#7e0023'},
@@ -46,9 +47,9 @@ function renderStats(sensors){
   const elevated = withVal.filter(s => s.latest_pm2_5 > 35.4);
 
   $('ov-stats').innerHTML =
-    statCard(typ.toFixed(1), 'typical PM2.5 now', tb.label + ' · µg/m³', tb.color === '#ffff00' ? '#b59a00' : tb.color) +
+    statCard(typ.toFixed(1), 'typical PM2.5 now', tb.label + ' · µg/m³', tb.text || tb.color) +
     statCard(withVal.length, 'sensors reporting', `of ${community.length} community`) +
-    statCard(hi.toFixed(1), 'highest now', esc(hiS ? hiS.name : ''), hb.color === '#ffff00' ? '#b59a00' : hb.color) +
+    statCard(hi.toFixed(1), 'highest now', esc(hiS ? hiS.name : ''), hb.text || hb.color) +
     statCard(refs.length, 'EPA reference monitors', 'for validation');
 
   const h = $('ov-headline');
@@ -68,27 +69,26 @@ function renderStats(sensors){
 
 function drawMap(sensors){
   const pts = sensors.filter(s => s.lat != null && s.lon != null);
-  const map = L.map('ov-map', {scrollWheelZoom: false}).setView([38.9, -80.5], 7);
+  const map = AIRWV_WV.fitWV(L.map('ov-map', {scrollWheelZoom: false}));
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
-  const group = [];
   pts.forEach(s => {
     const ref = s.kind === 'reference';
     const val = s.latest_pm2_5 != null ? `${s.latest_pm2_5.toFixed(1)} µg/m³ PM2.5` : 'no current reading';
     const m = L.circleMarker([s.lat, s.lon], {
-      radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
+      title: `${s.name}, ${ref ? 'reference monitor' : 'community sensor'}`, radius: ref ? 6 : 8, color: ref ? '#333' : '#111', weight: ref ? 1 : 2,
       fillColor: s.color, fillOpacity: ref ? 0.7 : 0.85})
       .bindPopup(`<b>${esc(s.name)}</b><br>${val}${ref ? '<br><i>EPA reference monitor</i>' : ''}`);
-    m.addTo(map); group.push([s.lat, s.lon]);
+    m.addTo(map);
   });
-  // a place in the URL (shared state, state.js) centres the map on it; otherwise statewide
+  // a place in the URL (shared state, state.js) centres the map on it; otherwise the statewide fitWV view stands
   const st = AirwvState.get();
   if (st.lat != null) {
-    L.marker([st.lat, st.lon], {zIndexOffset: 1000,
+    L.marker([st.lat, st.lon], {title: st.label || 'Selected place', zIndexOffset: 1000,
       icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
       .bindPopup(esc(st.label || 'Selected place')).addTo(map);
     map.setView([st.lat, st.lon], 11);
-  } else if (group.length) map.fitBounds(group, {padding: [30, 30], maxZoom: 9});
+  }
   $('ov-legend').innerHTML = 'Dots = community sensors · rings = EPA monitors · '
     + 'color = latest PM2.5 (green good → red unhealthy). Click a dot for details.';
   window.AIRWV_MAP = map;               // reporting.js drops the report pin here

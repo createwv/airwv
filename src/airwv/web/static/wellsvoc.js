@@ -38,7 +38,7 @@
     catch (e) { el('bl-math').textContent = 'Could not load the backlog.'; return; }
     const total = d.orphans_total || 0, nearHomes = d.orphans_near_homes || 0;
     const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}">
-      <b style="color:${col}">${Number(n).toLocaleString()}</b> ${txt}</span>`;
+      <b style="color:${AIRWV_WV.ink(col)}">${Number(n).toLocaleString()}</b> ${txt}</span>`;
     el('bl-summary').innerHTML =
       box(total, 'orphan wells awaiting plugging', '#c0392b')
       + box(nearHomes, 'of them within 200 m of a building', '#e07b00')

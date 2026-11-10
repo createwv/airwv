@@ -33,14 +33,18 @@ class Event:
     score: float  # robust z of the residual
 
 
-def detrend_events(
+def residual_scores(
     readings,
     field: str = "pm2_5",
     tzname: str = EASTERN,
-    z_threshold: float = 6.0,
     min_points: int = 48,
-) -> list[Event]:
-    """Flag readings whose de-trended residual is a strong outlier, worst first."""
+) -> list[tuple[datetime, float, float, float, float]]:
+    """Every reading de-trended by its local hour: ``(ts, value, baseline, residual, z)``.
+
+    ``z`` is the residual's robust z. Empty below ``min_points``. Shared by
+    :func:`detrend_events` and the neighbor cross-check (which reads a neighbor's
+    z over a window instead of thresholding it).
+    """
     series = [(r.ts, getattr(r, field)) for r in readings if getattr(r, field) is not None]
     if len(series) < min_points:
         return []
@@ -59,13 +63,26 @@ def detrend_events(
     diffs = [d for _, _, _, d in residuals]
     med = statistics.median(diffs)
     mad = statistics.median([abs(d - med) for d in diffs]) or 1.0
+    return [(ts, value, base, diff, _MAD_TO_SIGMA * (diff - med) / mad)
+            for ts, value, base, diff in residuals]
 
+
+def detrend_events(
+    readings,
+    field: str = "pm2_5",
+    tzname: str = EASTERN,
+    z_threshold: float = 6.0,
+    min_points: int = 48,
+) -> list[Event]:
+    """Flag readings whose de-trended residual is a strong outlier, worst first."""
+    scored = residual_scores(readings, field=field, tzname=tzname, min_points=min_points)
+    if not scored:
+        return []
     sensor_id = readings[0].sensor_id
     events = [
-        Event(sensor_id, ts, field, value, round(base, 1), round(diff, 1),
-              round(_MAD_TO_SIGMA * (diff - med) / mad, 1))
-        for ts, value, base, diff in residuals
-        if _MAD_TO_SIGMA * (diff - med) / mad >= z_threshold
+        Event(sensor_id, ts, field, value, round(base, 1), round(diff, 1), round(z, 1))
+        for ts, value, base, diff, z in scored
+        if z >= z_threshold
     ]
     events.sort(key=lambda e: -e.score)
     return events

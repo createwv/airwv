@@ -4,19 +4,31 @@
   const tabs = [...document.querySelectorAll('.ltab')];
   const panels = [...document.querySelectorAll('.lpanel')];
   function show(name) {
+    // #glossary (or any id inside a panel) opens that panel and scrolls to it
+    const el = name && !document.getElementById('lp-' + name) && document.getElementById(name);
+    const panel = el && el.closest('.lpanel');
+    if (panel) name = panel.id.slice(3);
     if (!document.getElementById('lp-' + name)) return;
     tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
     panels.forEach(p => { p.hidden = p.id !== 'lp-' + name; });
+    if (panel) el.scrollIntoView({ behavior: AIRWV_WV.scrollBehavior() });
   }
   tabs.forEach(t => t.addEventListener('click', () => {
     show(t.dataset.tab);
     history.replaceState(null, '', '#' + t.dataset.tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: AIRWV_WV.scrollBehavior() });
   }));
   // in-page links like <a href="#law"> switch tabs
   window.addEventListener('hashchange', () => show(location.hash.slice(1)));
   const h = location.hash.slice(1);
   if (h) show(h);
+
+  // opt-in haze tint (haze.js loads first, from base.html)
+  const hz = document.getElementById('haze-toggle');
+  if (hz && window.AIRWV_HAZE) {
+    hz.checked = AIRWV_HAZE.enabled();
+    hz.addEventListener('change', () => AIRWV_HAZE.set(hz.checked));
+  }
 
   // ---- live "right now" snapshot (Health & AQI tab) ----
   const PM_BANDS = [

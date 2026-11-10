@@ -199,7 +199,8 @@ python -m airwv.web           # open http://127.0.0.1:8000
 
 Pick a sensor and metric to see an hourly time series and a time-of-day (local
 Eastern) profile. Read API: `/api/sensors`, `/api/series/{id}?field=`,
-`/api/diurnal/{id}?field=`.
+`/api/diurnal/{id}?field=`. Reads on `/api/*` and `/data/dumps/*` allow any origin (CORS)
+and are rate limited per client (see `deploy/README.md`).
 
 ## Alerts
 
@@ -223,6 +224,24 @@ trend analysis):
 python -m airwv.ingest subscribe --channel log --kind trend \
     --sensor "Glasgow" --field voc --threshold 20    # alert if VOC rising ≥ 20%
 ```
+
+A third kind, **record**, is place-based and covers more than air: it fires when a
+new record shows up for a place in the public records the map uses — `--field spills`
+(NRC spill reports), `water` (EPA health-based drinking-water violations) or
+`violations` (EPA ECHO facility violations). The first check takes what's already
+on file as the baseline, so only records that appear later alert; county-only
+records (most spills, water systems) also match a place in that county. Spill reports
+dated more than 60 days back don't alert, and the message says so.
+
+```bash
+python -m airwv.ingest subscribe --channel webhook --target https://hooks.example/... \
+    --kind record --field spills --lat 38.35 --lon -81.63 --radius-km 16
+```
+
+A `water` or `violations` record that was off the list for at least 30 days and is
+listed again alerts too, marked as back on the list with the date it was last seen.
+Dropping off a list doesn't by itself mean a problem was fixed, so the alert doesn't
+say that.
 
 Channels: **log** (always works), **webhook** (POSTs alert JSON), and **email**
 (SMTP via `AIRWV_SMTP_*` env vars — set them when ready; see `.env.example`).

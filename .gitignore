@@ -41,3 +41,7 @@ data/*
 *.swp
 data/field_photos/
 data/report_photos/
+
+# Product harness output + locally vendored CDN libs (tests/product/README.md)
+tests/product/out/
+tests/product/vendor/

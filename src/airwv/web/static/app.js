@@ -5,10 +5,30 @@ const busy = (id,on) => { const el=$(id); if(el) el.classList.toggle('on', on); 
 const COLORS = ['#3b2a6b','#e07b00','#1b9e77','#d62728','#7570b3','#17becf','#b8860b'];
 let map, markers = {}, allSensors = [], GUIDE = null;
 let chartSet = new Set();   // sensor ids currently plotted (click a row or a map dot to toggle)
+let defaultPick = null;     // {sensor, why}: the auto-chosen sensor, while the chart still shows only it
+function setDefaultSensor(pick){
+  if (!pick) return;
+  chartSet = new Set([pick.sensor.sensor_id]);
+  markRows('.srow.on', false);
+  markRows(`.srow[data-sid="${pick.sensor.sensor_id}"]`, true);
+  defaultPick = pick;
+}
+// a sensor row's "charted" state: the highlight, and aria-pressed on its name button
+function markRows(sel, on){
+  document.querySelectorAll(sel).forEach(el => {
+    el.classList.toggle('on', on);
+    const b = el.querySelector('.sname'); if (b) b.setAttribute('aria-pressed', on);
+  });
+}
+function showWhy(){
+  const el = $('ts-why'); if (!el) return;
+  const auto = defaultPick && chartSet.size === 1 && chartSet.has(defaultPick.sensor.sensor_id);
+  el.textContent = auto ? `Showing ${defaultPick.sensor.name}: ${defaultPick.why}. Click any sensor to compare.` : '';
+}
 function toggleChart(sid){
   if (chartSet.has(sid)) chartSet.delete(sid); else chartSet.add(sid);
   // update the tree row(s) in place (don't rebuild — that would collapse open groups)
-  document.querySelectorAll(`.srow[data-sid="${sid}"]`).forEach(el => el.classList.toggle('on', chartSet.has(sid)));
+  markRows(`.srow[data-sid="${sid}"]`, chartSet.has(sid));
   redrawSensors(); render();
 }
 
@@ -47,10 +67,11 @@ function bandShapes(field, yMax){
 
 async function loadSensors(){
   allSensors = await j('/api/sensors');
-  // default: chart EWV Glasgow 1 (falls back to the first community sensor)
-  const glasgow = allSensors.find(s => /glasgow/i.test(s.name)) ||
-                  allSensors.find(s => s.kind === 'community' && s.lat != null);
-  if (glasgow) chartSet.add(glasgow.sensor_id);
+  // default: nearest community sensor to ?lat=&lon= if the link has one, else the
+  // highest current PM2.5; the reason is shown above the chart (AIRWV_WV.pickDefaultSensor)
+  const q = new URLSearchParams(location.search), qlat = parseFloat(q.get('lat')), qlon = parseFloat(q.get('lon'));
+  setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors,
+    isNaN(qlat) || isNaN(qlon) ? null : {lat: qlat, lon: qlon, label: 'the place in this link'}));
   // legend "as of": the newest community reading, so people know it's a live snapshot
   const asof = $('legend-asof');
   if (asof){
@@ -101,7 +122,7 @@ function toggleFollow(sid){
 let userMarker;
 function drawMap(sensors){
   if (!map){
-    map = L.map('map').setView([38.35, -81.6], 8);
+    map = AIRWV_WV.fitWV(L.map('map'));
     const tile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     tile.on('load', () => busy('b-map', false));      // hide spinner once tiles are in
@@ -130,9 +151,8 @@ function drawMap(sensors){
     });
   }
   redrawSensors();
-  const pts = allSensors.filter(s => s.kind !== 'reference' && s.lat != null).map(s => [s.lat, s.lon]);
+  // a place in the URL (state.js) pins and zooms to it; otherwise the statewide fitWV view stands
   if (URL_STATE.lat != null) showPlace(URL_STATE.lat, URL_STATE.lon, URL_STATE.label || 'Selected place');
-  else if (pts.length) map.fitBounds(pts, {padding:[30,30], maxZoom:11});
   loadSources();
   loadReports();
   loadFacilities();
@@ -150,7 +170,7 @@ function redrawSensors(){
   // ozone monitors (EPA reference) as square markers, colored by ozone AQI band
   if (layerState.ozone) allSensors.forEach(x => {
     if (x.latest_ozone == null || x.lat == null) return;
-    L.marker([x.lat, x.lon], {icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
+    L.marker([x.lat, x.lon], {title: `${x.name}, ozone monitor`, icon: L.divIcon({className:'', iconSize:[15,15], iconAnchor:[7,7],
       html:`<div class="o3mk" style="background:${x.ozone_color||'#9e9e9e'}"></div>`})})
       .bindPopup(`<b>${x.name}</b><br><i>EPA ozone monitor</i><br>latest O₃: <b>${x.latest_ozone} ppb</b>`
         + `<br><small>select the Ozone metric, then click to chart</small>`)
@@ -173,11 +193,11 @@ function redrawSensors(){
       `<br><small>${charted?'✓ charted — click to remove':'click to add to chart'}</small>`;
     if (x.kind === 'reference') {
       if (!layerState.reference) return;
-      L.circleMarker([x.lat, x.lon], {radius:8, color:(ring?ring.color:'#111'), weight:(ring?ring.weight:3), fillColor:x.color, fillOpacity:0.85})
+      L.circleMarker([x.lat, x.lon], {title: `${x.name}, reference monitor`, radius:8, color:(ring?ring.color:'#111'), weight:(ring?ring.weight:3), fillColor:x.color, fillOpacity:0.85})
         .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(refLayer);
     } else {
       if (!layerState.community || layerState.regions[x.region] === false) return;
-      L.circleMarker([x.lat, x.lon], {radius:9, color:(ring?ring.color:'#333'), weight:(ring?ring.weight:1), fillColor:x.color, fillOpacity:0.9})
+      L.circleMarker([x.lat, x.lon], {title: `${x.name}, community sensor`, radius:9, color:(ring?ring.color:'#333'), weight:(ring?ring.weight:1), fillColor:x.color, fillOpacity:0.9})
         .bindPopup(pop).on('click', () => toggleChart(x.sensor_id)).addTo(sensorLayer);
     }
   });
@@ -204,7 +224,7 @@ async function loadSources(){
   const wantSrc = new URLSearchParams(location.search).get('src');
   if (wantSrc && allSources_.some(s => s.name === wantSrc)){
     $('srcpick').value = wantSrc; showProximity(wantSrc);
-    document.querySelector('#proxtable').scrollIntoView({behavior:'smooth', block:'center'});
+    document.querySelector('#proxtable').scrollIntoView({behavior:AIRWV_WV.scrollBehavior(), block:'center'});
   }
 }
 // ---- Source-proximity: pick a polluter, see the sensors around it by distance + bearing ----
@@ -232,7 +252,7 @@ const prevailing = rose => Object.keys(rose).reduce((a,b)=> rose[b]>rose[a]?b:a)
 function showProximity(name){
   const src = allSources_.find(s => s.name === name && s.lat != null);
   const tb = document.querySelector('#proxtable tbody');
-  if (!src){ tb.innerHTML='<tr><td colspan="6" style="color:#999">Pick a pollution source above.</td></tr>';
+  if (!src){ tb.innerHTML='<tr><td colspan="6" class="meta">Pick a facility above.</td></tr>';
     $('chartnear').disabled=true; $('proxsector').textContent=''; if(proxRings){proxRings.remove();proxRings=null;} return; }
   const weighted = $('windweight').checked && windRoses.length;
   const station = weighted ? nearestStation(src.lat, src.lon) : null;
@@ -263,7 +283,7 @@ function showProximity(name){
   if (proxRings) proxRings.remove();
   proxRings = L.layerGroup();
   [1,3].forEach(mi => L.circle([src.lat,src.lon], {radius:mi*1609.34, color:'#a00', weight:1, fill:false, dashArray:'4'}).addTo(proxRings));
-  L.marker([src.lat,src.lon], {icon:L.divIcon({className:'', html:'🎯', iconSize:[24,24], iconAnchor:[12,12]})})
+  L.marker([src.lat,src.lon], {title: `${src.name}, proximity center`, icon:L.divIcon({className:'', html:'🎯', iconSize:[24,24], iconAnchor:[12,12]})})
     .bindPopup(`<b>${src.name}</b><br>proximity center`).addTo(proxRings);
   proxRings.addTo(map);
   if (map) map.setView([src.lat, src.lon], 10);
@@ -274,7 +294,7 @@ function initProximity(){
   $('windweight').addEventListener('change', () => showProximity($('srcpick').value.trim()));
   $('chartnear').addEventListener('click', () => {
     proxNearest.forEach(s => chartSet.add(s.sensor_id));
-    proxNearest.forEach(s => document.querySelectorAll(`.srow[data-sid="${s.sensor_id}"]`).forEach(el => el.classList.add('on')));
+    proxNearest.forEach(s => markRows(`.srow[data-sid="${s.sensor_id}"]`, true));
     redrawSensors(); render();
   });
 }
@@ -299,7 +319,7 @@ function renderFacWater(sites) {
   withVals.slice(0, 2).forEach(s => {
     const chips = WQ_ORDER.filter(k => s.latest[k]).map(k => {
       const l = s.latest[k], m = WQ[k], col = m.color(l.value);
-      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
     }).join(' ');
     if (chips) html += `<div style="margin:3px 0"><small>${s.name} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
   });
@@ -338,7 +358,7 @@ function redrawEcho(){
     // water/drinking-water dischargers get a lazily-loaded measured-water block
     const water = (f.programs||[]).some(p=>p==='water'||p==='drinking-water')
       ? `<div class="fac-wq" data-pending data-lat="${f.lat}" data-lon="${f.lon}"></div>` : '';
-    L.circleMarker([f.lat, f.lon], {radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([f.lat, f.lon], {title: f.name, radius:r, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${f.name}</b><br><span style="color:${col};font-weight:600">⚖️ ${ECHO_LABEL[f.status]||''}</span>`+
         `<br><small>${[f.city, f.county && f.county+' Co.'].filter(Boolean).join(', ')}</small>`+
         (progs?`<br><small>${progs}</small>`:'')+
@@ -367,7 +387,7 @@ function redrawDep(){
     if (layerState.depStage[p.stage] === false) return;
     const col = DEP_COLOR[p.stage] || DEP_COLOR.other;
     const when = p.issue_date || p.received_date;
-    L.circleMarker([p.lat, p.lon], {radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([p.lat, p.lon], {title: `Oil and gas permit: ${p.operator||'operator unknown'}`, radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${p.operator||'Operator unknown'}</b>`+
         `<br><span style="color:${col};font-weight:600">🛢️ ${DEP_LABEL[p.stage]||''}</span>`+
         `<br><small>${[p.county && p.county+' Co.', p.well_type].filter(Boolean).join(' · ')}</small>`+
@@ -395,7 +415,7 @@ function redrawMines(){
     if (layerState.mineStage[m.stage] === false) return;
     const col = MINE_COLOR[m.stage] || MINE_COLOR.other;
     const acres = m.acres_disturbed ? `<br><small>${m.acres_disturbed} acres disturbed${m.acres_reclaimed?` · ${m.acres_reclaimed} reclaimed`:''}</small>` : '';
-    L.circleMarker([m.lat, m.lon], {radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
+    L.circleMarker([m.lat, m.lon], {title: `Mine permit: ${m.operator||'operator unknown'}`, radius:6, color:'#333', weight:1, fillColor:col, fillOpacity:0.85})
       .bindPopup(`<b>${m.operator||'Operator unknown'}</b>`+
         `<br><span style="color:${col};font-weight:600">⛏️ ${MINE_LABEL[m.stage]||''}</span>`+
         `<br><small>${[m.type, m.facility].filter(Boolean).join(' · ')}</small>`+
@@ -432,7 +452,7 @@ function redrawWells(){
     // near-homes wells pop (bigger, opaque, dark ring); remote ones fade back
     const prox = w.near_homes ? `🏠 <b>within ${w.nearest_building_m} m of a building</b>`
       : (w.nearest_building_m != null ? `~${w.nearest_building_m} m to nearest building` : 'remote (no building within ~1 km)');
-    L.circleMarker([w.lat, w.lon], {radius: near?6:3.5, color: near?'#400':'#333',
+    L.circleMarker([w.lat, w.lon], {title: `Abandoned gas well ${w.id||''}`.trim(), radius: near?6:3.5, color: near?'#400':'#333',
       weight: near?1.2:0.5, fillColor:col, fillOpacity: near?0.95:0.55})
       .bindPopup(`<b>Abandoned gas well</b> <small>${w.id||''}</small>`+
         `<br><span style="color:${col};font-weight:600">${w.orphan?'🚱 Orphan — no known operator (state to plug)':'⚠️ Abandoned'}</span>`+
@@ -455,12 +475,13 @@ function redrawSources(){
     if (s.lat == null || s.lon == null) return;
     const cat = s.category || 'other';
     if (layerState.cats[cat] === false) return;
-    L.marker([s.lat, s.lon], {icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
+    L.marker([s.lat, s.lon], {title: s.name, icon: L.divIcon({className:'', html:SRC_ICON[cat]||'🏭',
       iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${s.name}</b>${s.state?` <small>(${s.state})</small>`:''}`+
         `<br><b style="color:#7a5b12">${SRC_LABEL[cat]||'Facility'}</b> · ${s.type}<br><i>${s.operator||''}</i>`+
         `<br><small>Documented public-record facility · ${s.citation||''}</small>`+
-        `<br><small style="color:#a00">${srcDisclaimer}</small>`)
+        `<br><small style="color:#a00">${srcDisclaimer}</small>`+
+        (s.id ? `<br><a href="/site/facility/${encodeURIComponent(s.id)}">Facility details →</a>` : ''))
       .addTo(sourceLayer);
   });
   sourceLayer.addTo(map);
@@ -477,19 +498,22 @@ function buildLayers(){
   cats.forEach(c=>{ if(!(c in layerState.cats)) layerState.cats[c]=true; });
   const row = (attr,val,checked,label,cnt)=>
     `<label><input type="checkbox" data-${attr}="${val}" ${checked?'checked':''}> ${label} <span class="cnt">${cnt}</span></label>`;
-  const srowHtml = s => `<div class="srow${chartSet.has(s.sensor_id)?' on':''}" data-sid="${s.sensor_id}">`+
-    `<span class="star${mySensors.has(s.sensor_id)?' on':''}" data-star="${s.sensor_id}" title="follow">${mySensors.has(s.sensor_id)?'★':'☆'}</span>${s.name}</div>`;
+  // buttons, so the follow star and "chart this sensor" work from the keyboard too
+  const srowHtml = s => { const on = chartSet.has(s.sensor_id), fav = mySensors.has(s.sensor_id);
+    return `<div class="srow${on?' on':''}" data-sid="${s.sensor_id}">`+
+      `<button type="button" class="star${fav?' on':''}" data-star="${s.sensor_id}" title="follow" aria-pressed="${fav}" aria-label="follow ${s.name}">${fav?'★':'☆'}</button>`+
+      `<button type="button" class="sname" aria-pressed="${on}" title="chart this sensor">${s.name}</button></div>`; };
   // community: each region is a <details> (visibility checkbox) holding clickable sensor rows
   const byRegion = {};
   comm.forEach(s => { (byRegion[s.region] = byRegion[s.region] || []).push(s); });
   const regionBlocks = regions.map(r => {
     const rows = (byRegion[r]||[]).sort((a,b)=>a.name.localeCompare(b.name)).map(srowHtml).join('');
-    return `<details><summary><input type="checkbox" data-region="${r}" ${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
+    return `<details><summary><input type="checkbox" data-region="${r}"${layerState.regions[r]?'checked':''}> ${r} <span class="cnt">${rCounts[r]}</span></summary><div class="children">${rows}</div></details>`;
   }).join('');
   // ⭐ pinned follow-list at the top
   const followed = comm.filter(s => mySensors.has(s.sensor_id)).sort((a,b)=>a.name.localeCompare(b.name));
   const myBlock = followed.length
-    ? `<details open><summary>⭐ My Sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
+    ? `<details open><summary>My sensors <span class="cnt">${followed.length}</span></summary><div class="children">${followed.map(srowHtml).join('')}</div></details>`
     : '';
   const catRows = cats.map(c=>row('cat',c,layerState.cats[c],`${SRC_ICON[c]} ${SRC_LABEL[c]}`,cCounts[c])).join('');
   // ⚖️ EPA ECHO compliance — WV major facilities, colored by status
@@ -525,7 +549,7 @@ function buildLayers(){
     `<label style="align-self:center"><input type="checkbox" id="L-reference" ${layerState.reference?'checked':''}> ◎ Reference monitors <span class="cnt">${ref.length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-ozone" ${layerState.ozone?'checked':''}> ◆ Ozone monitors (EPA) <span class="cnt">${allSensors.filter(s=>s.latest_ozone!=null).length}</span></label>`+
     `<label style="align-self:center"><input type="checkbox" id="L-reports" ${layerState.reports!==false?'checked':''}> 📣 Community reports <span class="cnt">${allReports.length}</span></label>`+
-    `<details class="ctxgroup"><summary>🔎 Context layers <span class="cnt">advanced · sources, violations, permits &amp; wells</span></summary><div class="children">`+
+    `<details class="ctxgroup"><summary>Context layers <span class="cnt">advanced · facilities, violations, permits &amp; wells</span></summary><div class="children">`+
       `<p class="ctx-intro">What's <b>permitted, monitored, or reported</b> around the sensors — context for a reading, <b>not</b> proof of what caused it. <a href="/learn#law">How the rules work →</a></p>`+
       `<details><summary><input type="checkbox" id="L-sources" ${layerState.sources?'checked':''}> 🏭 Pollution sources <span class="cnt">${allSources_.length}</span></summary><div class="children"><p class="ctx-help">Industrial facilities that report toxic releases (EPA TRI) — <b>who is permitted to emit</b> near you.</p>${catRows}</div></details>`+
       (echoTotal?`<details><summary><input type="checkbox" id="L-echo" ${layerState.echo?'checked':''}> ⚖️ Compliance (EPA ECHO) <span class="cnt">${echoTotal}</span></summary><div class="children"><p class="ctx-help">Whether a regulated facility is currently <b>meeting its clean-air/water permits</b>. Red = a <b>significant violation</b> on record — a legal state, not a measurement. <a href="/learn#law">what a violation is →</a></p>${echoRows}</div></details>`:'')+
@@ -534,7 +558,10 @@ function buildLayers(){
       `<details><summary><input type="checkbox" id="L-wells" ${layerState.wells?'checked':''}> 🛢️ Abandoned wells (WV DEP) <span class="cnt">${wellsTotal || '~15k'}</span></summary><div class="children"><p class="ctx-help">Old gas wells no longer producing. <b>Orphans</b> (red) have no responsible operator and can leak gas/H2S. <a href="/learn#health">why that matters →</a></p>${wellSubs}</div></details>`+
     `</div></details>`;
   // checkboxes in a <summary> shouldn't toggle its open/close
-  $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> cb.addEventListener('click', e=>e.stopPropagation()));
+  // …and, not being inside a <label>, they take their name from the summary text minus the count
+  $('layers').querySelectorAll('summary input[type=checkbox]').forEach(cb=> { cb.addEventListener('click', e=>e.stopPropagation());
+    const s = cb.parentElement.cloneNode(true); s.querySelectorAll('.cnt').forEach(c => c.remove());
+    cb.setAttribute('aria-label', 'show ' + s.textContent.trim()); });
   // updates happen in place (no rebuild) so open groups stay open
   $('L-community').onchange = e=>{ layerState.community=e.target.checked;
     regions.forEach(r=>layerState.regions[r]=e.target.checked);
@@ -578,7 +605,8 @@ function buildLayers(){
   $('layers').querySelectorAll('[data-well]').forEach(cb=> cb.onchange=e=>{
     layerState[e.target.dataset.well==='orphan'?'wellOrphan':'wellOperator']=e.target.checked; redrawWells(); });
   if($('L-wellnear')) $('L-wellnear').onchange = e=>{ layerState.wellNearOnly=e.target.checked; redrawWells(); };
-  $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star); }));
+  $('layers').querySelectorAll('[data-star]').forEach(el=> el.addEventListener('click', e=>{ e.stopPropagation(); toggleFollow(el.dataset.star);
+    const again = $('layers').querySelector(`[data-star="${el.dataset.star}"]`); if (again) again.focus(); }));   // the tree was rebuilt
   $('layers').querySelectorAll('.srow').forEach(rowEl=> rowEl.addEventListener('click', ()=> toggleChart(rowEl.dataset.sid)));
   syncParents(regions,cats);
 }
@@ -611,7 +639,7 @@ async function loadValidation(){
   }
   tb.innerHTML = d.results.map(v => {
     const r = v.r;
-    const rcol = r==null ? '#888' : r>=0.7 ? '#1b9e77' : r>=0.4 ? '#e07b00' : '#d62728';
+    const rcol = AIRWV_WV.ink(r==null ? '#888888' : r>=0.7 ? '#1b9e77' : r>=0.4 ? '#e07b00' : '#d62728');
     const rtxt = r==null ? 'n/a' : r.toFixed(2);
     const bad = Math.abs(v.bias) > 50;   // an absurd bias flags a malfunctioning sensor
     const btxt = (v.bias>0?'+':'') + v.bias.toFixed(1) + ' µg/m³';
@@ -634,6 +662,8 @@ function range(){ const s=$('start').value, e=$('end').value;
 const nameOf = id => (allSensors.find(s=>s.sensor_id===id)||{}).name || id;
 async function render(){
   const ids = selected(), field = $('field').value, rng = range();
+  showWhy();
+  const clampNote = $('ts-clamp'); if (clampNote) clampNote.textContent = '';
   $('dl').href = ids.length ? `/api/export/${ids[0]}.csv` : '#';
   if (!ids.length){
     Plotly.newPlot('ts', [], {margin:{t:10,r:10,b:40,l:45},
@@ -675,20 +705,33 @@ async function render(){
     $('trendinfo').textContent = tr.direction === 'insufficient' ? '' :
       `trend: ${tr.direction}${tr.watch ? ' ⚠ watch' : ''} · Δ${tr.pct_change}% over period (r=${tr.r})`;
   } else { $('trendinfo').textContent = ''; }
-  const yMax = Math.max(1, ...tsTraces.flatMap(t => t.y.filter(v => v != null)));
+  // one stuck-sensor spike shouldn't flatten weeks of data: clamp the axis, mark what's above
+  const clamp = AIRWV_WV.clampY(series.flatMap(s => s.points.map(p => p.value)));
+  const yaxis = {title:field};
+  if (clamp){
+    yaxis.range = [0, clamp.cap];
+    const hi = series.flatMap(s => s.points.filter(p => p.value > clamp.cap).map(p => ({...p, name:s.name})));
+    tsTraces.push({x:hi.map(p=>p.ts), y:hi.map(()=>clamp.cap), mode:'markers', name:'above axis',
+      marker:{symbol:'triangle-up', size:9, color:'#7a1f1f'}, customdata:hi.map(p=>[p.value, p.name]),
+      hovertemplate:'%{customdata[1]}: %{customdata[0]} at %{x}<extra>above axis</extra>'});
+    if (clampNote) clampNote.textContent = `Axis cut at ${clamp.cap}: ${clamp.above} reading${clamp.above>1?'s':''} `
+      + `above it (highest ${Math.round(clamp.max).toLocaleString()}) shown as ▲ at the top. Double-click the chart for the full range.`;
+  }
+  const yMax = clamp ? clamp.cap : Math.max(1, ...tsTraces.flatMap(t => t.y.filter(v => v != null)));
   const gd = await Plotly.newPlot('ts', tsTraces, {margin:{t:10,r:10,b:40,l:45},
-    yaxis:{title:field}, legend:{orientation:'h'}, shapes:bandShapes(field, yMax)},
+    yaxis, legend:{orientation:'h'}, shapes:bandShapes(field, yMax)},
     {responsive:true, displayModeBar:false});
   gd.on('plotly_click', e => {
     const p = e.points[0];
     let msg = `${p.x} — ${field} = ${p.y}`;
+    if (p.data.name === 'above axis') msg = `${p.x} — ${p.customdata[1]}: ${field} = ${p.customdata[0]} (above the axis cut)`;
     if (p.data.name === 'event' && p.customdata)
       msg += `  ·  event: +${p.customdata[0]} over baseline (z=${p.customdata[1]})`;
     $('detail').textContent = msg;
   });
   gd.on('plotly_legendclick', e => {           // click a legend name to remove that sensor
     const nm = e.data[e.curveNumber].name;
-    if (nm === 'event' || nm === 'trend') return true;
+    if (nm === 'event' || nm === 'trend' || nm === 'above axis') return true;
     const sid = [...chartSet].find(id => nameOf(id) === nm);
     if (sid) { toggleChart(sid); return false; }
     return true;
@@ -730,7 +773,7 @@ function redrawReports(){
       ? `<br><small>📊 measured: ${r.readings.map(x=>`${x.parameter} ${x.value}${x.unit?' '+x.unit:''}`).join(', ')} <i>(community, unverified)</i></small>`
       : '';
     const photo = r.photo ? `<br><a href="${r.photo}" target="_blank" rel="noopener"><img src="${r.photo}" style="max-width:200px;max-height:150px;border-radius:5px;margin-top:4px"></a>` : '';
-    L.marker([r.lat, r.lon], {icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
+    L.marker([r.lat, r.lon], {title: `Community report: ${r.category || r.domain}`, icon:L.divIcon({className:'', html:R_ICON[r.domain]||'📣', iconSize:[22,22], iconAnchor:[11,11]})})
       .bindPopup(`<b>${R_ICON[r.domain]||'📣'} ${r.category || r.domain}</b>`+
         (r.description ? `<br>${r.description}` : '')+
         (r.area_label ? `<br><small>📍 ${r.area_label}</small>` : '')+
@@ -750,13 +793,17 @@ function nearMe(){
     const lat=p.coords.latitude, lon=p.coords.longitude;
     showPlace(lat, lon, 'You are here');
     AirwvState.set({lat, lon, label:null});
+    if (defaultPick && chartSet.size === 1 && chartSet.has(defaultPick.sensor.sensor_id)){
+      setDefaultSensor(AIRWV_WV.pickDefaultSensor(allSensors, {lat, lon, label: 'you'}));
+      redrawSensors(); render();
+    }
   }, ()=>{ if(note) note.textContent='could not get your location'; }, {enableHighAccuracy:true, timeout:10000});
 }
 // pin a place (geolocated, or from the URL), zoom in, and list the nearest community sensors
 function showPlace(lat, lon, label){
   const note = $('nearme-note');
   if (userMarker) userMarker.remove();
-  userMarker = L.marker([lat,lon], {zIndexOffset:1000,
+  userMarker = L.marker([lat,lon], {title: label, zIndexOffset:1000,
     icon:L.divIcon({className:'', html:'📍', iconSize:[26,26], iconAnchor:[13,26]})})
     .addTo(map).bindPopup(esc(label)).openPopup();
   map.setView([lat,lon], 11);

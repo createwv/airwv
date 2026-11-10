@@ -2,10 +2,10 @@
 {% block content %}
 <script>window.SV_KEY = "{{ sv_key }}";</script>
 <div class="page">
-  <div class="ov-intro"><h1>Sources &amp; facilities</h1>
+  <div class="ov-intro"><h1>Facilities</h1>
     <p>Documented facilities across West Virginia and just over its borders, from public
        records. Browse a place to see what it is, who runs it, and the air sensors around
-       it. <b>Facts, not accusations</b> — every entry links to its public-record source.</p></div>
+       it. <b>Facts, not accusations</b> — every entry links to its public-record data source.</p></div>
 
   <h2 class="ov-sechead">Featured facilities</h2>
   <div class="carousel-wrap">
@@ -20,8 +20,9 @@
     <span class="meta" id="src-count"></span>
   </div>
   <section class="src-grid" id="src-grid"></section>
+  <p class="src-more-wrap"><button type="button" id="src-more" hidden>Show 24 more</button></p>
 
-  <h2 class="ov-sechead">⚖️ Compliance &amp; permits <span class="meta" id="fac-src"></span></h2>
+  <h2 class="ov-sechead">Compliance &amp; permits <span class="meta" id="fac-src"></span></h2>
   <p class="meta" style="margin:-6px 0 10px">West Virginia's <b>major</b> regulated facilities and their
      current EPA compliance status — the big permitted air emitters and water dischargers. Live from
      <a href="https://echo.epa.gov" target="_blank" rel="noopener">EPA ECHO</a>; each links to its official record.</p>
@@ -49,7 +50,7 @@
   </table></div>
   <p class="meta" id="fac-disc" style="margin-top:8px"></p>
 
-  <h2 class="ov-sechead">🛢️ Oil &amp; gas permit pipeline <span class="meta" id="dep-src"></span></h2>
+  <h2 class="ov-sechead">Oil &amp; gas permit pipeline <span class="meta" id="dep-src"></span></h2>
   <p class="meta" style="margin:-6px 0 10px">What's <b>coming</b> — new oil &amp; gas wells being requested, approved, or built
      across West Virginia, from the <a href="https://tagis.dep.wv.gov" target="_blank" rel="noopener">WV DEP</a>
      permit database. The forward-looking complement to the compliance view above.
@@ -71,7 +72,7 @@
   </table></div>
   <p class="meta" id="dep-disc" style="margin-top:8px"></p>
 
-  <h2 class="ov-sechead">⛏️ Mining permits <span class="meta" id="mine-src"></span></h2>
+  <h2 class="ov-sechead">Mining permits <span class="meta" id="mine-src"></span></h2>
   <p class="meta" style="margin:-6px 0 10px">Active and upcoming coal &amp; mineral mining across West Virginia, from the
      <a href="https://tagis.dep.wv.gov" target="_blank" rel="noopener">WV DEP</a> Division of Mining &amp; Reclamation —
      with disturbed vs. reclaimed acreage where reported. Released/revoked historical permits are excluded.</p>
@@ -92,7 +93,7 @@
   </table></div>
   <p class="meta" id="mine-disc" style="margin-top:8px"></p>
 
-  <h2 class="ov-sechead">💧 Coal &amp; water — mine discharge permits <span class="meta" id="coal-src"></span></h2>
+  <h2 class="ov-sechead">Coal &amp; water — mine discharge permits <span class="meta" id="coal-src"></span></h2>
   <p class="meta" style="margin:-6px 0 10px">Where mining meets water: WV coal mines that hold <b>NPDES permits</b> to discharge
      into streams (mine drainage, iron/manganese, selenium, conductivity). Each row is one permit's
      discharge system — see it on the <a href="/water">Water map</a> (toggle "⛏️ Coal discharge").
@@ -115,8 +116,8 @@
   <div class="about"><p class="meta" id="src-disc"></p></div>
 </div>
 
-<div class="modal" id="srcdetail"><div class="modalbox srcbox">
-  <h3><span id="sd-name">Facility</span> <button class="x" id="sd-close" type="button">×</button></h3>
+<div class="modal" id="srcdetail" role="dialog" aria-modal="true" aria-labelledby="sd-name"><div class="modalbox srcbox">
+  <h3><span id="sd-name">Facility</span> <button class="x" id="sd-close" type="button" aria-label="Close">×</button></h3>
   <div id="sd-compliance" class="sd-compliance" style="display:none"></div>
   <div class="sd-imgwrap" id="sd-imgwrap"></div>
   <span class="sd-chip" id="sd-cat"></span>
@@ -131,7 +132,7 @@
     <div id="sd-permit" class="meta"></div></div>
   <div class="sd-section"><b>Air sensors nearby</b>
     <table class="sd-sensors"><tbody id="sd-sensors"></tbody></table>
-    <a id="sd-analysis" class="meta" href="#">Open the source-proximity view in Air →</a></div>
+    <a id="sd-analysis" class="meta" href="#">Open the facility-proximity view in Air →</a></div>
   <div class="sd-section"><b>Water quality nearby</b>
     <div id="sd-water" class="meta">…</div></div>
   <div class="sd-section"><b>Concerned about this place?</b>

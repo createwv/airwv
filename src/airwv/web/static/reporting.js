@@ -8,9 +8,21 @@
   let reportStart = 0, reportLoc = null, reportArea = null, tmpLocMarker = null, photoData = null;
   const theMap = () => window.AIRWV_MAP || null;
 
-  const openReport = () => { reportStart = reportStart || Date.now(); $('reportmodal').classList.add('on'); };
-  const openFeedback = () => $('feedbackmodal').classList.add('on');
-  const close = id => $(id).classList.remove('on');
+  // Open a modal and move focus into it; closing hands focus back to whatever opened it.
+  let opener = null;
+  const show = id => {
+    if (!$(id).classList.contains('on')) opener = document.activeElement;
+    $(id).classList.add('on');
+    const first = $(id).querySelector('select, input:not([type=hidden]):not(.hp), textarea');
+    if (first) first.focus();
+  };
+  const close = id => {
+    $(id).classList.remove('on');
+    if (opener && opener.isConnected) opener.focus();
+    opener = null;
+  };
+  const openReport = () => { reportStart = reportStart || Date.now(); show('reportmodal'); };
+  const openFeedback = () => show('feedbackmodal');
 
   // Public hook: open the report modal pre-filled and pre-located — used by the
   // "report this well" link on abandoned-well popups (no map-pick needed).
@@ -22,7 +34,7 @@
     if (opts.domain && $('r-domain')) $('r-domain').value = opts.domain;
     if (opts.category) $('r-category').value = opts.category;
     if (opts.description) $('r-desc').value = opts.description;
-    $('reportmodal').classList.add('on');
+    show('reportmodal');
   };
 
   function resetReportForm() {
@@ -65,7 +77,7 @@
     if (!m) { $('r-locinfo').textContent = 'No map here — use "Use my location" or type an address.'; return; }
     $('r-locinfo').textContent = 'now click the map to drop a pin…';
     close('reportmodal');
-    m.once('click', e => { setLocation(e.latlng.lat, e.latlng.lng); $('reportmodal').classList.add('on'); });
+    m.once('click', e => { setLocation(e.latlng.lat, e.latlng.lng); show('reportmodal'); });
   }
 
   async function findAddress() {
@@ -192,7 +204,11 @@
     $('r-submit').addEventListener('click', submitReport);
     $('f-submit').addEventListener('click', submitFeedback);
     document.querySelectorAll('.modal').forEach(m =>
-      m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); }));
+      m.addEventListener('click', e => { if (e.target === m) close(m.id); }));
+    document.addEventListener('keydown', e => {
+      const open = document.querySelector('#reportmodal.on, #feedbackmodal.on');
+      if (e.key === 'Escape' && open) close(open.id);
+    });
     // deep links, e.g. /air#report and /air#feedback
     if (location.hash === '#report') openReport();
     else if (location.hash === '#feedback') openFeedback();

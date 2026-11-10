@@ -15,26 +15,34 @@ from __future__ import annotations
 
 import base64
 import html
+import math
 import os
 import re
 import secrets
 import statistics
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+from urllib.parse import quote, urlencode
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from airwv import dumps
+from airwv.alerts import RECORD_RULES, is_record_sub
 from airwv.analysis import detrend_events, hour_of_day_profile
-from airwv.export_utils import readings_to_csv
+from airwv.export_utils import (query_records_to_csv, query_series_to_csv, query_sites_to_csv,
+                                readings_to_csv)
 from airwv.notify.chat import chat_notifier_from_env
 from airwv.notify.email import email_enabled, send_email
 from airwv.reporting import DOMAINS, client_ip, ip_hash, jitter, load_facility_triggers, screen
 from airwv.storage import Store
+from airwv.web.public_api import PublicDataMiddleware
+from airwv.wvgeo import WV_COUNTY_CENTROID, county_names
 
 TEMPLATES = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
@@ -51,6 +59,63 @@ def _asset_version() -> str:
 
 
 TEMPLATES.env.globals["asset_v"] = _asset_version()
+
+VENDOR_DIR = Path(__file__).parent / "static" / "vendor"
+
+
+def _vendor(name: str, cdn: str) -> str:
+    """URL for a third-party lib: the pinned self-hosted copy in static/vendor/ when it's
+    there (see static/vendor/README.md), else the CDN — so a checkout without the copies
+    still works."""
+    return f"/static/vendor/{name}" if (VENDOR_DIR / name).is_file() else cdn
+
+
+TEMPLATES.env.globals["vendor"] = _vendor
+
+
+def _parse_bbox(bbox: str | None) -> tuple[float, float, float, float] | None:
+    """``bbox=west,south,east,north`` (lon/lat degrees, the GeoJSON/OGC order) → a tuple,
+    or None when absent. 400 on anything malformed."""
+    if not bbox:
+        return None
+    try:
+        w, s, e, n = (float(v) for v in bbox.split(","))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="bbox is west,south,east,north")
+    if w > e or s > n:
+        raise HTTPException(status_code=400, detail="bbox is west,south,east,north")
+    return w, s, e, n
+
+
+def _in_bbox(lat, lon, box: tuple[float, float, float, float]) -> bool:
+    return lat is not None and lon is not None and box[0] <= lon <= box[2] and box[1] <= lat <= box[3]
+
+
+# Heavy, slow-changing JSON (hourly collectors, monthly layer refreshes): let browsers and
+# Cloudflare reuse it briefly instead of refetching megabytes on every page view.
+_SHORT_CACHE = {"Cache-Control": "public, max-age=60"}
+_LAYER_CACHE = {"Cache-Control": "public, max-age=600"}
+
+# site kinds of the read model's `site` view -> the plain label a site page shows
+# (docs/GLOSSARY.md); each has a page at /site/<kind>/<ref>
+SITE_KINDS = {
+    "well": "Gas well", "facility": "Facility", "permit": "Permit", "spill_report": "Reported spill",
+    "water_system": "Water system", "reference_monitor": "Monitor", "sensor": "Sensor",
+    "gauge": "Gauge", "sample_site": "Sample site", "data_center": "Data center",
+}
+
+# record kinds of the `record` view -> what a site page calls them
+SITE_RECORD_LABELS = {
+    "orphan": "Orphan well (state list)", "violation": "EPA ECHO violation status",
+    "compliance_status": "EPA ECHO compliance status", "impaired_303d": "Receiving stream impaired (303(d) list) for",
+    "permit_stage": "Permit stage", "spill": "Reported to the National Response Center",
+    "health_violation": "Health-based drinking-water violation", "project_status": "Project status",
+}
+
+
+def site_page_url(kind: str, ref) -> str:
+    """The site page of one site: ``/site/<kind>/<ref>`` (ref URL-quoted)."""
+    return f"/site/{kind}/{quote(str(ref), safe='')}"
 
 
 class ReportReadingIn(BaseModel):
@@ -182,22 +247,49 @@ ALERT_LEVELS = {
 
 # Per-metric thresholds by severity level. PM2.5 mirrors ALERT_LEVELS (µg/m³).
 # VOC is the community relative gas index; ozone is EPA ppb (8-hr AQI-ish bands).
-# "water" and "spills" are proximity advisories with no numeric sensor field yet —
-# captured as intent (waitlist) and skipped by the matcher until those feeds fire.
+# "water", "spills" and "violations" are record alerts (alerts.RECORD_RULES): they fire
+# when a record is new for the place, whatever the level, so their thresholds are 0.
 METRIC_THRESHOLDS = {
     "pm2_5": {"sensitive": 35.0, "unhealthy": 55.0, "veryunhealthy": 150.0},
     "voc":   {"sensitive": 250.0, "unhealthy": 500.0, "veryunhealthy": 1000.0},
     "ozone": {"sensitive": 70.0, "unhealthy": 85.0, "veryunhealthy": 105.0},
     "water":  {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
     "spills": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
+    "violations": {"sensitive": 0.0, "unhealthy": 0.0, "veryunhealthy": 0.0},
 }
+ADMIN_HISTORY_CAP = 50   # records/sends listed per subscription in the admin view
 METRIC_LABELS = {
     "pm2_5": "PM2.5 (fine particles)", "voc": "VOC (community gas index)",
-    "ozone": "Ozone (EPA)", "water": "Water advisories near me",
-    "spills": "Reported spills near me",
+    "ozone": "Ozone (EPA)", "water": "Drinking-water violations near me",
+    "spills": "Reported spills near me", "violations": "Facility violations near me",
 }
-# metrics that don't yet have a live matcher (delivery captured as waitlist)
-WAITLIST_METRICS = {"water", "spills"}
+
+# Site kinds with measurements: /site/<kind>/<ref> charts the last N days up to the site's
+# latest reading (monitors' AirData history is daily, so a month; sample sites are visited
+# weeks apart, so a year); label and data source per kind, in docs/GLOSSARY.md's words.
+SERIES_KINDS = {"sensor": 7, "reference_monitor": 30, "gauge": 7, "sample_site": 365}
+SERIES_KIND_LABELS = {
+    "sensor": ("Sensor", "a community air device; provisional readings, corrected where we can",
+               "PurpleAir"),
+    "reference_monitor": ("Monitor", "an EPA / WV DEP reference air monitor",
+                          "EPA AirData / AQS"),
+    "gauge": ("Gauge", "a USGS stream gauge, near real time", "USGS Water Services"),
+    "sample_site": ("Sample site", "water samples taken and lab-tested at intervals, not live",
+                    "Water Quality Portal (WQP)"),
+}
+
+# /site/permit/<ref>: the three permit layers -> (what it is, data source, raw API); the stage
+# words match the map legends (app.js DEP_LABEL / MINE_LABEL)
+PERMIT_LAYERS = {
+    "coal_npdes": ("Coal-mine water discharge permit (NPDES)", "WV DEP Coal NPDES", "/api/coal-npdes"),
+    "dep_mining": ("Mining permit", "WV DEP Division of Mining & Reclamation", "/api/dep-mining"),
+    "dep_permits": ("Oil & gas well permit", "WV DEP Office of Oil & Gas", "/api/dep-permits"),
+}
+PERMIT_STAGE_LABELS = {
+    "requested": "Requested (pending)", "approved": "Approved (permit issued)",
+    "construction": "Under construction", "new": "New / not yet started",
+    "active": "Active / renewed", "inactive": "Inactive (idle)",
+}
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -222,6 +314,7 @@ def _IN_WV_REGION(lat: float, lon: float) -> bool:
 # Fields community sensors measure — the ones that make sense to roll up by area
 # (ozone/aqi are reference-only or derived, so they're excluded from area rollups).
 AREA_FIELDS = {"pm2_5", "pm1_0", "pm10", "voc", "temperature", "humidity"}
+AREA_PM_MAX = 1000.0    # µg/m³; PM readings over this stay out of the per-area rollups
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -304,8 +397,25 @@ def _ozone_color(value: float | None) -> str:
     return "#7e0023"
 
 
+def _listing_names() -> dict[str, str]:
+    """Map sensor id -> name from the resolved public listing, best-effort."""
+    try:
+        import json
+
+        cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
+        listing = Path(cache).with_name("wv_public_sensors.json")
+        return {str(r["sensor_index"]): r["name"] for r in json.loads(listing.read_text(encoding="utf-8"))
+                if r.get("sensor_index") is not None and r.get("name")}
+    except Exception:
+        return {}
+
+
 def _index_to_name() -> dict[str, str]:
-    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort."""
+    """Map stored sensor ids (PurpleAir indices) to friendly names, best-effort.
+
+    Registry names first. The private registry is absent from worktrees and fresh clones,
+    so the public listing it was matched against (same names) covers those.
+    """
     try:
         from airwv.registry import load_wv_sensors
         from airwv.resolve import load_index_map
@@ -313,7 +423,9 @@ def _index_to_name() -> dict[str, str]:
         cache = os.environ.get("AIRWV_INDEX_CACHE", "").strip() or "data/sensor_index_map.json"
         index_map = load_index_map(Path(cache))
         name_by_device = {s.device_id: s.name for s in load_wv_sensors()}
-        return {str(idx): name_by_device.get(dev, str(idx)) for dev, idx in index_map.items()}
+        listed = _listing_names()
+        return {str(idx): name_by_device.get(dev) or listed.get(str(idx), str(idx))
+                for dev, idx in index_map.items()}
     except Exception:
         return {}
 
@@ -375,15 +487,44 @@ def _index_to_coords() -> dict[str, tuple[float, float]]:
 
 def create_app(store: Store) -> FastAPI:
     app = FastAPI(title="AirWV Dashboard")
+    # gzip JSON/HTML/JS/CSS: the big layers (/api/abandoned-wells, /api/water/sites) are
+    # mostly repeated keys and shrink ~8-10×
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # added last so it runs first: a 429 costs no route work (limits are requests/minute per client)
+    app.add_middleware(PublicDataMiddleware, limits={
+        "api": int(os.environ.get("AIRWV_RATE_LIMIT_API", "").strip() or "300"),
+        "dumps": int(os.environ.get("AIRWV_RATE_LIMIT_DUMPS", "").strip() or "30")})
     names = _index_to_name()
     coords = _index_to_coords()
     regions = _index_to_region()
     airnow_names = _airnow_meta()
+    # community sensors join the read model's `site` view (resolved listing, WV regions only;
+    # `region` is the /api/query area; a sensor without listed coords still counts in its area)
+    store.read_model.set_layer("community_sensors", [
+        {"sid": sid, "lat": coords.get(sid, (None, None))[0], "lon": coords.get(sid, (None, None))[1],
+         "name": names.get(sid, sid), "region": region or "Other"}
+        for sid, region in regions.items()],
+        source="PurpleAir public listing (resolved)")
     facility_triggers = load_facility_triggers(Path(__file__).parent.parent / "data" / "sources.json")
     notifier = chat_notifier_from_env()   # Slack/Discord webhooks (env); disabled if unset
 
+    _sensors_cache: dict = {}
+
     @app.get("/api/sensors")
-    def sensors():
+    def sensors(response: Response):
+        # Every page fetches this (~0.8s uncached on prod); collectors run hourly, so a
+        # 60s cache costs nothing in freshness.
+        import time as _t
+
+        response.headers.update(_SHORT_CACHE)
+        hit = _sensors_cache.get("v")
+        if hit and _t.time() - hit[0] < 60:
+            return hit[1]
+        out = _sensors_uncached()
+        _sensors_cache["v"] = (_t.time(), out)
+        return out
+
+    def _sensors_uncached() -> list[dict]:
         # SQL aggregation instead of loading every row (was O(all rows) per sensor).
         coverage = store.sensor_coverage()
         latest = store.latest_value_per_sensor("pm2_5")
@@ -490,110 +631,267 @@ def create_app(store: Store) -> FastAPI:
         """Everything potentially health-relevant near a point — the 'what's around me
         and could it explain how I feel?' aggregation across all our layers. Each hazard
         carries a broad category (gas / air / water / chemical / sensor) the UI matches
-        to symptoms. Not medical advice."""
+        to symptoms. Not medical advice. Reads the unified views (site / measurement /
+        record, storage/readmodel.py); tests/snapshots/api_near.json pins the output.
+        ``link`` is the data source's own record; ``page`` is the site's /site/<kind>/<ref>."""
         km = min(max(km, 1.0), 25.0)
         radius_mi = km * 0.621371
+        rm = store.read_model
 
-        def near_pts(items, cap, make, latk="lat", lonk="lon"):
-            out = []
-            for it in items:
-                la, lo = it.get(latk), it.get(lonk)
-                if la is None or lo is None:
-                    continue
-                d = _hav_mi(lat, lon, la, lo)
-                if d <= radius_mi:
-                    out.append((d, it))
-            out.sort(key=lambda x: x[0])
-            return [make(it, round(d, 1)) for d, it in out[:cap]]
+        def flags(conn, sites):
+            recs = rm.records_for(conn, [s["site_id"] for s in sites])
+            return [(s, {r["kind"] for r in recs.get(s["site_id"], [])}) for s in sites]
 
-        haz: list[dict] = []
+        with rm.connect() as conn:
+            def near_pts(layer, cap, make):
+                sites = rm.sites_near(conn, lat, lon, radius_mi, layer=layer, limit=cap)
+                return [{**make(s, s["attrs"], f, round(s["d"], 1)), "page": site_page_url(s["kind"], s["ref"])}
+                        for s, f in flags(conn, sites)]
 
-        # abandoned / orphan gas wells → gas (H2S / natural gas)
-        haz += near_pts(_data_json("abandoned_wells.json").get("wells", []), 12, lambda w, d: {
-            "category": "gas", "icon": "🛢️",
-            "label": ("Orphan" if w.get("orphan") else "Abandoned") + " gas well",
-            "detail": (f"{w['nearest_building_m']} m from a building" if w.get("near_homes")
-                       else (w.get("county") and f"{w['county']} County")),
-            "flag": "orphan" if w.get("orphan") else None, "mi": d, "lat": w["lat"], "lon": w["lon"],
-            "link": f"http://www.wvgs.wvnet.edu/oginfo/pipeline/pipeline2.asp?txtsearchapi=47{(w.get('id') or '').replace('-', '')}",
-            "report": True})
+            haz: list[dict] = []
 
-        # EPA ECHO major facilities → air or water by program; violations flagged
-        def _fac(f, d):
-            water = any(p in (f.get("programs") or []) for p in ("water", "drinking-water"))
-            return {"category": "water" if water and "air" not in (f.get("programs") or []) else "air",
-                    "icon": "⚖️", "label": f.get("name"),
-                    "detail": (f.get("compliance_status") or "").strip() or "regulated facility",
-                    "flag": "violation" if f.get("status") in ("significant_violation", "violation") else None,
-                    "mi": d, "lat": f["lat"], "lon": f["lon"], "link": f.get("echo_url"), "report": True}
-        haz += near_pts(_data_json("echo_facilities.json").get("facilities", []), 8, _fac)
+            # abandoned / orphan gas wells → gas (H2S / natural gas)
+            haz += near_pts("abandoned_wells", 12, lambda s, w, f, d: {
+                "category": "gas", "icon": "🛢️",
+                "label": ("Orphan" if "orphan" in f else "Abandoned") + " gas well",
+                "detail": (f"{w['nearest_building_m']} m from a building" if w.get("near_homes")
+                           else (s["county"] and f"{s['county']} County")),
+                "flag": "orphan" if "orphan" in f else None, "mi": d, "lat": s["lat"], "lon": s["lon"],
+                "link": s["url"], "report": True})
 
-        # curated TRI / documented pollution sources → air/chemical
-        haz += near_pts(_data_json("sources.json").get("sources", []), 8, lambda s, d: {
-            "category": "air", "icon": "🏭", "label": s.get("name"),
-            "detail": s.get("type") or s.get("operator"), "flag": None, "mi": d,
-            "lat": s["lat"], "lon": s["lon"], "link": f"/sources#facility={s.get('name', '')}", "report": True})
+            # EPA ECHO major facilities → air or water by program; violations flagged
+            haz += near_pts("echo_facilities", 8, lambda s, a, f, d: {
+                "category": s["medium"], "icon": "⚖️", "label": s["name"],
+                "detail": (a.get("compliance_status") or "").strip() or "regulated facility",
+                "flag": "violation" if "violation" in f else None,
+                "mi": d, "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": True})
 
-        # coal-mine water discharges → water
-        haz += near_pts(_data_json("coal_npdes.json").get("permits", []), 6, lambda p, d: {
-            "category": "water", "icon": "⛏️", "label": f"Coal discharge — {p.get('operator')}",
-            "detail": (f"impaired for {', '.join(p.get('impairment_causes', [])[:2])}"
-                       if p.get("impaired") else f"{p.get('outlets')} outlets"),
-            "flag": "impaired" if p.get("impaired") else None, "mi": d,
-            "lat": p["lat"], "lon": p["lon"], "link": p.get("effluent_url"), "report": False})
+            # curated TRI / documented pollution sources → air/chemical
+            haz += near_pts("sources", 8, lambda s, a, f, d: {
+                "category": "air", "icon": "🏭", "label": s["name"],
+                "detail": a.get("type") or a.get("operator"), "flag": None, "mi": d,
+                "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": True})
 
-        # active mining permits → air (dust) / land
-        haz += near_pts(_data_json("dep_mining.json").get("mines", []), 6, lambda m, d: {
-            "category": "air", "icon": "⛏️", "label": f"{m.get('type') or 'Mining'} — {m.get('operator')}",
-            "detail": (f"{m.get('acres_disturbed')} acres disturbed" if m.get("acres_disturbed") else m.get("permit_status")),
-            "flag": None, "mi": d, "lat": m["lat"], "lon": m["lon"], "link": None, "report": True})
+            # coal-mine water discharges → water
+            haz += near_pts("coal_npdes", 6, lambda s, p, f, d: {
+                "category": "water", "icon": "⛏️", "label": f"Coal discharge — {p.get('operator')}",
+                "detail": (f"impaired for {', '.join(p.get('impairment_causes', [])[:2])}"
+                           if "impaired_303d" in f else f"{p.get('outlets')} outlets"),
+                "flag": "impaired" if "impaired_303d" in f else None, "mi": d,
+                "lat": s["lat"], "lon": s["lon"], "link": s["url"], "report": False})
 
-        # NRC reported spills → chemical (and water when they reached water)
-        haz += near_pts(_data_json("nrc_spills.json").get("spills", []), 6, lambda s, d: {
-            "category": "water" if s.get("reached_water") else "chemical", "icon": "🛢️",
-            "label": "Reported spill — " + (", ".join(m["name"] for m in s.get("materials", [])[:2]) or "release"),
-            "detail": f"{s.get('date') or ''}{' · reached water' if s.get('reached_water') else ''}".strip(" ·"),
-            "flag": "spill", "mi": d, "lat": s["lat"], "lon": s["lon"],
-            "link": "https://nrc.uscg.mil/", "report": False})
+            # active mining permits → air (dust) / land
+            haz += near_pts("dep_mining", 6, lambda s, m, f, d: {
+                "category": "air", "icon": "⛏️", "label": f"{m.get('type') or 'Mining'} — {m.get('operator')}",
+                "detail": (f"{m.get('acres_disturbed')} acres disturbed" if m.get("acres_disturbed")
+                           else m.get("permit_status")),
+                "flag": None, "mi": d, "lat": s["lat"], "lon": s["lon"], "link": None, "report": True})
 
-        # community sensors → sensor (VOC / PM2.5 right now)
-        latest_pm = store.latest_value_per_sensor("pm2_5")
-        latest_voc = store.latest_value_per_sensor("voc")
-        sensor_items = [{"sid": sid, "lat": c[0], "lon": c[1]} for sid, c in coords.items() if sid in regions]
-        haz += near_pts(sensor_items, 4, lambda s, d: {
-            "category": "sensor", "icon": "📡", "label": names.get(s["sid"], s["sid"]) + " sensor",
-            "detail": " · ".join(x for x in [
-                (latest_pm.get(s["sid"]) is not None and f"PM2.5 {round(latest_pm[s['sid']], 1)}"),
-                (latest_voc.get(s["sid"]) is not None and f"VOC {round(latest_voc[s['sid']], 0):g}")] if x) or "community sensor",
-            "flag": None, "mi": d, "lat": s["lat"], "lon": s["lon"],
-            "link": "/air", "report": False})
+            # NRC reported spills → chemical (and water when they reached water)
+            haz += near_pts("nrc_spills", 6, lambda s, a, f, d: {
+                "category": "water" if s["medium"] == "water" else "chemical", "icon": "🛢️",
+                "label": "Reported spill — " + (", ".join(m["name"] for m in a.get("materials", [])[:2])
+                                                or "release"),
+                "detail": f"{a.get('date') or ''}{' · reached water' if a.get('reached_water') else ''}".strip(" ·"),
+                "flag": "spill", "mi": d, "lat": s["lat"], "lon": s["lon"],
+                "link": s["url"], "report": False})
 
-        # measured water sample sites → water
-        for s in store.water_near(lat, lon, km=km, limit=4):
-            keys = [k for k in ("selenium", "iron", "manganese", "sulfate", "conductance", "ph", "ecoli") if k in s.get("latest", {})]
-            haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
-                        "detail": ", ".join(f"{k} {s['latest'][k]['value']}" for k in keys[:3]) or "sample site",
-                        "flag": None, "mi": s["mi"], "lat": s["lat"], "lon": s["lon"],
-                        "link": "/water", "report": False})
+            # community sensors → sensor (VOC / PM2.5 right now)
+            sensors = rm.sites_near(conn, lat, lon, radius_mi, layer="community_sensors", limit=4)
+            refs = [s["ref"] for s in sensors]
+            latest_pm = rm.latest(conn, "air", refs, "pm2_5")
+            latest_voc = rm.latest(conn, "air", refs, "voc")
+            for s in sensors:
+                pm = latest_pm.get(s["ref"], {}).get("pm2_5", {}).get("value")
+                voc = latest_voc.get(s["ref"], {}).get("voc", {}).get("value")
+                haz.append({
+                    "category": "sensor", "icon": "📡", "label": s["name"] + " sensor",
+                    "detail": " · ".join(x for x in [
+                        (pm is not None and f"PM2.5 {round(pm, 1)}"),
+                        (voc is not None and f"VOC {round(voc, 0):g}")] if x) or "community sensor",
+                    "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
+                    "link": "/air", "report": False, "page": site_page_url(s["kind"], s["ref"])})
 
-        # drinking-water systems with a health-based violation in the nearest county → water
-        from airwv.wvgeo import WV_COUNTY_CENTROID
-        near_county = min(WV_COUNTY_CENTROID,
-                          key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
-        if near_county:
-            for sy in _data_json("sdwa_systems.json").get("systems", []):
-                if sy.get("county") == near_county and sy.get("health_violation"):
-                    haz.append({"category": "water", "icon": "🚰",
-                                "label": f"{sy.get('name')} (water system)",
-                                "detail": f"health-based SDWA violation · serves {sy.get('population')}",
-                                "flag": "violation", "mi": None, "lat": sy.get("lat"), "lon": sy.get("lon"),
-                                "link": sy.get("dfr_url"), "report": False})
+            # measured water sample sites → water
+            wsites = rm.sites_near(conn, lat, lon, radius_mi, layer="water_readings", limit=10_000, bbox_km=km)
+            wsites = sorted(wsites, key=lambda s: (round(s["d"], 1), s["ref"]))[:4]   # nearest by 0.1 mi
+            wlatest = rm.latest(conn, "water", [s["ref"] for s in wsites])
+            for s in wsites:
+                latest = wlatest.get(s["ref"], {})
+                keys = [k for k in ("selenium", "iron", "manganese", "sulfate", "conductance", "ph", "ecoli")
+                        if k in latest]
+                haz.append({"category": "water", "icon": "💧", "label": s["name"] + " (water sample)",
+                            "detail": ", ".join(f"{k} {latest[k]['value']}" for k in keys[:3]) or "sample site",
+                            "flag": None, "mi": round(s["d"], 1), "lat": s["lat"], "lon": s["lon"],
+                            "link": "/water", "report": False, "page": site_page_url(s["kind"], s["ref"])})
+
+            # drinking-water systems with a health-based violation in the nearest county → water
+            from airwv.wvgeo import WV_COUNTY_CENTROID
+            near_county = min(WV_COUNTY_CENTROID,
+                              key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
+            if near_county:
+                systems = rm.sites(conn, layer="sdwa_systems", where="county = :c", params={"c": near_county})
+                for sy, f in flags(conn, systems):
+                    if "health_violation" in f:
+                        haz.append({"category": "water", "icon": "🚰",
+                                    "label": f"{sy['name']} (water system)",
+                                    "detail": f"health-based SDWA violation · serves {sy['attrs'].get('population')}",
+                                    "flag": "violation", "mi": None, "lat": sy["lat"], "lon": sy["lon"],
+                                    "link": sy["url"], "report": False,
+                                    "page": site_page_url(sy["kind"], sy["ref"])})
 
         cats: dict = defaultdict(int)
         for h in haz:
             cats[h["category"]] += 1
         return {"lat": lat, "lon": lon, "km": km, "county": near_county,
                 "hazards": haz, "counts": dict(cats)}
+
+    @app.get("/api/query")
+    def query(lat: float | None = None, lon: float | None = None, km: float = 8.0,
+              kind: str | None = None, medium: str | None = None, area: str | None = None,
+              county: str | None = None, param: str | None = None, since: str | None = None,
+              from_: str | None = Query(None, alias="from"), to: str | None = None,
+              over: float | None = None, site_id: str | None = None, limit: int | None = None,
+              format: str = "json", show: str = "sites"):
+        """One read path over the unified views: sites near a place (``kind`` is a comma
+        list: well, facility, permit, spill_report, water_system, reference_monitor,
+        sensor, gauge, sample_site, data_center; ``medium`` air / water / land; ``area`` a
+        county or a WV region, with or without a point; ``county`` a comma list of WV
+        counties, matching the county a site's own data lists, so sites with none listed,
+        like sensors and gauges, drop out), each with its records, its latest
+        ``param`` value when it has measurements (``param`` may be a comma list: the first
+        one the site has wins; ``from`` / ``to``, YYYY-MM-DD inclusive, bound which
+        measurements count), and the provenance of every layer it came from. ``since``
+        (YYYY-MM-DD) adds "what changed": a ``changes`` list of records dated on/after it
+        and each measured site's ``peak`` of the first ``param`` since then (up to ``to``).
+        ``over`` (needs ``param``) keeps only sites whose latest value is above it, before
+        ``limit`` applies; in series mode, only the rows above it.
+        ``km`` is capped at 25 mi. ``format=csv`` returns the same answer as a CSV file: one
+        row per site, or with ``show=records`` one row per record (only those dated on/after
+        ``since`` when it's given). Series mode: ``site_id`` (one site, ``kind:ref``) + one
+        ``param`` + optional ``from`` / ``to`` returns that site's measurement rows, oldest
+        first (the newest ``limit``, default 5000, at most 20000), and a ``csv`` link to the
+        same rows; the place filters don't apply. Powers /explore. See docs/READ-MODEL.md."""
+        km = min(max(km, 1.0), 40.25)
+        kinds = [k.strip() for k in kind.split(",") if k.strip()] if kind else None
+        params = [p.strip() for p in param.split(",") if p.strip()] if param else []
+        area = (area or "").strip() or None
+        point = lat is not None and lon is not None
+        site_id = (site_id or "").strip() or None
+        counties = []
+        for c in (county or "").split(","):
+            if c.strip():
+                if not county_names(c):
+                    raise HTTPException(status_code=400, detail=f"not a WV county: {c.strip()}")
+                counties += county_names(c)
+        if not point and not area and not counties and not site_id:
+            raise HTTPException(status_code=400, detail="give lat and lon, an area, a county, or a site_id")
+        if over is not None and (not params or not math.isfinite(over)):
+            raise HTTPException(status_code=400, detail="over needs a param and a finite number")
+        dates = {}
+        for name, val in (("since", since), ("from", from_), ("to", to)):
+            if val is not None:
+                try:
+                    dates[name] = date.fromisoformat(val[:10]).isoformat()
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"{name} must be YYYY-MM-DD")
+        since, from_, to = dates.get("since"), dates.get("from"), dates.get("to")
+        if format not in ("json", "csv") or show not in ("sites", "records"):
+            raise HTTPException(status_code=400, detail="format is json or csv; show is sites or records")
+        if site_id:
+            return _query_series(site_id, params, from_, to, limit, format, over)
+        limit = min(max(100 if limit is None else limit, 1), 500)
+        rm = store.read_model
+        with rm.connect() as conn:
+            # `over` is decided on values, so it reads every measured site and limits afterwards
+            measured = ["sensor", "reference_monitor", "gauge", "sample_site"]
+            sites = rm.sites_near(conn, lat if point else None, lon if point else None, km * 0.621371,
+                                  kinds=(kinds or measured) if over is not None else kinds,
+                                  medium=medium, area=area, county=counties,
+                                  limit=-1 if over is not None else limit)
+
+            def refs(med):
+                return [s["ref"] for s in sites if s["medium"] == med and s["kind"] in measured]
+
+            def newest(s):
+                by_param = latest.get(s["medium"], {})
+                return next(({**by_param[p][s["ref"]][p], "parameter": p} for p in params
+                             if s["ref"] in by_param.get(p, {})), None)
+
+            def is_over(s):
+                value = (newest(s) or {}).get("value")
+                return value is not None and value > over
+
+            latest: dict = {}
+            peaks: dict = {}
+            for med in ("air", "water") if params else ():
+                latest[med] = {p: rm.latest(conn, med, refs(med), p, since=from_, until=to) for p in params}
+            if over is not None:
+                sites = [s for s in sites if is_over(s)][:limit]
+            for med in ("air", "water") if params and since else ():
+                peaks[med] = rm.peak(conn, med, refs(med), params[0], max(since, from_ or since), until=to)
+            recs = rm.records_for(conn, [s["site_id"] for s in sites])
+            prov = rm.provenance(conn, sorted({s["layer"] for s in sites}))
+        out, changes = [], []
+        for s in sites:
+            row = {k: s[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
+                                     "lat", "lon", "county", "url")}
+            row["mi"] = round(s["d"], 2) if s["d"] is not None else None
+            row["records"] = recs.get(s["site_id"], [])
+            if params:
+                row["latest"] = newest(s)
+            if since:
+                pk = peaks.get(s["medium"], {}).get(s["ref"])
+                if params:
+                    row["peak"] = pk and {**pk, "parameter": params[0]}
+                changes += [{"site_id": s["site_id"], "site_kind": s["kind"], "name": s["name"],
+                             "medium": s["medium"], "mi": row["mi"], **r}
+                            for r in row["records"] if (r["effective"] or "")[:10] >= since]
+            out.append(row)
+        body = {"place": {"lat": lat, "lon": lon, "km": km} if point else None,
+                "filters": {"kind": kinds, "medium": medium, "area": area, "county": counties or None,
+                            "param": param, "over": over, "since": since, "from": from_, "to": to,
+                            "limit": limit},
+                "count": len(out), "sites": out, "provenance": prov}
+        if since:
+            body["changes"] = sorted(changes, key=lambda c: c["effective"], reverse=True)
+        if format == "csv":
+            if show == "records":
+                text = query_records_to_csv(body["changes"] if since else [
+                    {"site_id": s["site_id"], "site_kind": s["kind"], "name": s["name"],
+                     "medium": s["medium"], "mi": s["mi"], **r} for s in out for r in s["records"]])
+            else:
+                text = query_sites_to_csv(out)
+            return Response(content=text, media_type="text/csv", headers={
+                "Content-Disposition": f'attachment; filename="airwv_query_{show}.csv"'})
+        return body
+
+    def _query_series(site_id, params, from_, to, limit, format, over):
+        """/api/query series mode: one site's measurement rows of one parameter."""
+        if len(params) != 1:
+            raise HTTPException(status_code=400, detail="series mode takes exactly one param")
+        param = params[0]
+        limit = min(max(5000 if limit is None else limit, 1), 20000)
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, site_id)
+            if site is None:
+                raise HTTPException(status_code=404, detail="no site with that site_id")
+            rows, truncated = rm.series(conn, site["medium"], site["ref"], param,
+                                        since=from_, until=to, limit=limit, over=over)
+            prov = rm.provenance(conn, [site["layer"]])
+        if format == "csv":
+            return Response(content=query_series_to_csv(site, param, rows), media_type="text/csv",
+                            headers={"Content-Disposition": 'attachment; filename="airwv_query_series.csv"'})
+        q = {"site_id": site_id, "param": param, "from": from_, "to": to, "over": over}
+        csv_url = "/api/query?" + urlencode({k: v for k, v in q.items() if v is not None}
+                                            | {"limit": limit, "format": "csv"})
+        return {"mode": "series",
+                "site": {k: site[k] for k in ("site_id", "kind", "medium", "layer", "ref", "name",
+                                              "lat", "lon", "county", "url")},
+                "filters": {**q, "limit": limit},
+                "count": len(rows), "truncated": truncated, "rows": rows, "csv": csv_url,
+                "provenance": prov}
 
     @app.get("/api/data-catalog")
     def data_catalog():
@@ -652,6 +950,11 @@ def create_app(store: Store) -> FastAPI:
             {"name": "National Response Center", "category": "Events", "org": "US Coast Guard",
              "access": "annual .xlsx", "keyless": True, "record": "reported oil/chemical spills",
              "url": "https://nrc.uscg.mil/", "api": "/api/nrc-spills", **meta("nrc_spills.json", "spills")},
+            {"name": "Data centers & crypto mining (desk research)", "category": "Facilities",
+             "org": "Empower WV (from DEP, PSC, company and news records)", "access": "hand-compiled",
+             "keyless": True, "record": "data centers: power, water, noise, use, what's not disclosed",
+             "url": "/site/data_center/monarch-compute-campus", "api": "/api/data-centers",
+             **meta("data_centers.json", "sites")},
             {"name": "Microsoft US Building Footprints", "category": "Geospatial", "org": "Microsoft",
              "access": "open GeoJSON", "keyless": True, "record": "buildings (near-homes well risk)",
              "url": "https://github.com/microsoft/USBuildingFootprints", "api": "/api/abandoned-wells",
@@ -846,13 +1149,16 @@ def create_app(store: Store) -> FastAPI:
         for metric in metrics:
             threshold = METRIC_THRESHOLDS[metric][body.level]
             found = store.find_subscription(target=email, field=metric, sensor_id=sensor_id)
-            fields = dict(sensor_id=sensor_id, field=metric, threshold=threshold,
+            kind = "record" if metric in RECORD_RULES else "threshold"
+            fields = dict(sensor_id=sensor_id, field=metric, threshold=threshold, kind=kind,
                           center_lat=center_lat, center_lon=center_lon, radius_km=radius_km,
                           label=area, token=token)
+            if kind == "record":
+                fields["records_checked_at"] = None   # the place may have moved: new baseline
             if found is not None:
                 store.update_subscription(found.id, **fields)
             else:
-                store.add_subscription(channel="email", target=email, kind="threshold",
+                store.add_subscription(channel="email", target=email,
                                        active=confirmed, **fields)
 
         watching = ", ".join(METRIC_LABELS.get(m, m) for m in metrics)
@@ -898,8 +1204,9 @@ def create_app(store: Store) -> FastAPI:
                 "<a href='/alerts'>Sign up again →</a></p>")
         area = sub.label or "your area"
         return _alert_result_page(request, "You're all set ✅",
-            f"<p>Alerts are on. We'll email <b>{html.escape(sub.target)}</b> when PM2.5 near "
-            f"<b>{html.escape(area)}</b> crosses your threshold — with quiet hours and rate limits "
+            f"<p>Alerts are on. We'll email <b>{html.escape(sub.target)}</b> when something you "
+            f"watch near <b>{html.escape(area)}</b> crosses your level, or a new spill or violation "
+            f"you asked about shows up in the public records — with quiet hours and rate limits "
             f"so you're never spammed.</p><p><a href='/air'>See the live map →</a></p>")
 
     @app.get("/alerts/unsubscribe", response_class=HTMLResponse)
@@ -966,20 +1273,50 @@ def create_app(store: Store) -> FastAPI:
             raise HTTPException(status_code=404, detail="no such feedback")
         return {"ok": True}
 
+    def _record_history(sub, rows) -> dict:
+        """What a record subscription fired on (one entry per send, newest first) and what
+        was taken as its starting point. Lists stop at ADMIN_HISTORY_CAP; the counts don't."""
+        def record(key):
+            site_id, kind, value = key.split("|", 2)
+            return {"site_id": site_id, "kind": kind, "value": value or None}
+
+        sends: dict = {}
+        baseline = []
+        for key, origin, at in rows:
+            if origin == "alert":
+                sends.setdefault(at, []).append(record(key))
+            elif origin == "baseline":
+                baseline.append((key, at))
+        return {
+            "checked_at": sub.records_checked_at.isoformat() if sub.records_checked_at else None,
+            "sends": len(sends),
+            "fired": [{"at": at.isoformat(), "records": recs}
+                      for at, recs in list(sends.items())[:ADMIN_HISTORY_CAP]],
+            "baseline": {"taken_at": baseline[0][1].isoformat() if baseline else None,
+                         "count": len(baseline),
+                         "records": [record(k) for k, _at in baseline[:ADMIN_HISTORY_CAP]]},
+            # alert_seen rows stored before origin was tracked: can't say which they were
+            "unlabeled": sum(1 for _k, origin, _at in rows if origin is None),
+        }
+
     @app.get("/api/admin/subscriptions")
     def admin_subscriptions(_: bool = Depends(_require_admin)):
-        """Alert sign-ups — including the pending/unconfirmed waitlist."""
+        """Alert sign-ups — including the pending/unconfirmed waitlist — and, for record
+        subscriptions, their alert history."""
         subs = store.list_subscriptions(active_only=False)
+        history = store.record_history(s.id for s in subs if is_record_sub(s))
         return {"email_delivery": email_enabled(),
                 "results": [{"id": s.id, "email": s.target, "channel": s.channel,
                              "sensor_id": s.sensor_id, "area": s.label,
-                             "field": s.field, "threshold": s.threshold,
+                             "field": s.field, "kind": s.kind, "threshold": s.threshold,
                              "radius_km": s.radius_km,
                              "center": ([s.center_lat, s.center_lon]
                                         if s.center_lat is not None else None),
                              "active": s.active,
                              "confirmed": s.confirmed_at is not None,
-                             "created_at": s.created_at.isoformat() if s.created_at else None}
+                             "created_at": s.created_at.isoformat() if s.created_at else None,
+                             "record_history": (_record_history(s, history[s.id])
+                                                if s.id in history else None)}
                             for s in subs]}
 
     @app.post("/api/admin/notify-test")
@@ -1023,6 +1360,69 @@ def create_app(store: Store) -> FastAPI:
         if not ok:
             raise HTTPException(status_code=404, detail="no such event")
         return {"ok": True}
+
+    @app.get("/api/admin/event-candidates")
+    def admin_event_candidates(field: str = "pm2_5", days: int = 30, start: str | None = None,
+                               end: str | None = None, radius_km: float = 15.0,
+                               _: bool = Depends(_require_admin)):
+        """Spikes cross-checked against neighbors; corroborated ones proposed as draft events."""
+        _check_field(field)
+        from zoneinfo import ZoneInfo
+
+        from airwv.analysis.crosscheck import matching_event
+        from airwv.ingest import run_candidates
+
+        lo, hi = _parse_date(start), _parse_date(end)
+        r = run_candidates(store=store, coords=coords, field=field, days=max(1, min(days, 120)),
+                           start=datetime.combine(lo, time.min) if lo else None,
+                           end=datetime.combine(hi, time.max) if hi else None, radius_km=radius_km)
+        curated = store.events_for_admin()
+        et = ZoneInfo("America/New_York")
+        unit = " µg/m³" if field.startswith("pm") else ""
+
+        def name(sid):
+            return names.get(sid) or airnow_names.get(sid) or sid
+
+        def local(ts):
+            return ts.replace(tzinfo=timezone.utc).astimezone(et).strftime("%b %-d %-I:%M %p ET")
+
+        out = []
+        for c in r["candidates"]:
+            near = matching_event(c, curated)
+            seen = Counter(regions[s] for s in c.sensor_ids if regions.get(s, "Other") != "Other")
+            region = seen.most_common(1)[0][0] if seen else None
+            draft = {
+                "title": f"Sensor-detected {field.upper().replace('_', '.')} rise — "
+                         f"{region or 'nearby sensors'} ({c.start:%b %-d, %Y})",
+                "medium": "air", "kind": "other", "region": region, "lat": c.lat, "lon": c.lon,
+                "start_ts": c.start.isoformat() + "Z", "end_ts": c.end.isoformat() + "Z",
+                "description": (
+                    f"{len(c.sensor_ids)} sensors within {radius_km:g} km rose above their usual "
+                    f"level for the hour of day between {local(c.start)} and {local(c.end)}; highest "
+                    f"{c.peak_value:g}{unit} at {name(c.peak_sensor)}. Proposed automatically by the "
+                    "neighbor cross-check; the cause is not yet known."),
+                "captured": True, "sensor_ids": c.sensor_ids, "status": "draft",
+            }
+            out.append({
+                "start_ts": draft["start_ts"], "end_ts": draft["end_ts"], "field": c.field,
+                "sensor_ids": c.sensor_ids, "sensor_names": [name(s) for s in c.sensor_ids],
+                "peak": {"sensor_id": c.peak_sensor, "name": name(c.peak_sensor), "value": c.peak_value,
+                         "ts": c.peak_ts.isoformat() + "Z", "score": c.peak_score},
+                "lat": c.lat, "lon": c.lon, "region": region,
+                "existing_event": {"id": near.id, "title": near.title} if near else None,
+                "draft": draft,
+            })
+        single = [{"sensor_id": c.episode.sensor_id, "name": name(c.episode.sensor_id),
+                   "ts": c.episode.peak.ts.isoformat() + "Z", "value": c.episode.peak.value,
+                   "score": c.episode.peak.score, "neighbors": c.neighbors, "neighbor_peak_z": c.peak_z}
+                  for c in sorted((c for c in r["checks"] if c.status == "single_sensor"),
+                                  key=lambda c: -c.episode.peak.score)]
+        counts = {s: sum(c.status == s for c in r["checks"])
+                  for s in ("corroborated", "single_sensor", "no_neighbors")}
+        return {"field": field, "radius_km": radius_km,
+                "since": r["since"].isoformat() + "Z" if r["since"] else None,
+                "until": r["until"].isoformat() + "Z" if r["until"] else None,
+                "counts": counts, "candidates": out, "single_sensor": single[:50]}
 
     @app.get("/admin", response_class=HTMLResponse)
     def admin_page(request: Request):
@@ -1111,19 +1511,24 @@ def create_app(store: Store) -> FastAPI:
 
     _areas_cache: dict = {}
 
-    def _region_groups() -> dict[str, list[str]]:
+    def _region_groups(conn, region: str | None = None) -> dict[str, list[str]]:
+        """Community-sensor refs per WV region, from the read model's `site` view (the
+        same ``area`` filter /api/query takes), in listing order."""
         groups: dict[str, list[str]] = defaultdict(list)
-        for sid, region in regions.items():
-            groups[region or "Other"].append(sid)
+        for s in store.read_model.sites_near(conn, None, None, 0, layer="community_sensors",
+                                             area=region, limit=-1):
+            groups[s["attrs"]["region"]].append(s["ref"])
         return groups
 
-    def _area_daily(sids, field: str, since):
+    def _area_daily(conn, sids, field: str, since):
         """Pooled daily series across a region's sensors → sorted [(date, median, n)].
-        Uses SQL daily averages per sensor (cheap over years), then takes the median
-        across the sensors reporting each day so one noisy unit can't swing the area."""
+        Uses SQL daily averages per sensor over the `measurement` view (cheap over years),
+        then takes the median across the sensors reporting each day so one noisy unit
+        can't swing the area. PM readings over AREA_PM_MAX are left out of the averages."""
+        cap = AREA_PM_MAX if field.startswith("pm") else None
         pool: dict = defaultdict(list)
         for sid in sids:
-            for day, val in store.daily_avg(sid, field=field, since=since).items():
+            for day, val in store.read_model.daily(conn, "air", sid, field, since=since, max_value=cap).items():
                 pool[day].append(val)
         return [(d, round(statistics.median(v), 1), len(v)) for d, v in sorted(pool.items())]
 
@@ -1138,8 +1543,10 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/api/areas")
     def areas(field: str = "pm2_5", days: int = 180):
-        """Current rollup + trend per WV region, over community sensors. Aggregates
-        history, so cached briefly."""
+        """Current rollup + trend per WV region, over community sensors. Reads the
+        unified views (the `area` filter and measurement window /api/query uses);
+        tests/snapshots/api_areas.json pins the output. Aggregates history, so cached
+        briefly."""
         from airwv.analysis import is_worsening
 
         if field not in AREA_FIELDS:
@@ -1152,14 +1559,19 @@ def create_app(store: Store) -> FastAPI:
         if hit and _t.time() - hit[0] < 300:
             return hit[1]
 
-        latest = store.latest_value_per_sensor(field)
         since = datetime.utcnow() - timedelta(days=days)
         is_pm = field.startswith("pm")
+        rm = store.read_model
         out = []
-        for region, sids in _region_groups().items():
+        with rm.connect() as conn:
+            groups = _region_groups(conn)
+            latest = {ref: v[field]["value"] for ref, v in
+                      rm.latest(conn, "air", [s for g in groups.values() for s in g], field).items()}
+            dailies = {region: _area_daily(conn, sids, field, since) for region, sids in groups.items()}
+        for region, sids in groups.items():
             cur = [(sid, latest[sid]) for sid in sids
-                   if sid in latest and not (is_pm and latest[sid] > 1000)]
-            daily = _area_daily(sids, field, since)
+                   if sid in latest and not (is_pm and latest[sid] > AREA_PM_MAX)]
+            daily = dailies[region]
             t = _area_trend(daily, field)
             value = round(statistics.median([v for _, v in cur]), 1) if cur else None
             worst = max(cur, key=lambda p: p[1]) if cur else None
@@ -1184,9 +1596,10 @@ def create_app(store: Store) -> FastAPI:
     def area_series(region: str, field: str = "pm2_5", days: int = 180):
         if field not in AREA_FIELDS:
             raise HTTPException(status_code=400, detail="unsupported field for area series")
-        sids = _region_groups().get(region, [])
         since = datetime.utcnow() - timedelta(days=days)
-        daily = _area_daily(sids, field, since) if sids else []
+        with store.read_model.connect() as conn:
+            sids = _region_groups(conn, region).get(region, [])
+            daily = _area_daily(conn, sids, field, since) if sids else []
         t = _area_trend(daily, field)
         return {
             "region": region, "field": field, "sensor_count": len(sids),
@@ -1341,23 +1754,40 @@ def create_app(store: Store) -> FastAPI:
                 "partner_note": data.get("partner_note"),
                 "disclaimer": data.get("disclaimer"), "fetched_at": data.get("fetched_at")}
 
-    @app.get("/api/abandoned-wells")
-    def abandoned_wells(orphan_only: bool = False, near_homes: bool = False):
-        """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
-        known operator; near_homes keeps those within ~200 m of a building. Large —
-        loaded lazily by the map layer."""
-        try:
-            import json
+    _wells_file: dict = {}
 
-            path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
-            data = json.loads(path.read_text(encoding="utf-8"))
+    def _abandoned_wells_data() -> dict | None:
+        """The parsed abandoned-wells file (2.4MB), re-read only when it changes on disk."""
+        import json
+
+        path = Path(__file__).parent.parent / "data" / "abandoned_wells.json"
+        try:
+            mtime = path.stat().st_mtime
+            if _wells_file.get("mtime") != mtime:
+                _wells_file.update(mtime=mtime, data=json.loads(path.read_text(encoding="utf-8")))
+            return _wells_file["data"]
         except Exception:
+            return None
+
+    @app.get("/api/abandoned-wells")
+    def abandoned_wells(response: Response, orphan_only: bool = False, near_homes: bool = False,
+                        bbox: str | None = None):
+        """WV abandoned oil/gas wells (WV DEP). orphan_only keeps the ~4,700 with no
+        known operator; near_homes keeps those within ~200 m of a building; bbox
+        (west,south,east,north) keeps those inside a map view. Large — loaded lazily by
+        the map layer. The count fields stay statewide."""
+        box = _parse_bbox(bbox)
+        data = _abandoned_wells_data()
+        if data is None:
             return {"wells": [], "count": 0, "orphans": 0}
+        response.headers.update(_LAYER_CACHE)
         wells = data.get("wells", [])
         if orphan_only:
             wells = [w for w in wells if w.get("orphan")]
         if near_homes:
             wells = [w for w in wells if w.get("near_homes")]
+        if box:
+            wells = [w for w in wells if _in_bbox(w.get("lat"), w.get("lon"), box)]
         return {"wells": wells, "count": data.get("count", len(wells)),
                 "orphans": data.get("orphans", 0),
                 "near_homes": data.get("near_homes", 0),
@@ -1477,6 +1907,48 @@ def create_app(store: Store) -> FastAPI:
         except Exception:
             return {"note": "", "monitors": []}
 
+    @app.get("/api/data-centers")
+    def data_centers_layer(lat: float | None = None, lon: float | None = None, km: float = 16.0,
+                           full: bool = False):
+        """Data centers and crypto-mining sites (hand-researched, data/data_centers.json),
+        each with its basic-view card (what we know / what's not disclosed for water,
+        energy, noise and purpose). With lat/lon: ``near`` = mapped sites within ``km``,
+        nearest first, and ``in_county`` = sites in the nearest county with no public
+        coordinates. Without: every site in ``near``. Plus how to ask for what's missing.
+        ``full=true`` adds each site's whole record (``record``) for the advanced view."""
+        import json
+
+        from airwv import data_centers as dcs
+        from airwv.wvgeo import WV_COUNTY_CENTROID
+
+        rm = store.read_model
+        with rm.connect() as conn:
+            prov = rm.provenance(conn, ["data_centers"]).get("data_centers", {})
+            dockets = json.loads(conn.exec_driver_sql(
+                "SELECT coalesce(json_extract(doc, '$.dockets'), '[]') FROM layer_doc "
+                "WHERE layer = 'data_centers'").scalar() or "[]")
+            county, in_county = None, []
+            if lat is None or lon is None:
+                near = rm.sites(conn, layer="data_centers")
+            else:
+                km = min(max(km, 1.0), 50.0)
+                near = rm.sites_near(conn, lat, lon, km * 0.621371, layer="data_centers")
+                county = min(WV_COUNTY_CENTROID,
+                             key=lambda c: _hav_mi(lat, lon, *WV_COUNTY_CENTROID[c]), default=None)
+                in_county = [s for s in rm.sites(conn, layer="data_centers", where="lat IS NULL")
+                             if county in [c.strip() for c in (s["county"] or "").split("/")]]
+
+        def row(s):
+            out = dcs.card(s["attrs"])
+            out.update(lat=s["lat"], lon=s["lon"], mi=round(s["d"], 1) if s["d"] is not None else None)
+            if full:
+                out["record"] = s["attrs"]
+            return out
+
+        return {"place": {"lat": lat, "lon": lon, "km": km} if lat is not None and lon is not None else None,
+                "county": county, "near": [row(s) for s in near], "in_county": [row(s) for s in in_county],
+                "how_to_ask": dcs.HOW_TO_ASK, "dockets": dockets, **prov}
+
     _validate_cache: dict = {}
 
     @app.get("/api/validate")
@@ -1529,15 +2001,43 @@ def create_app(store: Store) -> FastAPI:
             headers={"Content-Disposition": f'attachment; filename="airwv_{sensor_id}.csv"'},
         )
 
+    _water_sites_cache: dict = {}
+
     @app.get("/api/water/sites")
-    def water_sites():
-        return {"sites": store.water_sites()}
+    def water_sites(response: Response, bbox: str | None = None):
+        """Every water site with its latest value per parameter (~1MB statewide);
+        bbox (west,south,east,north) keeps those inside a map view. Cached 5 min —
+        the USGS/WQP collectors run hourly."""
+        import time as _t
+
+        box = _parse_bbox(bbox)
+        response.headers.update(_SHORT_CACHE)
+        hit = _water_sites_cache.get("v")
+        if not (hit and _t.time() - hit[0] < 300):
+            hit = _water_sites_cache["v"] = (_t.time(), store.water_sites())
+        sites = hit[1]
+        if box:
+            sites = [s for s in sites if _in_bbox(s.get("lat"), s.get("lon"), box)]
+        return {"sites": sites}
 
     @app.get("/api/water/near")
     def water_near(lat: float, lon: float, km: float = 5.0, limit: int = 6):
         """Water sample sites near a point with their latest measured values —
-        used to attach measured water quality to a coal discharger / facility."""
-        return {"sites": store.water_near(lat, lon, km=min(km, 25), limit=min(limit, 20))}
+        used to attach measured water quality to a coal discharger / facility. Reads the
+        unified views (the water sites /api/query?medium=water returns);
+        tests/snapshots/api_water_near.json pins the output."""
+        km, limit = min(km, 25), min(limit, 20)
+        rm = store.read_model
+        with rm.connect() as conn:
+            sites = rm.sites_near(conn, lat, lon, km * 0.621371, layer="water_readings",
+                                  limit=10_000, bbox_km=km)
+            sites = sorted(sites, key=lambda s: (round(s["d"], 1), s["ref"]))[:limit]
+            latest = rm.latest(conn, "water", [s["ref"] for s in sites])
+        return {"sites": [{
+            "site_id": s["ref"], "name": s["name"], "lat": s["lat"], "lon": s["lon"],
+            "latest": {p: {**v, "ts": v["ts"] and datetime.fromisoformat(v["ts"]).isoformat()}
+                       for p, v in latest.get(s["ref"], {}).items()},
+            "mi": round(s["d"], 1)} for s in sites]}
 
     @app.get("/api/water/series/{site_id}")
     def water_series(site_id: str, parameter: str = "ph", days: int = 30):
@@ -1609,7 +2109,14 @@ def create_app(store: Store) -> FastAPI:
                                           context={"mode": "field"})
 
     @app.get("/", response_class=HTMLResponse)
-    def index(request: Request):
+    def index(request: Request, place: str | None = None, lat: str | None = None,
+              lon: str | None = None, statewide: str | None = None):
+        # a place in the URL (?place= or ?lat=&lon=) makes Home "my place now" (place.js keeps
+        # it in the URL); otherwise statewide. overview.html sends a browser with a saved place
+        # here with it, unless ?statewide=1 asks for the statewide view.
+        if not statewide and (place or (lat and lon)):
+            return TEMPLATES.TemplateResponse(request=request, name="place.html",
+                                              context={"mode": "place", "home": True})
         return TEMPLATES.TemplateResponse(request=request, name="overview.html",
                                           context={"mode": "overview"})
 
@@ -1637,7 +2144,8 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="spills.html",
                                           context={"mode": "spills"})
 
-    @app.get("/sources", response_class=HTMLResponse)
+    @app.get("/facilities", response_class=HTMLResponse)
+    @app.get("/sources", response_class=HTMLResponse)   # old name, kept for links / bookmarks
     def sources_page(request: Request):
         # Google Street View Static API key (optional) — front-of-business photos when set.
         return TEMPLATES.TemplateResponse(request=request, name="sources.html",
@@ -1654,10 +2162,126 @@ def create_app(store: Store) -> FastAPI:
         return TEMPLATES.TemplateResponse(request=request, name="near_me.html",
                                           context={"mode": "nearby"})
 
+    @app.get("/place", response_class=HTMLResponse)
+    def place_page(request: Request):
+        # "my place now" (basic view, DIRECTION.md §2): the page reads lat/lon/km/name
+        # from its URL and builds every line from /api/query
+        return TEMPLATES.TemplateResponse(request=request, name="place.html",
+                                          context={"mode": "place"})
+
+    @app.get("/explore", response_class=HTMLResponse)
+    def explore_page(request: Request):
+        # query builder v1 (DIRECTION.md §5.2): a form over /api/query; the form lives in the
+        # URL, and the page shows the table, a CSV download and the API URL for the same answer
+        return TEMPLATES.TemplateResponse(request=request, name="explore.html",
+                                          context={"mode": "explore",
+                                                   "counties": sorted(WV_COUNTY_CENTROID)})
+
+    @app.get("/site/{kind}/{ref:path}", response_class=HTMLResponse)
+    def site_page(request: Request, kind: str, ref: str, view: str = "basic", param: str | None = None):
+        """The single home of one site (docs/DIRECTION.md), for every kind in the read
+        model's ``site`` view (``SITE_KINDS``). Measured kinds get a recent-readings chart from
+        the /api/query series mode; data centers keep their own card ("what we know / what's
+        not disclosed"); permits show their stage and 303(d) records; the rest their public
+        records. ``view=adv`` is the full record."""
+        from airwv import data_centers as dcs
+
+        if kind not in SITE_KINDS:
+            raise HTTPException(status_code=404, detail="no such site kind")
+        view = "adv" if view == "adv" else "basic"
+        if kind in SERIES_KINDS:
+            return _measured_site_page(request, kind, ref, param)
+        if kind == "permit":
+            return _permit_site_page(request, ref, view)
+        if kind != "data_center":
+            return _generic_site_page(request, kind, ref, view)
+        api = data_centers_layer()
+        rm = store.read_model
+        with rm.connect() as conn:
+            found = rm.sites(conn, layer="data_centers", where="ref = :ref", params={"ref": ref})
+        if not found:
+            raise HTTPException(status_code=404, detail="unknown data center")
+        dc = found[0]["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
+            "mode": "site", "kind": kind, "view": view,
+            "dc": dc, "card": dcs.card(dc), "cited": dcs.cited, "ask": dcs.HOW_TO_ASK, "dockets": api["dockets"],
+            "prov": {k: api.get(k) for k in ("source", "disclaimer", "fetched_at")}})
+
+    def _generic_site_page(request: Request, kind: str, ref: str, view: str):
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"{kind}:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="unknown site")
+            records = rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"], {})
+        return TEMPLATES.TemplateResponse(request=request, name="site.html", context={
+            "mode": "site", "kind": kind, "view": view, "site": site, "label": SITE_KINDS[kind],
+            "records": records, "record_labels": SITE_RECORD_LABELS, "prov": prov})
+
+    def _measured_site_page(request, kind, ref, param):
+        """A sensor, monitor, gauge or sample site: what it measures, its latest reading and a
+        chart of the last ``SERIES_KINDS[kind]`` days up to that reading (site.js fetches
+        the rows from /api/query series mode, so the chart, CSV and API link agree)."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"{kind}:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no site with that id")
+            measured = rm.parameters(conn, site["medium"], site["ref"])
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        names = [m["parameter"] for m in measured]
+        chosen = next((m for m in measured if m["parameter"] == param), None) \
+            or next((m for m in measured if m["parameter"] == "pm2_5"), None) \
+            or (measured[0] if measured else None)
+        window = None
+        if chosen:
+            last = date.fromisoformat(str(chosen["last"])[:10])
+            q = {"site_id": site["site_id"], "param": chosen["parameter"],
+                 "from": (last - timedelta(days=SERIES_KINDS[kind])).isoformat(), "to": last.isoformat()}
+            window = {**q, "days": SERIES_KINDS[kind], "api": "/api/query?" + urlencode(q),
+                      "csv": "/api/query?" + urlencode(q | {"format": "csv"})}
+        return TEMPLATES.TemplateResponse(request=request, name="site_measured.html", context={
+            "mode": "site", "kind": kind, "site": site, "measured": measured, "names": names,
+            "chosen": chosen, "window": window, "label": SERIES_KIND_LABELS[kind],
+            "plabel": lambda p: METRIC_LABELS.get(p, p.replace("_", " ")), "prov": prov})
+
+    def _permit_site_page(request, ref, view):
+        """A coal discharge, DEP mining or oil & gas permit: what it is, its permit stage and,
+        for coal discharges, the 303(d) impaired streams its outlets sit on (the read model's
+        ``record`` rows), with the layer's caveat. ``view=adv`` lists every field."""
+        rm = store.read_model
+        with rm.connect() as conn:
+            site = rm.site(conn, f"permit:{ref}")
+            if site is None:
+                raise HTTPException(status_code=404, detail="no permit with that id")
+            # an oil & gas API number can list identical rows; keep each record once
+            records = list({tuple(r.values()): r for r in
+                            rm.records_for(conn, [site["site_id"]]).get(site["site_id"], [])}.values())
+            prov = rm.provenance(conn, [site["layer"]]).get(site["layer"]) or {}
+        a = site["attrs"]
+        return TEMPLATES.TemplateResponse(request=request, name="site_permit.html", context={
+            "mode": "site", "kind": "permit", "view": view, "site": site, "a": a,
+            "what": PERMIT_LAYERS[site["layer"]], "stage": PERMIT_STAGE_LABELS.get(a.get("stage")),
+            "stage_rec": next((r for r in records if r["kind"] == "permit_stage"), None),
+            "impaired": next((r for r in records if r["kind"] == "impaired_303d"), None),
+            "records": records, "prov": prov})
+
     @app.get("/data", response_class=HTMLResponse)
     def data_page(request: Request):
         return TEMPLATES.TemplateResponse(request=request, name="data.html",
-                                          context={"mode": "data"})
+                                          context={"mode": "data", "dump_info": dumps.summary()})
+
+    @app.get("/data/dumps/{name}")
+    def data_dump(name: str):
+        """The nightly public dumps (dumps.py): gzipped CSV of the read views + manifest.json.
+        Only the fixed file names; 404 until the first nightly run has written them."""
+        path = dumps.default_dir() / name
+        if name not in dumps.FILES or not path.is_file():
+            raise HTTPException(status_code=404, detail="no such dump (yet)")
+        media = "application/json" if name.endswith(".json") else "application/gzip"
+        return FileResponse(path, media_type=media, filename=name,
+                            headers={"Cache-Control": "public, max-age=3600"})
 
     @app.get("/about", response_class=HTMLResponse)
     def about(request: Request):

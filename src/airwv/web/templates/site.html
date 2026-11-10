@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% from "_dc_card.html" import dc_card, how_to_ask, cite %}
+{% from "_related.html" import related %}
+{% block content %}
+{% if kind != 'data_center' %}
+{% set s = site %}{% set a = site.attrs %}
+<div class="page">
+  <div class="ov-intro"><h1>{{ s.name or (label ~ ' ' ~ s.ref) }}</h1>
+    <p><span class="rbadge">{{ label }}</span>{% if s.medium %} · {{ s.medium | capitalize }}{% endif %}<br>
+      <span class="meta">{% if s.county %}{{ s.county }} County{% endif %}{% if s.lat is not none %}{% if s.county %} · {% endif %}{{ '%.4f' % s.lat }}, {{ '%.4f' % s.lon }}{% else %}{% if s.county %} · {% endif %}exact location not public{% endif %}</span></p>
+    <p class="meta">
+      {% if view == 'adv' %}<a href="?view=basic">← Plain summary</a> · Full record
+      {% else %}Plain summary · <a href="?view=adv">Full record →</a>{% endif %}
+      · <a href="/data">Where this comes from</a></p>
+  </div>
+
+  {% if view != 'adv' %}
+  <div class="card"><h2>Public records</h2>
+    {% if records %}<ul class="dc-files">{% for r in records %}<li><b>{{ record_labels.get(r.kind, r.kind.replace('_', ' ')) }}</b>{% if r.value and r.value != r.kind %}: {{ r.value | string | replace('_', ' ') }}{% endif %}{% if r.effective %} <span class="meta">({{ r.effective }})</span>{% endif %}</li>{% endfor %}</ul>
+    {% else %}<p class="meta" style="padding:8px 14px">No violations, listings or reports on file for this site in the data we track.</p>{% endif %}
+  </div>
+  <div class="card"><p class="meta" style="padding:10px 14px">
+    {% if s.lat is not none %}<a href="/nearby?lat={{ s.lat }}&amp;lon={{ s.lon }}">What else is near here →</a>{% endif %}
+    {% if s.url %}{% if s.lat is not none %} · {% endif %}<a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>The data source's own record →</a>{% endif %}</p></div>
+  {% else %}
+  <div class="card"><h2>Full record</h2>
+    <table class="dc-rec">
+      <tr><th>Site id</th><td><code>{{ s.site_id }}</code></td></tr>
+      <tr><th>Layer</th><td>{{ s.layer }}</td></tr>
+      {% for k, v in a.items() %}<tr><th>{{ k.replace('_', ' ') }}</th><td>{{ v }}</td></tr>{% endfor %}
+    </table>
+  </div>
+  <div class="card"><h2>Records</h2>
+    {% if records %}<table class="dc-rec">{% for r in records %}
+      <tr><th>{{ r.kind }}</th><td>{{ r.value }}{% if r.effective %} · effective {{ r.effective }}{% endif %}{% if r.as_of %} · as of {{ r.as_of }}{% endif %}{% if r.url %} · <a href="{{ r.url }}" target="_blank" rel="noopener">record</a>{% endif %}</td></tr>{% endfor %}
+    </table>{% else %}<p class="meta" style="padding:8px 14px">None in the record view.</p>{% endif %}
+  </div>
+  {% if s.url %}<div class="card"><p class="meta" style="padding:10px 14px">Data source record: <a href="{{ s.url }}"{% if s.url.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ s.url }}</a></p></div>{% endif %}
+  {% endif %}
+
+  {{ related(kind, s.site_id, s.lat, s.lon) }}
+
+  <div class="card"><p class="meta" style="padding:10px 14px">{% if prov.disclaimer %}{{ prov.disclaimer }}<br>{% endif %}
+    {% if prov.source %}Data source: {{ prov.source }}.{% endif %}{% if prov.fetched_at %} Fetched {{ prov.fetched_at }}.{% endif %}
+    <a href="/data">All data sources</a></p></div>
+</div>
+{% else %}
+{% set c = card %}
+<div class="page">
+  <div class="ov-intro"><h1>{{ c.name }}</h1>
+    <p><span class="rbadge">Data center</span> <b>{{ c.status_label }}</b> · {{ c.operator }}<br>
+      <span class="meta">{{ c.place }} · {{ c.county }} County{% if dc.lat is none %} · exact location not public{% endif %}</span></p>
+    <p class="meta">
+      {% if view == 'adv' %}<a href="?view=basic">← Plain summary</a> · Full record and filings
+      {% else %}Plain summary · <a href="?view=adv">Full record and filings →</a>{% endif %}
+      · <a href="/data">Where this comes from</a></p>
+  </div>
+
+  {% if view != 'adv' %}
+  <div class="card"><h2>What we know, and what's not disclosed</h2>
+    <div class="dc-card">
+      <p class="meta">{{ dc.status_detail }}</p>
+      {{ dc_card(c) }}
+      {{ how_to_ask(ask) }}
+    </div>
+  </div>
+  {% else %}
+  <div class="card"><h2>Full record</h2>
+    <table class="dc-rec">
+      <tr><th>Status</th><td>{{ c.status_label }} — {{ dc.status_detail }}</td></tr>
+      <tr><th>Operator</th><td>{{ dc.operator }}</td></tr>
+      <tr><th>Place</th><td>{{ dc.place }} ({{ dc.county }} County)</td></tr>
+      <tr><th>Location</th><td>{% if dc.lat is not none %}{{ dc.lat }}, {{ dc.lon }} — {% endif %}{{ dc.location_precision }}</td></tr>
+      <tr><th>Acres</th><td>{{ dc.acres }}</td></tr>
+      <tr><th>HB 2014 certification</th><td>{{ dc.hb2014 }}</td></tr>
+      {% for section, label in [('power', 'Power'), ('water', 'Water'), ('air_permits', 'Air permits'), ('noise', 'Noise')] %}
+      {% for k, v in (dc[section] or {}).items() %}
+      <tr><th>{{ label }} · {{ k.replace('_', ' ') }}</th><td>{{ v }}{{ cite(cited(dc, section ~ '.' ~ k)) }}</td></tr>
+      {% endfor %}{% endfor %}
+      {% for u in dc.use %}
+      <tr><th>Use · {{ u.category.replace('_', ' ') }}</th><td>{{ u.confidence }} confidence — {{ u.evidence }}{{ cite(cited(dc, 'use.' ~ loop.index0)) }}</td></tr>
+      {% endfor %}
+      <tr><th>Not disclosed</th><td>{{ dc.not_disclosed | join('; ') }}</td></tr>
+    </table>
+  </div>
+  <div class="card"><h2>Filings and data sources for this site</h2>
+    <ol class="dc-files">{% for s in dc.sources %}<li><span class="rbadge{{ ' ok' if s.kind == 'primary' }}">{{ s.kind }}</span>
+      <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="meta">{{ s.date }}</span></li>{% endfor %}</ol>
+  </div>
+  <div class="card"><h2>Statewide dockets and cases about data centers</h2>
+    <p class="meta" style="padding:8px 14px 0">Not all of these are about this site; they set the rules for all of them.</p>
+    <ul class="dc-files">{% for d in dockets %}<li><b>{{ d.agency }} {{ d.id }}</b> —
+      {% if d.url %}<a href="{{ d.url }}" target="_blank" rel="noopener">{{ d.title }}</a>{% else %}{{ d.title }}{% endif %}
+      <div class="meta">{{ d.detail }}</div></li>{% endfor %}</ul>
+  </div>
+  <div class="card dc-card">{{ how_to_ask(ask) }}</div>
+  {% endif %}
+
+  {{ related(kind, 'data_center:' ~ dc.id, dc.lat, dc.lon) }}
+
+  <div class="card"><p class="meta" style="padding:10px 14px">{{ prov.disclaimer }}
+    <br>Data source: {{ prov.source }}. Compiled {{ prov.fetched_at }}.
+    Raw record: <a href="/api/data-centers">/api/data-centers</a> · <a href="/data">all data sources</a></p></div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/site.js?v={{ asset_v }}"></script>
+{% endblock %}

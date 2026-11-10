@@ -76,7 +76,7 @@ async function loadRecent() {
   layer = L.layerGroup();
   rows.forEach(r => {
     if (r.lat == null) return;
-    L.circleMarker([r.lat, r.lon], {radius: 7, color: '#333', weight: 1, fillColor: MEDCOLOR[r.medium] || '#555', fillOpacity: 0.9})
+    L.circleMarker([r.lat, r.lon], {title: `${r.parameter}: ${r.value} ${r.unit || ''}`.trim(), radius: 7, color: '#333', weight: 1, fillColor: MEDCOLOR[r.medium] || '#555', fillOpacity: 0.9})
       .bindPopup(`<b>${MED[r.medium] || ''} ${esc(r.parameter)}: ${r.value} ${esc(r.unit || '')}</b>`
         + `<br><small>${esc(r.submitter)} · ${fmt(r.observed_at || r.created_at)}</small>`
         + (r.method ? `<br><small>${esc(r.method)}</small>` : '')
@@ -95,7 +95,7 @@ async function loadRecent() {
 
 function init() {
   showAuth();
-  map = L.map('fr-map').setView([38.9, -80.5], 7);
+  map = AIRWV_WV.fitWV(L.map('fr-map'));
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(map);
   map.on('click', e => { if (picking) { picking = false; setLoc(e.latlng.lat, e.latlng.lng); } });
   $('fr-login').addEventListener('click', setToken);

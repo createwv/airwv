@@ -109,8 +109,13 @@ Separate real signal from sensor noise before anyone relies on it.
 - [x] Stuck-value detection (frozen channel) — `analysis/anomaly.py`
 - [x] Sensor health scoring — dropout/offline, missing channels, degraded status
       — `analysis/health.py`
-- [ ] Neighbor cross-check — corroborate spikes against nearby sensors to
-      distinguish a real event from a single-sensor malfunction
+- [x] Neighbor cross-check — corroborate spikes against nearby sensors to
+      distinguish a real event from a single-sensor malfunction —
+      `analysis/crosscheck.py`, `ingest candidates`, `/api/admin/event-candidates`.
+      Each de-trended spike is *corroborated* (a sensor within 15 km had residual
+      z ≥ 3 within ±3 h), *single-sensor* (neighbors reporting, flat) or *unchecked*.
+      On the Jul 2026 data the Peoples Cartage fire reignition (Parkersburg 1 + 4) comes
+      out corroborated and the Jul 3/4 Vienna fireworks spikes single-sensor.
 - [x] PurpleAir A/B channel divergence as a malfunction signal — channel data
       captured + validated across the cluster (Glasgow 99.9% healthy, SC1 1.7%
       noisier). Productize into a command still to do.
@@ -157,6 +162,19 @@ Get warnings to the people who need them.
 - [x] `subscribe` + `alerts` CLI (dry-run by default; `--send` to deliver)
 - [x] Trend-based triggers — alert when a field is rising by >= N% (`kind=trend`,
       reuses Phase 3 `linear_trend`). Glasgow VOC (+79%) fires a +20% subscription.
+- [x] **Place-based record alerts, any medium** — `kind=record` subscriptions keyed to a
+      place (center + radius, or anywhere in WV) + a rule (`alerts.RECORD_RULES`: `spills` =
+      NRC spill reports, `water` = SDWA health-based violations, `violations` = ECHO facility
+      violations), read from the `record` view. Fires on records new for the place since the
+      last check (`alert_seen` table; first check = silent baseline); county-only records also
+      match a place in that county; spill reports dated over 60 days back are skipped
+      (`max_age_days`, stated in the email). `/api/admin/subscriptions` shows each record
+      subscription's history (`record_history`: what fired, per send, and the baseline). The `/alerts` form's water/spills waitlist rows went live
+      (old rows are matched by field, no migration) and gained facility violations; `/place`'s
+      *Watch this place* prefills the area; CLI `subscribe --kind record --lat --lon --radius-km`.
+      *Email delivery still waits on SMTP go-live (a session with Corey).*
+      Violations that return after 30+ days off the list alert as "back on the list"
+      (`alert_seen.last_present_at`; spills don't).
 - [ ] **SMS** notifications (Twilio-class provider) — channel stubbed, not wired
 - [x] Scheduled evaluation — the `run` loop evaluates + delivers alerts after each
       collection (`--no-alerts` to disable)
@@ -264,7 +282,9 @@ Make the data visible and usable.
       **origin** (likely/suspected cause), **scope** (Local/Regional/Multi-state/Continental),
       **regions affected**, and **links to related facilities** (`source_refs` → `/sources`)
       and **community reports** (`report_ids` → `/air`). *v2: map of event locations,
-      auto-surface candidates from the algorithmic `/api/events` detection, per-event
+      auto-surface candidates from the algorithmic `/api/events` detection (**done**:
+      corroborated spikes merge into candidates in the admin Events queue, "Save as
+      draft event"; ones that overlap a curated event are marked), per-event
       permalink pages (SEO/press), and richer sensor overlays for captured events.*
 - [~] **Reported spills feed (NRC)** — BUILT: `scripts/fetch_nrc_spills.py` pulls the
       **National Response Center** annual .xlsx (US Coast Guard spill hotline, keyless),
@@ -348,15 +368,15 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       *Refresh: re-run the script + redeploy.*
 - [~] **Orphaned & abandoned gas wells (the Rutledge story)** ⭐ — a **founding** issue for
       Create WV. v1 BUILT: `scripts/fetch_abandoned_wells.py` → `abandoned_wells.json` /
-      `/api/abandoned-wells` — **15,455** abandoned wells statewide, **4,721 orphans** (no
+      `/api/abandoned-wells` — **13,827** abandoned wells statewide, **4,596 orphans** (no
       operator = the state's to plug). Air-dashboard **"🛢️ Abandoned wells"** layer, lazy-loaded
       on toggle (15k clustered; orphans red, operator-abandoned brown; orphan/operator
       sub-filters; popups link the DEP record + note H2S/gas-near-homes risk). The **Rutledge**
       event is seeded on the Events page (H2S + raw gas near Crouch Hollow; sourced WCHS/WSAZ/
       LPM). **Near-homes flag DONE:** `scripts/enrich_wells_proximity.py` grids **Microsoft's
       open US Building Footprints** (~1.05M WV buildings) and tags each well with
-      `nearest_building_m` + `near_homes` (<200 m) → **6,053 abandoned wells near a building,
-      2,122 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
+      `nearest_building_m` + `near_homes` (<200 m) → **5,461 abandoned wells near a building,
+      2,055 of them orphans** (some 2–4 m away, in yards). Layer: near-home wells pop, remote
       ones fade, "🏠 Near homes only" sub-filter, distance in the popup. **Report hook DONE:**
       each well popup has a "🚨 Report a problem with this well" link that opens the community-
       report modal pre-filled + pre-located (domain=air, well id/orphan/county context, H2S-symptom
@@ -368,8 +388,8 @@ strongest at Nitro/John Amos (1.98). Mapping the sources makes this legible.*
       an explicit correlation-not-causation note. **The EWV Rutledge sensor reads VOC ~105 (above
       the ~84 median) near wells** — the origin story visible in our own data (9 elevated sensors
       sit near wells). **Plugging backlog DONE:** `/api/well-backlog` + Air-dashboard card "🕳️ The
-      orphan-well plugging backlog" — 4,721 orphans (2,122 near homes), the years-to-clear math
-      (state ~25/yr → ~190 yrs vs federal IIJA ~210/yr → ~22 yrs; IIJA targets only 1,200 by 2030),
+      orphan-well plugging backlog" — 4,596 orphans (2,055 near homes), the years-to-clear math
+      (state ~25/yr → ~184 yrs vs federal IIJA ~210/yr → ~22 yrs; IIJA targets only 1,200 by 2030),
       a county backlog bar chart (Ritchie 823…), cited (WV Watch / WV DEP IIJA / US DOI). **Health
       context DONE:** the Learn **Health** tab gained gas/H2S (rotten-egg + olfactory-fatigue danger,
       symptoms, what-to-do), ozone/VOC/benzene, and water-contaminant (lead/nitrate/E.coli/selenium)
@@ -547,8 +567,12 @@ Grow the network and secure the record.
 - [ ] Additional community-sensor sources beyond PurpleAir
 - [ ] Research-grade archival / backup partnership (e.g. an institutional
       environmental data store) for long-term preservation
-- [ ] Open-data exports and a documented public dataset
-- [ ] Public API documentation and rate limiting
+- [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
+      views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
+      `deploy/systemd/airwv-dumps.*`). *Parquet after Postgres.*
+- [x] CORS (read-only, any origin) and a per-client rate limit on `/api/*` and
+      `/data/dumps/*` (`web/public_api.py`; in-memory, one process)
+- [ ] Public API documentation
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)
 
@@ -700,8 +724,67 @@ side already accepts it (report category **🟤 Soil / land**, `field_readings` 
   smaller part (keyless, known patterns); the lens + integration is the bulk. **Sequence:** after the
   documentation-quality pass; the Postgres migration is independent.
 
+### Data centers — water, energy, noise, purpose, what's undisclosed
+Residents keep asking what the proposed data centers and crypto mines will do to their **water,
+power bills and quiet**, and what they're *for*. HB 2014 (2025) makes certification petitions
+confidential and blocks local zoning/noise/lighting ordinances for certified sites, so much of the
+answer is **"not disclosed"** — and saying that plainly is part of the product. Desk research +
+data: [`docs/DATA-CENTERS.md`](docs/DATA-CENTERS.md). This is a **records layer** (permits, dockets,
+filings, news), not a measurement, like Soil/Land above.
+
+- [~] **Site list + per-site record** — BUILT: `src/airwv/data/data_centers.json` (provenance block;
+      every fact sourced and tagged primary / company / news / tracker) → read-model layer
+      `data_centers`, `/site/data_center/<id>` (plain card: water · energy · noise · purpose, each
+      *what we know* / *what's not disclosed*, with where to ask; `?view=adv` for filings and the
+      statewide dockets), `/api/data-centers`, `/api/query?kind=data_center`, and a card on **Near me**.
+      Per-fact `cite` keys link a card line to its own numbered source where the record ties it to one.
+- [ ] **Keep it current** — re-check the sources DATA-CENTERS.md lists (DEP DAQ applications, PSC
+      dockets, Air Quality Board, Commerce's Data Economy Office) on a schedule; show each site's
+      "last checked" date. Any new fetcher needs Corey's OK (charter data rule 2).
+- [ ] **Water** — look up DEP large-quantity water-use reports and withdrawal / NPDES / stormwater
+      permits per site; tie each site to the river or mine pool it draws from and to the Water
+      lens (nearest gauges, downstream drinking-water intakes).
+- [ ] **Energy** — per site: grid vs off-grid, MW, fuel, backup diesel; link the PSC dockets and what
+      they mean for rates in plain words; for on-site gas plants, put the DEP permit's potential
+      emissions next to the nearest air monitors (an Air-lens tie-in).
+- [ ] **Noise** — no operating measurement exists in WV yet: say so on each card; link local noise
+      ordinances where they exist (and note HB 2014 preempts them for certified sites); hook into the
+      *Noise and light pollution* medium below for community reports and sensors.
+- [ ] **Purpose + what's undisclosed** — keep the use labels (AI / cloud / crypto / government…)
+      with confidence, and a statewide "what nobody has disclosed" tally (water volume, tenant,
+      backup generators, certification) so the gaps are visible, not hidden.
+- **Honesty/caveats:** news and tracker claims can be wrong or stale; use labels are our read, not
+  findings; "none found" isn't proof of absence. Wording on health/legal effects stays sourced
+  (charter data rule 3).
+
+### Noise and light pollution (a later medium)
+A fourth lens after Air | Water | Land: what residents **hear and see at night** — compressor
+stations, gas engines, data-center fans, mines, highways, and the sky glow that comes with them.
+Two halves with very different data: **light** has a real satellite record; **noise** has almost
+none in WV, so it starts as community reports and a few sensors. Candidate sources below are
+ideas only — each needs Corey's OK before any fetching (charter data rule 2).
+
+- [ ] **Night-sky brightness (satellite)** — NASA/NOAA **VIIRS Day/Night Band** monthly composites
+      (e.g. NASA Black Marble) for change over time, and the **World Atlas of Artificial Night Sky
+      Brightness** for a baseline; a map layer + "how dark is my sky / what changed since <year>"
+      on Near me. Add ground truth from **Globe at Night** citizen observations and WV dark-sky
+      places (e.g. Watoga / Calvin Price, if still certified — verify).
+- [ ] **Community noise reports** — a **🔊 Noise / 💡 Light** report category (time, duration,
+      what it sounds like, suspected source), mapped like other community reports and labeled
+      unverified; reuse the reporting flow and the `/nearby` drill-in.
+- [ ] **Noise sensors** — field readings with `medium=noise` (dB(A), meter type, method, duration),
+      using the existing field-reading intake; later, low-cost continuous sound-level monitors at
+      partner sites, the way PurpleAir works for air. Context layer: the **US DOT (BTS) National
+      Transportation Noise Map** for road/rail/air noise.
+- [ ] **Tie-ins** — data-center, compressor-station and mine sites near a report or a bright patch;
+      Learn content on health effects of chronic noise and light at night (sourced, e.g. WHO noise
+      guidelines) and what local ordinances do and don't cover.
+- **Honesty/caveats:** satellite radiance is light leaving the ground, not what a person sees, and
+      it's coarse (~500 m) with snow/moon/cloud artifacts; one dB reading depends on the meter,
+      distance and time; community reports are unverified. **Sequence:** after Soil/Land.
+
 ### Beyond (later)
-- [ ] Other exposures worth surfacing over time (radon, noise, PFAS-specific, etc.) —
+- [ ] Other exposures worth surfacing over time (radon, PFAS-specific, etc.) —
       driven by community concern.
 
 ## Phase 8 — Legibility & the public experience 👁️
@@ -714,6 +797,23 @@ the events/spills split are **decided** (see below).*
 
 *2026-11-05: direction approved: six-noun model, Basic/Advanced over one place, nav collapse,
 demo place Rutledge. See [`docs/DIRECTION.md`](docs/DIRECTION.md); it reframes the redesign below.*
+
+- [x] **Place picker + "my place now" (basic view)** — `/place?place=rutledge&km=8` (or
+      `?lat=&lon=&name=`): known places / my location, 5 · 10 · 25 mi; one plain status line per
+      medium (air band + PM2.5 + time + nearest sensor; water gauge or latest sample; drinking-water
+      health violations; wells) and "what changed (7 days)" (PM2.5 band peaks, spills, permit
+      dates), all from `/api/query`. Not in the nav yet (the nav collapse item adds it).
+      The air and water lines name and link the nearest sensor / monitor / gauge / sample site
+      to its `/site/<kind>/<ref>` page ("data behind this →").
+      Home (`/`) is this view when a place is in the URL (`/?place=` or `/?lat=&lon=`) or saved
+      in the browser (`localStorage.airwv_place`, set when a place is chosen); `/?statewide=1`
+      keeps the statewide overview.
+      Site pages show "Related nearby": the nearest site of each other kind (5 closest, within
+      25 mi, from `/api/query`), each linking to its site page or its own record.
+- [x] **Permit site pages** — `/site/permit/<id>` for coal discharge, DEP mining and oil & gas
+      permits: the permit stage in the map legends' words (+ DEP's own status) and, for coal
+      discharges, the 303(d) impaired-stream causes and streams with the "not proof it caused it"
+      caveat; `?view=adv` is the full record. Popups don't link to them yet.
 
 ### Analysis / map redesign (the anchor) — reading-first + contextual drill-in ⭐
 Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `/nearby`
@@ -807,7 +907,10 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       *distinctive* name token (place names excluded, data-driven, so a shared town like "nitro"
       can't fuse two different plants). 530 → 505; the 3 Amos records are now one facility carrying
       all categories/records. Applied (cached) in `/api/sources`; detail view shows merged-record
-      count + "also recorded as" names.
+      count + "also recorded as" names. Each merged row has a stable `id` (`tri-<n>`, its first
+      record's index in `sources.json`, the read model's facility ref); the Air-map marker popup
+      links `/site/facility/<id>`, which redirects to the facility on `/sources` until facility
+      site pages land.
 - [x] **Retain former company names** — cautious curated `former_name_note` (Chemours←DuPont,
       Solutia←Monsanto, Union Carbide→Dow, Bayer/Institute…), shown as "Formerly:" with precise
       triggers (no false positives — the Nitro WWTP no longer gets Monsanto history).
@@ -830,6 +933,7 @@ Decided approach: keep one `/air` page, flip the defaults, reuse `/api/near` + `
       top-anchored "horizon smog" gradient otherwise, with an explainer chip (band + value → Learn).
       Above content + maps, below modals, `pointer-events:none`; honors reduced-motion + print.
       Uses a **WV-level signal**; local-per-user tint is a future refinement.
+      Not shown on `/place`, whose own place-scoped air line it could contradict.
 
 ## Documentation & open-source education (ongoing)
 

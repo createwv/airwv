@@ -56,15 +56,20 @@
       const rows = (d.areas || []).map(a => {
         const now = a.value == null
           ? '<span class="meta">no data</span>'
-          : `<b style="color:${a.color}">●</b> ${a.value}${UNIT[field]}`;
+          : `<b style="color:${a.color}" aria-hidden="true">●</b> ${a.value}${UNIT[field]}`;
         const worst = a.max_sensor
           ? `${a.max_sensor} <span class="meta">(${a.max_value}${UNIT[field]})</span>` : '';
-        return `<tr class="arow" data-region="${encodeURIComponent(a.region)}" style="cursor:pointer">
+        return `<tr class="arow" data-region="${encodeURIComponent(a.region)}" style="cursor:pointer" tabindex="0"
+          title="chart ${a.region}">
           <td><b>${a.region}</b></td><td>${now}</td>
           <td class="meta">${a.reporting}/${a.sensor_count}</td>
           <td>${trendCell(a.trend, field)}</td><td class="meta">${worst}</td></tr>`;
       }).join('');
-      body.innerHTML = rows || '<tr><td colspan="5" style="color:#999">No community sensors resolved yet.</td></tr>';
+      body.innerHTML = rows || '<tr><td colspan="5" class="meta">No community sensors resolved yet.</td></tr>';
+      // rows open the chart by click, or Enter/Space when focused
+      body.querySelectorAll('.arow').forEach(tr => tr.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tr.click(); }
+      }));
       body.querySelectorAll('.arow').forEach(tr => tr.addEventListener('click', () => {
         const region = decodeURIComponent(tr.dataset.region);
         openRegion = region;
@@ -77,7 +82,7 @@
         if (keep) { keep.style.background = '#f2effa'; showChart(openRegion, field); }
       }
     } catch (e) {
-      body.innerHTML = '<tr><td colspan="5" style="color:#999">Could not load areas.</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" class="meta">Could not load areas.</td></tr>';
     }
   }
 

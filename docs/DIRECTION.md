@@ -17,7 +17,7 @@ and the **object**, and show the same answer at two depths.
 | Noun | What it is |
 |---|---|
 | `place` | a point or area a person cares about: lat/lon + radius, town, county, region |
-| `site` | a thing that produces data or carries a record, with a location, a `kind` and a `medium` (air / water / land). Kinds: `sensor`, `reference_monitor`, `gauge`, `sample_site`, `facility`, `well`, `permit`, `water_system`, `spill_report`, `cleanup_site` (`data_center` is added by its plan item) |
+| `site` | a thing that produces data or carries a record, with a location, a `kind` and a `medium` (air / water / land). Kinds: `sensor`, `reference_monitor`, `gauge`, `sample_site`, `facility`, `well`, `permit`, `water_system`, `spill_report`, `cleanup_site`, `data_center` |
 | `measurement` | one value, tall: `site_id, ts, parameter, value, unit, quality, source, raw`, with a parameter catalog (`pm2_5`, `voc`, `ozone`, `ph`, `conductance`, `selenium`, …) |
 | `record` | a non-measurement state about a site: violation, permit stage, 303(d) listing, orphan status, compliance status; effective dates + public-record URL |
 | `event` | a narrated episode: time window, places/sites involved, cause, scope |

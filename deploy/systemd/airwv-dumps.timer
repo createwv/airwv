@@ -1,0 +1,13 @@
+# Runs airwv-dumps.service nightly at 03:30 (server time), between the hourly collectors.
+#   sudo systemctl enable --now airwv-dumps.timer
+
+[Unit]
+Description=Write AirWV public data dumps nightly
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

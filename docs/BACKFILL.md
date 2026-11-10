@@ -53,7 +53,12 @@ python -m airwv.ingest events --sensor "Belle" --field pm2_5
 ```
 
 If the neighbors also spike on 2024-09-24 → real area event. If they're clean →
-Glasgow-local (or a Glasgow sensor glitch — check further).
+Glasgow-local (or a Glasgow sensor glitch — check further). `ingest candidates` does
+this check for every sensor at once:
+
+```bash
+python -m airwv.ingest candidates --start 2024-09-20 --end 2024-09-28
+```
 
 ## 3. Whole WVCAG network (optional, larger)
 

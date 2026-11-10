@@ -1,0 +1,171 @@
+{
+ "37.805,-81.905,8,6": {
+  "sites": [
+   {
+    "lat": 37.81,
+    "latest": {
+     "selenium": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "ug/L",
+      "value": 6.5
+     }
+    },
+    "lon": -81.9,
+    "mi": 0.4,
+    "name": "Spruce Fork",
+    "site_id": "S2"
+   }
+  ]
+ },
+ "38.3,-81.6,999,99": {
+  "sites": [
+   {
+    "lat": 38.37,
+    "latest": {
+     "iron": {
+      "ts": "2026-07-02T00:00:00",
+      "unit": "mg/L",
+      "value": 1.9
+     },
+     "ph": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "pH",
+      "value": 7.1
+     }
+    },
+    "lon": -81.62,
+    "mi": 5.0,
+    "name": "Elk River at Clendenin",
+    "site_id": "S1"
+   },
+   {
+    "lat": 38.33,
+    "latest": {
+     "ecoli": {
+      "ts": "2026-06-28T00:00:00",
+      "unit": "cfu/100mL",
+      "value": 88.0
+     }
+    },
+    "lon": -81.7,
+    "mi": 5.8,
+    "name": "Davis Creek",
+    "site_id": "S3"
+   },
+   {
+    "lat": 38.371,
+    "latest": {
+     "conductance": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "uS/cm",
+      "value": 310.0
+     }
+    },
+    "lon": -81.702,
+    "mi": 7.4,
+    "name": "Kanawha River at Charleston",
+    "site_id": "03198000"
+   }
+  ]
+ },
+ "38.37,-81.62,1,6": {
+  "sites": [
+   {
+    "lat": 38.37,
+    "latest": {
+     "iron": {
+      "ts": "2026-07-02T00:00:00",
+      "unit": "mg/L",
+      "value": 1.9
+     },
+     "ph": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "pH",
+      "value": 7.1
+     }
+    },
+    "lon": -81.62,
+    "mi": 0.0,
+    "name": "Elk River at Clendenin",
+    "site_id": "S1"
+   }
+  ]
+ },
+ "38.3727,-81.654,8,1": {
+  "sites": [
+   {
+    "lat": 38.37,
+    "latest": {
+     "iron": {
+      "ts": "2026-07-02T00:00:00",
+      "unit": "mg/L",
+      "value": 1.9
+     },
+     "ph": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "pH",
+      "value": 7.1
+     }
+    },
+    "lon": -81.62,
+    "mi": 1.9,
+    "name": "Elk River at Clendenin",
+    "site_id": "S1"
+   }
+  ]
+ },
+ "38.3727,-81.654,8,6": {
+  "sites": [
+   {
+    "lat": 38.37,
+    "latest": {
+     "iron": {
+      "ts": "2026-07-02T00:00:00",
+      "unit": "mg/L",
+      "value": 1.9
+     },
+     "ph": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "pH",
+      "value": 7.1
+     }
+    },
+    "lon": -81.62,
+    "mi": 1.9,
+    "name": "Elk River at Clendenin",
+    "site_id": "S1"
+   },
+   {
+    "lat": 38.371,
+    "latest": {
+     "conductance": {
+      "ts": "2026-07-01T00:00:00",
+      "unit": "uS/cm",
+      "value": 310.0
+     }
+    },
+    "lon": -81.702,
+    "mi": 2.6,
+    "name": "Kanawha River at Charleston",
+    "site_id": "03198000"
+   },
+   {
+    "lat": 38.33,
+    "latest": {
+     "ecoli": {
+      "ts": "2026-06-28T00:00:00",
+      "unit": "cfu/100mL",
+      "value": 88.0
+     }
+    },
+    "lon": -81.7,
+    "mi": 3.9,
+    "name": "Davis Creek",
+    "site_id": "S3"
+   }
+  ]
+ },
+ "40.7,-74.0,8,6": {
+  "sites": []
+ }
+}

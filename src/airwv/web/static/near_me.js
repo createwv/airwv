@@ -21,7 +21,7 @@ const SYMPTOMS = [
 ];
 const REPORT_DOMAIN = {gas: 'air', air: 'air', water: 'water', chemical: 'other', sensor: 'air'};
 
-let picked = new Set(), DATA = null, nbMap, nbLayer;
+let picked = new Set(), DATA = null, DC = null, nbMap, nbLayer;
 
 function relevantCats() {
   const c = new Set();
@@ -42,7 +42,9 @@ function renderSymptoms() {
 function hazardRow(h, relevant) {
   const flag = h.flag ? `<span class="nb-flag nb-${h.flag}">${h.flag.replace('_', ' ')}</span>` : '';
   const dist = h.mi != null ? `${h.mi} mi` : 'in your county';
-  const link = h.link ? `<a href="${esc(h.link)}" ${h.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
+  // each hazard's own site page (/site/<kind>/<id>), which links on to the data source's record
+  const href = h.page || h.link;
+  const link = href ? `<a href="${esc(href)}" ${href.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>details →</a>` : '';
   const report = h.report ? `<a href="#" class="nb-report" data-lat="${h.lat}" data-lon="${h.lon}" data-cat="${h.category}" data-label="${esc(h.label)}">report →</a>` : '';
   return `<div class="nb-item${relevant ? ' rel' : ''}">
     <span class="nb-ic">${h.icon || '•'}</span>
@@ -75,6 +77,21 @@ function renderResults() {
   if (rel.size && html) $('nb-results').insertAdjacentHTML('afterbegin',
     `<p class="meta" style="margin:4px 2px 8px">⬆ Categories that fit your symptoms are shown first and marked. This is a place to look — not a cause.</p>`);
   wireReports();
+  renderDataCenters();
+}
+
+// Data centers (/api/data-centers): a plain card per site near this place (static/dc.js).
+function renderDataCenters() {
+  const old = $('nb-dc'); if (old) old.remove();
+  if (!DC) return;
+  const all = DC.near.concat(DC.in_county);
+  if (!all.length) return;
+  $('nb-results').insertAdjacentHTML('afterbegin', `<div class="card" id="nb-dc">
+    <h2>Data centers near here <span class="meta">${all.length} · within ${Math.round(DC.place.km * 0.621371)} mi${DC.county ? ' or in ' + esc(DC.county) + ' County' : ''}</span></h2>
+    <p class="meta" style="padding:6px 14px 0">What the public record says about water, energy, noise and what it's for, and what nobody has disclosed. Hand-compiled ${esc(DC.fetched_at)}; <a href="/data">where this comes from</a>.</p>
+    ${all.map(AIRWV_DC.card).join('')}
+    <div class="dc-card">${AIRWV_DC.ask(DC.how_to_ask)}</div>
+  </div>`);
 }
 
 function drawMap() {
@@ -86,12 +103,18 @@ function drawMap() {
   nbMap.setView([DATA.lat, DATA.lon], 12);
   if (nbLayer) nbLayer.remove();
   nbLayer = L.layerGroup();
-  L.marker([DATA.lat, DATA.lon], {icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
+  L.marker([DATA.lat, DATA.lon], {title: 'You are here', icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
     .bindPopup('You are here').addTo(nbLayer);
   (DATA.hazards || []).forEach(h => {
     if (h.lat == null || h.lon == null) return;
-    L.circleMarker([h.lat, h.lon], {radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
+    L.circleMarker([h.lat, h.lon], {title: h.label, radius: 6, color: '#333', weight: 1, fillColor: CAT[h.category].color, fillOpacity: 0.85})
       .bindPopup(`<b>${esc(h.label)}</b><br><small>${h.mi != null ? h.mi + ' mi · ' : ''}${esc(h.detail || '')}</small>`)
+      .addTo(nbLayer);
+  });
+  ((DC && DC.near) || []).forEach(c => {
+    if (c.lat == null || c.lon == null) return;
+    L.marker([c.lat, c.lon], {title: `${c.name}, data center`, icon: L.divIcon({className: '', html: '🏢', iconSize: [24, 24], iconAnchor: [12, 12]})})
+      .bindPopup(`<b>${esc(c.name)}</b><br><small>Data center · ${esc(c.status_label)} · ${c.mi} mi</small><br><a href="${esc(c.url)}">what we know →</a>`)
       .addTo(nbLayer);
   });
   nbLayer.addTo(nbMap);
@@ -117,7 +140,11 @@ async function loadAt(lat, lon, from) {
   AirwvState.set({lat: +lat, lon: +lon, km: +km, label: from || null});   // a shareable link to this screen
   $('nb-locinfo').textContent = `📍 ${(+lat).toFixed(3)}, ${(+lon).toFixed(3)}${from ? ' · ' + from : ''}`;
   try {
-    DATA = await (await fetch(`/api/near?lat=${lat}&lon=${lon}&km=${km}`)).json();
+    // data centers are big neighbors (water, power, generator noise): look at least 10 mi out
+    const [near, dc] = await Promise.all([
+      fetch(`/api/near?lat=${lat}&lon=${lon}&km=${km}`).then(r => r.json()),
+      fetch(`/api/data-centers?lat=${lat}&lon=${lon}&km=${Math.max(16, +km)}`).then(r => r.json()).catch(() => null)]);
+    DATA = near; DC = dc;
     $('nb-locinfo').textContent += ` — ${(DATA.hazards || []).length} things nearby${DATA.county ? ' · ' + DATA.county + ' County' : ''}`;
     renderResults();
   } catch (e) { $('nb-results').innerHTML = '<div class="card"><p class="meta" style="padding:16px">Could not load nearby data — try again.</p></div>'; }

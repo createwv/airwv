@@ -16,6 +16,7 @@ import argparse
 import json
 import logging
 import math
+import os
 import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -34,7 +35,7 @@ from airwv.analysis import (
     score_health,
     sensor_medians,
 )
-from airwv.alerts import evaluate
+from airwv.alerts import RECORD_RULES, evaluate, evaluate_records, is_record_sub, record_key
 from airwv.config import Config
 from airwv.export_utils import readings_to_csv, readings_to_records
 from airwv.notify import make_notifier
@@ -350,8 +351,11 @@ def run_subscribe(
     quiet_start: int | None = None,
     quiet_end: int | None = None,
     store=None,
+    center: tuple[float, float] | None = None,
+    radius_km: float | None = None,
 ) -> int:
-    """Create an alert subscription. Returns its id."""
+    """Create an alert subscription. Returns its id. ``center`` + ``radius_km`` scope it
+    to a place; ``kind="record"`` (field spills | water | violations) fires on new records."""
     store = store or Store.from_config(config)
     store.create_schema()
     sensor_id = None
@@ -366,10 +370,16 @@ def run_subscribe(
         channel=channel, target=target, sensor_id=sensor_id, field=field, kind=kind,
         threshold=threshold, min_interval_seconds=min_interval_seconds,
         quiet_start=quiet_start, quiet_end=quiet_end,
+        center_lat=center[0] if center and radius_km else None,
+        center_lon=center[1] if center and radius_km else None,
+        radius_km=radius_km if center else None,
     )
-    trigger = f">= {threshold}" if kind == "threshold" else f"rising +{threshold}%"
+    trigger = {"threshold": f">= {threshold}", "record": "a new record appears"}.get(
+        kind, f"rising +{threshold}%")
+    where = (f"within {radius_km:g} km of {center[0]}, {center[1]}" if center and radius_km
+             else f"sensor {sensor_id}" if sensor_id else "anywhere in WV")
     log.info("subscription %d: %s -> %s when %s %s (%s)", sub_id, channel, target,
-             field, trigger, f"sensor {sensor_id}" if sensor_id else "any sensor")
+             field, trigger, where)
     return sub_id
 
 
@@ -400,18 +410,46 @@ def run_alerts(config: Config, send: bool = False, now: datetime | None = None,
                      if getattr(r, "lat", None) is not None and getattr(r, "lon", None) is not None}
     alerts = evaluate(subs, latest, now, trends=trends, sensor_coords=sensor_coords)
 
+    # place-based record alerts (spills, violations): records new for the place since last check
+    record_subs = [s for s in subs if is_record_sub(s)]
+    baselines, present = {}, {}
+    if record_subs:
+        with store.read_model.connect() as conn:
+            records = store.read_model.alert_records(conn, RECORD_RULES)
+        seen = store.seen_records(s.id for s in record_subs)
+        last_present = store.records_last_present(s.id for s in record_subs)
+        rec_alerts, baselines, present = evaluate_records(record_subs, records, seen, now,
+                                                          last_present=last_present)
+        alerts += rec_alerts
+    for sub_id, keys in baselines.items():
+        log.info("  baseline sub %d: %d record(s) already on file%s", sub_id, len(keys),
+                 "" if send else " (not stored in a dry run)")
+        if send:
+            store.mark_records_seen(sub_id, keys, now, origin="baseline")
+    if send:
+        for sub_id, keys in present.items():
+            store.mark_records_present(sub_id, keys, now)
+
+    base = os.environ.get("AIRWV_BASE_URL", "").strip().rstrip("/")
+    tokens = {s.id: s.token for s in subs if getattr(s, "token", None)}
     log.info("%d subscription(s), %d alert(s) %s", len(subs), len(alerts),
              "to send" if send else "(dry run — use --send to deliver)")
     for a in alerts:
+        if base and a.subscription_id in tokens:
+            a.unsubscribe_url = f"{base}/alerts/unsubscribe?token={tokens[a.subscription_id]}"
         detail = (f"{a.field} rising +{a.value}% (>= +{a.threshold}%)" if a.kind == "trend"
+                  else f"{len(a.records)} new {a.field} record(s)" if a.kind == "record"
                   else f"{a.field}={a.value} >= {a.threshold}")
-        log.info("  ALERT sub %d %s->%s: %s at sensor %s",
-                 a.subscription_id, a.channel, a.target, detail, a.sensor_id)
+        log.info("  ALERT sub %d %s->%s: %s at %s %s", a.subscription_id, a.channel, a.target,
+                 detail, "site" if a.kind == "record" else "sensor", a.sensor_id)
         if not send:
             continue
         try:
             notifier_factory(a.channel).send(a)
             store.mark_notified(a.subscription_id, now)
+            if a.kind == "record":
+                store.mark_records_seen(a.subscription_id, [record_key(r) for r in a.records], now,
+                                        origin="alert")
         except Exception as exc:  # one bad channel shouldn't block the rest
             log.warning("  failed to send alert %d via %s: %s", a.subscription_id, a.channel, exc)
     return alerts
@@ -664,6 +702,7 @@ def run_airnow(config: Config, store=None, max_lookback: int = 8) -> int:
         return 0
     readings, monitors = _parse_airnow(content)
     n = store.save_readings(readings)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors.items()})
     total = _airnow_save_monitors(config, monitors)
     log.info("airnow: %d readings from %d monitors (HourlyAQObs_%s; %d monitors known total)",
              n, len(monitors), stamp, total)
@@ -696,6 +735,7 @@ def run_airnow_backfill(config: Config, days: int, store=None, hour: int = 18) -
                 readings, monitors = _parse_airnow(got)
                 total += store.save_readings(readings)
                 monitors_all.update(monitors)
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow backfill: %d readings across %d days", total, days)
     return total
@@ -741,6 +781,7 @@ def run_airnow_hourly(config: Config, year: int, store=None, workers: int = 10) 
     if batch:
         total += store.save_readings(batch)
     client.close()
+    store.name_reading_sites("airnow", {k: m["name"] for k, m in monitors_all.items()})
     _airnow_save_monitors(config, monitors_all)
     log.info("airnow hourly %d: %d readings from %d files", year, total, len(hours))
     return total
@@ -800,13 +841,7 @@ def run_validate(config: Config | None = None, field: str = "pm2_5", min_days: i
 
     # Community sensor coords: passed in, or from the resolved public-sensor listing.
     if coords is None:
-        coords = {}
-        listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
-        if listing_path.exists():
-            for rec in json.loads(listing_path.read_text()):
-                idx = str(rec.get("sensor_index") or rec.get("index") or "")
-                if idx and rec.get("latitude") is not None:
-                    coords[idx] = (rec["latitude"], rec["longitude"])
+        coords = _community_coords(config)
 
     since = None if not window_days else (
         datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=window_days))
@@ -989,6 +1024,91 @@ def run_events(
     return found
 
 
+def _community_coords(config: Config) -> dict[str, tuple]:
+    """Community sensor coords from the resolved public-sensor listing (best-effort)."""
+    coords: dict[str, tuple] = {}
+    listing_path = config.index_cache_path.parent / "wv_public_sensors.json"
+    if listing_path.exists():
+        for rec in json.loads(listing_path.read_text()):
+            idx = str(rec.get("sensor_index") or rec.get("index") or "")
+            if idx and rec.get("latitude") is not None:
+                coords[idx] = (rec["latitude"], rec["longitude"])
+    return coords
+
+
+def run_candidates(
+    config: Config | None = None,
+    field: str = "pm2_5",
+    days: int = 30,
+    start: datetime | None = None,
+    end: datetime | None = None,
+    z_threshold: float = 6.0,
+    radius_km: float = 15.0,
+    window_h: float = 3.0,
+    neighbor_z: float = 3.0,
+    top: int = 15,
+    store=None,
+    coords: dict | None = None,
+) -> dict:
+    """Neighbor cross-check every spike in a window and propose event candidates.
+
+    Spikes come from :func:`detrend_events` on each community sensor and AirNow
+    monitor (hourly sources; AirData's daily archive is left out). Each spike is
+    corroborated (a neighbor within ``radius_km`` rose too), single-sensor
+    (neighbors reporting, flat: local source or sensor fault) or unchecked (no
+    neighbor reporting). Corroborated spikes that overlap merge into candidates.
+    The window is ``[start, end]``, default the last ``days`` up to the newest
+    reading. Read-only, no API cost.
+    """
+    from airwv.analysis.crosscheck import cross_check, episodes, event_candidates
+    from airwv.analysis.events import residual_scores
+
+    store = store or Store.from_config(config)
+    if coords is None:
+        coords = _community_coords(config)
+    coords = {**coords, **store.coords_from_readings("airnow")}
+    sids = sorted(set(store.sensor_ids_by_source("purpleair")) | set(store.sensor_ids_by_source("airnow")))
+
+    def naive(dt):
+        return dt.astimezone(timezone.utc).replace(tzinfo=None) if dt and dt.tzinfo else dt
+
+    until = naive(end)
+    if until is None:
+        lasts = [t for t in (store.last_ts_for_sensor(s) for s in sids) if t is not None]
+        until = max(lasts).replace(tzinfo=None) if lasts else None
+    if until is None:
+        return {"since": None, "until": None, "checks": [], "candidates": []}
+    since = naive(start) or until - timedelta(days=days)
+
+    scores, flagged = {}, []
+    for sid in sids:
+        rows = store.readings_for_sensor(sid, since=since, until=until)
+        pts = residual_scores(rows, field=field)
+        if not pts:
+            continue
+        scores[sid] = pts
+        flagged.extend(detrend_events(rows, field=field, z_threshold=z_threshold))
+
+    checks = cross_check(episodes(flagged, gap_h=window_h), scores, coords,
+                         radius_km=radius_km, window_h=window_h, neighbor_z=neighbor_z)
+    cands = event_candidates(checks, coords, window_h=window_h)
+
+    by_status = Counter(c.status for c in checks)
+    log.info("%s spikes %s → %s: %d corroborated, %d single-sensor, %d unchecked; %d candidate(s)",
+             field, since.date(), until.date(), by_status["corroborated"], by_status["single_sensor"],
+             by_status["no_neighbors"], len(cands))
+    for c in cands[:top]:
+        log.info("  candidate %s → %s  %d sensors  peak %s=%.1f at %s (z=%.0f)",
+                 c.start.strftime("%Y-%m-%d %H:%M"), c.end.strftime("%Y-%m-%d %H:%M"),
+                 len(c.sensor_ids), field, c.peak_value, c.peak_sensor, c.peak_score)
+    for c in sorted((c for c in checks if c.status == "single_sensor"),
+                    key=lambda c: -c.episode.peak.score)[:top]:
+        log.info("  single-sensor %s  sensor %s  %s=%.1f  (%d neighbor(s) flat)",
+                 c.episode.peak.ts.strftime("%Y-%m-%d %H:%M"), c.episode.sensor_id,
+                 field, c.episode.peak.value, len(c.neighbors))
+    return {"since": since, "until": until, "checks": checks, "candidates": cands}
+
+
 def collect_with_retry(
     config: Config,
     source=None,
@@ -1095,6 +1215,15 @@ def main(argv: list[str] | None = None) -> None:
     events.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
     events.add_argument("--threshold", type=float, default=6.0, help="residual robust-z threshold")
     events.add_argument("--top", type=int, default=15, help="how many top events to show")
+    cands = sub.add_parser("candidates",
+                           help="neighbor cross-check of spikes + proposed events (no API cost)")
+    cands.add_argument("--field", default="pm2_5", help="field to scan (default pm2_5)")
+    cands.add_argument("--days", type=int, default=30, help="window length, ending at the newest reading")
+    cands.add_argument("--start", help="window start YYYY-MM-DD (UTC)")
+    cands.add_argument("--end", help="window end YYYY-MM-DD (UTC)")
+    cands.add_argument("--threshold", type=float, default=6.0, help="spike residual robust-z threshold")
+    cands.add_argument("--radius-km", type=float, default=15.0, help="neighbor radius")
+    cands.add_argument("--top", type=int, default=15, help="how many to show")
     trends = sub.add_parser("trends", help="long-term trends + areas to watch (no API cost)")
     trends.add_argument("--field", default="pm2_5", help="field to trend (default pm2_5)")
     trends.add_argument("--sensor", help="limit to one sensor name (default: all)")
@@ -1109,12 +1238,17 @@ def main(argv: list[str] | None = None) -> None:
     subscribe = sub.add_parser("subscribe", help="create an alert subscription")
     subscribe.add_argument("--channel", required=True, choices=["email", "webhook", "log"])
     subscribe.add_argument("--target", required=True, help="email address / webhook URL")
-    subscribe.add_argument("--threshold", type=float, required=True,
-                           help="threshold value, or for --kind trend the min %% rise")
-    subscribe.add_argument("--kind", default="threshold", choices=["threshold", "trend"],
-                           help="threshold (value crosses) or trend (rising over time)")
+    subscribe.add_argument("--threshold", type=float,
+                           help="threshold value, or for --kind trend the min %% rise "
+                                "(required, except for --kind record)")
+    subscribe.add_argument("--kind", default="threshold", choices=["threshold", "trend", "record"],
+                           help="threshold (value crosses), trend (rising over time) or "
+                                "record (a new spill/violation; --field spills|water|violations)")
     subscribe.add_argument("--sensor", help="sensor name (default: any sensor)")
     subscribe.add_argument("--field", default="pm2_5", help="field to watch (default pm2_5)")
+    subscribe.add_argument("--lat", type=float, help="place: center latitude (with --lon, --radius-km)")
+    subscribe.add_argument("--lon", type=float, help="place: center longitude")
+    subscribe.add_argument("--radius-km", type=float, help="place: radius in km")
     subscribe.add_argument("--min-interval", type=int, default=21600, help="min seconds between alerts")
     subscribe.add_argument("--quiet-start", type=int, help="quiet hours start (local hour 0-23)")
     subscribe.add_argument("--quiet-end", type=int, help="quiet hours end (local hour 0-23)")
@@ -1173,6 +1307,10 @@ def main(argv: list[str] | None = None) -> None:
         run_compare(config, args.sensor, field=args.field)
     elif command == "events":
         run_events(config, args.sensor, field=args.field, z_threshold=args.threshold, top=args.top)
+    elif command == "candidates":
+        run_candidates(config, field=args.field, days=args.days, start=_date(args.start),
+                       end=_date(args.end), z_threshold=args.threshold, radius_km=args.radius_km,
+                       top=args.top)
     elif command == "trends":
         run_trends(config, field=args.field, sensor_name=args.sensor, min_days=args.min_days)
     elif command == "baseline":
@@ -1180,9 +1318,16 @@ def main(argv: list[str] | None = None) -> None:
     elif command == "export":
         run_export(config, args.out, sensor_name=args.sensor, org=args.org, fmt=args.format)
     elif command == "subscribe":
-        run_subscribe(config, args.channel, args.target, args.threshold, sensor_name=args.sensor,
+        if args.kind == "record" and args.field not in RECORD_RULES:
+            parser.error(f"--kind record needs --field {'|'.join(RECORD_RULES)}")
+        if args.kind != "record" and args.threshold is None:
+            parser.error("--threshold is required for --kind threshold/trend")
+        run_subscribe(config, args.channel, args.target, args.threshold or 0.0, sensor_name=args.sensor,
                       field=args.field, kind=args.kind, min_interval_seconds=args.min_interval,
-                      quiet_start=args.quiet_start, quiet_end=args.quiet_end)
+                      quiet_start=args.quiet_start, quiet_end=args.quiet_end,
+                      center=((args.lat, args.lon) if args.lat is not None and args.lon is not None
+                              else None),
+                      radius_km=args.radius_km)
     elif command == "alerts":
         run_alerts(config, send=args.send)
     elif command == "airnow":

@@ -188,7 +188,8 @@ conductance, E. coli, …) in `fetch_water_samples.py`. **Add a parameter** by a
 `CharacteristicName → (key, unit)` row to `CHARS` and running `--chars <Name>` (that's
 how selenium got added). Periodic samples, not live — each site shows its latest date.
 Served via `/api/water/near` (the reusable "measured water near a point" join used by
-coal dischargers *and* facilities).
+coal dischargers *and* facilities), which reads the unified views; output is pinned by
+`tests/snapshots/api_water_near.json`.
 
 ### WV DEP Coal NPDES + 303(d) impaired streams (ArcGIS)
 `fetch_coal_npdes.py` pulls active coal-mine discharge outlets from WV DEP's
@@ -230,8 +231,8 @@ both from `tagis.dep.wv.gov/.../WVDEP_enterprise/{oil_gas,mining_reclamation}`. 
 ## Wells, spills & the "near me" synthesis
 
 ### WV DEP abandoned & orphan wells (ArcGIS)
-`fetch_abandoned_wells.py` — 15,455 abandoned wells, 4,721 orphans (no operator = the
-state's to plug). `enrich_wells_proximity.py` then tags each with distance to the
+`fetch_abandoned_wells.py` — 13,827 abandoned wells, 4,596 orphans (no operator = the
+state's to plug), after dropping the ~1,600 rows the layer repeats verbatim. `enrich_wells_proximity.py` then tags each with distance to the
 nearest **Microsoft building footprint** (§Geospatial) for the near-homes risk flag.
 
 ### National Response Center — reported spills (keyless)
@@ -245,7 +246,49 @@ follow-up sampling never becomes public. → `/api/nrc-spills`, Events page.
 `/api/near?lat=&lon=&km=` aggregates **all** of the above within a radius into one
 categorized list (gas/air/water/chemical/sensor). It's the clearest example of the
 payoff: once every source carries coordinates + provenance, joining them by location
-is easy. Powers the **What's near me?** page.
+is easy. Powers the **What's near me?** page. Reads the unified views below; output is
+pinned by `tests/snapshots/api_near.json`. Each hazard's `page` is its site page,
+`/site/<kind>/<id>` (the Nearby "details →" link); `link` stays the data source's own record.
+
+### `/site/<kind>/<id>` — one page per site
+Every kind in the `site` view (`well`, `facility`, `permit`, `spill_report`, `water_system`,
+`reference_monitor`, `sensor`, `gauge`, `sample_site`, `data_center`) has a page; `<id>` is the
+site's `ref` (the part of `site_id` after `kind:`). The plain view shows what and where, its
+public records in words, the latest readings (sensors, gauges, sample sites), "what else is
+near here" and the data source's own record; `?view=adv` shows the full source row, the raw
+records and series / CSV links into `/api/query`. Data centers keep their own card.
+
+### `/api/query` — one read path over the unified views
+`/api/query?lat=&lon=&km=&kind=&medium=&area=&county=&param=&over=&from=&to=&since=&limit=` returns sites near
+a place from the `site` / `measurement` / `record` SQL views, each with its records, its latest
+`param` value (sensors, monitors, gauges, sample sites) and the provenance block of every
+layer in the answer. `param` may be a comma list (the first one a site has wins; `latest`
+names it). `area` is a county (`Kanawha`) or a WV sensor region (`Kanawha Valley`); with
+an area, `lat`/`lon` are optional (then `place` is null, `mi` is null and sites without
+coordinates count). `county` is a comma list of WV counties, with or without a point; it
+reads each layer's county field in any spelling (`Kanawha County`, `Mc Dowell`, a project
+listed under several counties counts in each), and an unknown name is a 400. Sites whose
+source lists no county (community sensors, gauges, sample sites, coal permits, mines, TRI
+facilities) drop out rather than being placed by guesswork. `over=N` (needs `param`) keeps
+only sites whose `latest` value is above N, checked before `limit`, and `from` / `to` decide
+which value is latest. `from` / `to` (YYYY-MM-DD, inclusive) bound which measurements count
+for `latest` and `peak`. `since=YYYY-MM-DD` adds "what changed": each measured site's `peak` of the first
+`param` since then, and a `changes` list of records dated on/after it (spills, permit
+dates), newest first. `/api/areas` (+ `/series`) and `/api/water/near` read the same views
+(the area filter and a measurement window), pinned by `tests/snapshots/api_areas.json` and
+`api_water_near.json`. `km` is capped at 40.25 (25 mi). `format=csv` returns the same answer
+as a CSV download: one row per site (latest/peak values flattened, a record count), or with
+`show=records` one row per record (only the dated `changes` when `since` is given). **Series
+mode:** `/api/query?site_id=&param=&from=&to=&over=&limit=` (`site_id` as the answer lists it, e.g.
+`sensor:197127` or `sample_site:S1`; exactly one `param`) returns that site's `measurement`
+rows (`ts`, `value`, `unit`, `source`, `quality`; only those above `over` when given), oldest first, with the site, its layer's
+provenance and a `csv` link to the same rows; the place filters don't apply. Past `limit`
+(default 5000, max 20000) the newest rows are kept and `truncated` is true; an unknown
+`site_id` is a 404. Powers the
+**My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
+state is in its URL, with the table, the CSV link and the API link for the same query; its
+"measurements" option picks a site near the place and reads this series mode). See
+[READ-MODEL.md](READ-MODEL.md).
 
 ---
 

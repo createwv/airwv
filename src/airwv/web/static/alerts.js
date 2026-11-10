@@ -82,3 +82,10 @@ $('a-useloc').addEventListener('click', useMyLocation);
 $('a-addrfind').addEventListener('click', findAddress);
 $('a-addr').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); findAddress(); } });
 $('alertform').addEventListener('submit', submit);
+
+// "Watch this place" from /place arrives as ?lat=&lon=&name=: start from that place
+(() => {
+  const q = new URLSearchParams(location.search);
+  const lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
+  if (Number.isFinite(lat) && Number.isFinite(lon)) setLoc(lat, lon, (q.get('name') || '').slice(0, 120) || null);
+})();

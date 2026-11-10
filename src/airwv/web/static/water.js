@@ -55,7 +55,7 @@ function renderNearWater(sites) {
       const l = s.latest[k], m = WATER_PARAMS[k];
       const col = m ? m.color(l.value) : '#333';
       const unit = m && m.unit ? m.unit : (l.unit || '');
-      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${unit ? ' ' + unit : ''}</b> ${m ? m.label : k}</span>`;
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${l.value}${unit ? ' ' + unit : ''}</b> ${m ? m.label : k}</span>`;
     }).join(' ');
     if (chips) html += `<div style="margin:3px 0"><small>${esc(s.name)} <span class="meta">${s.mi} mi</span></small><br>${chips}</div>`;
   });
@@ -83,7 +83,7 @@ async function toggleCoal(on) {
       ? `<br><span style="color:#c0392b;font-weight:600">⚠️ On a 303(d)-impaired stream</span>`
         + `<br><small>Impaired for: ${(p.impairment_causes || []).map(esc).join(', ')}</small>`
       : '';
-    L.circleMarker([p.lat, p.lon], {radius: r, color: '#333', weight: 1, fillColor: fill, fillOpacity: 0.82})
+    L.circleMarker([p.lat, p.lon], {title: `${p.operator}, permit ${p.permit}`, radius: r, color: '#333', weight: 1, fillColor: fill, fillOpacity: 0.82})
       .bindPopup(`<b>${esc(p.operator)}</b> <small>${esc(p.permit)}</small>`
         + `<br>⛏️ <b>${p.outlets}</b> permitted discharge outlet${p.outlets === 1 ? '' : 's'}`
         + ` into <b>${p.stream_count}</b> stream${p.stream_count === 1 ? '' : 's'}`
@@ -106,7 +106,7 @@ function nearMe() {
 }
 function showPlace(lat, lon, label) {
   if (userMarker) userMarker.remove();
-  userMarker = L.marker([lat, lon], {zIndexOffset: 1000,
+  userMarker = L.marker([lat, lon], {title: label, zIndexOffset: 1000,
     icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26], iconAnchor: [13, 26]})})
     .addTo(map).bindPopup(esc(label)).openPopup();
   map.setView([lat, lon], 11);
@@ -132,14 +132,15 @@ function draw() {
     const t = l.ts ? new Date(l.ts).getTime() : null;
     if (t) { newest = newest == null ? t : Math.max(newest, t); oldest = oldest == null ? t : Math.min(oldest, t); }
     const val = `${l.value}${meta.unit ? ' ' + meta.unit : ''}`;
-    L.circleMarker([s.lat, s.lon], {radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
+    L.circleMarker([s.lat, s.lon], {title: s.name, radius: 6, color: '#333', weight: 1, fillColor: colorFor(s, current), fillOpacity: 0.9})
       .bindPopup(`<b>${esc(s.name)}</b><br>${meta.label}: <b>${val}</b>`
         + (l.ts ? `<br><small>latest sample: ${fmtDate(l.ts)}</small>` : '')
         + `<br><small>click to chart</small>`)
       .on('click', () => showSite(s)).addTo(layer);
   });
   layer.addTo(map);
-  $('w-count').textContent = `· ${withVal} sites report ${meta.label.toLowerCase()}`;
+  const total = SITES.filter(s => s.lat != null && s.lon != null).length;
+  $('w-count').textContent = `· ${withVal.toLocaleString()} of ${total.toLocaleString()} sites have ${meta.label.toLowerCase()} data`;
   // freshness: latest-sample dates vary by site, so state the span plainly
   $('w-asof').textContent = newest
     ? ` · latest samples ${oldest && oldest !== newest ? fmtDate(oldest) + '–' : ''}${fmtDate(newest)}`
@@ -185,7 +186,7 @@ async function showSite(s) {
        yaxis: {title: meta.label + (meta.unit ? ` (${meta.unit})` : '')}},
       {displayModeBar: false, responsive: true});
   } catch (e) { $('w-chart').innerHTML = '<p class="meta" style="padding:14px">Could not load the chart.</p>'; }
-  $('w-sitename').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  $('w-sitename').scrollIntoView({behavior: AIRWV_WV.scrollBehavior(), block: 'nearest'});
 }
 
 // ---- 🚰 SDWA drinking-water systems + violations ----
@@ -195,7 +196,7 @@ async function loadSdwa() {
   catch (e) { $('sdwa-body').innerHTML = '<tr><td colspan="6" class="meta" style="padding:14px">Could not load drinking-water data.</td></tr>'; return; }
   SDWA_META = SDWA;
   const s = SDWA.summary || {};
-  const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${col}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+  const box = (n, txt, col) => `<span class="fac-stat" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
   $('sdwa-summary').innerHTML =
     box(s.systems, 'active water systems', '#5a6472')
     + box(s.community, 'community (serve homes)', '#2c7fb8')
@@ -208,11 +209,11 @@ async function loadSdwa() {
   drawSdwaMap();
   renderSdwa();
   ['sdwa-health', 'sdwa-community', 'sdwa-county'].forEach(id => $(id).addEventListener('change', renderSdwa));
-  setTimeout(() => sdwaMap && sdwaMap.invalidateSize(), 200);
+  setTimeout(() => { if (sdwaMap) { sdwaMap.invalidateSize(); AIRWV_WV.fitWV(sdwaMap); } }, 200);
 }
 function drawSdwaMap() {
   if (!sdwaMap) {
-    sdwaMap = L.map('sdwa-map').setView([38.6, -80.6], 7);
+    sdwaMap = AIRWV_WV.fitWV(L.map('sdwa-map'));
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '© OpenStreetMap'}).addTo(sdwaMap);
   }
   if (sdwaLayer) sdwaLayer.remove();
@@ -222,8 +223,8 @@ function drawSdwaMap() {
     if (c.lat == null || !c.health) return;
     const rate = c.systems ? c.health / c.systems : 0;
     const col = rate >= 0.4 ? '#7e0023' : rate >= 0.25 ? '#c0392b' : rate >= 0.12 ? '#e07b00' : '#e0a030';
-    L.circleMarker([c.lat, c.lon], {radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
-      .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${col}">${c.health}</b> of ${c.systems} systems with a health-based violation`
+    L.circleMarker([c.lat, c.lon], {title: `${c.county} County`, radius: 6 + 22 * (c.health / maxH), color: '#500', weight: 1, fillColor: col, fillOpacity: 0.75})
+      .bindPopup(`<b>${esc(c.county)} County</b><br><b style="color:${AIRWV_WV.ink(col)}">${c.health}</b> of ${c.systems} systems with a health-based violation`
         + `<br><small>${c.serious} serious violator(s) · ${Number(c.pop_affected).toLocaleString()} people served</small>`
         + `<br><small><a href="#" data-cofilter="${esc(c.county)}">show these systems ↓</a></small>`)
       .addTo(sdwaLayer);

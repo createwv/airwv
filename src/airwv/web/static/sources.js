@@ -1,4 +1,4 @@
-// Sources & Facilities browse page. Carousel of featured facilities + a filterable
+// Facilities browse page (/facilities, formerly /sources). Carousel of featured facilities + a filterable
 // grid; click any card for a detail view with a Street View photo (when a Google Maps
 // key is configured), the facts we cite, and the nearest air sensors. No map on this
 // page — the "nearby sensors" list is computed from /api/sensors client-side.
@@ -12,20 +12,21 @@ const CAT = {
   oil_gas:  {label: 'Oil & gas',          icon: '🛢️', color: '#7a5b12'},
   materials:{label: 'Metals / materials', icon: '🏗️', color: '#5a6472'},
   waste:    {label: 'Waste',              icon: '♻️', color: '#2a7a2a'},
-  water_discharge: {label: 'Water discharge (NPDES)', icon: '💧', color: '#2c9fd6'},
-  other:    {label: 'TRI facility',       icon: '🏭', color: '#4a7fb0'},
+  water_discharge: {label: 'Water discharge (NPDES)', icon: '💧', color: '#1a78a8'},
+  other:    {label: 'TRI facility',       icon: '🏭', color: '#3f74a6'},
 };
 const CAT_ORDER = ['power', 'chemical', 'oil_gas', 'water_discharge', 'waste', 'materials', 'other'];
 
 let SOURCES = [], SENSORS = [], DISCLAIMER = '';
+const sdDialog = AIRWV_WV.dialog($('srcdetail'), $('sd-close'));
 let FACILITIES = [], FAC_META = {};
 
 // EPA ECHO compliance status → badge; program code → chip.
 const FAC_STATUS = {
   significant_violation: {label: 'Significant violation', color: '#c0392b', icon: '⛔'},
-  violation:            {label: 'In violation',          color: '#e07b00', icon: '⚠️'},
+  violation:            {label: 'In violation',          color: '#b35f00', icon: '⚠️'},
   compliant:            {label: 'No violation',          color: '#137333', icon: '✓'},
-  unknown:              {label: 'Not tracked',           color: '#8a94a0', icon: '·'},
+  unknown:              {label: 'Not tracked',           color: '#687280', icon: '·'},
 };
 const PROG = {air: '🌫️ Air', water: '💧 Water', waste: '♻️ Waste',
   'drinking-water': '🚰 Drinking water', 'toxics-release': '☢️ Toxics'};
@@ -55,7 +56,7 @@ async function fetchNearWaterHtml(lat, lon) {
   return withVals.slice(0, 3).map(s => {
     const chips = WQ_ORDER.filter(k => s.latest[k]).map(k => {
       const l = s.latest[k], m = WQ[k], col = m.color(l.value);
-      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${col}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
+      return `<span class="wq-chip" style="border-color:${col}"><b style="color:${AIRWV_WV.ink(col)}">${l.value}${m.unit ? ' ' + m.unit : ''}</b> ${m.label}</span>`;
     }).join(' ');
     return `<div style="margin:4px 0"><span>${esc(s.name)} <span class="meta">${s.mi} mi</span></span><br>${chips}</div>`;
   }).join('') + '<div class="meta" style="margin-top:4px">Latest WQP / USGS samples nearby · <a href="/water">open the Water map →</a></div>';
@@ -64,17 +65,17 @@ async function fetchNearWaterHtml(lat, lon) {
 let PERMITS = [], DEP_META = {};
 const DEP_STAGE = {
   requested:    {label: 'Requested', color: '#8e44ad', icon: '🟣'},
-  approved:     {label: 'Approved',  color: '#2c7fb8', icon: '🔵'},
-  construction: {label: 'Under construction', color: '#e07b00', icon: '🟠'},
-  other:        {label: 'Other',     color: '#8a94a0', icon: '·'},
+  approved:     {label: 'Approved',  color: '#2a6fa8', icon: '🔵'},
+  construction: {label: 'Under construction', color: '#b35f00', icon: '🟠'},
+  other:        {label: 'Other',     color: '#687280', icon: '·'},
 };
 
 let MINES = [], MINE_META = {};
 const MINE_STAGE = {
-  new:      {label: 'New', color: '#e67e22', icon: '🟠'},
+  new:      {label: 'New', color: '#b35f00', icon: '🟠'},
   active:   {label: 'Active', color: '#8B4513', icon: '🟤'},
-  inactive: {label: 'Inactive', color: '#95a5a6', icon: '⚪'},
-  other:    {label: 'Other', color: '#8a94a0', icon: '·'},
+  inactive: {label: 'Inactive', color: '#5f6d6e', icon: '⚪'},
+  other:    {label: 'Other', color: '#687280', icon: '·'},
 };
 
 // ---- geo helpers (mirror of app.js proximity math) ----
@@ -103,7 +104,7 @@ function phStyle(cat) {
   return `background:linear-gradient(135deg,${c.color}22,${c.color}44)`;
 }
 function phInner(icon) {
-  return `<span class="ph-ic">${icon}</span><span class="ph-cap">📷 photo coming soon</span>`;
+  return `<span class="ph-ic">${icon}</span>`;
 }
 function thumb(s, w, h, cls) {
   const c = CAT[s.category] || CAT.other;
@@ -153,10 +154,18 @@ function renderGrid() {
   const rows = SOURCES.filter(s => s.lat != null
     && (!cat || s.category === cat || (s.categories || []).includes(cat))
     && (!q || (s.name + ' ' + (s.operator || '') + ' ' + (s.type || '') + ' ' + (s.names || []).join(' ')).toLowerCase().includes(q)));
-  $('src-count').textContent = `${rows.length} facilit${rows.length === 1 ? 'y' : 'ies'}`;
-  $('src-grid').innerHTML = rows.map(s => card(s, SOURCES.indexOf(s))).join('')
+  const shown = rows.slice(0, gridLimit);
+  $('src-count').textContent = rows.length > shown.length
+    ? `showing ${shown.length} of ${rows.length} facilities`
+    : `${rows.length} facilit${rows.length === 1 ? 'y' : 'ies'}`;
+  $('src-grid').innerHTML = shown.map(s => card(s, SOURCES.indexOf(s))).join('')
     || '<p class="meta" style="padding:14px">No matches.</p>';
+  $('src-more').hidden = rows.length <= shown.length;
 }
+// render the grid a page at a time (all ~500 cards at once made a very long, slow page)
+const GRID_PAGE = 24;
+let gridLimit = GRID_PAGE;
+function resetGrid() { gridLimit = GRID_PAGE; renderGrid(); }
 
 function renderFacilities() {
   const st = $('fac-status').value, pg = $('fac-program').value;
@@ -179,7 +188,7 @@ function renderFacilities() {
 function renderFacSummary() {
   const s = FAC_META.summary || {};
   const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
-    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+    <b style="color:${AIRWV_WV.ink(color)}">${n ?? '—'}</b> ${txt}</span>`;
   $('fac-summary').innerHTML =
     box(s.total, 'major facilities', '#5a6472')
     + box(s.significant_violation, 'in significant violation', '#c0392b')
@@ -203,7 +212,7 @@ function renderPermits() {
       <td class="meta">${esc(p.county || '')}</td>
       <td class="meta">${form || '—'}</td>
       <td><span class="fac-badge" style="background:${s.color}">${s.icon} ${s.label}</span></td>
-      <td class="meta">${when ? `${esc(when)}${whenLbl ? ` <span style="opacity:.7">(${whenLbl})</span>` : ''}` : '—'}</td>
+      <td class="meta">${when ? `${esc(when)}${whenLbl ? ` <span>(${whenLbl})</span>` : ''}` : '—'}</td>
       <td>${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">DEP →</a>` : '—'}</td>
     </tr>`;
   }).join('') || '<tr><td colspan="6" class="meta" style="padding:14px">No permits match.</td></tr>';
@@ -212,7 +221,7 @@ function renderPermits() {
 function renderPermitSummary() {
   const s = DEP_META.summary || {};
   const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
-    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+    <b style="color:${AIRWV_WV.ink(color)}">${n ?? '—'}</b> ${txt}</span>`;
   $('dep-summary').innerHTML =
     box(s.total, 'permits in the pipeline', '#5a6472')
     + box(s.requested, 'requested (pending)', '#8e44ad')
@@ -247,7 +256,7 @@ function renderMines() {
 function renderMineSummary() {
   const s = MINE_META.summary || {};
   const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
-    <b style="color:${color}">${n ?? '—'}</b> ${txt}</span>`;
+    <b style="color:${AIRWV_WV.ink(color)}">${n ?? '—'}</b> ${txt}</span>`;
   $('mine-summary').innerHTML =
     box(s.total, 'active + upcoming permits', '#5a6472')
     + box(s.new, 'new / not started', '#e67e22')
@@ -289,7 +298,7 @@ function renderCoal() {
 function renderCoalSummary() {
   const s = COAL_META.summary || {};
   const box = (n, txt, color) => `<span class="fac-stat" style="border-color:${color}">
-    <b style="color:${color}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
+    <b style="color:${AIRWV_WV.ink(color)}">${n != null ? Number(n).toLocaleString() : '—'}</b> ${txt}</span>`;
   const pct = s.permits ? Math.round(s.impaired / s.permits * 100) : 0;
   $('coal-summary').innerHTML =
     box(s.permits, 'coal discharge permits', '#8B4513')
@@ -362,7 +371,7 @@ function openDetail(s) {
   $('sd-analysis').href = `/air?src=${q}`;
   $('sd-report').href = `/air?src=${q}#report`;
   $('sd-note').textContent = DISCLAIMER;
-  $('srcdetail').classList.add('on');
+  sdDialog.open();
 }
 
 async function init() {
@@ -409,18 +418,15 @@ async function init() {
   $('mine-type').addEventListener('change', renderMines);
   $('coal-min').addEventListener('change', renderCoal);
   $('coal-impaired').addEventListener('change', renderCoal);
-  if (!SV_KEY) {
-    $('src-count').insertAdjacentHTML('afterend',
-      '<span class="meta" style="margin-left:10px">📷 Street View photos appear once a Google Maps key is configured.</span>');
-  }
 
   // interactions (event delegation for cards in both carousel and grid)
   document.body.addEventListener('click', e => {
     const b = e.target.closest('.srccard');
     if (b) openDetail(SOURCES[+b.dataset.i]);
   });
-  $('src-q').addEventListener('input', renderGrid);
-  $('src-cat').addEventListener('change', renderGrid);
+  $('src-q').addEventListener('input', resetGrid);
+  $('src-cat').addEventListener('change', resetGrid);
+  $('src-more').addEventListener('click', () => { gridLimit += GRID_PAGE; renderGrid(); });
   // deep link from the Events page: /sources#facility=<name> opens that facility
   const want = decodeURIComponent((location.hash.match(/facility=([^&]+)/) || [])[1] || '');
   // match the canonical name OR any of the merged variant names (Events may link an old name)
@@ -428,9 +434,7 @@ async function init() {
     const s = SOURCES.find(x => x.name === want || (x.names || []).includes(want));
     if (s) openDetail(s);
   }
-  $('sd-close').addEventListener('click', () => $('srcdetail').classList.remove('on'));
-  $('srcdetail').addEventListener('click', e => { if (e.target === $('srcdetail')) $('srcdetail').classList.remove('on'); });
-  const scroll = dx => $('carousel').scrollBy({left: dx, behavior: 'smooth'});
+  const scroll = dx => $('carousel').scrollBy({left: dx, behavior: AIRWV_WV.scrollBehavior()});
   $('car-prev').addEventListener('click', () => scroll(-660));
   $('car-next').addEventListener('click', () => scroll(660));
 }
