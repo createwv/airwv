@@ -288,7 +288,7 @@ provenance and a `csv` link to the same rows; the place filters don't apply. Pas
 **My place now** page (`/place`) and the **Explore** query builder (`/explore`, a form whose
 state is in its URL, with the table, the CSV link and the API link for the same query; its
 "measurements" option picks a site near the place and reads this series mode; its Area picker
-sends a county as `county=` and a sensor region as `area=`, "anywhere in the area" drops the point
+sends a county as `county=` and a sensor region as `area=`, "whole area" (`place=anywhere`) drops the point
 so the whole area counts, and its "Readings from / to" fields are `from` / `to`). See
 [READ-MODEL.md](READ-MODEL.md).
 

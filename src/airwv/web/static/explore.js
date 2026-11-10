@@ -27,7 +27,7 @@ const form = $('ex-form');
 const FIELDS = ['show', 'km', 'medium', 'param', 'over', 'since', 'site_id', 'from', 'to', 'limit'];
 const COUNTY_NOTE = "The county filter only finds places whose data source lists a county. Sensors, gauges and sample sites don't, so they drop out. ";
 const REGION_NOTE = 'A region only finds community sensors, grouped by the county their listing gives. ';
-const ANYWHERE = {id: 'anywhere', name: 'anywhere in the area'};
+const ANYWHERE = {id: 'anywhere', name: 'whole area'};
 const MEASURED_KINDS = 'sensor,reference_monitor,gauge,sample_site';
 const isSeries = () => form.elements.show.value === 'measurements';
 let urlSite = null;   // a site_id from the URL, until the site list has been filled once
