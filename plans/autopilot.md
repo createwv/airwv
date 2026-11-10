@@ -90,7 +90,7 @@ Direction: `~/Sites/clients/airwv-direction-review-2026-11-05.md` (outside the r
 - [x] Add a test that fails if "source" is used alone in page text, nav or popups, per the glossary [auto:S]
 - [x] Exclude PM readings over 1000 µg/m³ from the `/api/areas` daily trend as well as the current value, and update `api_areas.json` [auto:S]
 - [x] Remove the unused `Store.water_near` and its `_haversine_mi` helper [auto:S]
-- [ ] Explore: add an area picker (county / region) and `from`/`to` fields that use the new `/api/query` parameters [auto:M]
+- [x] Explore: add an area picker (county / region) and `from`/`to` fields that use the new `/api/query` parameters [auto:M]
 - [x] Swap `Store.coords_from_readings` (used by `/api/sensors` and ingest) to read `reading_sites` instead of scanning `readings` per source [auto:S]
 - [x] Bring the Alembic baseline up to date with the models (missing: `events`, `field_readings`, `water_readings`, `readings.ozone`, subscription columns) [auto:S]
 - [x] Set names for AirData-only monitors in `reading_sites` from the AirData CSV's site name column at ingest [auto:S]
