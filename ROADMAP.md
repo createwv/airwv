@@ -565,7 +565,8 @@ Grow the network and secure the record.
       environmental data store) for long-term preservation
 - [x] Open-data exports — nightly gzipped CSV of the `site` / `measurement` / `record`
       views and published events + a manifest with provenance (`python -m airwv.dumps`, `/data/dumps/…`,
-      `deploy/systemd/airwv-dumps.*`). *Parquet, CORS and rate limiting after Postgres.*
+      `deploy/systemd/airwv-dumps.*`), and Parquet of the same with the `dumps` extra (`pyarrow`).
+      *CORS and rate limiting after Postgres.*
 - [ ] Public API documentation and rate limiting
 - [ ] **Schema migrations** (e.g. Alembic) — `create_all` adds new tables but
       won't alter existing ones (adding a column needs a migration for live DBs)

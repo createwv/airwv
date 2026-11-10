@@ -9,13 +9,17 @@
 * ``events.csv.gz``      — curated events, published only (no drafts or archived ones)
 * ``manifest.json``      — when, row counts, columns, and each layer file's provenance block
 
+plus the same four tables as ``<name>.parquet`` (typed columns, zstd) when ``pyarrow`` is
+installed (the ``dumps`` extra); without it the CSVs are still written and Parquet is skipped
+with a warning.
+
 Only the public views (storage/readmodel.py) and published ``events`` are read, never
 ``reports`` / ``feedback`` / ``subscriptions``, so no contact details, IP hashes or exact
 report coordinates. Each file
 is written beside its final name and renamed into place, so the web app never serves a
 half-written dump. The app serves them at ``/data/dumps/<name>`` (web/app.py).
 
-CSV only: Parquet needs ``pyarrow``, which isn't a dependency (yet). SQLite for now; the
+SQLite for now; the
 views move to Postgres with the migration, and this reads them the same way.
 """
 
@@ -50,7 +54,18 @@ TABLES = {
                 "source_refs", "report_ids", "sources"], "start_ts, id"),
 }
 
-FILES = [f"{name}.csv.gz" for name in TABLES] + ["manifest.json"]
+# Parquet column types; every other column is a string, as in the CSV. Fixed per table because
+# SQLite's types are loose, so a type guessed from the first batch could break a later one.
+PARQUET_TYPES = {
+    "site": {"lat": "float64", "lon": "float64"},
+    "measurement": {"value": "float64"},
+    "record": {},
+    "events": {"id": "int64", "lat": "float64", "lon": "float64", "captured": "bool"},
+}
+_CASTS = {"string": str, "float64": float, "int64": int, "bool": bool}
+
+FILES = ([f"{name}.csv.gz" for name in TABLES] + [f"{name}.parquet" for name in TABLES]
+         + ["manifest.json"])
 
 CAVEATS = ("Public data, re-published as received: government data is provisional and not a "
            "regulatory determination; community-sensor (PurpleAir) values are as the sensor reported "
@@ -78,6 +93,33 @@ def _write_table(conn, view: str, columns: list[str], order: str, path: Path) ->
     return n
 
 
+def _pyarrow():
+    try:
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+    except ImportError:
+        log.warning("pyarrow not installed (pip install '.[dumps]'): skipping the Parquet dumps")
+        return None
+    return pa, pq
+
+
+def _write_parquet(conn, view: str, columns: list[str], order: str, types: dict, path: Path,
+                   pa, pq) -> int:
+    schema = pa.schema([(c, pa.type_for_alias(types.get(c, "string"))) for c in columns])
+    casts = [_CASTS[types.get(c, "string")] for c in columns]   # SQLite hands back 0/1, "2.4", ...
+    tmp = path.with_name(path.name + ".tmp")
+    n = 0
+    with pq.ParquetWriter(tmp, schema, compression="zstd") as writer:
+        result = conn.exec_driver_sql(f"SELECT {', '.join(columns)} FROM {view} ORDER BY {order}")
+        while rows := result.fetchmany(5000):
+            arrays = [pa.array([None if v is None else cast(v) for v in vals], type=schema.field(c).type)
+                      for c, cast, vals in zip(columns, casts, zip(*rows))]
+            writer.write_table(pa.Table.from_arrays(arrays, schema=schema))
+            n += len(rows)
+    tmp.replace(path)
+    return n
+
+
 def write_dumps(store: Store, out_dir: Path | str | None = None, now: datetime | None = None) -> dict:
     """Write every dump into ``out_dir``; returns the manifest (also written as manifest.json)."""
     out = Path(out_dir) if out_dir is not None else default_dir()
@@ -91,6 +133,14 @@ def write_dumps(store: Store, out_dir: Path | str | None = None, now: datetime |
             manifest["files"][fname] = {"view": view, "rows": rows, "columns": columns,
                                         "bytes": (out / fname).stat().st_size}
             log.info("dumped %s: %d rows -> %s", view, rows, out / fname)
+        if arrow := _pyarrow():
+            for name, (view, columns, order) in TABLES.items():
+                fname = f"{name}.parquet"
+                rows = _write_parquet(conn, view, columns, order, PARQUET_TYPES[name],
+                                      out / fname, *arrow)
+                manifest["files"][fname] = {"view": view, "rows": rows, "columns": columns,
+                                            "bytes": (out / fname).stat().st_size}
+                log.info("dumped %s: %d rows -> %s", view, rows, out / fname)
         manifest["provenance"] = store.read_model.provenance(conn, list(FILE_LAYERS))
     buf = io.StringIO()
     json.dump(manifest, buf, indent=2, ensure_ascii=False)

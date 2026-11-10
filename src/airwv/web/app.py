@@ -2167,12 +2167,14 @@ def create_app(store: Store) -> FastAPI:
 
     @app.get("/data/dumps/{name}")
     def data_dump(name: str):
-        """The nightly public dumps (dumps.py): gzipped CSV of the read views + manifest.json.
-        Only the fixed file names; 404 until the first nightly run has written them."""
+        """The nightly public dumps (dumps.py): gzipped CSV and Parquet of the read
+        views + manifest.json. Only the fixed file names; 404 until the first nightly run has
+        written them (the Parquet ones need pyarrow on the server)."""
         path = dumps.default_dir() / name
         if name not in dumps.FILES or not path.is_file():
             raise HTTPException(status_code=404, detail="no such dump (yet)")
-        media = "application/json" if name.endswith(".json") else "application/gzip"
+        media = ("application/json" if name.endswith(".json") else
+                 "application/vnd.apache.parquet" if name.endswith(".parquet") else "application/gzip")
         return FileResponse(path, media_type=media, filename=name,
                             headers={"Cache-Control": "public, max-age=3600"})
 
