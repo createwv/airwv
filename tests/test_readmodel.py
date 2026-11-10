@@ -199,6 +199,29 @@ def test_reading_sites_filled_at_ingest(tmp_path, monkeypatch):
     assert got["540250003"] == 38.36 and got["197127"] is None and len(got) == 8
 
 
+def test_airdata_ingest_names_its_monitors(tmp_path, monkeypatch):
+    import io
+    import zipfile
+
+    import httpx
+
+    from airwv.ingest import run_airdata
+    _, store = _client(tmp_path, monkeypatch)
+    head = "State Code,County Code,Site Num,Latitude,Longitude,Date Local,Arithmetic Mean,Local Site Name\n"
+    rows = ["54,099,0001,38.2,-82.5,2026-07-01,6.5,Fake Huntington Site\n",
+            "54,107,0009,39.3,-81.5,2026-07-01,7.0,\n"]   # AirData leaves some names blank
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("daily_88101_2026.csv", head + "".join(rows))
+    monkeypatch.setattr(httpx, "get", lambda *a, **k: httpx.Response(200, content=buf.getvalue()))
+    assert run_airdata(None, 2026, 2026, store=store) == 2
+    with store.read_model.connect() as conn:
+        names = dict(conn.exec_driver_sql(
+            "SELECT site_id, name FROM site WHERE layer = 'reading_sites' AND kind = 'reference_monitor'").all())
+    assert names["reference_monitor:54-099-0001"] == "Fake Huntington Site"
+    assert names["reference_monitor:54-107-0009"] is None
+
+
 def test_layers_reload_when_a_file_changes(tmp_path, monkeypatch):
     from airwv.storage.readmodel import ReadModel
     _, store = _client(tmp_path, monkeypatch)

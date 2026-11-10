@@ -34,7 +34,8 @@ from `ReadModel.site`; `/api/near` gives each hazard its `page`.
   per `source`, `sensor_id`: name, `lat`/`lon` of its latest located reading, first/last
   `ts`) that `Store.save_readings` keeps current at ingest, so no query groups over
   `readings`. `airnow` and `epa_airdata` rows are `reference_monitor`s (AirNow runs set the
-  names), the rest `sensor`s; ids that `reference_monitors.json` or the resolved listing
+  names from the hourly file's `SiteName`, AirData runs from the CSV's `Local Site Name`),
+  the rest `sensor`s; ids that `reference_monitors.json` or the resolved listing
   already carry are left to those layers. Monitor ids are compared in the dashed AQS form
   (AirNow's 9-digit `540390020` is `54-039-0020`), and an AirData monitor AirNow also
   reports is left to AirNow, so one monitor is one site. A database with readings from before the table
@@ -68,7 +69,8 @@ with the date it was last seen.
 - `site_id` repeats for oil & gas permits, where one API number has several applications.
   (The abandoned-well layer's verbatim repeats are dropped by `fetch_abandoned_wells.py`.)
 - Readings-table sensors with no coordinates in any reading aren't sites (nothing to place
-  them by); AirNow names come only from the hourly file, so AirData-only monitors have none.
+  them by). AirData-only monitors with a blank `Local Site Name` have no name, and monitors
+  imported before AirData runs set names get one only on the next `ingest airdata`.
 - Where `site_id` repeats (oil & gas permits), `/site/<kind>/<ref>` shows the first row.
 - `/api/water/near` now places each site at its latest reading (the `site` view), not at
   whichever latest-per-parameter row came first; same in the fixture, may move a drifting

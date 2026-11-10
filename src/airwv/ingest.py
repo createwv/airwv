@@ -573,6 +573,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
             continue
         agg: dict = defaultdict(list)  # (site, date) -> [values]
         meta: dict = {}                # site -> (lat, lon)
+        names: dict = {}               # site -> "Local Site Name" (blank for some monitors)
         # some years' zips list a directory entry first — pick the actual CSV
         csv_name = next((n for n in zf.namelist() if n.endswith(".csv")), zf.namelist()[0])
         with zf.open(csv_name) as fh:
@@ -588,6 +589,8 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
                 site = f"{row['State Code']}-{row['County Code']}-{row['Site Num']}"
                 agg[(site, ts)].append(val)
                 meta[site] = (lat, lon)
+                if (row.get("Local Site Name") or "").strip():
+                    names[site] = row["Local Site Name"].strip()
         readings = [
             Reading(source="epa_airdata", sensor_id=site, ts=ts,
                     lat=meta[site][0], lon=meta[site][1],
@@ -595,6 +598,7 @@ def run_airdata(config: Config, start_year: int, end_year: int, param: str = "88
             for (site, ts), vals in agg.items()
         ]
         n = store.save_readings(readings)
+        store.name_reading_sites("epa_airdata", names)
         total += n
         log.info("airdata %s: %d daily readings from %d monitors", year, n, len({k[0] for k in agg}))
     log.info("airdata: %d total daily readings stored (source=epa_airdata, %d–%d)",
