@@ -2,7 +2,7 @@
  "source": "Desk research of public records and reporting: WV DEP Division of Air Quality permits and notices, WV Air Quality Board, WV PSC dockets, WV Governor / Department of Commerce releases, court records, SEC filings, company statements, and news coverage",
  "scope": "every West Virginia data center and crypto-mining site found (proposed, permitted, under construction, operating, stalled or tabled) with what public records say about operator, status, power, water, backup generation, noise and use",
  "disclaimer": "Compiled by hand from public sources; not an official list. The state does not publish its High Impact Data Center / microgrid certifications, and HB 2014 keeps certification petitions confidential, so gaps are expected. 'not disclosed' means the developer or agency has not made it public; 'none found' means we searched and found no public record. Each fact cites its source; news and tracker claims are marked as such and can be wrong or out of date. Use labels are evidence-based guesses with a confidence, not findings. Confirm on the linked record. See docs/DATA-CENTERS.md.",
- "fetched_at": "2026-11-05",
+ "fetched_at": "2026-11-10",
  "values": {
   "status": ["operating", "under_construction", "certified", "permitted", "proposed", "stalled", "tabled", "unknown"],
   "use": ["generative_ai", "cloud", "crypto_mining", "storage", "government_or_surveillance", "enterprise", "unknown"],
@@ -144,6 +144,8 @@
    "sources": [
     {"kind": "primary", "date": "2025-08-15", "title": "WV DEP permit R13-3713 (Fundamental Data, Ridgeline Facility)", "url": "https://www.wboy.com/wp-content/uploads/sites/43/2025/08/WVDEP-Construction-Permit-1.pdf"},
     {"kind": "primary", "date": "2025-03-18", "title": "R13-3713 application (redacted copy)", "url": "https://dep.wv.gov/daq/permitting/Documents/Fundamental%20Data%20LLC;%20Ridgeline%20Facility/093-00034_APPL_13-3713.pdf"},
+    {"kind": "primary", "date": "2026-02-05", "title": "WV Air Quality Board 25-02-AQB: Memorandum of Decision and Final Order", "url": "https://aqb.wv.gov/AppealsDocuments/2026.02.05.%2025-02-AQB.%20Memorandum%20of%20Decision%20and%20Final%20Order.pdf"},
+    {"kind": "primary", "date": "2025-10-15", "title": "WV Air Quality Board 25-02-AQB appeal record (certified record, 6 parts)", "url": "https://aqb.wv.gov/Pages/Appeal-Details.aspx?title=25-02-AQB"},
     {"kind": "news", "date": "2026-02-06", "title": "WVPB: regulators reaffirm approval for microgrid generator in Tucker County", "url": "https://wvpublic.org/story/energy-environment/regulators-reaffirm-approval-for-microgrid-generator-data-center-in-tucker-county/"},
     {"kind": "news", "date": "2026-07-03", "title": "Gazette-Mail: WV axes Fundamental Data violation notice", "url": "https://www.wvgazettemail.com/news/energy_and_environment/wv-axes-fundamental-data-violation-notice-saying-large-scale-project-conceptual/article_5353b642-4a8e-4a4e-a048-ddc0c3afcf6c.html"},
     {"kind": "news", "date": "2026-08-17", "title": "WV Watch: DEP says Fundamental Data controls site", "url": "https://westvirginiawatch.com/2026/08/17/wv-dep-says-fundamental-data-controls-site-of-proposed-tucker-county-data-center-power-plant/"},

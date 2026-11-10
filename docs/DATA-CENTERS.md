@@ -189,8 +189,19 @@ data center developers.
   (<https://documents.dep.wv.gov/>, public login listed on the NSR page; search Secondary ID
   13-3713, 13-3714, 13-3715). It is a JavaScript app with a limited number of public
   licenses, and DEP says "usually, the only file available to view will be the permit
-  application", so we haven't searched it yet. The Air Quality Board's certified appeal records (25-02-AQB for Ridgeline) also
-  appear to include the evaluations.
+  application", so we haven't searched it yet.
+- Air Quality Board record for Ridgeline: the
+  [25-02-AQB appeal page](https://aqb.wv.gov/Pages/Appeal-Details.aspx?title=25-02-AQB)
+  lists a six-part Certified Record (2025-10-15, 653 pages, e.g.
+  [Part 1](https://aqb.wv.gov/AppealsDocuments/2025.10.15.%2025-02-AQB.%20Certified%20Record%20Part%201%20of%206.%20Pages%201%20-%20131.pdf)).
+  The Board's order cites the application at CR 2-79, the draft permit at CR 80-99 and the
+  final permit at CR 485-512; DEP's Jerry Williams testified he wrote the engineering
+  evaluation, so it should be in the record too. Each part is over 10 MB and we haven't read
+  them yet (checked 2026-11-10). The Board's order itself (scanned) has nothing on generators
+  or water. No AQB appeal exists for R13-3714 or R13-3715 (25-01 and 25-03 are other Tucker
+  County appeals; the open docket lists only 25-04), so the Adams Fork evaluations are only in
+  Application Enhancer or by records request. AQB stopped posting appeal documents on
+  2026-04-24; later ones come from the Board's clerk.
 - WV DEP NPDES/stormwater permit search.
 - WV PSC case search: <https://www.psc.state.wv.us/> (search operator names).
 - WV Air Quality Board appeals: <https://aqb.wv.gov/>.
