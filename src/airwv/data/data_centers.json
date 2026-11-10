@@ -2,7 +2,7 @@
  "source": "Desk research of public records and reporting: WV DEP Division of Air Quality permits and notices, WV Air Quality Board, WV PSC dockets, WV Governor / Department of Commerce releases, court records, SEC filings, company statements, and news coverage",
  "scope": "every West Virginia data center and crypto-mining site found (proposed, permitted, under construction, operating, stalled or tabled) with what public records say about operator, status, power, water, backup generation, noise and use",
  "disclaimer": "Compiled by hand from public sources; not an official list. The state does not publish its High Impact Data Center / microgrid certifications, and HB 2014 keeps certification petitions confidential, so gaps are expected. 'not disclosed' means the developer or agency has not made it public; 'none found' means we searched and found no public record. Each fact cites its source; news and tracker claims are marked as such and can be wrong or out of date. Use labels are evidence-based guesses with a confidence, not findings. Confirm on the linked record. See docs/DATA-CENTERS.md.",
- "fetched_at": "2026-11-05",
+ "fetched_at": "2026-11-09",
  "values": {
   "status": ["operating", "under_construction", "certified", "permitted", "proposed", "stalled", "tabled", "unknown"],
   "use": ["generative_ai", "cloud", "crypto_mining", "storage", "government_or_surveillance", "enterprise", "unknown"],
@@ -71,9 +71,9 @@
    "operator": "Starwood Digital Ventures (Starwood Capital Group); applicant Tamarack Investment Holdings LLC",
    "county": "Mason",
    "place": "14230 Ohio River Rd, West Columbia",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address (news); coordinates not published",
+   "lat": 38.972111,
+   "lon": -82.079896,
+   "location_precision": "street address point (WV E911 address point for 14230 Ohio River Rd, in Mason parcel 26-16-0143-0021-0002, owned by CyBlair Lumber LLC in the 2026 tax roll); the campus footprint is larger and not mapped",
    "acres": "not disclosed (~227 acres of disturbance in a DEP stormwater filing)",
    "status": "certified",
    "status_detail": "High Impact Data Center certification announced 2026-09-03 ($12B, ~2.16 GW claimed). DEP stormwater filing plans construction 2027-03-01 to 2029-04-05.",
@@ -98,7 +98,8 @@
     {"kind": "company", "date": "2026", "title": "Project Tamarack", "url": "https://projecttamarack.com"},
     {"kind": "news", "date": "2026-09-08", "title": "WV Watch: new data center project coming to Mason County (Florida-based real estate group)", "url": "https://westvirginiawatch.com/2026/09/08/new-data-center-project-coming-to-mason-county-wv-spearheaded-by-florida-based-real-estate-group/"},
     {"kind": "news", "date": "2026-09-03", "title": "WSAZ: Starwood Digital Ventures announces data center in Mason County", "url": "https://www.wsaz.com/2026/09/03/starwood-digital-ventures-announces-data-center-mason-county/"},
-    {"kind": "news", "date": "2026-10-21", "title": "Herald-Dispatch: DEP permit bids detail Mason County data center impacts", "url": "https://www.herald-dispatch.com/news/dep-permit-bids-detail-significant-mason-county-data-center-environmental-impacts/article_c16dc9f5-d96c-40e5-82e6-794170422392.html"}
+    {"kind": "news", "date": "2026-10-21", "title": "Herald-Dispatch: DEP permit bids detail Mason County data center impacts", "url": "https://www.herald-dispatch.com/news/dep-permit-bids-detail-significant-mason-county-data-center-environmental-impacts/article_c16dc9f5-d96c-40e5-82e6-794170422392.html"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -162,9 +163,9 @@
    "operator": "TransGas Development Systems LLC (New York; CEO Adam Victor)",
    "county": "Mingo",
    "place": "2002 Twisted Gun Rd, Wharncliffe (former Twisted Gun Golf Course, reclaimed mine land)",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address (news)",
+   "lat": 37.59372,
+   "lon": -81.95491,
+   "location_precision": "exact (WV DEP public notice for R13-3714 and R13-3715; DEP air facility 059-00134 agrees)",
    "acres": "not disclosed",
    "status": "permitted",
    "status_detail": "Air permit issued 2025-10-02 after 119 comments. Federal suit (3:25-cv-714, S.D. W.Va.) dismissed as to TransGas (Mar 2026) and federal agencies (2026-06-22, without prejudice). Application said construction ~2026 and start-up 2027; no construction reported as of 2026-11-05.",
@@ -199,7 +200,9 @@
     {"kind": "news", "date": "2025-12-05", "title": "WV Record: residents file lawsuit to stop southern WV data center", "url": "https://legalnewsline.com/west-virginia-record/residents-file-lawsuit-to-stop-southern-w-va-data-center/article_6d3eb843-51cc-45ac-ae14-7da0a3b99b8c.html"},
     {"kind": "news", "date": "2026-06-23", "title": "Bloomberg Law: federal agencies escape lawsuit over WV power plant", "url": "https://news.bloomberglaw.com/environment-and-energy/federal-agencies-escape-lawsuit-over-west-virginia-power-plant"},
     {"kind": "news", "date": "2026-05-03", "title": "Mountain State Spotlight: Mingo County data centers", "url": "https://mountainstatespotlight.org/2026/05/03/mingo-county-data-centers/"},
-    {"kind": "news", "date": "2025-09-23", "title": "WVOW: DEP meeting in Gilbert addresses Adams Fork proposal", "url": "https://www.wvowradio.com/post/wvdep-meeting-in-gilbert-addresses-adams-fork-energy-project-proposal"}
+    {"kind": "news", "date": "2025-09-23", "title": "WVOW: DEP meeting in Gilbert addresses Adams Fork proposal", "url": "https://www.wvowradio.com/post/wvdep-meeting-in-gilbert-addresses-adams-fork-energy-project-proposal"},
+    {"kind": "primary", "date": "2025-08", "title": "WV DEP DAQ: public notice for R13-3714 and R13-3715 (states the Adams Fork site's latitude and longitude; archived copy)", "url": "https://web.archive.org/web/20250820144437/https://dep.wv.gov/daq/permitting/Documents/Transgas-Adams-Fork-Harless/TransGas_13-3714%20and%2013-3715_Notice.pdf"},
+    {"kind": "primary", "date": "2026", "title": "WV DEP air quality facilities map layer, fetched 2026-11-09", "url": "https://tagis.dep.wv.gov/arcgis/rest/services/WVDEP_enterprise/air_quality/MapServer/7"}
    ]
   },
   {
@@ -284,9 +287,9 @@
    "operator": "Google",
    "county": "Putnam",
    "place": "22272 Charleston Rd, Buffalo; both sides of WV 62 along the Kanawha River",
-   "lat": 38.644,
-   "lon": -81.957,
-   "location_precision": "approximate (tracker estimate)",
+   "lat": 38.644106,
+   "lon": -81.95651,
+   "location_precision": "street address point (WV E911 address point for 22272 Charleston Rd, in Putnam parcel 40-02-0123-0006); the campus spans several parcels and its centre isn't mapped",
    "acres": "about 1,700",
    "status": "certified",
    "status_detail": "Land bought March 2026; High Impact Data Center certification approved 2026-03-27 (~72 hours after applying). In due diligence; permits could take ~a year. Putnam County Commission passed a non-binding resolution (2026-09-29) asking for water studies, sound enclosures and dark-sky lighting.",
@@ -318,7 +321,8 @@
     {"kind": "news", "date": "2026", "title": "DCD: Google purchases land for data center in Putnam County", "url": "https://www.datacenterdynamics.com/en/news/google-purchases-land-for-data-center-in-putnam-county-west-virginia/"},
     {"kind": "news", "date": "2026", "title": "Gazette-Mail: details scarce on Google's Putnam County plans", "url": "https://www.wvgazettemail.com/news/energy_and_environment/details-scarce-advocate-concerns-many-on-googles-putnam-county-data-center-plans/article_829998b0-5bab-4c1d-843f-6ec4a126aa6e.html"},
     {"kind": "news", "date": "2026-09-29", "title": "WV MetroNews: Putnam County Commission data center resolution", "url": "https://wvmetronews.com/2026/09/29/putnam-county-commission-approves-data-center-resolution-developers-must-comply-with-county-rules-going-forward/"},
-    {"kind": "company", "date": "2026-09-02", "title": "MN8 Energy, Google and Eos: Mammoth Solar (Kanawha County)", "url": "https://secure.businesswire.com/news/home/20260902424949/en/MN8-Energy-Google-and-Eos-Energy-Enterprises-Bring-Advanced-Clean-Energy-Solutions-to-West-Virginia"}
+    {"kind": "company", "date": "2026-09-02", "title": "MN8 Energy, Google and Eos: Mammoth Solar (Kanawha County)", "url": "https://secure.businesswire.com/news/home/20260902424949/en/MN8-Energy-Google-and-Eos-Energy-Enterprises-Bring-Advanced-Clean-Energy-Solutions-to-West-Virginia"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -748,9 +752,9 @@
    "operator": "Federal Bureau of Investigation",
    "county": "Harrison",
    "place": "1000 Custer Hollow Rd, Clarksburg",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address",
+   "lat": 39.325841,
+   "lon": -80.268193,
+   "location_precision": "street address point (WV E911 address point for 1000 Custer Hollow Rd, in U.S.-owned Harrison parcel 17-08-0035-0004); the campus spans several federal parcels",
    "acres": "not disclosed",
    "status": "operating",
    "status_detail": "Operating; FBI director has called the site 'available for expansion'; an FBI solicitation for AI servers lists CJIS Clarksburg as the delivery point.",
@@ -763,7 +767,8 @@
    "not_disclosed": ["MW", "water", "generator count"],
    "cite": {"power.supply": [0], "air_permits.backup_generators": [0], "use.0": [0]},
    "sources": [
-    {"kind": "news", "date": "2008-07", "title": "Route Fifty: the FBI's expanding data center", "url": "https://www.route-fifty.com/digital-government/2008/07/the-fbis-expanding-data-center/279755/"}
+    {"kind": "news", "date": "2008-07", "title": "Route Fifty: the FBI's expanding data center", "url": "https://www.route-fifty.com/digital-government/2008/07/the-fbis-expanding-data-center/279755/"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -772,9 +777,9 @@
    "operator": "Internal Revenue Service",
    "county": "Berkeley",
    "place": "Murall Dr, Kearneysville",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street",
+   "lat": 39.4008,
+   "lon": -77.9158,
+   "location_precision": "facility point (WV DEP air facility 003-00133, in U.S.-owned Berkeley parcel 02-01-0017-0007-0028, \"GSA/IRS\"); which building holds the data center isn't confirmed",
    "acres": "not disclosed",
    "status": "operating",
    "status_detail": "Holds the IRS Master File; appeared on a 2025 federal property disposal list (outcome unconfirmed).",
@@ -787,18 +792,20 @@
    "not_disclosed": ["MW", "water", "generators"],
    "cite": {"power.supply": [0], "use.0": [0]},
    "sources": [
-    {"kind": "news", "date": "2025-03-06", "title": "The Intercept: IRS Martinsburg", "url": "https://theintercept.com/2025/03/06/trump-irs-taxes-martinsburg/"}
+    {"kind": "news", "date": "2025-03-06", "title": "The Intercept: IRS Martinsburg", "url": "https://theintercept.com/2025/03/06/trump-irs-taxes-martinsburg/"},
+    {"kind": "primary", "date": "2026", "title": "WV DEP air quality facilities map layer, fetched 2026-11-09", "url": "https://tagis.dep.wv.gov/arcgis/rest/services/WVDEP_enterprise/air_quality/MapServer/7"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
    "id": "uscg-osc-kearneysville",
    "name": "U.S. Coast Guard Operations Systems Center (C5ISC)",
    "operator": "U.S. Coast Guard",
-   "county": "Jefferson",
+   "county": "Berkeley",
    "place": "408 Coast Guard Dr, Kearneysville",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address",
+   "lat": 39.396053,
+   "lon": -77.913661,
+   "location_precision": "facility point (WV DEP air facility 003-00140, 408 Coast Guard Dr, in Berkeley parcel 02-01-0017-0007-0024, owned by a private lessor to GSA)",
    "acres": "not disclosed",
    "status": "operating",
    "status_detail": "Data center opened 2014; contractors hiring cleared data center engineers in 2026.",
@@ -811,7 +818,9 @@
    "not_disclosed": ["MW", "water", "generators"],
    "sources": [
     {"kind": "news", "date": "2014-10-03", "title": "Shepherdstown Chronicle: new Coast Guard facility opens in Jefferson", "url": "https://www.shepherdstownchronicle.com/news/local-news/2014/10/03/new-coast-guard-facility-opens-in-jefferson/"},
-    {"kind": "company", "date": "2026", "title": "Contractor job posting: data center operations engineer, Kearneysville (HVAC, UPS, generators)", "url": "https://careers-sev1tech.icims.com/jobs/9519/data-center-operations-engineer/job"}
+    {"kind": "company", "date": "2026", "title": "Contractor job posting: data center operations engineer, Kearneysville (HVAC, UPS, generators)", "url": "https://careers-sev1tech.icims.com/jobs/9519/data-center-operations-engineer/job"},
+    {"kind": "primary", "date": "2026", "title": "WV DEP air quality facilities map layer, fetched 2026-11-09", "url": "https://tagis.dep.wv.gov/arcgis/rest/services/WVDEP_enterprise/air_quality/MapServer/7"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -820,9 +829,9 @@
    "operator": "NASA (building owned by WVU Research Corp.)",
    "county": "Marion",
    "place": "100 University Dr, Fairmont",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address",
+   "lat": 39.431102,
+   "lon": -80.197425,
+   "location_precision": "parcel centroid (Marion parcel 24-04-0020-0074, 100 University Dr, owned by WVU Research Corp)",
    "acres": "not disclosed",
    "status": "operating",
    "status_detail": "Software verification facility with an on-site data center (operations contracts include data center maintenance); small.",
@@ -836,7 +845,8 @@
    "cite": {"use.0": [1]},
    "sources": [
     {"kind": "primary", "date": "2014", "title": "NASA OIG IG-14-024 (IV&V facility operations and WVU Research Corp. ownership)", "url": "https://www.oversight.gov/sites/default/files/oig-reports/IG-14-024.pdf"},
-    {"kind": "primary", "date": "2026", "title": "NASA: Katherine Johnson IV&V Facility", "url": "https://www.nasa.gov/centers-and-facilities/ivv/"}
+    {"kind": "primary", "date": "2026", "title": "NASA: Katherine Johnson IV&V Facility", "url": "https://www.nasa.gov/centers-and-facilities/ivv/"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -845,9 +855,9 @@
    "operator": "State of West Virginia, Office of Technology",
    "county": "Kanawha / Braxton",
    "place": "1900 Kanawha Blvd E, Bldg 6, Charleston; 89 Richard Minnich Dr, Sutton",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address (state bid notice)",
+   "lat": 38.337804,
+   "lon": -81.610211,
+   "location_precision": "street address point for the Charleston site (WV E911 address point for 1900 Kanawha Blvd E, Bldg 6, in State-owned Kanawha parcel 20-11-0028-0064); the Sutton site is Braxton parcel 04-05-010L-0005-0034 (centroid 38.695888, -80.655387), not mapped separately",
    "acres": "not applicable",
    "status": "operating",
    "status_detail": "State government data centers named in an undated state bid notice.",
@@ -860,7 +870,8 @@
    "not_disclosed": ["MW"],
    "cite": {"power.supply": [0], "use.0": [0]},
    "sources": [
-    {"kind": "tracker", "date": "undated", "title": "ConstructConnect: state bid notice, electrical work for WVOT data centers (Charleston and Sutton)", "url": "https://projects.constructconnect.com/details/5649491-electrical-work-for-data-centers&find_loc=west-virginia-25301"}
+    {"kind": "tracker", "date": "undated", "title": "ConstructConnect: state bid notice, electrical work for WVOT data centers (Charleston and Sutton)", "url": "https://projects.constructconnect.com/details/5649491-electrical-work-for-data-centers&find_loc=west-virginia-25301"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
@@ -869,9 +880,9 @@
    "operator": "Continent 8 Technologies",
    "county": "Kanawha / Grant",
    "place": "South Charleston (2018); 155 Technology Ln, Grant County Business & Technology Park, Petersburg (2024)",
-   "lat": null,
-   "lon": null,
-   "location_precision": "street address / community",
+   "lat": 38.978734,
+   "lon": -79.145744,
+   "location_precision": "street address point for Petersburg DC2 (WV E911 address point for 155 Technology Ln, in the Grant County Development Authority's business park parcel 12-03-0448-0034); South Charleston DC1 has no published street address and isn't mapped",
    "acres": "not applicable",
    "status": "operating",
    "status_detail": "Hosting for online gambling and sports betting, approved by the WV gaming regulator. The Petersburg park also held the 1.5 MW Grant County Data Center leased by Back-Up and Recovery Corp. (2016); whether these are the same building is unconfirmed.",
@@ -886,7 +897,8 @@
    "sources": [
     {"kind": "news", "date": "2024-02-26", "title": "SBC Americas: Continent 8 second West Virginia site", "url": "https://sbcamericas.com/2024/02/26/continent-8-second-west-virginia-site/"},
     {"kind": "tracker", "date": "2026", "title": "Data Center Map: Continent 8 West Virginia DC2", "url": "https://www.datacentermap.com/usa/west-virginia/petersburg/continent-8-west-virginia-dc2"},
-    {"kind": "company", "date": "2016", "title": "Five 9s Digital: 1.5 MW data center operator lease in Grant County", "url": "https://www.five9sdigital.com/news/new-1-5-mw-data-center-operator-lease-in-grant-county-wv"}
+    {"kind": "company", "date": "2016", "title": "Five 9s Digital: 1.5 MW data center operator lease in Grant County", "url": "https://www.five9sdigital.com/news/new-1-5-mw-data-center-operator-lease-in-grant-county-wv"},
+    {"kind": "primary", "date": "2026", "title": "WV GIS Technical Center: statewide parcels (tax year 2026) and E911 site address points, fetched 2026-11-09", "url": "https://services.wvgis.wvu.edu/arcgis/rest/services/Planning_Cadastre/WV_Parcels/MapServer"}
    ]
   },
   {
